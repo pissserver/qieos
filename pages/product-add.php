@@ -7,7 +7,7 @@
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
         <!-- Primary Meta Tags -->
-        <title>Volt Premium Bootstrap Dashboard - Forms</title>
+        <title>Tambah Produk - Cartify</title>
         
         <?php include '../script/headscript.php'; ?>
     </head>
@@ -32,8 +32,24 @@
                             <form action="product-action.php?action=add" method="POST" enctype="multipart/form-data">
 
                                 <div class="row">
+                                    <!-- Kategori -->
+                                    <div class="col-md-4 mb-4">
+                                        <label class="form-label">Kategori</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text">
+                                                <i class="fas fa-box"></i>
+                                            </span>
+                                            <select name="category" id="category" class="form-control" required>
+                                                <option value="">Pilih Kategori</option>
+                                                <option value="makanan">Makanan</option>
+                                                <option value="minuman">Minuman</option>
+                                                <option value="jajanan">Jajanan</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
                                     <!-- Nama Produk -->
-                                    <div class="col-md-6 mb-4">
+                                    <div class="col-md-4 mb-4">
                                         <label class="form-label">Nama Produk</label>
                                         <div class="input-group">
                                             <span class="input-group-text">
@@ -50,7 +66,7 @@
                                     </div>
 
                                     <!-- Harga -->
-                                    <div class="col-md-6 mb-4">
+                                    <div class="col-md-4 mb-4">
                                         <label class="form-label">Harga</label>
                                         <div class="input-group">
                                             <span class="input-group-text">
@@ -140,23 +156,20 @@
 
         <!-- Sweetalert -->
         <script>
-            <?php if (isset($_SESSION['success_message'])): ?>
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Sukses',
-                    text: '<?php echo $_SESSION['success_message']; ?>',
-                });
-                <?php unset($_SESSION['success_message']); ?>
-            <?php endif; ?>
+            const urlParams = new URLSearchParams(window.location.search);
+            const status = urlParams.get('status');
+            const msg = urlParams.get('msg');
 
-            <?php if (isset($_SESSION['error_message'])): ?>
+            if(status && msg){
                 Swal.fire({
-                    icon: 'error',
-                    title: 'Error',
-                    text: '<?php echo $_SESSION['error_message']; ?>',
+                    icon: status === 'success' ? 'success' : 'error',
+                    title: status === 'success' ? 'Sukses' : 'Error',
+                    text: msg,
                 });
-                <?php unset($_SESSION['error_message']); ?>
-            <?php endif; ?>
+
+                // 🔥 hapus parameter dari URL setelah tampil
+                window.history.replaceState({}, document.title, window.location.pathname);
+            }
         </script>
     </body>
 </html>

@@ -3,16 +3,6 @@ include '../sessions/session.php';
 $query = mysqli_query($conn,"SELECT * FROM products ORDER BY id DESC");
 ?>
 
-<!doctype html>
-<html lang="en">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Premium Catalog</title>
-<?php include '../script/headscript.php'; ?>
-
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-
 <style>
     body {
         font-family: 'Inter', sans-serif;
@@ -65,6 +55,18 @@ $query = mysqli_query($conn,"SELECT * FROM products ORDER BY id DESC");
         align-items: center;
         gap: 6px;
         background: #f3f4f6;
+        padding: 6px 10px;
+        border-radius: 12px;
+        font-size: 13px;
+        font-weight: 500;
+    }
+
+    .category-badge {
+        align-items: center;
+        margin: 0 30px;
+        gap: 6px;
+        color: #fff;
+        background: #cebd23;
         padding: 6px 10px;
         border-radius: 12px;
         font-size: 13px;
@@ -160,6 +162,14 @@ $query = mysqli_query($conn,"SELECT * FROM products ORDER BY id DESC");
         animation: fadeIn 0.3s ease;
     }
 
+    .filter-select {
+        width: auto;          /* Lebar menyesuaikan isi */
+        min-width: 80px;     /* Lebar minimum agar tetap terlihat */
+        max-width: 150px;     /* Lebar maksimum */
+        padding: 0.25rem 0.5rem;  /* Lebih ringkas */
+        font-size: 0.9rem;    /* lebih kecil */
+    }
+
     @keyframes fadeIn {
         from {
             opacity: 0;
@@ -171,6 +181,15 @@ $query = mysqli_query($conn,"SELECT * FROM products ORDER BY id DESC");
         }
     }
 </style>
+
+<!doctype html>
+<html lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <!-- Primary Meta Tags -->
+    <title>Katalog Produk - Cartify</title>
+        
+    <?php include '../script/headscript.php'; ?>
 </head>
 
 <body>
@@ -179,11 +198,11 @@ $query = mysqli_query($conn,"SELECT * FROM products ORDER BY id DESC");
 <main class="content">
 <?php include '../components/navbar.php'; ?>
 
-<div class="container-fluid mt-5">
+<div class="container-fluid px-0 mt-5">
 
     <div class="top-bar">
         <div class="row">
-            <div class="col-md-6 mb-3">
+            <div class="col-md-6 col-sm-7 mb-3">
                 <div class="input-group input-group-merge search-bar">
                     <span class="input-group-text" id="topbar-addon">
                         <svg
@@ -204,11 +223,18 @@ $query = mysqli_query($conn,"SELECT * FROM products ORDER BY id DESC");
                     <input type="text" id="search" class="search-box" placeholder="Cari produk..." onkeyup="searchProduct()">
                 </div>
             </div>
-            <div class="col-md-6 mb-3 d-flex justify-content-md-end">
+            <div class="col-md-6 col-sm-5 mb-3 d-flex justify-content-md-end">
+                <select class="filter-select me-3" onchange="sortCategory(this.value)">
+                    <option value="all">Semua</option>
+                    <option value="makanan">Makanan</option>
+                    <option value="minuman">Minuman</option>
+                    <option value="jajanan">Jajanan</option>
+                </select>
+
                 <select class="filter-select" onchange="sortProduct(this.value)">
                     <option value="latest">Terbaru</option>
-                    <option value="low">Harga Terendah</option>
-                    <option value="high">Harga Tertinggi</option>
+                    <option value="low">Terendah</option>
+                    <option value="high">Tertinggi</option>
                 </select>
             </div>
         </div>
@@ -218,7 +244,7 @@ $query = mysqli_query($conn,"SELECT * FROM products ORDER BY id DESC");
 
         <?php while($row = mysqli_fetch_assoc($query)): ?>
 
-        <div class="col-lg-2 col-md-4 col-sm-6 mb-4 product-item" data-name="<?php echo strtolower($row['product_name']); ?>" data-price="<?php echo $row['price']; ?>">
+        <div class="col-xl-2 col-lg-4 col-md-4 col-sm-6 mb-4 product-item" data-name="<?php echo strtolower($row['product_name']); ?>" data-id="<?php echo $row['id']; ?>" data-category="<?php echo $row['category']; ?>" data-price="<?php echo $row['price']; ?>">
             <div class="card product-card" id="product-<?php echo $row['id']; ?>">
 
                 <div style="position:relative">
@@ -228,8 +254,13 @@ $query = mysqli_query($conn,"SELECT * FROM products ORDER BY id DESC");
 
                 <div class="card-body">
                     <div class="name-badge">
-                        <i class="fas fa-box"></i>
+                        <i class="fas fa-box"></i>&nbsp;
                         <?php echo $row['product_name']; ?>
+                    </div>
+                    
+                    <div class="category-badge mt-2">
+                        <i class="fas fa-tag"></i>&nbsp;
+                        <?php echo ucfirst($row['category']); ?>
                     </div>
 
                     <div class="quantity-control">
@@ -238,7 +269,7 @@ $query = mysqli_query($conn,"SELECT * FROM products ORDER BY id DESC");
                         <button class="qty-btn" onclick="increaseQty('<?php echo $row['id']; ?>')">+</button>
                     </div>
 
-                    <button class="add-to-cart" onclick="addToCart('<?php echo $row['id']; ?>','<?php echo $row['product_name']; ?>',<?php echo $row['price']; ?>)">Add to Cart &nbsp;<i class="fas fa-shopping-cart"></i></button>
+                    <button class="add-to-cart" onclick="addToCart('<?php echo $row['id']; ?>','<?php echo $row['product_name']; ?>',<?php echo $row['price']; ?>)">Tambahkan &nbsp;<i class="fas fa-shopping-cart"></i></button>
                 </div>
 
             </div>
@@ -291,14 +322,38 @@ $query = mysqli_query($conn,"SELECT * FROM products ORDER BY id DESC");
         document.getElementById('empty-search').style.display = found ? 'none' : 'block';
     }
 
+    function sortCategory(category) {
+        // Ambil semua elemen dengan class product-item
+        const items = document.querySelectorAll('.product-item');
+
+        items.forEach(item => {
+            const itemCategory = item.getAttribute('data-category').toLowerCase();
+
+            if (category === "all") {
+                // tampilkan semua
+                item.style.display = "block";
+            } else {
+                // tampilkan hanya yang sesuai kategori
+                if (itemCategory === category.toLowerCase()) {
+                    item.style.display = "block";
+                } else {
+                    item.style.display = "none";
+                }
+            }
+        });
+    }
+
     function sortProduct(type) {
         let container = document.getElementById('product-list');
         let items = Array.from(document.querySelectorAll('.product-item'));
 
         items.sort((a, b) => {
+            let idA = parseInt(a.getAttribute('data-id'));
+            let idB = parseInt(b.getAttribute('data-id'));
             let priceA = parseInt(a.getAttribute('data-price'));
             let priceB = parseInt(b.getAttribute('data-price'));
 
+            if(type === 'latest') return idB - idA; // id besar duluan
             if(type === 'low') return priceA - priceB;
             if(type === 'high') return priceB - priceA;
             return 0;

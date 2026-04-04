@@ -9,7 +9,7 @@
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
         <!-- Primary Meta Tags -->
-        <title>Volt Free Bootstrap Dashboard - Settings</title>
+        <title>Profile - Cartify</title>
         
         <?php include '../script/headscript.php'; ?>
     </head>
@@ -264,6 +264,24 @@
                     document.getElementById("uploadText").style.display = "none";
                     document.getElementById("saveBtn").style.display = "inline-block";
                 }
+            }
+        </script>
+
+        <!-- Sweetalert -->
+        <script>
+            const urlParams = new URLSearchParams(window.location.search);
+            const status = urlParams.get('status');
+            const msg = urlParams.get('msg');
+
+            if(status && msg){
+                Swal.fire({
+                    icon: status === 'success' ? 'success' : 'error',
+                    title: status === 'success' ? 'Sukses' : 'Error',
+                    text: msg,
+                });
+
+                // 🔥 hapus parameter dari URL setelah tampil
+                window.history.replaceState({}, document.title, window.location.pathname);
             }
         </script>
     </body>

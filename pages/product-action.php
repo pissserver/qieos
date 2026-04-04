@@ -6,6 +6,7 @@
     if(isset($_GET['action']) && $_GET['action'] == 'add'){
         if(isset($_POST['save_product'])){
 
+            $category = $_POST['category'];
             $product_name = $_POST['product_name'];
             $price = $_POST['price'];
 
@@ -18,18 +19,14 @@
 
             move_uploaded_file($tmp,$folder.$photo);
 
-            $query = mysqli_query($conn,"INSERT INTO products (product_name,price,photo,created_at)
-                                    VALUES ('$product_name','$price','$photo','$created_at')");
+            $query = mysqli_query($conn,"INSERT INTO products (category,product_name,price,photo,created_at)
+                                    VALUES ('$category','$product_name','$price','$photo','$created_at')");
 
             if($query){
-                $_SESSION['success_message'] = "Produk berhasil ditambahkan";
-
-                header("Location: product-add.php");
+                header("Location: product-add.php?status=success&msg=Produk berhasil ditambahkan");
                 exit();
             }else{
-                $_SESSION['error_message'] = "Produk gagal ditambahkan";
-
-                header("Location: product-add.php");
+                header("Location: product-add.php?status=error&msg=Produk gagal ditambahkan");
                 exit();
             }
         }
@@ -40,6 +37,7 @@
         if(isset($_POST['edit_product'])){
 
             $id = $_GET['id'];
+            $category = $_POST['category'];
             $product_name = $_POST['product_name'];
             $price = $_POST['price'];
 
@@ -58,20 +56,16 @@
                 }
 
                 move_uploaded_file($tmp,$folder.$photo);
-                $query = mysqli_query($conn,"UPDATE products SET product_name='$product_name', price='$price', photo='$photo' WHERE id='$id'");
+                $query = mysqli_query($conn,"UPDATE products SET category='$category', product_name='$product_name', price='$price', photo='$photo' WHERE id='$id'");
             }else{
-                $query = mysqli_query($conn,"UPDATE products SET product_name='$product_name', price='$price' WHERE id='$id'");
+                $query = mysqli_query($conn,"UPDATE products SET category='$category', product_name='$product_name', price='$price' WHERE id='$id'");
             }
 
             if($query){
-                $_SESSION['success_message'] = "Produk berhasil diubah";
-
-                header("Location: product-add.php");
+                header("Location: product-add.php?status=success&msg=Produk berhasil diupdate");
                 exit();
             }else{
-                $_SESSION['error_message'] = "Produk gagal diubah";
-
-                header("Location: product-add.php");
+                header("Location: product-add.php?status=error&msg=Produk gagal diupdate");
                 exit();
             }
         }
@@ -97,14 +91,10 @@
             $query = mysqli_query($conn,"DELETE FROM products WHERE id='$id'");
 
             if($query){
-                $_SESSION['success_message'] = "Produk berhasil dihapus";
-
-                header("Location: product-add.php");
+                header("Location: product-add.php?status=success&msg=Produk berhasil dihapus");
                 exit();
             }else{
-                $_SESSION['error_message'] = "Produk gagal dihapus";
-
-                header("Location: product-add.php");
+                header("Location: product-add.php?status=error&msg=Produk gagal dihapus");
                 exit();
             }
         }

@@ -2,8 +2,8 @@
 <html lang="en">
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-        <!-- Primary Meta Tags -->
-        <title>Volt Premium Bootstrap Dashboard - Sign up page</title>
+
+        <title>Buat Akun - Cartify</title>
         
         <?php include '../script/headscript.php'; ?>
     </head>
@@ -27,10 +27,11 @@
                             <div
                                 class="bg-white shadow border-0 rounded border-light p-4 p-lg-5 w-100 fmxw-500"
                             >
-                                <div
-                                    class="text-center text-md-center mb-4 mt-md-0"
-                                >
-                                    <h1 class="mb-0 h3">Buat Akun</h1>
+                                <div class="d-flex align-items-center justify-content-center mb-4 mt-md-0">
+                                    <img src="../assets/img/brand/cartify2.png" alt="Cartify Logo" width="50">
+                                    <h1 class="ms-2 mb-0 h3">
+                                        Buat Akun 
+                                    </h1>
                                 </div>
 
                                 <?php

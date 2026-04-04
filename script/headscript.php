@@ -36,28 +36,11 @@
 
 <!-- Favicon -->
 <link
-    rel="apple-touch-icon"
+    rel="icon"
     sizes="120x120"
-    href="../assets/img/favicon/apple-touch-icon.png"
+    href="../assets/img/brand/cartify2.png"
 />
-<link
-    rel="icon"
-    type="image/png"
-    sizes="32x32"
-    href="../assets/img/favicon/favicon-32x32.png"
-/>
-<link
-    rel="icon"
-    type="image/png"
-    sizes="16x16"
-    href="../assets/img/favicon/favicon-16x16.png"
-/>
-<link rel="manifest" href="../assets/img/favicon/site.webmanifest" />
-<link
-    rel="mask-icon"
-    href="../assets/img/favicon/safari-pinned-tab.svg"
-    color="#ffffff"
-/>
+
 <meta name="msapplication-TileColor" content="#ffffff" />
 <meta name="theme-color" content="#ffffff" />
 
@@ -92,3 +75,7 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
 <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+
+<!-- Datepicker -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>

@@ -8,7 +8,7 @@
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
         <!-- Primary Meta Tags -->
-        <title>Volt Premium Bootstrap Dashboard - Reset password</title>
+        <title>Reset Password - Cartify</title>
         
         <?php include '../script/headscript.php'; ?>
     </head>

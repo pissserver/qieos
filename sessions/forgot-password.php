@@ -7,7 +7,7 @@
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
         <!-- Primary Meta Tags -->
-        <title>Volt Premium Bootstrap Dashboard - Forgot password</title>
+        <title>Lupa Password - Cartify</title>
         
         <?php include '../script/headscript.php'; ?>
     </head>
@@ -73,7 +73,7 @@
                                                 type="email"
                                                 class="form-control"
                                                 id="email"
-                                                placeholder="example@company.com"
+                                                placeholder="example@gmail.com"
                                                 name="email"
                                                 required
                                                 autofocus

@@ -16,7 +16,8 @@
                     <tr>
                         <th style="text-align: center;" width="5%">No</th>
                         <th style="text-align: center;" width="15%">Foto</th>
-                        <th style="text-align: center;">Produk</th>
+                        <th style="text-align: center;" width="20%">Produk</th>
+                        <th style="text-align: center;" width="20%">Kategory</th>
                         <th style="text-align: center;" width="20%">Harga</th>
                         <th style="text-align: center;" width="20%">Action</th>
                     </tr>
@@ -36,6 +37,11 @@
                         </td>
                         <td>
                             <b><?php echo $row['product_name']; ?></b>
+                        </td>
+                        <td style="text-align: center;">
+                            <span class="badge bg-info p-2">
+                                <i class="fas fa-box"></i>&nbsp;&nbsp;<?php echo ucfirst($row['category']); ?>
+                            </span>
                         </td>
                         <td style="text-align: center;">
                             <span class="badge bg-success p-2">

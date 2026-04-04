@@ -13,11 +13,11 @@
 
         if ($result) {
             $_SESSION['flash'] = "Profil berhasil diperbarui.";
-            header("Location: profile.php");
+            header("Location: profile.php?status=success&msg=Profil berhasil diperbarui");
             exit();
         } else {
             $_SESSION['flash'] = "Profile gagal diperbarui.";
-            header("Location: profile.php");
+            header("Location: profile.php?status=error&msg=Profil gagal diperbarui");
             exit();
         }
     }

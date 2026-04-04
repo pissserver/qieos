@@ -2,17 +2,76 @@
     $current_page = basename($_SERVER['PHP_SELF']);
 ?>
 
+<style>
+    .sidebar-footer {
+        padding: 15px;
+        text-align: center;
+        position: relative;
+    }
+
+    /* garis glowing tipis */
+    .sidebar-footer::before {
+        content: '';
+        display: block;
+        height: 1px;
+        width: 60%;
+        margin: 0 auto 10px;
+        background: linear-gradient(90deg, transparent, #4b6cb7, transparent);
+        animation: glowLine 2s infinite linear;
+    }
+
+    @keyframes glowLine {
+        0% {opacity: 0.3;}
+        50% {opacity: 1;}
+        100% {opacity: 0.3;}
+    }
+
+    /* badge version */
+    .version-badge {
+        display: inline-block;
+        background: linear-gradient(135deg, #4b6cb7, #182848);
+        padding: 6px 14px;
+        border-radius: 20px;
+        color: #fff;
+        font-size: 12px;
+        font-weight: 500;
+        box-shadow: 0 3px 8px rgba(0,0,0,0.2);
+        animation: floaty 3s ease-in-out infinite;
+    }
+
+    /* animasi floating halus */
+    @keyframes floaty {
+        0% { transform: translateY(0px); }
+        50% { transform: translateY(-3px); }
+        100% { transform: translateY(0px); }
+    }
+
+    .version-badge span {
+        font-weight: 600;
+        margin-right: 5px;
+    }
+
+    .version-badge small {
+        opacity: 0.8;
+    }
+
+    .version-badge:hover {
+        transform: scale(1.05);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    }
+</style>
+
 <nav class="navbar navbar-dark navbar-theme-primary px-4 col-12 d-lg-none">
-    <a class="navbar-brand me-lg-5" href="../index.html">
+    <a class="navbar-brand me-lg-5" href="../pages/dashboard.php">
         <img
             class="navbar-brand-dark"
-            src="../assets/img/brand/light.svg"
-            alt="Volt logo"
+            src="../assets/img/brand/cartify.png"
+            alt="Cartify Logo"
         />
         <img
             class="navbar-brand-light"
-            src="../assets/img/brand/dark.svg"
-            alt="Volt logo"
+            src="../assets/img/brand/cartify.png"
+            alt="Cartify Logo"
         />
     </a>
     <div class="d-flex align-items-center">
@@ -37,8 +96,7 @@
 >
     <div class="sidebar-inner px-4 pt-3">
         <div
-            class="user-card d-flex d-md-none align-items-center justify-content-between justify-content-md-center pb-4"
-        >
+            class="user-card d-flex d-md-none align-items-center justify-content-between justify-content-md-center pb-4">
             <div class="d-flex align-items-center">
                 <div class="avatar-lg me-4">
                     <img
@@ -48,7 +106,7 @@
                             />
                 </div>
                 <div class="d-block">
-                    <h2 class="h5 mb-3">Hi, <?php echo $_SESSION['email']; ?></h2>
+                    <h2 class="h5 mb-3">Hi, <?php echo $user['fullname'] != '' ? $user['fullname'] : $_SESSION['email']; ?></h2>
                     <a
                         href="../sessions/logout.php"
                         class="btn btn-secondary btn-sm d-inline-flex align-items-center"
@@ -103,13 +161,11 @@
                 >
                     <span class="sidebar-icon">
                         <img
-                            src="../assets/img/brand/light.svg"
-                            height="20"
-                            width="20"
-                            alt="Volt Logo"
+                            src="../assets/img/brand/cartify.png"
+                            width="150"
+                            alt="Cartify Logo"
                         />
                     </span>
-                    <span class="mt-1 ms-1 sidebar-text">Volt Overview</span>
                 </a>
             </li>
             <li class="nav-item <?php echo ($current_page == 'dashboard.php') ? 'active' : ''; ?>">
@@ -142,10 +198,22 @@
                             <path d="M4 3h4v4H4V3zm0 6h4v4H4V9zm6-6h4v4h-4V3zm0 6h4v4h-4V9z"/>
                         </svg>
                     </span>
-                    <span class="sidebar-text">Catalog</span>
+                    <span class="sidebar-text">Katalog</span>
                 </a>
             </li>
-            <li class="nav-item <?php echo ($current_page == 'product-add.php') ? 'active' : ''; ?>">
+            <li class="nav-item <?php echo ($current_page == 'order.php') ? 'active' : ''; ?>">
+                <a href="../pages/order.php" class="nav-link">
+                    <span class="sidebar-icon">
+                        <svg class="icon icon-xs me-2" fill="none" stroke="currentColor" stroke-width="2"
+                            viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M9 14h6M9 10h6M5 3h14a1 1 0 011 1v17l-3-2-3 2-3-2-3 2-3-2V4a1 1 0 011-1z"/>
+                        </svg>
+                    </span>
+                    <span class="sidebar-text">Pesanan</span>
+                </a>
+            </li>
+            <li class="nav-item <?php echo ($current_page == 'product-add.php' || $current_page == 'product-edit.php') ? 'active' : ''; ?>">
                 <a href="../pages/product-add.php" class="nav-link">
                     <span class="sidebar-icon">
                         <svg class="icon icon-xs me-2"
@@ -163,265 +231,37 @@
                     <span class="sidebar-text">Tambah Produk</span>
                 </a>
             </li>
-            <li class="nav-item">
-                <span
-                    class="nav-link collapsed d-flex justify-content-between align-items-center"
-                    data-bs-toggle="collapse"
-                    data-bs-target="#submenu-app"
-                >
-                    <span>
-                        <span class="sidebar-icon">
-                            <svg
-                                class="icon icon-xs me-2"
-                                fill="currentColor"
-                                viewBox="0 0 20 20"
-                                xmlns="http://www.w3.org/2000/svg"
-                            >
-                                <path
-                                    fill-rule="evenodd"
-                                    d="M5 4a3 3 0 00-3 3v6a3 3 0 003 3h10a3 3 0 003-3V7a3 3 0 00-3-3H5zm-1 9v-1h5v2H5a1 1 0 01-1-1zm7 1h4a1 1 0 001-1v-1h-5v2zm0-4h5V8h-5v2zM9 8H4v2h5V8z"
-                                    clip-rule="evenodd"
-                                ></path>
-                            </svg>
-                        </span>
-                        <span class="sidebar-text">Tables</span>
-                    </span>
-                    <span class="link-arrow">
-                        <svg
-                            class="icon icon-sm"
-                            fill="currentColor"
-                            viewBox="0 0 20 20"
-                            xmlns="http://www.w3.org/2000/svg"
-                        >
-                            <path
-                                fill-rule="evenodd"
-                                d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
-                                clip-rule="evenodd"
-                            ></path>
+            <li class="nav-item <?php echo ($current_page == 'report.php') ? 'active' : ''; ?>">
+                <a href="../pages/report.php" class="nav-link">
+                    <span class="sidebar-icon">
+                        <svg class="icon icon-xs me-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M5 3a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2V5a2 2 0 00-2-2H5zm3.707 1.707a1 1 0 00-1.414-1.414l-3
+                            3a1 1 0 001.414 1.414l3-3zM11
+                            7h4a1 1 0 110
+                            2h-4a1 1
+                            0
+                            110-2zm0
+                            4h4a1
+                            1
+                            0
+                            110
+                            2h-4a1
+                            1
+                            0
+                            110-2z"/>
                         </svg>
                     </span>
-                </span>
-                <div
-                    class="multi-level collapse"
-                    role="list"
-                    id="submenu-app"
-                    aria-expanded="false"
-                >
-                    <ul class="flex-column nav">
-                        <li class="nav-item">
-                            <a
-                                class="nav-link"
-                                href="../pages/tables/bootstrap-tables.html"
-                            >
-                                <span class="sidebar-text"
-                                    >Bootstrap Tables</span
-                                >
-                            </a>
-                        </li>
-                    </ul>
-                </div>
-            </li>
-            <li class="nav-item">
-                <span
-                    class="nav-link collapsed d-flex justify-content-between align-items-center"
-                    data-bs-toggle="collapse"
-                    data-bs-target="#submenu-pages"
-                >
-                    <span>
-                        <span class="sidebar-icon">
-                            <svg
-                                class="icon icon-xs me-2"
-                                fill="currentColor"
-                                viewBox="0 0 20 20"
-                                xmlns="http://www.w3.org/2000/svg"
-                            >
-                                <path
-                                    fill-rule="evenodd"
-                                    d="M2 5a2 2 0 012-2h8a2 2 0 012 2v10a2 2 0 002 2H4a2 2 0 01-2-2V5zm3 1h6v4H5V6zm6 6H5v2h6v-2z"
-                                    clip-rule="evenodd"
-                                ></path>
-                                <path
-                                    d="M15 7h1a2 2 0 012 2v5.5a1.5 1.5 0 01-3 0V7z"
-                                ></path>
-                            </svg>
-                        </span>
-                        <span class="sidebar-text">Page examples</span>
-                    </span>
-                    <span class="link-arrow">
-                        <svg
-                            class="icon icon-sm"
-                            fill="currentColor"
-                            viewBox="0 0 20 20"
-                            xmlns="http://www.w3.org/2000/svg"
-                        >
-                            <path
-                                fill-rule="evenodd"
-                                d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
-                                clip-rule="evenodd"
-                            ></path>
-                        </svg>
-                    </span>
-                </span>
-                <div
-                    class="multi-level collapse"
-                    role="list"
-                    id="submenu-pages"
-                    aria-expanded="false"
-                >
-                    <ul class="flex-column nav">
-                        <li class="nav-item">
-                            <a
-                                class="nav-link"
-                                href="../pages/examples/sign-in.html"
-                            >
-                                <span class="sidebar-text">Sign In</span>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a
-                                class="nav-link"
-                                href="../pages/examples/sign-up.html"
-                            >
-                                <span class="sidebar-text">Sign Up</span>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a
-                                class="nav-link"
-                                href="../pages/examples/forgot-password.html"
-                            >
-                                <span class="sidebar-text"
-                                    >Forgot password</span
-                                >
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a
-                                class="nav-link"
-                                href="../pages/examples/reset-password.html"
-                            >
-                                <span class="sidebar-text">Reset password</span>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a
-                                class="nav-link"
-                                href="../pages/examples/lock.html"
-                            >
-                                <span class="sidebar-text">Lock</span>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a
-                                class="nav-link"
-                                href="../pages/examples/404.html"
-                            >
-                                <span class="sidebar-text">404 Not Found</span>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a
-                                class="nav-link"
-                                href="../pages/examples/500.html"
-                            >
-                                <span class="sidebar-text">500 Not Found</span>
-                            </a>
-                        </li>
-                    </ul>
-                </div>
-            </li>
-            <li class="nav-item">
-                <span
-                    class="nav-link collapsed d-flex justify-content-between align-items-center"
-                    data-bs-toggle="collapse"
-                    data-bs-target="#submenu-components"
-                >
-                    <span>
-                        <span class="sidebar-icon">
-                            <svg
-                                class="icon icon-xs me-2"
-                                fill="currentColor"
-                                viewBox="0 0 20 20"
-                                xmlns="http://www.w3.org/2000/svg"
-                            >
-                                <path
-                                    d="M4 3a2 2 0 100 4h12a2 2 0 100-4H4z"
-                                ></path>
-                                <path
-                                    fill-rule="evenodd"
-                                    d="M3 8h14v7a2 2 0 01-2 2H5a2 2 0 01-2-2V8zm5 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z"
-                                    clip-rule="evenodd"
-                                ></path>
-                            </svg>
-                        </span>
-                        <span class="sidebar-text">Components</span>
-                    </span>
-                    <span class="link-arrow">
-                        <svg
-                            class="icon icon-sm"
-                            fill="currentColor"
-                            viewBox="0 0 20 20"
-                            xmlns="http://www.w3.org/2000/svg"
-                        >
-                            <path
-                                fill-rule="evenodd"
-                                d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
-                                clip-rule="evenodd"
-                            ></path>
-                        </svg>
-                    </span>
-                </span>
-                <div
-                    class="multi-level collapse"
-                    role="list"
-                    id="submenu-components"
-                    aria-expanded="false"
-                >
-                    <ul class="flex-column nav">
-                        <li class="nav-item">
-                            <a
-                                class="nav-link"
-                                target="_blank"
-                                href="https://themesberg.com/docs/volt-bootstrap-5-dashboard/components/accordions/"
-                            >
-                                <span class="sidebar-text">All Components</span>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a
-                                class="nav-link"
-                                href="../pages/components/buttons.html"
-                            >
-                                <span class="sidebar-text">Buttons</span>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a
-                                class="nav-link"
-                                href="../pages/components/notifications.html"
-                            >
-                                <span class="sidebar-text">Notifications</span>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a
-                                class="nav-link"
-                                href="../pages/components/modals.html"
-                            >
-                                <span class="sidebar-text">Modals</span>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a
-                                class="nav-link"
-                                href="../pages/components/typography.html"
-                            >
-                                <span class="sidebar-text">Typography</span>
-                            </a>
-                        </li>
-                    </ul>
-                </div>
+                    <span class="sidebar-text">Laporan</span>
+                </a>
             </li>
         </ul>
+    </div>
+    
+    <!-- Version -->
+    <div class="sidebar-footer">
+        <div class="version-badge">
+            <span>Cartify</span>
+            <small>v1.0.0</small>
+        </div>
     </div>
 </nav>
