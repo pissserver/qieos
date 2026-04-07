@@ -412,7 +412,7 @@
                     <div class="dropdown-menu dashboard-dropdown dropdown-menu-end mt-2 py-1 shadow-lg rounded-1" style="background: #1F2937;">
                         <a class="dropdown-item d-flex align-items-center text-white" href="../pages/profile.php">
                             <i class="fas fa-user-circle text-white me-2"></i>
-                            My Profile
+                            Profil
                         </a>
 
                         <div role="separator" class="dropdown-divider my-1"></div>

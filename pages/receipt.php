@@ -34,7 +34,7 @@ $details = mysqli_query($conn, "
     <style>
         body {
             font-family: monospace;
-            font-size: 15px;
+            font-size: 12px;
             margin: 0;
 
             display: flex;
@@ -86,20 +86,23 @@ $details = mysqli_query($conn, "
                 display: block;
                 background: none;
                 height: auto;
+                margin: 0;
+                padding: 0;
             }
 
             .receipt {
-                /* width: 58mm; */
-                margin: 0;
+                width: 58mm;
+                max-width: 58mm;
+                background: #fff;
                 padding: 5px;
                 box-shadow: none;
             }
         }
 
-        /* @page {
+        @page {
             size: 58mm auto;
             margin: 0;
-        } */
+        }
     </style>
 
 </head>
@@ -108,7 +111,7 @@ $details = mysqli_query($conn, "
     <div class="receipt">
         <div class="center">
             <h3>CARTIFY</h3>
-            <p><?= $user['city'] ?> - <?= date('d M Y', strtotime($order['tanggal'])) ?></p>
+            <p><?= date('d M Y', strtotime($order['tanggal'])) ?></p>
             <p>Pelanggan: <b><?= $order['customer_name'] ?></b></p>
         </div>
 
