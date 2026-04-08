@@ -268,7 +268,7 @@ $currentState = $user['state'];
         if (status && msg) {
             Swal.fire({
                 icon: status === 'success' ? 'success' : 'error',
-                title: status === 'success' ? 'Sukses' : 'Error',
+                title: status === 'success' ? 'Berhasil!' : 'Error',
                 text: msg,
             });
 

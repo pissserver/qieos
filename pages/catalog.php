@@ -1,6 +1,6 @@
 <?php
 include '../sessions/session.php';
-$query = mysqli_query($conn,"SELECT * FROM products ORDER BY id DESC");
+$query = mysqli_query($conn, "SELECT * FROM products ORDER BY id DESC");
 ?>
 
 <style>
@@ -19,7 +19,7 @@ $query = mysqli_query($conn,"SELECT * FROM products ORDER BY id DESC");
 
     .product-card:hover {
         transform: translateY(-8px) scale(1.02);
-        box-shadow: 0 20px 40px rgba(0,0,0,0.08);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
     }
 
     .product-img {
@@ -163,11 +163,16 @@ $query = mysqli_query($conn,"SELECT * FROM products ORDER BY id DESC");
     }
 
     .filter-select {
-        width: auto;          /* Lebar menyesuaikan isi */
-        min-width: 80px;     /* Lebar minimum agar tetap terlihat */
-        max-width: 150px;     /* Lebar maksimum */
-        padding: 0.25rem 0.5rem;  /* Lebih ringkas */
-        font-size: 0.9rem;    /* lebih kecil */
+        width: auto;
+        /* Lebar menyesuaikan isi */
+        min-width: 80px;
+        /* Lebar minimum agar tetap terlihat */
+        max-width: 150px;
+        /* Lebar maksimum */
+        padding: 0.25rem 0.5rem;
+        /* Lebih ringkas */
+        font-size: 0.9rem;
+        /* lebih kecil */
     }
 
     @keyframes fadeIn {
@@ -175,6 +180,7 @@ $query = mysqli_query($conn,"SELECT * FROM products ORDER BY id DESC");
             opacity: 0;
             transform: translateY(10px);
         }
+
         to {
             opacity: 1;
             transform: translateY(0);
@@ -184,184 +190,184 @@ $query = mysqli_query($conn,"SELECT * FROM products ORDER BY id DESC");
 
 <!doctype html>
 <html lang="en">
+
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <!-- Primary Meta Tags -->
     <title>Katalog Produk - Cartify</title>
-        
+
     <?php include '../script/headscript.php'; ?>
 </head>
 
 <body>
-<?php include '../components/sidebar.php'; ?>
+    <?php include '../components/sidebar.php'; ?>
 
-<main class="content">
-<?php include '../components/navbar.php'; ?>
+    <main class="content">
+        <?php include '../components/navbar.php'; ?>
 
-<div class="container-fluid px-0 mt-5">
+        <div class="container-fluid px-0 mt-5">
 
-    <div class="top-bar">
-        <div class="row">
-            <div class="col-md-6 col-sm-7 mb-3">
-                <div class="input-group input-group-merge search-bar">
-                    <span class="input-group-text" id="topbar-addon">
-                        <svg
-                            class="icon icon-xs"
-                            x-description="Heroicon name: solid/search"
-                            xmlns="http://www.w3.org/2000/svg"
-                            viewBox="0 0 20 20"
-                            fill="currentColor"
-                            aria-hidden="true"
-                        >
-                            <path
-                                fill-rule="evenodd"
-                                d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"
-                                clip-rule="evenodd"
-                            ></path>
-                        </svg>
-                    </span>
-                    <input type="text" id="search" class="search-box" placeholder="Cari produk..." onkeyup="searchProduct()">
+            <div class="top-bar">
+                <div class="row">
+                    <div class="col-md-6 col-sm-7 mb-3">
+                        <div class="input-group input-group-merge search-bar">
+                            <span class="input-group-text" id="topbar-addon">
+                                <svg
+                                    class="icon icon-xs"
+                                    x-description="Heroicon name: solid/search"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    viewBox="0 0 20 20"
+                                    fill="currentColor"
+                                    aria-hidden="true">
+                                    <path
+                                        fill-rule="evenodd"
+                                        d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"
+                                        clip-rule="evenodd"></path>
+                                </svg>
+                            </span>
+                            <input type="text" id="search" class="search-box" placeholder="Cari produk..." onkeyup="searchProduct()">
+                        </div>
+                    </div>
+                    <div class="col-md-6 col-sm-5 mb-3 d-flex justify-content-md-end">
+                        <select class="filter-select me-3" onchange="sortCategory(this.value)">
+                            <option value="all">Semua</option>
+                            <option value="makanan">Makanan</option>
+                            <option value="minuman">Minuman</option>
+                            <option value="jajanan">Jajanan</option>
+                        </select>
+
+                        <select class="filter-select" onchange="sortProduct(this.value)">
+                            <option value="latest">Terbaru</option>
+                            <option value="low">Terendah</option>
+                            <option value="high">Tertinggi</option>
+                        </select>
+                    </div>
                 </div>
             </div>
-            <div class="col-md-6 col-sm-5 mb-3 d-flex justify-content-md-end">
-                <select class="filter-select me-3" onchange="sortCategory(this.value)">
-                    <option value="all">Semua</option>
-                    <option value="makanan">Makanan</option>
-                    <option value="minuman">Minuman</option>
-                    <option value="jajanan">Jajanan</option>
-                </select>
 
-                <select class="filter-select" onchange="sortProduct(this.value)">
-                    <option value="latest">Terbaru</option>
-                    <option value="low">Terendah</option>
-                    <option value="high">Tertinggi</option>
-                </select>
-            </div>
-        </div>
-    </div>
+            <div class="row" id="product-list">
 
-    <div class="row" id="product-list">
+                <?php while ($row = mysqli_fetch_assoc($query)): ?>
 
-        <?php while($row = mysqli_fetch_assoc($query)): ?>
+                    <div class="col-xl-2 col-lg-4 col-md-4 col-sm-6 mb-4 product-item" data-name="<?php echo strtolower($row['product_name']); ?>" data-id="<?php echo $row['id']; ?>" data-category="<?php echo $row['category']; ?>" data-price="<?php echo $row['price']; ?>">
+                        <div class="card product-card" id="product-<?php echo $row['id']; ?>">
 
-        <div class="col-xl-2 col-lg-4 col-md-4 col-sm-6 mb-4 product-item" data-name="<?php echo strtolower($row['product_name']); ?>" data-id="<?php echo $row['id']; ?>" data-category="<?php echo $row['category']; ?>" data-price="<?php echo $row['price']; ?>">
-            <div class="card product-card" id="product-<?php echo $row['id']; ?>">
+                            <div style="position:relative">
+                                <span class="price-badge">Rp <?php echo number_format($row['price'], 0, ',', '.'); ?></span>
+                                <img src="../assets/img/uploads/<?php echo $row['photo']; ?>" class="product-img">
+                            </div>
 
-                <div style="position:relative">
-                    <span class="price-badge">Rp <?php echo number_format($row['price'],0,',','.'); ?></span>
-                    <img src="../assets/img/uploads/<?php echo $row['photo']; ?>" class="product-img">
+                            <div class="card-body">
+                                <div class="name-badge">
+                                    <i class="fas fa-box"></i>&nbsp;
+                                    <?php echo ucwords(strtolower($row['product_name'])); ?>
+                                </div>
+
+                                <div class="category-badge mt-2">
+                                    <i class="fas fa-tag"></i>&nbsp;
+                                    <?php echo ucfirst($row['category']); ?>
+                                </div>
+
+                                <div class="quantity-control">
+                                    <button class="qty-btn" onclick="decreaseQty('<?php echo $row['id']; ?>')">-</button>
+                                    <input type="text" id="qty-<?php echo $row['id']; ?>" value="0" class="qty-input" readonly>
+                                    <button class="qty-btn" onclick="increaseQty('<?php echo $row['id']; ?>')">+</button>
+                                </div>
+
+                                <button class="add-to-cart" onclick="addToCart('<?php echo $row['id']; ?>','<?php echo $row['product_name']; ?>',<?php echo $row['price']; ?>)">Tambahkan &nbsp;<i class="fas fa-shopping-cart"></i></button>
+                            </div>
+
+                        </div>
+                    </div>
+
+                <?php endwhile; ?>
+
+                <div id="empty-search" class="empty-search" style="display:none;">
+                    <div class="empty-icon">
+                        <i class="fas fa-search"></i>
+                    </div>
+                    <h5>Produk tidak ditemukan</h5>
+                    <p>Coba gunakan kata kunci lain</p>
                 </div>
-
-                <div class="card-body">
-                    <div class="name-badge">
-                        <i class="fas fa-box"></i>&nbsp;
-                        <?php echo $row['product_name']; ?>
-                    </div>
-                    
-                    <div class="category-badge mt-2">
-                        <i class="fas fa-tag"></i>&nbsp;
-                        <?php echo ucfirst($row['category']); ?>
-                    </div>
-
-                    <div class="quantity-control">
-                        <button class="qty-btn" onclick="decreaseQty('<?php echo $row['id']; ?>')">-</button>
-                        <input type="text" id="qty-<?php echo $row['id']; ?>" value="0" class="qty-input" readonly>
-                        <button class="qty-btn" onclick="increaseQty('<?php echo $row['id']; ?>')">+</button>
-                    </div>
-
-                    <button class="add-to-cart" onclick="addToCart('<?php echo $row['id']; ?>','<?php echo $row['product_name']; ?>',<?php echo $row['price']; ?>)">Tambahkan &nbsp;<i class="fas fa-shopping-cart"></i></button>
-                </div>
-
             </div>
         </div>
+    </main>
 
-        <?php endwhile; ?>
+    <?php include '../script/footscript.php'; ?>
 
-        <div id="empty-search" class="empty-search" style="display:none;">
-            <div class="empty-icon">
-                <i class="fas fa-search"></i>
-            </div>
-            <h5>Produk tidak ditemukan</h5>
-            <p>Coba gunakan kata kunci lain</p>
-        </div>
-    </div>
-</div>
-</main>
+    <script>
+        function increaseQty(id) {
+            let input = document.getElementById('qty-' + id);
+            input.value = parseInt(input.value) + 1;
+        }
 
-<?php include '../script/footscript.php'; ?>
+        function decreaseQty(id) {
+            let input = document.getElementById('qty-' + id);
+            let val = parseInt(input.value);
+            if (val > 0) input.value = val - 1;
+        }
 
-<script>
-    function increaseQty(id) {
-        let input = document.getElementById('qty-' + id);
-        input.value = parseInt(input.value) + 1;
-    }
+        function searchProduct() {
+            let keyword = document.getElementById('search').value.toLowerCase();
+            let items = document.querySelectorAll('.product-item');
+            let found = false;
 
-    function decreaseQty(id) {
-        let input = document.getElementById('qty-' + id);
-        let val = parseInt(input.value);
-        if(val > 0) input.value = val - 1;
-    }
+            items.forEach(item => {
+                let name = item.getAttribute('data-name');
 
-    function searchProduct() {
-        let keyword = document.getElementById('search').value.toLowerCase();
-        let items = document.querySelectorAll('.product-item');
-        let found = false;
+                if (name.includes(keyword)) {
+                    item.style.display = 'block';
+                    found = true;
+                } else {
+                    item.style.display = 'none';
+                }
+            });
 
-        items.forEach(item => {
-            let name = item.getAttribute('data-name');
+            // tampilkan / sembunyikan empty state
+            document.getElementById('empty-search').style.display = found ? 'none' : 'block';
+        }
 
-            if(name.includes(keyword)) {
-                item.style.display = 'block';
-                found = true;
-            } else {
-                item.style.display = 'none';
-            }
-        });
+        function sortCategory(category) {
+            // Ambil semua elemen dengan class product-item
+            const items = document.querySelectorAll('.product-item');
 
-        // tampilkan / sembunyikan empty state
-        document.getElementById('empty-search').style.display = found ? 'none' : 'block';
-    }
+            items.forEach(item => {
+                const itemCategory = item.getAttribute('data-category').toLowerCase();
 
-    function sortCategory(category) {
-        // Ambil semua elemen dengan class product-item
-        const items = document.querySelectorAll('.product-item');
-
-        items.forEach(item => {
-            const itemCategory = item.getAttribute('data-category').toLowerCase();
-
-            if (category === "all") {
-                // tampilkan semua
-                item.style.display = "block";
-            } else {
-                // tampilkan hanya yang sesuai kategori
-                if (itemCategory === category.toLowerCase()) {
+                if (category === "all") {
+                    // tampilkan semua
                     item.style.display = "block";
                 } else {
-                    item.style.display = "none";
+                    // tampilkan hanya yang sesuai kategori
+                    if (itemCategory === category.toLowerCase()) {
+                        item.style.display = "block";
+                    } else {
+                        item.style.display = "none";
+                    }
                 }
-            }
-        });
-    }
+            });
+        }
 
-    function sortProduct(type) {
-        let container = document.getElementById('product-list');
-        let items = Array.from(document.querySelectorAll('.product-item'));
+        function sortProduct(type) {
+            let container = document.getElementById('product-list');
+            let items = Array.from(document.querySelectorAll('.product-item'));
 
-        items.sort((a, b) => {
-            let idA = parseInt(a.getAttribute('data-id'));
-            let idB = parseInt(b.getAttribute('data-id'));
-            let priceA = parseInt(a.getAttribute('data-price'));
-            let priceB = parseInt(b.getAttribute('data-price'));
+            items.sort((a, b) => {
+                let idA = parseInt(a.getAttribute('data-id'));
+                let idB = parseInt(b.getAttribute('data-id'));
+                let priceA = parseInt(a.getAttribute('data-price'));
+                let priceB = parseInt(b.getAttribute('data-price'));
 
-            if(type === 'latest') return idB - idA; // id besar duluan
-            if(type === 'low') return priceA - priceB;
-            if(type === 'high') return priceB - priceA;
-            return 0;
-        });
+                if (type === 'latest') return idB - idA; // id besar duluan
+                if (type === 'low') return priceA - priceB;
+                if (type === 'high') return priceB - priceA;
+                return 0;
+            });
 
-        items.forEach(item => container.appendChild(item));
-    }
-</script>
+            items.forEach(item => container.appendChild(item));
+        }
+    </script>
 
 </body>
+
 </html>

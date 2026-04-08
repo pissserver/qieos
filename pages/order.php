@@ -518,7 +518,7 @@ include '../sessions/session.php';
         function payOrder(id, name) {
             Swal.fire({
                 title: 'Bayar Pesanan?',
-                text: `Apakah anda yakin ingin menandai pesanan ${name} sebagai terbayar?`,
+                html: `Yakin ingin menandai pesanan dari pelanggan <strong class="text-capitalize">${name}</strong> sebagai terbayar?`,
                 icon: 'question',
                 showCancelButton: true,
                 confirmButtonText: 'Ya, Bayar!',
@@ -544,7 +544,8 @@ include '../sessions/session.php';
         function cancelOrder(id, name) {
             Swal.fire({
                 title: 'Cancel Pesanan?',
-                text: `Apakah anda yakin ingin membatalkan pesanan ${name}?`,
+                html: `Yakin ingin membatalkan pesanan dari pelanggan <strong class="text-capitalize">${name}</strong>?`,
+                icon: 'warning',
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonText: 'Ya, Cancel!',
@@ -586,7 +587,7 @@ include '../sessions/session.php';
 
                     <!-- LEFT SIDE -->
                     <div class="d-flex flex-wrap">
-                        <span class="badge bg-primary me-2 mb-2">
+                        <span class="badge bg-primary me-2 mb-2 text-capitalize">
                             <i class="fas fa-user me-1"></i>&nbsp; ${order.customer_name}
                         </span>
 
@@ -619,7 +620,7 @@ include '../sessions/session.php';
                     <div class="order-item">
                     <img src="../assets/img/uploads/${item.photo}" alt="${item.product_name}">
                     <div class="order-item-info">
-                        <strong>${item.product_name}</strong>
+                        <strong class="text-capitalize">${item.product_name}</strong>
                         <div class="order-item-badges">
                         <span class="badge-price">Rp ${Number(item.price).toLocaleString()}</span>
                         <span class="badge-qty">Qty: ${item.qty}</span>

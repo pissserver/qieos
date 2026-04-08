@@ -35,14 +35,14 @@ $details = mysqli_query($conn, "
         body {
             font-family: monospace;
             font-size: 12px;
-            margin: 0;
+            margin: 20px 0;
 
             display: flex;
             justify-content: center;
             /* tengah horizontal */
             align-items: center;
             /* tengah vertical */
-            height: 80vh;
+            /* height: 80vh; */
             /* full tinggi layar */
             background: #f5f5f5;
             /* optional biar kelihatan */
@@ -112,14 +112,14 @@ $details = mysqli_query($conn, "
         <div class="center">
             <h3>CARTIFY</h3>
             <p><?= date('d M Y', strtotime($order['tanggal'])) ?></p>
-            <p>Pelanggan: <b><?= $order['customer_name'] ?></b></p>
+            <p>Pelanggan: <b><?= ucwords(strtolower($order['customer_name'])) ?></b></p>
         </div>
 
         <hr>
 
         <?php while ($d = mysqli_fetch_assoc($details)) { ?>
             <div class="item">
-                <div><?= $d['product_name'] ?></div>
+                <div><?= ucwords(strtolower($d['product_name'])) ?></div>
                 <div class="row">
                     <span><?= $d['qty'] ?> x <?= number_format($d['price']) ?></span>
                     <span>Rp <?= number_format($d['subtotal']) ?></span>

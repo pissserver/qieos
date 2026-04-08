@@ -575,7 +575,7 @@
                         <img src="${item.photo}" class="cart-img">
 
                         <div>
-                            <div class="cart-title">${item.name}</div>
+                            <div class="cart-title text-capitalize">${item.name}</div>
 
                             <div class="cart-meta">
                                 <span class="badge-price">

@@ -61,7 +61,7 @@ function tanggalIndo($date)
             <div class="order-header">
                 <div>
                     <div class="order-id">
-                        <i class="fas fa-user"></i> <?= $row['customer_name']; ?>
+                        <i class="fas fa-user"></i> <?= ucwords(strtolower($row['customer_name'])); ?>
                     </div>
                     <div class="order-date">
                         <i class="fas fa-calendar-alt"></i> <?= tanggalIndo($row['tanggal']); ?>
