@@ -20,3 +20,22 @@ if($_GET['action'] === 'add'){
         echo json_encode(["status"=>"error","message"=>"Gagal menambahkan kategori"]);
     }
 } 
+
+if ($_GET['action'] === 'delete') {
+    $id = (int) $_POST['id'];
+
+    $stmt = $conn->prepare("DELETE FROM cashout_categories WHERE id=?");
+    $stmt->bind_param("i", $id);
+
+    if ($stmt->execute()) {
+        echo json_encode([
+            "status" => "success",
+            "message" => "Kategori berhasil dihapus"
+        ]);
+    } else {
+        echo json_encode([
+            "status" => "error",
+            "message" => "Gagal menghapus"
+        ]);
+    }
+}

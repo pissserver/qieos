@@ -1,5 +1,8 @@
 <?php
 include '../sessions/session.php';
+
+$query = mysqli_query($conn, "SELECT cashouts.*, cashout_categories.category_name FROM cashouts LEFT JOIN cashout_categories ON cashouts.category_id = cashout_categories.id WHERE cashouts.id='" . $_GET['id'] . "'");
+$row = mysqli_fetch_assoc($query);
 ?>
 
 <style>
@@ -77,37 +80,6 @@ include '../sessions/session.php';
     .btn-light {
         border-radius: 10px;
     }
-
-    /* Modal */
-    .custom-modal {
-        border-radius: 12px;
-    }
-
-    .modal-body-scroll {
-        max-height: 400px;
-        overflow-y: auto;
-        padding-right: 10px;
-    }
-
-    .category-card {
-        border-radius: 12px;
-        transition: all 0.2s ease;
-    }
-
-    .category-card:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 6px 18px rgba(0,0,0,0.1);
-    }
-
-    .icon-category {
-        width: 35px;
-        height: 35px;
-        background: #f1f3f5;
-        border-radius: 8px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
 </style>
 
 <!doctype html>
@@ -133,28 +105,23 @@ include '../sessions/session.php';
 
                     <div class="card-header d-flex justify-content-between align-items-center">
                         <div>
-                            <h5 class="mb-0">Tambah Kas Keluar</h5>
-                            <small class="text-muted">Masukkan data kas keluar</small>
+                            <h5 class="mb-0">Edit Kas Keluar</h5>
+                            <small class="text-muted">Edit data kas keluar</small>
                         </div>
 
-                        <div class="categoryButton">
-                            <!-- BUTTON TAMBAH KATEGORI -->
-                            <button class="btn btn-dark btn-sm px-3 text-white" data-bs-toggle="modal" data-bs-target="#modalKategori">
-                                <i class="fas fa-plus-circle me-1"></i> Tambah Kategori
-                            </button>
-
-                            <!-- BUTTON HAPUS KATEGORI -->
-                            <button class="btn btn-danger btn-sm px-3 text-white" data-bs-toggle="modal" data-bs-target="#modalHapusKategori">
-                                <i class="fas fa-trash me-1"></i> Hapus Kategori
-                            </button>
-                        </div>
+                        <!-- BUTTON TAMBAH KAS KELUAR -->
+                        <a href="cashout.php" class="btn btn-dark btn-sm px-3 text-white" >
+                            <i class="fas fa-plus-circle me-1"></i> Tambah Kas Keluar
+                        </a>
                     </div>
 
                     <div class="card-body">
 
-                        <form id="cashOutForm" action="cashout-action.php?action=add" method="POST" enctype="multipart/form-data">
+                        <form id="cashOutForm" action="cashout-action.php?action=edit" method="POST" enctype="multipart/form-data">
 
                             <div class="row">
+                                <input type="hidden" name="id" value="<?php echo $row['id']; ?>">
+                                
                                 <!-- Tanggal -->
                                 <div class="col-md-4 mb-4">
                                     <label class="form-label">Tanggal</label>
@@ -166,6 +133,7 @@ include '../sessions/session.php';
                                             type="date"
                                             name="cashout_date"
                                             class="form-control"
+                                            value="<?php echo $row['cashout_date']; ?>"
                                             required>
                                     </div>
                                 </div>
@@ -178,13 +146,13 @@ include '../sessions/session.php';
                                             <i class="fas fa-box"></i>
                                         </span>
                                         <select name="category" id="category" class="form-control" required>
-                                            <option value="">Pilih Kategori</option>
+                                            <option value="<?php echo $row['category_id']; ?>"><?php echo $row['category_name']; ?></option>
                                             <?php
                                             $categoryQuery = "SELECT * FROM cashout_categories ORDER BY category_name ASC";
                                             $categoryResult = $conn->query($categoryQuery);
                                             if ($categoryResult->num_rows > 0) {
-                                                while ($row = $categoryResult->fetch_assoc()) {
-                                                    echo "<option value='" . $row['id'] . "'>" . $row['category_name'] . "</option>";
+                                                while ($rowCategory = $categoryResult->fetch_assoc()) {
+                                                    echo "<option value='" . $rowCategory['id'] . "'>" . $rowCategory['category_name'] . "</option>";
                                                 }
                                             }
                                             ?>
@@ -204,6 +172,7 @@ include '../sessions/session.php';
                                             name="expense_name"
                                             class="form-control"
                                             placeholder="Masukkan nama pengeluaran"
+                                            value="<?php echo $row['expense_name']; ?>"
                                             required>
                                     </div>
                                 </div>
@@ -220,6 +189,7 @@ include '../sessions/session.php';
                                             name="quantity"
                                             class="form-control"
                                             placeholder="Jumlah pengeluaran"
+                                            value="<?php echo $row['quantity']; ?>"
                                             required>
                                     </div>
                                 </div>
@@ -236,6 +206,7 @@ include '../sessions/session.php';
                                             name="unit"
                                             class="form-control"
                                             placeholder="Satuan (misal: pcs, kg, liter)"
+                                            value="<?php echo $row['unit']; ?>"
                                             required>
                                     </div>
                                 </div>
@@ -252,6 +223,7 @@ include '../sessions/session.php';
                                             name="price"
                                             class="form-control"
                                             placeholder="Harga per satuan"
+                                            value="<?php echo $row['price']; ?>"
                                             required>
                                     </div>
                                 </div>
@@ -260,15 +232,9 @@ include '../sessions/session.php';
 
                             <!-- Tombol -->
                             <div class="d-flex justify-content-end">
-
-                                <button type="reset" class="btn btn-light me-2">
-                                    Reset
-                                </button>
-
                                 <button type="submit" name="save_product" class="btn btn-primary">
-                                    Simpan
+                                    Simpan Edit
                                 </button>
-
                             </div>
 
                         </form>
@@ -286,219 +252,8 @@ include '../sessions/session.php';
         </div>
     </main>
 
-    <!-- Modal Tambah Kategori -->
-    <div class="modal fade" id="modalKategori" tabindex="-1">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content custom-modal">
-
-                <!-- HEADER -->
-                <div class="modal-header border-0">
-                    <div class="d-flex align-items-center">
-                        <div class="modal-icon me-3">
-                            <i class="fas fa-tags"></i>
-                        </div>
-                        <div>
-                            <h5 class="modal-title mb-0">Tambah Kategori</h5>
-                            <small class="text-muted">Tambah kategori pengeluaran</small>
-                        </div>
-                    </div>
-
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-
-                <!-- BODY -->
-                <form id="categoryForm" action="category-action.php?action=add" method="POST">
-                    <div class="modal-body pt-0">
-
-                        <div class="form-floating mb-3">
-                            <input
-                                type="text"
-                                name="category_name"
-                                class="form-control input-custom"
-                                id="floatingKategori"
-                                placeholder="Nama kategori"
-                                required>
-                            <label for="floatingKategori">Nama Kategori</label>
-                        </div>
-
-                    </div>
-
-                    <!-- FOOTER -->
-                    <div class="modal-footer border-0 d-flex justify-content-between">
-
-                        <button type="button" class="btn btn-light px-4" data-bs-dismiss="modal">
-                            Batal
-                        </button>
-
-                        <button type="submit" class="btn btn-primary px-4 btn-save">
-                            <i class="fas fa-check-circle me-1"></i> Simpan
-                        </button>
-
-                    </div>
-                </form>
-
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal Hapus Kategori -->
-    <div class="modal fade" id="modalHapusKategori" tabindex="-1">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content custom-modal">
-
-                <!-- HEADER -->
-                <div class="modal-header border-0">
-                    <div class="d-flex align-items-center">
-                        <div class="modal-icon me-3">
-                            <i class="fas fa-tags"></i>
-                        </div>
-                        <div>
-                            <h5 class="modal-title mb-0">Hapus Kategori</h5>
-                            <small class="text-muted">Hapus kategori pengeluaran</small>
-                        </div>
-                    </div>
-
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-
-                <!-- BODY -->
-                <div class="modal-body pt-0 modal-body-scroll">
-
-                    <div class="row" id="categoryList">
-
-                        <?php
-                        $q = mysqli_query($conn, "SELECT * FROM cashout_categories ORDER BY id DESC");
-                        while($cat = mysqli_fetch_assoc($q)){
-                        ?>
-
-                        <div class="col-6 mb-3" id="cat-<?php echo $cat['id']; ?>">
-                            <div class="card shadow-sm border-0 category-card">
-
-                                <div class="card-body d-flex justify-content-between align-items-center">
-
-                                    <!-- Nama -->
-                                    <div class="d-flex align-items-center">
-                                        <div class="icon-category me-2">
-                                            <i class="fas fa-tag"></i>
-                                        </div>
-                                        <span class="fw-semibold">
-                                            <?php echo $cat['category_name']; ?>
-                                        </span>
-                                    </div>
-
-                                    <!-- Action -->
-                                    <div>
-                                        <button 
-                                            class="btn btn-sm btn-danger btn-delete-cat"
-                                            data-id="<?php echo $cat['id']; ?>"
-                                            data-name="<?php echo htmlspecialchars($cat['category_name']); ?>">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
-                                    </div>
-
-                                </div>
-
-                            </div>
-                        </div>
-
-                        <?php } ?>
-
-                    </div>
-
-                </div>
-
-            </div>
-        </div>
-    </div>
 
     <?php include '../script/footscript.php'; ?>
-
-    <!-- Category Form Script -->
-    <script>
-        document.getElementById('categoryForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const formData = new FormData(this);
-            fetch(this.action, {
-                method: 'POST',
-                body: formData
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.status === 'success') {
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Berhasil!',
-                        text: data.message
-                    });
-                    this.reset();
-                    
-                    // OPTIONAL: reload data
-                    setTimeout(() => {
-                        location.reload();
-                    }, 1500);
-
-                } else {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error',
-                        text: data.message
-                    });
-                }
-            });
-        });
-
-        document.querySelectorAll('.btn-delete-cat').forEach(btn => {
-            btn.addEventListener('click', function() {
-
-                const id = this.dataset.id;
-                const name = this.dataset.name;
-
-                Swal.fire({
-                    title:'Hapus?',
-                    icon:'warning',
-                    html:`Yakin hapus kategori <strong>${name}</strong>?`,
-                    showCancelButton:true
-                }).then(r=>{
-                    if(r.isConfirmed){
-
-                        fetch('category-action.php?action=delete', {
-                            method:'POST',
-                            headers:{
-                                'Content-Type':'application/x-www-form-urlencoded'
-                            },
-                            body:`id=${id}`
-                        })
-                        .then(res => res.json())
-                        .then(data => {
-
-                            if(data.status === 'success'){
-
-                                Swal.fire({
-                                    icon:'success',
-                                    title:'Berhasil',
-                                    timer:1000,
-                                    showConfirmButton:false
-                                });
-
-                                document.getElementById('cat-'+id)?.remove();
-
-                                // OPTIONAL: reload data
-                                setTimeout(() => {
-                                    location.reload();
-                                }, 1500);
-
-                            } else {
-                                Swal.fire('Error', data.message, 'error');
-                            }
-
-                        });
-
-                    }
-                });
-
-            });
-        });
-    </script>
 
 
     <!-- Cashout Script -->
@@ -530,7 +285,14 @@ include '../sessions/session.php';
                         showConfirmButton: false
                     });
 
-                    form.reset();
+                    // 🔥 UPDATE FORM VALUE TANPA RELOAD
+                    form.cashout_date.value = data.data.cashout_date;
+                    form.category.value = data.data.category;
+                    form.expense_name.value = data.data.expense_name;
+                    form.quantity.value = data.data.quantity;
+                    form.unit.value = data.data.unit;
+                    form.price.value = data.data.price;
+                    
                     loadCategory(currentCategory);
                 } else {
                     Swal.fire({

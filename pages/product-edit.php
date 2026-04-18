@@ -138,7 +138,7 @@ $row = mysqli_fetch_assoc($query);
                             <!-- Tombol -->
                             <div class="d-flex justify-content-end">
                                 <button type="submit" name="edit_product" class="btn btn-primary">
-                                    Edit Produk
+                                    Simpan Edit
                                 </button>
                             </div>
 

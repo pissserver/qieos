@@ -179,7 +179,7 @@ $totalData = mysqli_fetch_assoc($totalQuery);
                             <a href="cashout-edit.php?id=<?php echo $row['id']; ?>" class="btn btn-sm btn-warning">
                                 <i class="fas fa-edit"></i>
                             </a>
-                            <button onclick="deleteData(<?php echo $row['id']; ?>)" class="btn btn-sm btn-danger">
+                            <button onclick="deleteData(<?php echo $row['id']; ?>, '<?php echo $row['expense_name']; ?>')" class="btn btn-sm btn-danger">
                                 <i class="fas fa-trash"></i>
                             </button>
                         </div>

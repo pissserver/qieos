@@ -11,10 +11,18 @@ $query = mysqli_query($conn, "
         WHERE status_payment != 'cancelled'
     ");
 
+$query_cashout = mysqli_query($conn, "
+        SELECT 
+            SUM(amount) as total_cashouts
+        FROM cashouts
+    ");
+
 $data = mysqli_fetch_assoc($query);
+$cashout_data = mysqli_fetch_assoc($query_cashout);
 
 $total_customers   = $data['total_customer'] ? $data['total_customer'] : 0;
 $total_revenue     = $data['total_revenue'] ? $data['total_revenue'] : 0;
+$total_cashouts    = $cashout_data['total_cashouts'] ? $cashout_data['total_cashouts'] : 0;
 $start_order_date  = $data['start_order_date'] ? $data['start_order_date'] : null;
 
 // =========================
@@ -118,7 +126,7 @@ while ($row = mysqli_fetch_assoc($top_customers_query)) {
         <?php include '../components/navbar.php'; ?>
 
         <div class="row mt-5">
-            <div class="col-12 col-sm-6 col-xl-6 mb-4">
+            <div class="col-12 col-sm-12 col-xl-4 mb-4">
                 <div class="card border-0 shadow">
                     <div class="card-body">
                         <div
@@ -172,28 +180,26 @@ while ($row = mysqli_fetch_assoc($top_customers_query)) {
                     </div>
                 </div>
             </div>
-            <div class="col-12 col-sm-6 col-xl-6 mb-4">
+
+            <div class="col-12 col-sm-12 col-xl-4 mb-4">
                 <div class="card border-0 shadow">
                     <div class="card-body">
                         <div
                             class="row d-block d-xl-flex align-items-center">
                             <div
                                 class="col-12 col-xl-5 text-xl-center mb-3 mb-xl-0 d-flex align-items-center justify-content-xl-center">
-                                <div
-                                    class="icon-shape icon-shape-secondary rounded me-4 me-sm-0">
-                                    <svg
-                                        class="icon"
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        viewBox="0 0 24 24"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        stroke-width="1.8"
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round">
-                                        <rect x="2" y="6" width="20" height="12" rx="3"></rect>
-                                        <circle cx="12" cy="12" r="3"></circle>
-                                        <path d="M6 12h0"></path>
-                                        <path d="M18 12h0"></path>
+                                <div class="icon-shape bg-success text-white rounded me-4 me-sm-0">
+                                    <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+                                        fill="none" stroke="currentColor" stroke-width="2"
+                                        stroke-linecap="round" stroke-linejoin="round">
+                                        
+                                        <!-- uang -->
+                                        <rect x="2" y="7" width="20" height="10" rx="2"></rect>
+                                        <circle cx="12" cy="12" r="2"></circle>
+
+                                        <!-- panah naik -->
+                                        <path d="M16 8l4-4"></path>
+                                        <path d="M20 4h-4"></path>
                                     </svg>
                                 </div>
                                 <div class="d-sm-none">
@@ -208,6 +214,62 @@ while ($row = mysqli_fetch_assoc($top_customers_query)) {
                                     </h2>
                                     <h3 class="fw-extrabold mb-2">
                                         <?php echo 'Rp ' . number_format($total_revenue); ?>
+                                    </h3>
+                                </div>
+                                <small
+                                    class="d-flex align-items-center text-gray-500">
+                                    Sejak <?php echo date('F j Y', strtotime($start_order_date)); ?>,
+                                    <svg
+                                        class="icon icon-xxs text-gray-500 ms-2 me-1"
+                                        fill="currentColor"
+                                        viewBox="0 0 20 20"
+                                        xmlns="http://www.w3.org/2000/svg">
+                                        <path
+                                            fill-rule="evenodd"
+                                            d="M10 18a8 8 0 100-16 8 8 0 000 16zM4.332 8.027a6.012 6.012 0 011.912-2.706C6.512 5.73 6.974 6 7.5 6A1.5 1.5 0 019 7.5V8a2 2 0 004 0 2 2 0 011.523-1.943A5.977 5.977 0 0116 10c0 .34-.028.675-.083 1H15a2 2 0 00-2 2v2.197A5.973 5.973 0 0110 16v-2a2 2 0 00-2-2 2 2 0 01-2-2 2 2 0 00-1.668-1.973z"
+                                            clip-rule="evenodd"></path>
+                                    </svg>
+                                    <?php echo $user['city']; ?>
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-12 col-sm-12 col-xl-4 mb-4">
+                <div class="card border-0 shadow">
+                    <div class="card-body">
+                        <div
+                            class="row d-block d-xl-flex align-items-center">
+                            <div
+                                class="col-12 col-xl-5 text-xl-center mb-3 mb-xl-0 d-flex align-items-center justify-content-xl-center">
+                                <div class="icon-shape bg-danger text-white rounded me-4 me-sm-0">
+                                    <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+                                        fill="none" stroke="currentColor" stroke-width="2"
+                                        stroke-linecap="round" stroke-linejoin="round">
+                                        
+                                        <!-- uang -->
+                                        <rect x="2" y="7" width="20" height="10" rx="2"></rect>
+                                        <circle cx="12" cy="12" r="2"></circle>
+
+                                        <!-- panah turun -->
+                                        <path d="M16 16l4 4"></path>
+                                        <path d="M20 20h-4"></path>
+                                    </svg>
+                                </div>
+                                <div class="d-sm-none">
+                                    <h2 class="fw-extrabold h5">Cashout</h2>
+                                    <h3 class="mb-1"><?php echo 'Rp ' . number_format($total_cashouts); ?></h3>
+                                </div>
+                            </div>
+                            <div class="col-12 col-xl-7 px-xl-0">
+                                <div class="d-none d-sm-block">
+                                    <h2 class="h6 text-gray-400 mb-0">
+                                        Cashout
+                                    </h2>
+                                    <h3 class="fw-extrabold mb-2">
+                                        <?php echo 'Rp ' . number_format($total_cashouts); ?>
                                     </h3>
                                 </div>
                                 <small
