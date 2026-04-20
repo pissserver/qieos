@@ -242,8 +242,8 @@ $current_page = basename($_SERVER['PHP_SELF']);
                     <span class="sidebar-text">Kas Keluar</span>
                 </a>
             </li>
-            <li class="nav-item <?php echo ($current_page == 'report.php') ? 'active' : ''; ?>">
-                <a href="../pages/report.php" class="nav-link">
+            <li class="nav-item <?php echo ($current_page == 'report-page.php') ? 'active' : ''; ?>">
+                <a href="../pages/report-page.php" class="nav-link">
                     <span class="sidebar-icon">
                         <svg class="icon icon-xs me-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
                             <path d="M5 3a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2V5a2 2 0 00-2-2H5zm3.707 1.707a1 1 0 00-1.414-1.414l-3
