@@ -3,7 +3,7 @@
     $servername = "localhost";
     $username = "root";
     $password = "";
-    $dbname = "db_project_freelance";
+    $dbname = "cartify";
 
     // Create connection
     $conn = new mysqli($servername, $username, $password, $dbname);
