@@ -1,9 +1,42 @@
+<style>
+    .login-title{
+        font-size: 34px;
+        font-weight: 700;
+        letter-spacing: -0.8px;
+        color:#1e293b;
+        margin-bottom:8px;
+    }
+
+    .login-subtitle{
+        font-size:15px;
+        font-weight:400;
+        color:#64748b;
+        margin-bottom:0;
+        letter-spacing:0.3px;
+    }
+
+    .login-title-wrap{
+        position:relative;
+        display:inline-block;
+    }
+
+    .login-title-wrap::after{
+        content:'';
+        width:60px;
+        height:4px;
+        border-radius:50px;
+        background:linear-gradient(90deg,#60a5fa,#facc15);
+        display:block;
+        margin:14px auto 0;
+    }
+</style>
+
 <!doctype html>
 <html lang="en">
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 
-        <title>Login - Cartify</title>
+        <title>Login - Qieos</title>
 
         <?php include '../script/headscript.php'; ?>
     </head>
@@ -27,12 +60,17 @@
                             <div
                                 class="bg-white shadow border-0 rounded border-light p-4 p-lg-5 w-100 fmxw-500"
                             >
-                                <div class="d-flex align-items-center justify-content-center mb-4 mt-md-0">
-                                    <img src="../assets/img/brand/cartify2.png" alt="Cartify Logo" width="50">
-                                    <h1 class="ms-2 mb-0 h3">
-                                        Login 
-                                    </h1>
-                                </div>
+                                    <div class="text-center">
+                                        <img src="../assets/img/brand/qieos.png"
+                                            alt="Qieos Logo"
+                                            width="240"
+                                            class="d-block mx-auto mb-4">
+
+                                        <div class="login-title-wrap">
+                                            <h1 class="login-title">Selamat Datang</h1>
+                                            <p class="login-subtitle">Login akun Qieos anda</p>
+                                        </div>
+                                    </div>
 
                                 <?php
                                     if(isset($_GET['success'])){

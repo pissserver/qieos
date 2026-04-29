@@ -31,7 +31,7 @@
 <link
     rel="icon"
     sizes="120x120"
-    href="../assets/img/brand/cartify2.png" />
+    href="../assets/img/brand/qieos2.png" />
 
 <meta name="msapplication-TileColor" content="#ffffff" />
 <meta name="theme-color" content="#ffffff" />
@@ -74,7 +74,7 @@
 <meta name="theme-color" content="#000000">
 <script>
     if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('/cartify/sw.js')
+        navigator.serviceWorker.register('/qieos/sw.js')
             .then(reg => console.log('SW OK:', reg.scope))
             .catch(err => console.log('SW ERROR:', err));
     }

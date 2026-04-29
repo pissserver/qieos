@@ -81,12 +81,12 @@ $current_page = basename($_SERVER['PHP_SELF']);
     <a class="navbar-brand me-lg-5" href="../pages/dashboard.php">
         <img
             class="navbar-brand-dark"
-            src="../assets/img/brand/cartify.png"
-            alt="Cartify Logo" />
+            src="../assets/img/brand/qieos.png"
+            alt="Qieos Logo" />
         <img
             class="navbar-brand-light"
-            src="../assets/img/brand/cartify.png"
-            alt="Cartify Logo" />
+            src="../assets/img/brand/qieos.png"
+            alt="Qieos Logo" />
     </a>
     <div class="d-flex align-items-center">
         <button
@@ -165,9 +165,9 @@ $current_page = basename($_SERVER['PHP_SELF']);
                     class="nav-link d-flex align-items-center">
                     <span class="sidebar-icon">
                         <img
-                            src="../assets/img/brand/cartify.png"
+                            src="../assets/img/brand/qieos.png"
                             width="150"
-                            alt="Cartify Logo" />
+                            alt="Qieos Logo" />
                     </span>
                 </a>
             </li>
@@ -271,7 +271,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
     <!-- Version -->
     <div class="sidebar-footer">
         <div class="version-badge">
-            <span>Cartify</span>
+            <span>Qieos</span>
             <small>v1.0.0</small>
         </div>
     </div>

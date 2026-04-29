@@ -1,3 +1,36 @@
+<style>
+    .login-title{
+        font-size: 34px;
+        font-weight: 700;
+        letter-spacing: -0.8px;
+        color:#1e293b;
+        margin-bottom:8px;
+    }
+
+    .login-subtitle{
+        font-size:15px;
+        font-weight:400;
+        color:#64748b;
+        margin-bottom:0;
+        letter-spacing:0.3px;
+    }
+
+    .login-title-wrap{
+        position:relative;
+        display:inline-block;
+    }
+
+    .login-title-wrap::after{
+        content:'';
+        width:60px;
+        height:4px;
+        border-radius:50px;
+        background:linear-gradient(90deg,#60a5fa,#facc15);
+        display:block;
+        margin:14px auto 0;
+    }
+</style>
+
 <!doctype html>
 <html lang="en">
     <head>
@@ -27,11 +60,16 @@
                             <div
                                 class="bg-white shadow border-0 rounded border-light p-4 p-lg-5 w-100 fmxw-500"
                             >
-                                <div class="d-flex align-items-center justify-content-center mb-4 mt-md-0">
-                                    <img src="../assets/img/brand/cartify2.png" alt="Cartify Logo" width="50">
-                                    <h1 class="ms-2 mb-0 h3">
-                                        Buat Akun 
-                                    </h1>
+                                <div class="text-center">
+                                    <img src="../assets/img/brand/qieos.png"
+                                        alt="Qieos Logo"
+                                        width="240"
+                                        class="d-block mx-auto mb-4">
+
+                                    <div class="login-title-wrap">
+                                        <h1 class="login-title">Selamat Datang</h1>
+                                        <p class="login-subtitle">Login akun Qieos anda</p>
+                                    </div>
                                 </div>
 
                                 <?php
@@ -52,6 +90,38 @@
 
                                 <form action="sign-up-action.php" class="mt-4" method="POST">
                                     <!-- Form -->
+                                    <div class="form-group mb-4">
+                                        <label for="name">Nama Lengkap</label>
+                                        <div class="input-group">
+                                            <span
+                                                class="input-group-text"
+                                                id="basic-addon1"
+                                            >
+                                                <svg
+                                                    class="icon icon-xs text-gray-600"
+                                                    fill="currentColor"
+                                                    viewBox="0 0 20 20"
+                                                    xmlns="http://www.w3.org/2000/svg"
+                                                >
+                                                    <path
+                                                        fill-rule="evenodd"
+                                                        d="M10 2a4 4 0 100 8 4 4 0 000-8zM4 15a6 6 0 1112 0v1H4v-1z"
+                                                        clip-rule="evenodd"
+                                                    ></path>
+                                                </svg>
+                                            </span>
+                                            <input
+                                                type="text"
+                                                class="form-control"
+                                                placeholder="Nama Lengkap"
+                                                id="name"
+                                                name="name"
+                                                autofocus
+                                                required
+                                            />
+                                        </div>
+                                    </div>
+
                                     <div class="form-group mb-4">
                                         <label for="email">Email Anda</label>
                                         <div class="input-group">

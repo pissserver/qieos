@@ -1,20 +1,20 @@
 {
     "name": "Kasir App",
-    "short_name": "Cartify",
-    "start_url": "/cartify/",
-    "scope": "/cartify/",
+    "short_name": "Qieos",
+    "start_url": "/qieos/",
+    "scope": "/qieos/",
     "display": "fullscreen",
     "background_color": "#ffffff",
     "theme_color": "#000000",
     "orientation": "portrait",
     "icons": [
         {
-            "src": "/cartify/assets/img/brand/cartify2.png",
+            "src": "/qieos/assets/img/brand/qieos2.png",
             "sizes": "192x192",
             "type": "image/png"
         },
         {
-            "src": "/cartify/assets/img/brand/cartify2.png",
+            "src": "/qieos/assets/img/brand/qieos2.png",
             "sizes": "512x512",
             "type": "image/png"
         }
