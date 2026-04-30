@@ -1,6 +1,6 @@
 <?php
     session_start();
-    include '../script/connection.php';
+    require_once __DIR__ . '/../script/connection.php';
     
     if (!isset($_SESSION['email'])) {
         header("Location: ../sessions/sign-in.php");

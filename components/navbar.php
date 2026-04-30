@@ -397,7 +397,7 @@
                             <!-- Avatar -->
                             <img class="avatar rounded-circle border border-2 border-white shadow-sm"
                                 alt="Image placeholder"
-                                src="<?php echo $user['photo'] ? $user['photo'] : '../assets/img/default-avatar.jpg'; ?>"
+                                src="<?php echo $user['photo'] ? $user['photo'] : '/qieos/assets/img/default-avatar.jpg'; ?>"
                                 style="width:40px; height:40px; object-fit:cover;" />
 
                             <!-- Email + ikon dropdown -->

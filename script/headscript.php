@@ -31,7 +31,7 @@
 <link
     rel="icon"
     sizes="120x120"
-    href="../assets/img/brand/qieos2.png" />
+    href="/qieos/assets/img/brand/qieos2.png" />
 
 <meta name="msapplication-TileColor" content="#ffffff" />
 <meta name="theme-color" content="#ffffff" />
@@ -39,14 +39,14 @@
 <!-- Sweet Alert -->
 <link
     type="text/css"
-    href="../vendor/sweetalert2/dist/sweetalert2.min.css"
+    href="/qieos/vendor/sweetalert2/dist/sweetalert2.min.css"
     rel="stylesheet" />
 
 <!-- Notyf -->
-<link type="text/css" href="../vendor/notyf/notyf.min.css" rel="stylesheet" />
+<link type="text/css" href="/qieos/vendor/notyf/notyf.min.css" rel="stylesheet" />
 
 <!-- Volt CSS -->
-<link type="text/css" href="../css/volt.css" rel="stylesheet" />
+<link type="text/css" href="/qieos/css/volt.css" rel="stylesheet" />
 
 <!-- Font Awesome -->
 <link

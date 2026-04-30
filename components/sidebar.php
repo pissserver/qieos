@@ -1,5 +1,5 @@
 <?php
-$current_page = basename($_SERVER['PHP_SELF']);
+    $current_page = basename($_SERVER['PHP_SELF']);
 ?>
 
 <style>
@@ -75,17 +75,25 @@ $current_page = basename($_SERVER['PHP_SELF']);
         transform: scale(1.05);
         box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
     }
+
+    .nav-title {
+        font-size: 11px;
+        font-weight: 700;
+        color: #9ca3af;
+        margin: 15px 10px 5px;
+        letter-spacing: 1px;
+    }
 </style>
 
 <nav class="navbar navbar-dark navbar-theme-primary px-4 col-12 d-lg-none">
-    <a class="navbar-brand me-lg-5" href="../pages/dashboard.php">
+    <a class="navbar-brand me-lg-5" href="/qieos/pages/dashboard.php">
         <img
             class="navbar-brand-dark"
-            src="../assets/img/brand/qieos.png"
+            src="/qieos/assets/img/brand/qieos.png"
             alt="Qieos Logo" />
         <img
             class="navbar-brand-light"
-            src="../assets/img/brand/qieos.png"
+            src="/qieos/assets/img/brand/qieos.png"
             alt="Qieos Logo" />
     </a>
     <div class="d-flex align-items-center">
@@ -112,14 +120,14 @@ $current_page = basename($_SERVER['PHP_SELF']);
             <div class="d-flex align-items-center">
                 <div class="avatar-lg me-4">
                     <img
-                        src="<?php echo $user['photo'] ? $user['photo'] : '../assets/img/default-avatar.jpg'; ?>"
+                        src="<?php echo $user['photo'] ? $user['photo'] : '/qieos/assets/img/default-avatar.jpg'; ?>"
                         class="card-img-top rounded-circle border-white"
                         alt="Bonnie Green" />
                 </div>
                 <div class="d-block">
                     <h2 class="h5 mb-3">Hi, <?php echo $user['fullname'] != '' ? $user['fullname'] : $_SESSION['email']; ?></h2>
                     <a
-                        href="../sessions/logout.php"
+                        href="/qieos/sessions/logout.php"
                         class="btn btn-secondary btn-sm d-inline-flex align-items-center">
                         <svg
                             class="icon icon-xxs me-1"
@@ -161,88 +169,143 @@ $current_page = basename($_SERVER['PHP_SELF']);
         <ul class="nav flex-column pt-3 pt-md-0">
             <li class="nav-item">
                 <a
-                    href="../pages/dashboard.php"
+                    href="/qieos/pages/dashboard.php"
                     class="nav-link d-flex align-items-center">
                     <span class="sidebar-icon">
                         <img
-                            src="../assets/img/brand/qieos.png"
+                            src="/qieos/assets/img/brand/qieos.png"
                             width="150"
                             alt="Qieos Logo" />
                     </span>
                 </a>
             </li>
+
+            <li class="nav-title">OVERVIEW</li>
+
             <li class="nav-item <?php echo ($current_page == 'dashboard.php') ? 'active' : ''; ?>">
-                <a href="../pages/dashboard.php" class="nav-link">
+                <a href="/qieos/pages/dashboard.php" class="nav-link">
                     <span class="sidebar-icon">
-                        <svg
-                            class="icon icon-xs me-2"
-                            fill="currentColor"
-                            viewBox="0 0 20 20"
-                            xmlns="http://www.w3.org/2000/svg">
-                            <path
-                                d="M2 10a8 8 0 018-8v8h8a8 8 0 11-16 0z"></path>
-                            <path
-                                d="M12 2.252A8.014 8.014 0 0117.748 8H12V2.252z"></path>
-                        </svg>
+                        <i class="fas fa-dashboard me-2"></i>
                     </span>
                     <span class="sidebar-text">Dashboard</span>
                 </a>
             </li>
-            <li class="nav-item <?php echo ($current_page == 'catalog.php') ? 'active' : ''; ?>">
-                <a href="../pages/catalog.php" class="nav-link">
-                    <span class="sidebar-icon">
-                        <svg class="icon icon-xs me-2"
-                            fill="currentColor"
-                            viewBox="0 0 20 20"
-                            xmlns="http://www.w3.org/2000/svg">
-                            <path d="M4 3h4v4H4V3zm0 6h4v4H4V9zm6-6h4v4h-4V3zm0 6h4v4h-4V9z" />
-                        </svg>
-                    </span>
-                    <span class="sidebar-text">Katalog</span>
-                </a>
-            </li>
-            <li class="nav-item <?php echo ($current_page == 'order.php') ? 'active' : ''; ?>">
-                <a href="../pages/order.php" class="nav-link">
-                    <span class="sidebar-icon">
-                        <svg class="icon icon-xs me-2" fill="none" stroke="currentColor" stroke-width="2"
-                            viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                d="M9 14h6M9 10h6M5 3h14a1 1 0 011 1v17l-3-2-3 2-3-2-3 2-3-2V4a1 1 0 011-1z" />
-                        </svg>
-                    </span>
-                    <span class="sidebar-text">Pesanan</span>
-                </a>
-            </li>
-            <li class="nav-item <?php echo ($current_page == 'product-add.php' || $current_page == 'product-edit.php') ? 'active' : ''; ?>">
-                <a href="../pages/product-add.php" class="nav-link">
-                    <span class="sidebar-icon">
-                        <svg class="icon icon-xs me-2"
-                            fill="currentColor"
-                            viewBox="0 0 20 20"
-                            xmlns="http://www.w3.org/2000/svg">
 
-                            <path fill-rule="evenodd"
-                                d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2
-                            0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z"
-                                clip-rule="evenodd"></path>
+            <!-- GUDANG STOK (SUMBER BARANG / FIFO) -->
+            <li class="nav-title">GUDANG STOK</li>
 
-                        </svg>
+            <li class="nav-item <?= ($current_page == 'stock-in.php') ? 'active' : ''; ?>">
+                <a href="/qieos/pages/stock/stock-in.php" class="nav-link">
+                    <span class="sidebar-icon">
+                        <i class="fas fa-dolly-flatbed me-2"></i>
                     </span>
-                    <span class="sidebar-text">Tambah Produk</span>
+                    <span>Pembelian Stok</span>
                 </a>
             </li>
-            <li class="nav-item <?php echo ($current_page == 'cashout.php' || $current_page == 'cashout-edit.php') ? 'active' : ''; ?>">
+
+            <li class="nav-item <?= ($current_page == 'stock-list.php') ? 'active' : ''; ?>">
+                <a href="/qieos/pages/stock-list.php" class="nav-link">
+                    <span class="sidebar-icon">
+                        <i class="fas fa-warehouse me-2"></i>
+                    </span>
+                    <span>Stok Gudang</span>
+                </a>
+            </li>
+
+            <li class="nav-item <?= ($current_page == 'stock-transfer.php') ? 'active' : ''; ?>">
+                <a href="/qieos/pages/stock-transfer.php" class="nav-link">
+                    <span class="sidebar-icon">
+                        <i class="fas fa-exchange-alt me-2"></i>
+                    </span>
+                    <span>Transfer ke Penjualan</span>
+                </a>
+            </li>
+
+            <!-- GUDANG PENJUALAN -->
+            <li class="nav-title">GUDANG PENJUALAN</li>
+
+            <li class="nav-item <?= ($current_page == 'sales-stock.php') ? 'active' : ''; ?>">
+                <a href="/qieos/pages/sales-stock.php" class="nav-link">
+                    <span class="sidebar-icon">
+                        <i class="fas fa-store me-2"></i>
+                    </span>
+                    <span>Stok Penjualan</span>
+                </a>
+            </li>
+
+            <li class="nav-item <?= ($current_page == 'catalog.php') ? 'active' : ''; ?>">
+                <a href="/qieos/pages/catalog.php" class="nav-link">
+                    <span class="sidebar-icon">
+                        <i class="fas fa-box me-2"></i>
+                    </span>
+                    <span>Katalog</span>
+                </a>
+            </li>
+
+            <li class="nav-item <?= ($current_page == 'order.php') ? 'active' : ''; ?>">
+                <a href="/qieos/pages/order.php" class="nav-link">
+                    <span class="sidebar-icon">
+                        <i class="fas fa-receipt me-2"></i>
+                    </span>
+                    <span>Pesanan</span>
+                </a>
+            </li>
+
+            <!-- PRODUK MANAGEMENT -->
+            <!-- <li class="nav-title">PRODUK</li>
+
+            <li class="nav-item <?= ($current_page == 'product-add.php' || $current_page == 'product-edit.php') ? 'active' : ''; ?>">
+                <a href="/qieos/pages/product-add.php" class="nav-link">
+                    <span class="sidebar-icon">
+                        <i class="fas fa-plus-circle me-2"></i>
+                    </span>
+                    <span>Kelola Produk</span>
+                </a>
+            </li> -->
+
+            <!-- KEUANGAN -->
+            <!-- <li class="nav-title">KEUANGAN</li>
+
+            <li class="nav-item <?= ($current_page == 'cashout.php') ? 'active' : ''; ?>">
                 <a href="../pages/cashout.php" class="nav-link">
                     <span class="sidebar-icon">
-                        <svg class="icon icon-xs me-2" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M3 6h18v12H3z" opacity="0.3" />
-                            <path d="M17 10l4 4-4 4v-3H9v-2h8v-3z" />
-                        </svg>
+                        <i class="fas fa-wallet me-2"></i>
                     </span>
-                    <span class="sidebar-text">Kas Keluar</span>
+                    <span>Pengeluaran</span>
+                </a>
+            </li> -->
+
+            <!-- LAPORAN -->
+            <li class="nav-title">LAPORAN</li>
+
+            <li class="nav-item <?= ($current_page == 'report-sales.php') ? 'active' : ''; ?>">
+                <a href="/qieos/pages/report-sales.php" class="nav-link">
+                    <span class="sidebar-icon">
+                        <i class="fas fa-chart-line me-2"></i>
+                    </span>
+                    <span>Laporan Penjualan</span>
                 </a>
             </li>
-            <li class="nav-item <?php echo ($current_page == 'report-page.php') ? 'active' : ''; ?>">
+
+            <li class="nav-item <?= ($current_page == 'report-stock.php') ? 'active' : ''; ?>">
+                <a href="/qieos/pages/report-stock.php" class="nav-link">
+                    <span class="sidebar-icon">
+                        <i class="fas fa-boxes me-2"></i>
+                    </span>
+                    <span>Laporan Stok</span>
+                </a>
+            </li>
+
+            <li class="nav-item <?= ($current_page == 'report-profit.php') ? 'active' : ''; ?>">
+                <a href="/qieos/pages/report-profit.php" class="nav-link">
+                    <span class="sidebar-icon">
+                        <i class="fas fa-coins me-2"></i>
+                    </span>
+                    <span>Laba Bersih</span>
+                </a>
+            </li>
+
+            <!-- <li class="nav-item <?php echo ($current_page == 'report-page.php') ? 'active' : ''; ?>">
                 <a href="../pages/report-page.php" class="nav-link">
                     <span class="sidebar-icon">
                         <svg class="icon icon-xs me-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
@@ -264,7 +327,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
                     </span>
                     <span class="sidebar-text">Laporan</span>
                 </a>
-            </li>
+            </li> -->
         </ul>
     </div>
 
