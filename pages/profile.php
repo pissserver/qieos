@@ -16,10 +16,10 @@ $currentState = $user['state'];
 </head>
 
 <body>
-    <?php include '../components/sidebar.php'; ?>
+    <?php include 'components/sidebar.php'; ?>
 
     <main class="content">
-        <?php include '../components/navbar.php'; ?>
+        <?php include 'components/navbar.php'; ?>
 
         <div class="row mt-5">
             <div class="col-12 col-xl-7">

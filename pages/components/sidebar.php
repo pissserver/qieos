@@ -181,7 +181,7 @@
                 </a>
             </li>
 
-            <li class="nav-title">OVERVIEW</li>
+            <!-- <li class="nav-title">OVERVIEW</li>
 
             <li class="nav-item <?php echo ($current_page == 'dashboard.php') ? 'active' : ''; ?>">
                 <a href="/qieos/pages/dashboard.php" class="nav-link">
@@ -190,7 +190,7 @@
                     </span>
                     <span class="sidebar-text">Dashboard</span>
                 </a>
-            </li>
+            </li> -->
 
             <!-- GUDANG STOK (SUMBER BARANG / FIFO) -->
             <li class="nav-title">GUDANG STOK</li>

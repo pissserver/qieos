@@ -25,7 +25,7 @@
                 <small><?= $d['code'] ?></small>
             </td>
 
-            <td class="text-center">
+            <td style="vertical-align: middle;" class="text-center">
                 <span class="badge bg-primary"><?= $d['qty'] ?></span>
             </td>
         </tr>

@@ -4,6 +4,7 @@
 
     if ($_GET['action'] === 'stock_in') {
 
+        $formNumber = $_POST['form_number'];
         $name       = $_POST['product_name'];
         $code       = $_POST['code'];
         $category   = $_POST['category'];
@@ -35,7 +36,7 @@
         }
 
         /* header */
-        mysqli_query($conn, "INSERT INTO purchases (date,note) VALUES ('$date','$note')");
+        mysqli_query($conn, "INSERT INTO purchases (form,date,note) VALUES ('$formNumber','$date','$note')");
         $purchase_id = mysqli_insert_id($conn);
 
         /* FIFO layer */
@@ -47,4 +48,50 @@
             "status"=>"success",
             "msg"=>"Stok berhasil ditambahkan"
         ]);
+    }
+
+    if($_GET['action']=='update_purchase_full'){
+
+        $id = $_GET['id'];
+
+        $product_name = $_POST['product_name'];
+        $code         = $_POST['code'];
+        $category     = $_POST['category'];
+        $qty          = $_POST['qty'];
+        $unit         = $_POST['unit'];
+        $buy_price    = $_POST['buy_price'];
+        $sell_price   = $_POST['sell_price'];
+        $note         = $_POST['note'];
+
+        mysqli_query($conn,"
+            UPDATE products 
+            SET name='$product_name',
+                code='$code',
+                category='$category'
+            WHERE id = (
+                SELECT product_id 
+                FROM purchase_items 
+                WHERE purchase_id='$id'
+            )
+        ");
+
+        mysqli_query($conn,"
+            UPDATE purchase_items
+            SET qty='$qty',
+                unit='$unit',
+                buy_price='$buy_price',
+                sell_price='$sell_price'
+            WHERE purchase_id='$id'
+        ");
+
+        mysqli_query($conn,"
+            UPDATE purchases
+            SET note='$note'
+            WHERE id='$id'
+        ");
+
+        echo json_encode([
+            'status'=>'success'
+        ]);
+        exit;
     }

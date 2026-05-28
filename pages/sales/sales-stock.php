@@ -140,7 +140,7 @@
 
                 qtyInput.max = stock;
                 qtyInput.value = "";
-                qtyInput.placeholder = "Max: " + stock;
+                qtyInput.placeholder = stock != 0 ? "Max: " + stock : "Stok kosong";
             });
 
             /* 🔥 VALIDASI */
