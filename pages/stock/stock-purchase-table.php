@@ -2,9 +2,29 @@
 include '../../sessions/session.php';
 
 $q = mysqli_query($conn,"
-SELECT id, form, date, note, created_at
+SELECT 
+    purchases.id,
+    purchases.form,
+    purchases.date,
+    purchases.note,
+    purchases.created_at,
+    purchase_items.qty,
+    purchase_items.unit,
+
+    GROUP_CONCAT(products.name SEPARATOR ', ') as products
+
 FROM purchases
-ORDER BY id DESC
+
+LEFT JOIN purchase_items 
+    ON purchase_items.purchase_id = purchases.id
+
+LEFT JOIN products 
+    ON products.id = purchase_items.product_id
+
+WHERE purchases.deleted_at IS NULL
+
+GROUP BY purchases.id
+ORDER BY purchases.id DESC
 ");
 ?>
 
@@ -182,7 +202,12 @@ ORDER BY id DESC
             <i class="fas fa-edit"></i>
         </button>
 
-        <button class="action-btn btn-delete">
+       <button class="action-btn btn-delete deletePurchaseBtn"
+            data-id="<?= $d['id'] ?>"
+            data-form="<?= $d['form'] ?>"
+            data-products="<?= htmlspecialchars($d['products']) ?>"
+            data-qty="<?= $d['qty'] ?>"
+            data-unit="<?= $d['unit'] ?>">
             <i class="fas fa-trash"></i>
         </button>
 

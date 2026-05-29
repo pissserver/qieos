@@ -6,6 +6,7 @@ $id = (int)$_GET['id'];
 $sql = "
 SELECT 
     purchases.id,
+    purchases.form,
     purchases.note,
 
     purchase_items.qty,
@@ -37,7 +38,7 @@ if(!$q){
 
 $d = mysqli_fetch_assoc($q);
 
-$formNumber = 'FORM-' . str_pad($id,7,'0',STR_PAD_LEFT);
+$formNumber = $d['form'];
 ?>
 
 <form id="editPurchaseForm" enctype="multipart/form-data">
@@ -138,42 +139,8 @@ $formNumber = 'FORM-' . str_pad($id,7,'0',STR_PAD_LEFT);
 
 <div class="text-end mt-4">
     <button type="submit" class="btn-save">
-        <i class="fas fa-save me-1"></i> Update Purchase
+        <i class="fas fa-save me-1"></i> Update
     </button>
 </div>
 
 </form>
-
-<script>
-$('#editPurchaseForm').submit(function(e){
-    e.preventDefault();
-
-    let formData = new FormData(this);
-
-    fetch('stock-action.php?action=update_purchase_full&id=<?= $id ?>',{
-        method:'POST',
-        body:formData
-    })
-    .then(res=>res.json())
-    .then(res=>{
-
-        if(res.status==='success'){
-
-            Swal.fire(
-                'Berhasil',
-                'Data berhasil diperbarui',
-                'success'
-            );
-
-            $('#editPurchaseModal').modal('hide');
-
-            loadPurchaseTable();
-            loadTable();
-
-        }else{
-            Swal.fire('Error',res.msg,'error');
-        }
-
-    });
-});
-</script>

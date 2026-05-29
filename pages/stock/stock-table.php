@@ -10,6 +10,7 @@ SELECT
     GROUP_CONCAT(DISTINCT pi.unit) as units
 FROM products p
 LEFT JOIN purchase_items pi ON pi.product_id=p.id
+WHERE pi.deleted_at IS NULL
 GROUP BY p.id
 ");
 ?>
