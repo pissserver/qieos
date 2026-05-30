@@ -2,7 +2,7 @@
 include '../../sessions/session.php';
 
 $q = mysqli_query($conn, "
-    SELECT code, name, category
+    SELECT code, name, category, sell_price
     FROM products
     ORDER BY name ASC
 ");

@@ -15,13 +15,24 @@
         $note       = $_POST['note'] ?: '-';
         $date       = date('Y-m-d');
 
-        /* upload */
-        $photo_name = null;
+        /* cek produk & ambil foto lama */
+        $cek = mysqli_query($conn, "SELECT * FROM products WHERE code='$code' LIMIT 1");
+        $p = mysqli_fetch_assoc($cek);
+
+        // default pakai foto lama
+        $photo_name = $p['photo'] ? $p['photo'] : null;
+
+        /* upload foto baru jika ada */
         if (!empty($_FILES['photo']['name'])) {
             $ext = pathinfo($_FILES['photo']['name'], PATHINFO_EXTENSION);
             $photo_name = 'prod_' . time() . '.' . $ext;
-            move_uploaded_file($_FILES['photo']['tmp_name'], "../../assets/img/products/".$photo_name);
+
+            move_uploaded_file(
+                $_FILES['photo']['tmp_name'],
+                "../../assets/img/products/".$photo_name
+            );
         }
+    
 
         /* cek produk */
         $cek = mysqli_query($conn, "SELECT * FROM products WHERE code='$code' LIMIT 1");
@@ -89,36 +100,66 @@
         $sell_price   = $_POST['sell_price'];
         $note         = $_POST['note'];
 
-        /* upload */
-        $photo_name = null;
+        /* cek produk & ambil foto lama */
+        $cek = mysqli_query($conn, "SELECT * FROM products WHERE code='$code' LIMIT 1");
+        $p = mysqli_fetch_assoc($cek);
+
+        // default pakai foto lama
+        $photo_name = $p['photo'] ? $p['photo'] : null;
+
+        /* upload foto baru jika ada */
         if (!empty($_FILES['photo']['name'])) {
             $ext = pathinfo($_FILES['photo']['name'], PATHINFO_EXTENSION);
             $photo_name = 'prod_' . time() . '.' . $ext;
-            move_uploaded_file($_FILES['photo']['tmp_name'], "../../assets/img/products/".$photo_name);
+
+            move_uploaded_file(
+                $_FILES['photo']['tmp_name'],
+                "../../assets/img/products/".$photo_name
+            );
         }
 
-        mysqli_query($conn,"
-            UPDATE products 
-            SET name='$product_name',
-                code='$code',
-                category='$category',
-                sell_price='$sell_price',
-                photo='$photo_name'
-            WHERE id = (
-                SELECT product_id 
-                FROM purchase_items 
-                WHERE purchase_id='$id'
-            )
-        ");
+        if($p){
 
-        mysqli_query($conn,"
-            UPDATE purchase_items
-            SET qty='$qty',
-                remaining_qty='$qty',
-                unit='$unit',
-                buy_price='$buy_price'
-            WHERE purchase_id='$id'
-        ");
+            mysqli_query($conn,"
+                UPDATE products 
+                SET category='$category',
+                    sell_price='$sell_price',
+                    photo='$photo_name'
+                WHERE id = (
+                    SELECT product_id 
+                    FROM purchase_items 
+                    WHERE purchase_id='$id'
+                )
+            ");
+
+            mysqli_query($conn,"
+                UPDATE purchase_items
+                SET product_id='{$p['id']}',
+                    qty='$qty',
+                    remaining_qty='$qty',
+                    unit='$unit',
+                    buy_price='$buy_price'
+                WHERE purchase_id='$id'
+            ");
+        } else {
+
+            mysqli_query($conn, "
+                INSERT INTO products (name,code,category,sell_price,photo)
+                VALUES ('$product_name','$code','$category','$sell_price','$photo_name')
+            ");
+
+            $product_id = mysqli_insert_id($conn);
+
+            mysqli_query($conn,"
+                UPDATE purchase_items
+                SET product_id='$product_id',
+                    qty='$qty',
+                    remaining_qty='$qty',
+                    unit='$unit',
+                    buy_price='$buy_price'
+                WHERE purchase_id='$id'
+            ");
+        }
 
         mysqli_query($conn,"
             UPDATE purchases

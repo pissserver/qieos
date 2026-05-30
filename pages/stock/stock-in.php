@@ -738,6 +738,7 @@ $hasPrevious = $currentFormId > 1;
                 option.value = item.code;
                 option.dataset.name = item.name;
                 option.dataset.category = item.category;
+                option.dataset.sellPrice = item.sell_price;
                 list.appendChild(option);
             });
 
@@ -755,6 +756,7 @@ $hasPrevious = $currentFormId > 1;
             if(opt.value === code){
                 document.getElementById('productName').value = opt.dataset.name;
                 document.getElementById('productCategory').value = opt.dataset.category;
+                document.querySelector('input[name="sell_price"]').value = opt.dataset.sellPrice;
                 found = true;
             }
         });
@@ -763,6 +765,7 @@ $hasPrevious = $currentFormId > 1;
         if(!found){
             document.getElementById('productName').value = '';
             document.getElementById('productCategory').value = '';
+            document.querySelector('input[name="sell_price"]').value = '';
         }
 
     });
