@@ -6,12 +6,13 @@ SELECT
     p.name,
     p.code,
     p.category,
-    COALESCE(SUM(pi.remaining_qty),0) as stock,
-    GROUP_CONCAT(DISTINCT pi.unit) as units
+    COALESCE(SUM(pi.remaining_qty),0) AS stock,
+    GROUP_CONCAT(DISTINCT pi.unit) AS units
 FROM products p
-LEFT JOIN purchase_items pi ON pi.product_id=p.id
-WHERE pi.deleted_at IS NULL
-GROUP BY p.id
+LEFT JOIN purchase_items pi 
+    ON pi.product_id = p.id
+    AND pi.deleted_at IS NULL
+GROUP BY p.id;
 ");
 ?>
 
@@ -186,7 +187,7 @@ GROUP BY p.id
 
     <!-- SATUAN -->
     <td class="text-center">
-        <span class="unit-badge">
+        <span class="unit-badge text-uppercase">
             <i class="fas fa-balance-scale"></i>
             <?= $d['units'] ?>
         </span>

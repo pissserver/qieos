@@ -195,8 +195,8 @@
             <!-- GUDANG STOK (SUMBER BARANG / FIFO) -->
             <li class="nav-title">GUDANG STOK</li>
 
-            <li class="nav-item <?= ($current_page == 'stock-in.php') ? 'active' : ''; ?>">
-                <a href="/qieos/pages/stock/stock-in.php" class="nav-link">
+            <li class="nav-item <?= ($current_page == 'purchase.php') ? 'active' : ''; ?>">
+                <a href="/qieos/pages/stock/purchase.php" class="nav-link">
                     <span class="sidebar-icon">
                         <i class="fas fa-dolly-flatbed me-2"></i>
                     </span>
@@ -204,8 +204,8 @@
                 </a>
             </li>
 
-            <li class="nav-item <?= ($current_page == 'stock-list.php') ? 'active' : ''; ?>">
-                <a href="/qieos/pages/stock/stock-list.php" class="nav-link">
+            <li class="nav-item <?= ($current_page == 'stock.php') ? 'active' : ''; ?>">
+                <a href="/qieos/pages/stock/stock.php" class="nav-link">
                     <span class="sidebar-icon">
                         <i class="fas fa-warehouse me-2"></i>
                     </span>

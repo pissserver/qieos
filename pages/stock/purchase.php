@@ -334,7 +334,7 @@ $hasPrevious = $currentFormId > 1;
         <div class="stock-body">
 
             <div id="formMode" class="panel-mode active">
-                <form id="form-stock" action="stock-action.php?action=stock_in" method="POST" enctype="multipart/form-data">
+                <form id="form-stock" action="purchase-action.php?action=store" method="POST" enctype="multipart/form-data">
 
                     <!-- FORM NUMBER -->
                     <div class="row mb-3">
@@ -597,7 +597,7 @@ $hasPrevious = $currentFormId > 1;
     // Next form button
     document.getElementById('nextFormBtn')?.addEventListener('click',function(){
 
-        fetch('stock-action.php?action=next_form')
+        fetch('purchase-action.php?action=next_form')
         .then(res=>res.json())
         .then(res=>{
             if(res.status==='success'){
@@ -610,7 +610,7 @@ $hasPrevious = $currentFormId > 1;
     // Previous form button
     document.getElementById('prevFormBtn')?.addEventListener('click',function(){
 
-        fetch('stock-action.php?action=prev_form')
+        fetch('purchase-action.php?action=prev_form')
         .then(res=>res.json())
         .then(res=>{
             if(res.status==='success'){
@@ -621,7 +621,7 @@ $hasPrevious = $currentFormId > 1;
     });
 
     function loadTable(){
-        fetch('stock-table.php')
+        fetch('purchase-stock-table.php')
         .then(res=>res.text())
         .then(html=>{
             document.getElementById("table-stock").innerHTML=html;
@@ -692,7 +692,7 @@ $hasPrevious = $currentFormId > 1;
     });
 
     function loadPurchaseTable(){
-        fetch('stock-purchase-table.php')
+        fetch('purchase-table.php')
         .then(res => res.text())
         .then(html => {
             document.getElementById('purchase-table').innerHTML = html;
@@ -708,9 +708,31 @@ $hasPrevious = $currentFormId > 1;
                     lengthMenu:[[5,10,25,50],[5,10,25,50]],
                     responsive:true,
                     autoWidth:false,
+                    order: [[0, 'desc']],
+                    ordering: true,
                     language:{
                         search:"",
-                        searchPlaceholder:"Cari purchase..."
+                        searchPlaceholder:"Cari purchase...",
+                        
+                        zeroRecords: `
+                            <div class="empty-search">
+                                <img src="../../assets/img/illustrations/empty-data.png" class="empty-img">
+                                <div class="empty-title">Purchase tidak ditemukan</div>
+                                <div class="empty-sub">
+                                    Coba gunakan kata kunci lain
+                                </div>
+                            </div>
+                        `,
+
+                        emptyTable: `
+                            <div class="empty-search">
+                                <img src="../../assets/img/illustrations/empty-data.png" class="empty-img">
+                                <div class="empty-title">Belum ada data purchase</div>
+                                <div class="empty-sub">
+                                    Silakan tambahkan purchase terlebih dahulu
+                                </div>
+                            </div>
+                        `
                     }
                 });
 
@@ -726,7 +748,7 @@ $hasPrevious = $currentFormId > 1;
 
     // LOAD DATA KODE PRODUK
     function loadProductCodes(){
-        fetch('stock-product-list.php')
+        fetch('purchase-product-code.php')
         .then(res => res.json())
         .then(data => {
 
@@ -773,7 +795,7 @@ $hasPrevious = $currentFormId > 1;
     loadProductCodes();
 </script>
 
-<!-- Script Modal Edit -->
+<!-- Script Edit -->
 <script>
     // OPEN EDIT MODAL
     $(document).on('click','.editPurchaseBtn',function(){
@@ -788,7 +810,7 @@ $hasPrevious = $currentFormId > 1;
             </div>
         `;
 
-        fetch('stock-purchase-edit.php?id=' + id)
+        fetch('purchase-edit.php?id=' + id)
         .then(res => res.text())
         .then(html => {
             document.getElementById('editPurchaseContent').innerHTML = html;
@@ -803,7 +825,7 @@ $hasPrevious = $currentFormId > 1;
         let formData = new FormData(this);
         let id = formData.get('id');
 
-        fetch('stock-action.php?action=update_purchase_full&id='+id,{
+        fetch('purchase-action.php?action=update&id='+id,{
             method:'POST',
             body:formData
         })
@@ -870,7 +892,7 @@ $hasPrevious = $currentFormId > 1;
 
             if(result.isConfirmed){
 
-                fetch('stock-action.php?action=delete_purchase&id='+id)
+                fetch('purchase-action.php?action=destroy&id='+id)
                 .then(res=>res.json())
                 .then(res=>{
 

@@ -2,7 +2,8 @@
     include '../../sessions/session.php';
     header('Content-Type: application/json');
 
-    if ($_GET['action'] === 'stock_in') {
+    // buat pembelian baru
+    if ($_GET['action'] === 'store') {
 
         $formNumber = $_POST['form_number'];
         $name       = $_POST['product_name'];
@@ -61,6 +62,7 @@
         ]);
     }
 
+    // form navigation next
     if($_GET['action']=='next_form'){
 
         if(!isset($_SESSION['current_form_id'])){
@@ -75,6 +77,7 @@
         exit;
     }
 
+    // form navigation prev
     if($_GET['action']=='prev_form'){
 
         if(isset($_SESSION['current_form_id']) && $_SESSION['current_form_id'] > 1){
@@ -87,7 +90,8 @@
         exit;
     }
 
-    if($_GET['action']=='update_purchase_full'){
+    // update pembelian
+    if($_GET['action']=='update'){
 
         $id = $_GET['id'];
 
@@ -173,7 +177,8 @@
         exit;
     }
 
-    if($_GET['action']=='delete_purchase'){
+    // hapus pembelian
+    if($_GET['action']=='destroy'){
 
         $id = (int)$_GET['id'];
 
