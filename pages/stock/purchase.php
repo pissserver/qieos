@@ -35,30 +35,69 @@ $hasPrevious = $currentFormId > 1;
         --badge:#e2e8f0;
     }
 
-    body{
-        background:var(--bg);
-        font-family:'Segoe UI',sans-serif;
+    /* SECTION */
+
+    .section-card{
+        background:#fff;
+        border-radius:24px;
+        padding:24px;
+        box-shadow:0 8px 24px rgba(15,23,42,.05);
     }
 
     /* PANEL */
-    .stock-panel{
-        background:var(--panel);
-        border-radius:10px;
-        overflow:hidden;
-        box-shadow:0 4px 18px rgba(0,0,0,.05);
-        margin-bottom:18px;
+            
+    .panel-header{
+        display:flex;
+        justify-content:space-between;
+        align-items:center;
+        padding:18px 22px;
+        border-radius:18px;
     }
 
-    .stock-header{
-        background:linear-gradient(90deg,#1e293b,#0f172a);
+    .panel-left{
+        display:flex;
+        align-items:center;
+        gap:16px;
+    }
+
+    .panel-icon{
+        width:58px;
+        height:58px;
+        border-radius:16px;
+        background:rgba(255,255,255,.12);
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        font-size:22px;
+    }
+
+    .panel-title{
+        font-size:17px;
+        font-weight:700;
+    }
+
+    .panel-subtitle{
+        font-size:13px;
+        opacity:.85;
+    }
+
+    .panel-primary{
+        background:linear-gradient(
+            135deg,
+            #4f46e5,
+            #4338ca
+        );
         color:#fff;
-        padding:11px 18px;
-        font-weight:600;
-        font-size:15px;
     }
 
-    .stock-body{
-        padding:18px;
+
+    .panel-dark{
+        background:linear-gradient(
+            135deg,
+            #334155,
+            #0f172a
+        );
+        color:#fff;
     }
 
     .panel-toggle-wrap{
@@ -223,26 +262,19 @@ $hasPrevious = $currentFormId > 1;
     }
 
     /* DATATABLE */
-    .dataTables_wrapper .dataTables_filter input,
-    .dataTables_wrapper .dataTables_length select{
-        border-radius:8px;
-        border:1px solid var(--border);
-        padding:6px 10px;
+    .dataTables_filter input{
+        border-radius:8px !important;
+        border:1px solid #cbd5e1 !important;
+        padding:8px 14px !important;
+        width:180px !important;
     }
 
     .dataTables_length select{
-        appearance:auto !important;
-        min-width:72px !important;
-        padding:6px 30px 6px 12px !important;
+        min-width:75px !important;
+        height:38px !important;
+        padding:0 30px 0 12px !important;
         border-radius:8px !important;
-        border:1px solid var(--border) !important;
-        background:#fff !important;
-        color:#0f172a !important;
-    }
-
-    .dataTables_filter input{
-        border-radius:8px !important;
-        padding:6px 12px !important;
+        border:1px solid #cbd5e1 !important;
     }
 
     .dataTables_wrapper .dataTables_length,
@@ -313,10 +345,21 @@ $hasPrevious = $currentFormId > 1;
 
 <div class="container-fluid mt-5">
     <!-- FORM -->
-    <div class="stock-panel mb-5">
-        <div class="stock-header d-flex justify-content-between align-items-center">
-            <div>
-                <i class="fas fa-dolly me-2"></i> Pembelian Stok
+    <div class="section-card mb-4">
+        <div class="panel-header panel-dark">
+            <div class="panel-left">
+                <div class="panel-icon">
+                    <i class="fas fas fa-file-alt"></i>
+                </div>
+
+                <div>
+                    <div class="panel-title">
+                        Form Pembelian 
+                    </div>
+                    <div class="panel-subtitle">
+                        Tambah stok produk yang dibeli
+                    </div>
+                </div>
             </div>
 
             <div class="panel-toggle-wrap">
@@ -331,218 +374,234 @@ $hasPrevious = $currentFormId > 1;
             </div>
         </div>
 
-        <div class="stock-body">
+        <div class="mt-4 px-4">
+            <div class="stock-body">
 
-            <div id="formMode" class="panel-mode active">
-                <form id="form-stock" action="purchase-action.php?action=store" method="POST" enctype="multipart/form-data">
+                <div id="formMode" class="panel-mode active">
+                    <form id="form-stock" action="purchase-action.php?action=store" method="POST" enctype="multipart/form-data">
 
-                    <!-- FORM NUMBER -->
-                    <div class="row mb-3">
-                        <div class="col-md-12">
-                            <div class="input-group-modern">
-                                <div class="input-icon">
-                                    <i class="fas fa-hashtag"></i>
+                        <!-- FORM NUMBER -->
+                        <div class="row mb-3">
+                            <div class="col-md-12">
+                                <div class="input-group-modern">
+                                    <div class="input-icon">
+                                        <i class="fas fa-hashtag"></i>
+                                    </div>
+
+                                    <input type="text"
+                                        name="form_number"
+                                        class="form-control fw-bold"
+                                        value="<?= $formNumber ?>"
+                                        readonly>
                                 </div>
-
-                                <input type="text"
-                                    name="form_number"
-                                    class="form-control fw-bold"
-                                    value="<?= $formNumber ?>"
-                                    readonly>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- INFORMASI PRODUK -->
-                    <div class="section-title">Informasi Produk</div>
-
-                    <div class="row">
-
-                        <!-- KODE -->
-                        <div class="col-md-3">
-                            <div class="input-group-modern">
-                                <div class="input-icon">
-                                    <i class="fas fa-barcode"></i>
-                                </div>
-
-                                <input type="text"
-                                    name="code"
-                                    id="productCode"
-                                    class="form-control"
-                                    list="productCodeList"
-                                    placeholder="Pilih / ketik kode produk"
-                                    autocomplete="off"
-                                    required>
-
-                                <datalist id="productCodeList"></datalist>
                             </div>
                         </div>
 
-                        <!-- NAMA -->
-                        <div class="col-md-3">
-                            <div class="input-group-modern">
-                                <div class="input-icon">
-                                    <i class="fas fa-box"></i>
-                                </div>
+                        <!-- INFORMASI PRODUK -->
+                        <div class="section-title">Informasi Produk</div>
 
-                                <input type="text"
-                                    name="product_name"
-                                    id="productName"
-                                    class="form-control"
-                                    placeholder="Nama Produk"
-                                    required>
-                            </div>
-                        </div>
+                        <div class="row">
 
-                        <!-- KATEGORI -->
-                        <div class="col-md-3">
-                            <div class="input-group-modern">
-                                <div class="input-icon">
-                                    <i class="fas fa-tags"></i>
-                                </div>
+                            <!-- KODE -->
+                            <div class="col-md-3">
+                                <div class="input-group-modern">
+                                    <div class="input-icon">
+                                        <i class="fas fa-barcode"></i>
+                                    </div>
 
-                                <select name="category"
-                                        id="productCategory"
+                                    <input type="text"
+                                        name="code"
+                                        id="productCode"
                                         class="form-control"
+                                        list="productCodeList"
+                                        placeholder="Pilih / ketik kode produk"
+                                        autocomplete="off"
                                         required>
-                                    <option value="">Kategori</option>
-                                    <option value="makanan">Makanan</option>
-                                    <option value="minuman">Minuman</option>
-                                    <option value="jajanan">Jajanan</option>
-                                </select>
+
+                                    <datalist id="productCodeList"></datalist>
+                                </div>
                             </div>
+
+                            <!-- NAMA -->
+                            <div class="col-md-3">
+                                <div class="input-group-modern">
+                                    <div class="input-icon">
+                                        <i class="fas fa-box"></i>
+                                    </div>
+
+                                    <input type="text"
+                                        name="product_name"
+                                        id="productName"
+                                        class="form-control"
+                                        placeholder="Nama Produk"
+                                        required>
+                                </div>
+                            </div>
+
+                            <!-- KATEGORI -->
+                            <div class="col-md-3">
+                                <div class="input-group-modern">
+                                    <div class="input-icon">
+                                        <i class="fas fa-tags"></i>
+                                    </div>
+
+                                    <select name="category"
+                                            id="productCategory"
+                                            class="form-control"
+                                            required>
+                                        <option value="">Kategori</option>
+                                        <option value="makanan">Makanan</option>
+                                        <option value="minuman">Minuman</option>
+                                        <option value="jajanan">Jajanan</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- FOTO -->
+                            <div class="col-md-3">
+                                <div class="input-group-modern">
+                                    <div class="input-icon">
+                                        <i class="fas fa-image"></i>
+                                    </div>
+
+                                    <input type="file"
+                                        name="photo"
+                                        class="form-control">
+                                </div>
+                            </div>
+
                         </div>
 
-                        <!-- FOTO -->
-                        <div class="col-md-3">
-                            <div class="input-group-modern">
-                                <div class="input-icon">
-                                    <i class="fas fa-image"></i>
-                                </div>
+                        <!-- DETAIL STOK -->
+                        <div class="section-title mt-3">Detail Stok</div>
 
-                                <input type="file"
-                                    name="photo"
-                                    class="form-control">
+                        <div class="row">
+
+                            <!-- QTY -->
+                            <div class="col-md-3">
+                                <div class="input-group-modern">
+                                    <div class="input-icon">
+                                        <i class="fas fa-cubes"></i>
+                                    </div>
+
+                                    <input type="number"
+                                        name="qty"
+                                        class="form-control"
+                                        placeholder="Qty"
+                                        required>
+                                </div>
                             </div>
+
+                            <!-- SATUAN -->
+                            <div class="col-md-3">
+                                <div class="input-group-modern">
+                                    <div class="input-icon">
+                                        <i class="fas fa-balance-scale"></i>
+                                    </div>
+
+                                    <input type="text"
+                                        name="unit"
+                                        class="form-control"
+                                        placeholder="Satuan"
+                                        required>
+                                </div>
+                            </div>
+
+                            <!-- HARGA BELI -->
+                            <div class="col-md-3">
+                                <div class="input-group-modern">
+                                    <div class="input-icon">
+                                        <i class="fas fa-wallet"></i>
+                                    </div>
+
+                                    <input type="number"
+                                        name="buy_price"
+                                        class="form-control"
+                                        placeholder="Harga Beli"
+                                        required>
+                                </div>
+                            </div>
+
+                            <!-- HARGA JUAL -->
+                            <div class="col-md-3">
+                                <div class="input-group-modern">
+                                    <div class="input-icon">
+                                        <i class="fas fa-coins"></i>
+                                    </div>
+
+                                    <input type="number"
+                                        name="sell_price"
+                                        class="form-control"
+                                        placeholder="Harga Jual"
+                                        required>
+                                </div>
+                            </div>
+
                         </div>
 
-                    </div>
+                        <!-- NOTE -->
+                        <div class="input-group-modern mt-3">
+                            <div class="input-icon">
+                                <i class="fas fa-sticky-note"></i>
+                            </div>
 
-                    <!-- DETAIL STOK -->
-                    <div class="section-title mt-3">Detail Stok</div>
-
-                    <div class="row">
-
-                        <!-- QTY -->
-                        <div class="col-md-3">
-                            <div class="input-group-modern">
-                                <div class="input-icon">
-                                    <i class="fas fa-cubes"></i>
-                                </div>
-
-                                <input type="number"
-                                    name="qty"
+                            <textarea name="note"
                                     class="form-control"
-                                    placeholder="Qty"
-                                    required>
-                            </div>
+                                    placeholder="Catatan transaksi"></textarea>
                         </div>
 
-                        <!-- SATUAN -->
-                        <div class="col-md-3">
-                            <div class="input-group-modern">
-                                <div class="input-icon">
-                                    <i class="fas fa-balance-scale"></i>
-                                </div>
+                        <!-- ACTION -->
+                        <div class="d-flex justify-content-end gap-2 mt-4">
 
-                                <input type="text"
-                                    name="unit"
-                                    class="form-control"
-                                    placeholder="Satuan"
-                                    required>
-                            </div>
+                            <?php if($hasPrevious): ?>
+                            <button type="button" id="prevFormBtn" class="btn-prev-form">
+                                <i class="fas fa-arrow-left me-1"></i>
+                                Form Sebelumnya
+                            </button>
+                            <?php endif; ?>
+
+                            <button type="button" id="nextFormBtn" class="btn-change-form">
+                                <i class="fas fa-sync-alt me-1"></i>
+                                Ganti Form
+                            </button>
+
+                            <button type="submit" class="btn-save">
+                                <i class="fas fa-save me-1"></i>
+                                Simpan
+                            </button>
+
                         </div>
 
-                        <!-- HARGA BELI -->
-                        <div class="col-md-3">
-                            <div class="input-group-modern">
-                                <div class="input-icon">
-                                    <i class="fas fa-wallet"></i>
-                                </div>
+                    </form>
+                </div>
 
-                                <input type="number"
-                                    name="buy_price"
-                                    class="form-control"
-                                    placeholder="Harga Beli"
-                                    required>
-                            </div>
-                        </div>
-
-                        <!-- HARGA JUAL -->
-                        <div class="col-md-3">
-                            <div class="input-group-modern">
-                                <div class="input-icon">
-                                    <i class="fas fa-coins"></i>
-                                </div>
-
-                                <input type="number"
-                                    name="sell_price"
-                                    class="form-control"
-                                    placeholder="Harga Jual"
-                                    required>
-                            </div>
-                        </div>
-
-                    </div>
-
-                    <!-- NOTE -->
-                    <div class="input-group-modern mt-3">
-                        <div class="input-icon">
-                            <i class="fas fa-sticky-note"></i>
-                        </div>
-
-                        <textarea name="note"
-                                class="form-control"
-                                placeholder="Catatan transaksi"></textarea>
-                    </div>
-
-                    <!-- ACTION -->
-                    <div class="d-flex justify-content-end gap-2 mt-4">
-
-                        <?php if($hasPrevious): ?>
-                        <button type="button" id="prevFormBtn" class="btn-prev-form">
-                            <i class="fas fa-arrow-left me-1"></i>
-                            Form Sebelumnya
-                        </button>
-                        <?php endif; ?>
-
-                        <button type="button" id="nextFormBtn" class="btn-change-form">
-                            <i class="fas fa-sync-alt me-1"></i>
-                            Ganti Form
-                        </button>
-
-                        <button type="submit" class="btn-save">
-                            <i class="fas fa-save me-1"></i>
-                            Simpan
-                        </button>
-
-                    </div>
-
-                </form>
-            </div>
-
-            <div id="editMode" class="panel-mode">
-                <div id="purchase-table"></div>
+                <div id="editMode" class="panel-mode">
+                    <div id="purchase-table"></div>
+                </div>
             </div>
         </div>
-    </div>
+    </div>    
 
     <!-- TABLE -->
-    <div class="stock-panel mb-5">
-        <div class="stock-header">
-            <i class="fas fa-warehouse me-2"></i> Data Produk Stok
+    <div class="section-card mb-4">
+        <div class="panel-header panel-primary">
+            <div class="panel-left">
+                <div class="panel-icon">
+                    <i class="fas fa-boxes-stacked"></i>
+                </div>
+
+                <div>
+                    <div class="panel-title">
+                        Pembelian Produk 
+                    </div>
+                    <div class="panel-subtitle">
+                        List produk yang sudah dibeli
+                    </div>
+                </div>
+            </div>
         </div>
-        <div class="stock-body">
+
+        <div class="mt-4 px-4">
             <div id="table-stock"></div>
         </div>
     </div>
@@ -554,17 +613,26 @@ $hasPrevious = $currentFormId > 1;
     <div class="modal-dialog modal-xl modal-dialog-centered">
         <div class="modal-content stock-panel border-0">
 
-            <div class="stock-header d-flex justify-content-between align-items-center">
-                <div>
-                    <i class="fas fa-edit me-2"></i> Edit Purchase
+            <div class="panel-header panel-dark my-3 mx-3">
+                <div class="panel-left">
+                    <div class="panel-icon">
+                        <i class="fas fas fa-file-alt"></i>
+                    </div>
+
+                    <div>
+                        <div class="panel-title">
+                            Edit Form Pembelian 
+                        </div>
+                        <div class="panel-subtitle">
+                            Edit informasi pembelian dan detail stok produk
+                        </div>
+                    </div>
                 </div>
 
                 <button class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
 
-            <div class="stock-body" id="editPurchaseContent">
-            </div>
-
+            <div class="mt-2 px-5" id="editPurchaseContent"></div>
         </div>
     </div>
 </div>

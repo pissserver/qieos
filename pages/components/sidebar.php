@@ -213,8 +213,8 @@
                 </a>
             </li>
 
-            <li class="nav-item <?= ($current_page == 'stock-transfer.php') ? 'active' : ''; ?>">
-                <a href="/qieos/pages/stock/stock-transfer.php" class="nav-link">
+            <li class="nav-item <?= ($current_page == 'transfer.php') ? 'active' : ''; ?>">
+                <a href="/qieos/pages/stock/transfer.php" class="nav-link">
                     <span class="sidebar-icon">
                         <i class="fas fa-exchange-alt me-2"></i>
                     </span>

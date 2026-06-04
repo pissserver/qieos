@@ -53,6 +53,61 @@ include '../../sessions/session.php';
             font-size:36px;
         }
 
+        /* SECTION */
+
+        .section-card{
+            background:#fff;
+            border-radius:24px;
+            padding:24px;
+            box-shadow:0 8px 24px rgba(15,23,42,.05);
+        }
+
+        /* PANEL */
+            
+        .panel-header{
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            padding:18px 22px;
+            border-radius:18px;
+        }
+
+        .panel-left{
+            display:flex;
+            align-items:center;
+            gap:16px;
+        }
+
+        .panel-icon{
+            width:58px;
+            height:58px;
+            border-radius:16px;
+            background:rgba(255,255,255,.12);
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            font-size:22px;
+        }
+
+        .panel-title{
+            font-size:17px;
+            font-weight:700;
+        }
+
+        .panel-subtitle{
+            font-size:13px;
+            opacity:.85;
+        }
+
+        .panel-primary{
+            background:linear-gradient(
+                135deg,
+                #4f46e5,
+                #4338ca
+            );
+            color:#fff;
+        }
+
         /* DATATABLE */
 
         .dataTables_filter input{
@@ -88,12 +143,21 @@ include '../../sessions/session.php';
             background:#fff;
             box-shadow:0 8px 18px rgba(15,23,42,.05);
             transition:.25s;
+            border-radius:14px;
             cursor:pointer;
         }
 
         .stock-row:hover{
             transform:translateY(-2px);
             box-shadow:0 14px 28px rgba(15,23,42,.10);
+        }
+
+        .stock-row td:first-child{
+            border-radius:14px 0 0 14px;
+        }
+
+        .stock-row td:last-child{
+            border-radius:0 14px 14px 0;
         }
 
         #stockTable tbody td{
@@ -215,120 +279,142 @@ include '../../sessions/session.php';
         </div>
     </div>
 
-    <!-- TABLE -->
-    <div class="card card-modern p-3">
-        <table class="table table-hover align-middle" id="stockTable">
-            <thead>
-                <tr style="font-size:13px;color:#64748b;">
-                    <th>Produk</th>
-                    <th class="text-center">Stok</th>
-                    <th class="text-center">Satuan</th>
-                    <th class="text-center">Status</th>
-                </tr>
-            </thead>
-            <tbody>
+    <div class="section-card mb-4">
+        <div class="panel-header panel-primary">
+            <div class="panel-left">
+                <div class="panel-icon">
+                    <i class="fas fa-boxes-stacked"></i>
+                </div>
 
-            <?php
-            $q = mysqli_query($conn,"
-            SELECT
-                p.id,
-                p.name,
-                p.code,
-                COALESCE(SUM(pi.remaining_qty),0) stock,
-                GROUP_CONCAT(DISTINCT pi.unit) unit
-            FROM products p
-            LEFT JOIN purchase_items pi
-                ON pi.product_id=p.id
-                AND pi.deleted_at IS NULL
-            GROUP BY p.id
-            ORDER BY p.name ASC
-            ");
-            while($d=mysqli_fetch_assoc($q)): ?>
-
-            <?php
-            $stock = (int)$d['stock'];
-
-            $statusClass =
-                $stock < 10
-                ? 'stock-danger'
-                : 'stock-success';
-            ?>
-
-            <tr class="stock-row"
-                onclick="loadDetail(<?= $d['id'] ?>)">
-
-                <td>
-                    <div class="product-wrap">
-
-                        <div class="product-icon">
-                            <i class="fas fa-box-open"></i>
-                        </div>
-
-                        <div>
-                            <div class="fw-bold">
-                                <?= htmlspecialchars($d['name']) ?>
-                            </div>
-
-                            <small class="text-muted">
-                                <?= htmlspecialchars($d['code']) ?>
-                            </small>
-                        </div>
-
+                <div>
+                    <div class="panel-title">
+                        Stok Gudang
                     </div>
-                </td>
+                    <div class="panel-subtitle">
+                        List stok produk siap transfer ke penjualan
+                    </div>
+                </div>
+            </div>
+        </div>
 
-                <td class="text-center">
+        <div class="mt-4 px-4">
+            <!-- TABLE -->
+            <div>
+                <table class="table table-hover align-middle" id="stockTable">
+                    <thead>
+                        <tr style="font-size:13px;color:#64748b;">
+                            <th>Produk</th>
+                            <th class="text-center">Stok</th>
+                            <th class="text-center">Satuan</th>
+                            <th class="text-center">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
 
-                    <span class="stock-badge <?= $statusClass ?>">
-                        <i class="fas fa-cubes me-1"></i>
-                        <?= number_format($stock) ?>
-                    </span>
+                    <?php
+                    $q = mysqli_query($conn,"
+                    SELECT
+                        p.id,
+                        p.name,
+                        p.code,
+                        COALESCE(SUM(pi.remaining_qty),0) stock,
+                        GROUP_CONCAT(DISTINCT pi.unit) unit
+                    FROM products p
+                    LEFT JOIN purchase_items pi
+                        ON pi.product_id=p.id
+                        AND pi.deleted_at IS NULL
+                    GROUP BY p.id
+                    ORDER BY p.name ASC
+                    ");
+                    while($d=mysqli_fetch_assoc($q)): ?>
 
-                </td>
+                    <?php
+                    $stock = (int)$d['stock'];
 
-                <td class="text-center">
+                    $statusClass =
+                        $stock < 10
+                        ? 'stock-danger'
+                        : 'stock-success';
+                    ?>
 
-                    <span class="unit-badge">
-                        <i class="fas fa-balance-scale me-1"></i>
-                        <?= strtoupper($d['unit']) ?>
-                    </span>
+                    <tr class="stock-row"
+                        onclick="loadDetail(<?= $d['id'] ?>)">
 
-                </td>
+                        <td>
+                            <div class="product-wrap">
 
-                <td class="text-center">
+                                <div class="product-icon">
+                                    <i class="fas fa-box-open"></i>
+                                </div>
 
-                    <?php if($stock == 0): ?>
+                                <div>
+                                    <div class="fw-bold">
+                                        <?= htmlspecialchars($d['name']) ?>
+                                    </div>
 
-                        <span class="stock-badge stock-empty">
-                            <i class="fas fa-triangle-exclamation me-1"></i>
-                            Habis
-                        </span>
+                                    <small class="text-muted">
+                                        <?= htmlspecialchars($d['code']) ?>
+                                    </small>
+                                </div>
 
-                    <?php elseif($stock <= 50): ?>
+                            </div>
+                        </td>
 
-                        <span class="stock-badge stock-danger">
-                            <i class="fas fa-triangle-exclamation me-1"></i>
-                            Menipis
-                        </span>
+                        <td class="text-center">
 
-                    <?php else: ?>
+                            <span class="stock-badge <?= $statusClass ?>">
+                                <i class="fas fa-cubes me-1"></i>
+                                <?= number_format($stock) ?>
+                            </span>
 
-                        <span class="stock-badge stock-success">
-                            <i class="fas fa-check-circle me-1"></i>
-                            Aman
-                        </span>
+                        </td>
 
-                    <?php endif; ?>
+                        <td class="text-center">
 
-                </td>
+                            <span class="unit-badge">
+                                <i class="fas fa-balance-scale me-1"></i>
+                                <?= strtoupper($d['unit']) ?>
+                            </span>
 
-            </tr>
+                        </td>
 
-            <?php endwhile; ?>
+                        <td class="text-center">
 
-            </tbody>
-        </table>
+                            <?php if($stock == 0): ?>
+
+                                <span class="stock-badge stock-empty">
+                                    <i class="fas fa-triangle-exclamation me-1"></i>
+                                    Habis
+                                </span>
+
+                            <?php elseif($stock <= 50): ?>
+
+                                <span class="stock-badge stock-danger">
+                                    <i class="fas fa-triangle-exclamation me-1"></i>
+                                    Menipis
+                                </span>
+
+                            <?php else: ?>
+
+                                <span class="stock-badge stock-success">
+                                    <i class="fas fa-check-circle me-1"></i>
+                                    Aman
+                                </span>
+
+                            <?php endif; ?>
+
+                        </td>
+
+                    </tr>
+
+                    <?php endwhile; ?>
+
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
+
 
     <!-- DETAIL FIFO -->
     <div class="fifo-container mt-4 mb-5">

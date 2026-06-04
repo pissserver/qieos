@@ -137,7 +137,7 @@ $formNumber = $d['form'];
     <textarea name="note" class="form-control"><?= $d['note'] ?></textarea>
 </div>
 
-<div class="text-end mt-4">
+<div class="text-end mt-4 mb-3">
     <button type="submit" class="btn-save">
         <i class="fas fa-save me-1"></i> Update
     </button>

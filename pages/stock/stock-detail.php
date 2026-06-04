@@ -36,7 +36,7 @@ $bulan = [
 
 .stock-card {
     border: none;
-    border-radius: 14px;
+    border-radius: 20px;
     box-shadow: 0 8px 20px rgba(0,0,0,0.08);
     overflow: hidden;
 }
