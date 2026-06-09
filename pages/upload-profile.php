@@ -35,7 +35,7 @@
 
             // --- Simpan file baru ---
             if (move_uploaded_file($file["tmp_name"], $targetFile)) {
-                $dbPath = "../assets/img/uploads/" . $fileName;
+                $dbPath = $fileName;
 
                 $sql = "UPDATE users SET photo=? WHERE email=?";
                 $stmt = mysqli_prepare($conn, $sql);

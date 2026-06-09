@@ -1,5 +1,5 @@
 <?php
-include '../../script/connection.php';
+include '../../../script/connection.php';
 
 // AMBIL PARAMETER
 $search = isset($_GET['search']) ? mysqli_real_escape_string($conn, $_GET['search']) : '';
@@ -17,7 +17,7 @@ if (!empty($date)) {
 }
 
 if (!empty($search)) {
-    $where .= " AND (customer_name LIKE '%$search%' OR id LIKE '%$search%')";
+    $where .= " AND (code LIKE '%$search%' OR id LIKE '%$search%')";
 }
 
 // QUERY DATA
@@ -61,7 +61,7 @@ function tanggalIndo($date)
             <div class="order-header">
                 <div>
                     <div class="order-id">
-                        <i class="fas fa-user"></i> <?= ucwords(strtolower($row['customer_name'])); ?>
+                        <i class="fas fa-file-invoice"></i> <?= $row['code']; ?>
                     </div>
                     <div class="order-date">
                         <i class="fas fa-calendar-alt"></i> <?= tanggalIndo($row['tanggal']); ?>
@@ -69,7 +69,7 @@ function tanggalIndo($date)
                 </div>
                 <div class="<?= $row['status_payment'] === 'paid' ? 'badge-success' : 'badge-warning'; ?>">
                     <i class="fas <?= $row['status_payment'] === 'paid' ? 'fa-check-circle' : 'fa-spinner'; ?>"></i>
-                    <?= $row['status_payment'] == 'paid' ? 'Terbayar' : 'Menunggu Pembayaran'; ?>
+                    <?= $row['status_payment'] == 'paid' ? 'Terbayar' : 'Waiting'; ?>
                 </div>
             </div>
 
@@ -79,15 +79,15 @@ function tanggalIndo($date)
                 </div>
                 <div>
                     <button class="btn-soft btn-detail" onclick="showDetail(<?= $row['id']; ?>)">
-                        Detail
+                        Lihat
                     </button>
 
                     <?php if ($row['status_payment'] !== 'paid'): ?>
-                        <button class="btn-soft btn-cancel" onclick="cancelOrder(<?= $row['id']; ?>, '<?= $row['customer_name']; ?>')">
+                        <button class="btn-soft btn-cancel" onclick="cancelOrder(<?= $row['id']; ?>, '<?= $row['code']; ?>')">
                             Cancel
                         </button>
 
-                        <button class="btn-soft btn-pay" onclick="payOrder(<?= $row['id']; ?>, '<?= $row['customer_name']; ?>')">
+                        <button class="btn-soft btn-pay" onclick="payOrder(<?= $row['id']; ?>, '<?= $row['code']; ?>')">
                             Bayar
                         </button>
                     <?php endif; ?>

@@ -245,6 +245,7 @@
 
     .omzet-card {
         display: flex;
+        height: 62px;
         align-items: center;
         gap: 12px;
         padding: 14px 18px;
@@ -266,7 +267,7 @@
         color: #000;
         padding: 10px;
         border-radius: 10px;
-        font-size: 16px;
+        font-size: 14px;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -279,7 +280,7 @@
 
     .omzet-content .amount {
         margin: 0;
-        font-size: 17px;
+        font-size: 15px;
         font-weight: 600;
         letter-spacing: 0.5px;
         color: #fff;
@@ -396,10 +397,9 @@
                         <div class="card shadow-sm border-0 d-flex flex-row align-items-center px-2 py-2" style="background: #1F2937;">
                             <!-- Avatar -->
                             <img class="avatar rounded-circle border border-2 border-white shadow-sm"
-                                alt="Image placeholder"
-                                src="<?php echo $user['photo'] ? $user['photo'] : '/qieos/assets/img/default-avatar.jpg'; ?>"
+                                alt="Your Image"
+                                src="<?php echo $user['photo'] ? '/qieos/assets/img/uploads/' . $user['photo'] : '/qieos/assets/img/default-avatar.jpg'; ?>"
                                 style="width:40px; height:40px; object-fit:cover;" />
-
                             <!-- Email + ikon dropdown -->
                             <div class="ms-2 d-none d-lg-block">
                                 <span class="fw-bold text-white"><?php echo $user['fullname'] != '' ? $user['fullname'] : $_SESSION['email']; ?></span>
@@ -410,7 +410,7 @@
 
                     <!-- Dropdown menu -->
                     <div class="dropdown-menu dashboard-dropdown dropdown-menu-end mt-2 py-1 shadow-lg rounded-1" style="background: #1F2937;">
-                        <a class="dropdown-item d-flex align-items-center text-white" href="../pages/profile.php">
+                        <a class="dropdown-item d-flex align-items-center text-white" href="../profile.php">
                             <i class="fas fa-user-circle text-white me-2"></i>
                             Profil
                         </a>
@@ -456,7 +456,7 @@
 
                 <!-- BUTTON -->
                 <button class="btn btn-checkout" onclick="checkout()">
-                    Pesan <i class="fas fa-arrow-right ms-1"></i>
+                    Pesan <i class="fas fa-shopping-bag ms-1"></i>
                 </button>
 
             </div>
@@ -467,23 +467,28 @@
 <script>
     // Load cart from localStorage
     let cart = JSON.parse(localStorage.getItem('cart')) || [];
-    let savedName = localStorage.getItem('customer_name') || '';
 
     function openCart() {
         let modal = new bootstrap.Modal(document.getElementById('cartModal'));
         modal.show();
     }
 
-    function addToCart(id, name, price) {
-        let qty = parseInt(document.getElementById('qty-' + id).value);
-        if (qty == 0) return Swal.fire('Tambahkan qty produk terlebih dahulu!', '', 'warning');
+    function addToCart(btn, id, name, price){
 
-        let product = document.querySelector(`#product-${id}`);
-        let img = product.querySelector('.product-img').src;
+        let input = document.getElementById('qty-' + id);
+        let qty = parseInt(input.value || 0);
+
+        if(qty <= 0){
+            Swal.fire('Tambahkan qty produk terlebih dahulu!', '', 'warning');
+            return;
+        }
+
+        let img = btn.closest('.product-item')
+                    .querySelector('.product-img').src;
 
         let existing = cart.find(item => item.id == id);
 
-        if (existing) {
+        if(existing){
             existing.qty += qty;
         } else {
             cart.push({
@@ -496,7 +501,16 @@
         }
 
         updateCart();
-        document.getElementById('qty-' + id).value = 0;
+
+        input.value = 0;
+
+        Swal.fire({
+            icon:'success',
+            title:'Ditambahkan',
+            text:name+' masuk keranjang',
+            timer:1000,
+            showConfirmButton:false
+        });
     }
 
     function updateCart() {
@@ -518,7 +532,7 @@
 
                 <h5>Keranjang kosong</h5>
                 <p>Yuk tambahkan produk ke keranjang kamu</p>
-                <a href="../pages/catalog.php" class="btn btn-primary mt-2">
+                <a href="../sales/catalog.php" class="btn btn-primary mt-2">
                     Mulai Belanja
                 </a>
             </div>
@@ -538,26 +552,6 @@
 
         // ✅ tampilkan footer
         document.querySelector('.cart-footer').style.display = 'flex';
-
-        html += `
-            <div class="customer-form mb-3">
-                <label class="form-label">Nama Pelanggan</label>
-                <div class="input-group">
-                    <span class="input-group-text">
-                        <i class="fas fa-user"></i>
-                    </span>
-                    <input 
-                        type="text"
-                        name="customer_name"
-                        class="form-control"
-                        placeholder="Masukkan nama pelanggan"
-                        value="${savedName}"
-                        oninput="saveCustomerName(this.value)"
-                        required
-                    >
-                </div>
-            </div>
-        `;
 
         cart.forEach((item, index) => {
             let subtotal = item.qty * item.price;
@@ -626,10 +620,6 @@
         document.getElementById('cart-total').innerText = total.toLocaleString();
     }
 
-    function saveCustomerName(name) {
-        localStorage.setItem('customer_name', name);
-    }
-
     function changeQty(index, change) {
         cart[index].qty += change;
 
@@ -656,24 +646,12 @@
             return Swal.fire('Keranjang kosong', '', 'warning');
         }
 
-        // Ambil nama pelanggan dari input
-        let customerName = document.querySelector('input[name="customer_name"]').value.trim();
-        if (customerName === '') {
-            return Swal.fire('Isi nama pelanggan terlebih dahulu', '', 'warning');
-        }
-
-        // Gabungkan data cart + nama pelanggan
-        let payload = {
-            customer_name: customerName,
-            cart: cart
-        };
-
-        fetch('../pages/checkout.php', {
+        fetch('../checkout.php', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify(payload)
+                body: JSON.stringify({ cart: cart })
             })
             .then(res => res.json())
             .then(res => {
@@ -681,34 +659,24 @@
 
                     Swal.fire('Berhasil!', 'Pesanan berhasil dibuat', 'success');
 
-                    const receiptUrl = `../pages/receipt.php?id=${res.order_id}`;
-
-                    // 🔥 buka struk di tab baru (blank)
+                    const receiptUrl = `../receipt.php?id=${res.order_id}`;
                     window.open(receiptUrl, '_blank');
 
-                    // 🔥 SHARE otomatis (Android)
                     if (navigator.share) {
                         navigator.share({
                             title: 'Struk Pembelian',
                             text: 'Berikut struk pembelian',
                             url: receiptUrl
-                        }).catch(err => console.log(err));
+                        });
                     }
 
+                    // reset cart
                     cart = [];
-                    localStorage.clear();
+                    localStorage.removeItem('cart');
                     updateCart();
-                    updateOmzet();
-
-                    if (window.location.pathname.includes('/order.php')) {
-                        loadPage(1);
-                    }
 
                     let modal = bootstrap.Modal.getInstance(document.getElementById('cartModal'));
                     modal.hide();
-
-                } else {
-                    Swal.fire('Error', res.message, 'error');
                 }
             })
     }
@@ -729,6 +697,12 @@
                 }, 150);
             });
     }
+
+    // jalan tiap 1 detik
+    setInterval(updateOmzet, 3000);
+
+    // pertama kali load
+    updateOmzet();
 </script>
 
 <script>

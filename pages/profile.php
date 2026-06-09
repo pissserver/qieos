@@ -121,7 +121,7 @@ $currentState = $user['state'];
                                             padding: 40px 20px;">
 
                                 <!-- Foto profil -->
-                                <img src="<?php echo $user['photo'] ? $user['photo'] : '../assets/img/default-avatar.jpg'; ?>"
+                                <img src="<?php echo $user['photo'] ? '/qieos/assets/img/uploads/' . $user['photo'] : '/qieos/assets/img/default-avatar.jpg'; ?>"
                                     class="mt-n7 mb-4"
                                     style="object-fit: cover; 
                                                 width: 120px; 
@@ -129,7 +129,7 @@ $currentState = $user['state'];
                                                 border-radius: 50%; 
                                                 border: 4px solid #fff; 
                                                 box-shadow: 0 4px 12px rgba(0,0,0,0.15);"
-                                    alt="User Portrait" />
+                                    alt="Your Image" />
 
                                 <!-- Nama -->
                                 <h4 style="font-size: 1.6rem; 

@@ -120,9 +120,9 @@
             <div class="d-flex align-items-center">
                 <div class="avatar-lg me-4">
                     <img
-                        src="<?php echo $user['photo'] ? $user['photo'] : '/qieos/assets/img/default-avatar.jpg'; ?>"
+                        src="<?php echo $user['photo'] ? '/qieos/assets/img/uploads/' . $user['photo'] : '/qieos/assets/img/default-avatar.jpg'; ?>"
                         class="card-img-top rounded-circle border-white"
-                        alt="Bonnie Green" />
+                        alt="Your Image" />
                 </div>
                 <div class="d-block">
                     <h2 class="h5 mb-3">Hi, <?php echo $user['fullname'] != '' ? $user['fullname'] : $_SESSION['email']; ?></h2>
@@ -234,23 +234,23 @@
                 </a>
             </li>
 
-            <!-- <li class="nav-item <?= ($current_page == 'catalog.php') ? 'active' : ''; ?>">
-                <a href="/qieos/pages/catalog.php" class="nav-link">
+            <li class="nav-item <?= ($current_page == 'catalog.php') ? 'active' : ''; ?>">
+                <a href="/qieos/pages/sales/catalog.php" class="nav-link">
                     <span class="sidebar-icon">
-                        <i class="fas fa-box me-2"></i>
+                        <i class="fas fa-book-open me-2"></i>
                     </span>
-                    <span>Katalog</span>
+                    <span>Katalog Produk</span>
                 </a>
             </li>
 
             <li class="nav-item <?= ($current_page == 'order.php') ? 'active' : ''; ?>">
-                <a href="/qieos/pages/order.php" class="nav-link">
+                <a href="/qieos/pages/sales/order.php" class="nav-link">
                     <span class="sidebar-icon">
                         <i class="fas fa-receipt me-2"></i>
                     </span>
                     <span>Pesanan</span>
                 </a>
-            </li> -->
+            </li>
 
             <!-- LAPORAN -->
             <!-- <li class="nav-title">LAPORAN</li>

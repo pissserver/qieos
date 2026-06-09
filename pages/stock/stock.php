@@ -265,10 +265,10 @@ include '../../sessions/session.php';
 <main class="content">
 <?php include '../components/navbar.php'; ?>
 
-<div class="container-fluid mt-4">
+<div class="container-fluid px-0 mt-4">
 
     <!-- HEADER -->
-    <div class="stock-header">
+    <div class="stock-header mt-5">
         <div>
             <h3>Stok Gudang</h3>
             <p>Monitoring stok produk dan FIFO layer secara realtime</p>

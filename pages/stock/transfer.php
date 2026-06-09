@@ -145,9 +145,9 @@
         <main class="content">
             <?php include '../components/navbar.php'; ?>
 
-            <div class="container-fluid mt-4">
+            <div class="container-fluid px-0 mt-4">
                 <!-- HEADER -->
-                <div class="transfer-header">
+                <div class="transfer-header mt-5">
                     <div>
                         <h3>Transfer ke Penjualan</h3>
                         <p class="mb-0">

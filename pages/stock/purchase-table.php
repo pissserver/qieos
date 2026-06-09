@@ -9,6 +9,7 @@ SELECT
     purchases.note,
     purchases.created_at,
     purchase_items.qty,
+    purchase_items.remaining_qty,
     purchase_items.unit,
 
     GROUP_CONCAT(products.name SEPARATOR ', ') as products
@@ -206,6 +207,8 @@ ORDER BY purchases.id DESC
     <!-- ACTION -->
     <td class="text-center">
 
+        <?php if ($d['remaining_qty'] === $d['qty']): ?>
+
         <button class="action-btn btn-edit editPurchaseBtn" data-id="<?= $d['id'] ?>">
             <i class="fas fa-edit"></i>
         </button>
@@ -219,6 +222,14 @@ ORDER BY purchases.id DESC
             <i class="fas fa-trash"></i>
         </button>
 
+        <?php else: ?>
+
+        <span class="text-muted">
+            <i class="fas fa-lock me-1"></i> Tidak dapat diubah
+        </span>
+
+        <?php endif; ?>
+        
     </td>
 
 </tr>

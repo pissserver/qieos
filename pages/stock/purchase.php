@@ -343,7 +343,7 @@ $hasPrevious = $currentFormId > 1;
 <main class="content">
 <?php include '../components/navbar.php'; ?>
 
-<div class="container-fluid mt-5">
+<div class="container-fluid px-0 mt-5">
     <!-- FORM -->
     <div class="section-card mb-4">
         <div class="panel-header panel-dark">

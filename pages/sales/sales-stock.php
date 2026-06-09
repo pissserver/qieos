@@ -172,9 +172,9 @@
         <main class="content">
             <?php include '../components/navbar.php'; ?>
 
-            <div class="container-fluid mt-4">
+            <div class="container-fluid px-0 mt-4">
                 <!-- Header -->
-                <div class="sales-header">
+                <div class="sales-header mt-5">
                     <div>
                         <h3>Stok Penjualan</h3>
                         <p class="mb-0">
@@ -510,6 +510,49 @@
 
             loadTable();
             loadHistory();
+
+            function toggleCatalog(id, el){
+
+                let status = el.checked ? 'active' : 'nonactive';
+                let row = document.getElementById('row-' + id);
+
+                // UI langsung berubah (smooth UX)
+                if(row){
+                    row.classList.toggle('catalog-active', el.checked);
+                }
+
+                fetch('sales-toggle-catalog.php', {
+                    method:'POST',
+                    headers:{'Content-Type':'application/json'},
+                    body:JSON.stringify({
+                        id:id,
+                        status:status
+                    })
+                })
+                .then(res=>res.json())
+                .then(res=>{
+                    console.log(res);
+
+                    if(!res.success){
+                        alert('Gagal update catalog');
+                        el.checked = !el.checked;
+
+                        if(row){
+                            row.classList.toggle('catalog-active', el.checked);
+                        }
+                    }
+
+                })
+                .catch(()=>{
+                    alert('Server error');
+                    el.checked = !el.checked;
+
+                    if(row){
+                        row.classList.toggle('catalog-active', el.checked);
+                    }
+                });
+
+            }
         </script>
     </body>
 </html>

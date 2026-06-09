@@ -1,5 +1,5 @@
 <?php
-    include '../../script/connection.php';
+    include '../../../script/connection.php';
 
     $today = date('Y-m-d');
 
