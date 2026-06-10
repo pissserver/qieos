@@ -225,114 +225,219 @@ include '../../sessions/session.php';
 
     }
 
-    /* Empty Search */
+    /* =========================
+    EMPTY SEARCH PREMIUM
+    ========================= */
+
     .empty-search-order{
-        width:520px;
-        max-width:90%;
-        min-height:auto;
-        margin:auto;
-        display:flex;
-        flex-direction:column;
-        justify-content:center;
-        align-items:center;
+
+        position:relative;
+
+        width:100%;
+        max-width:700px;
+
+        margin:40px auto;
+
+        padding:60px 40px;
+
         text-align:center;
-        padding:50px;
-        border-radius:28px;
-        background:linear-gradient(
-            135deg,
-            rgba(255,255,255,.95),
-            rgba(248,250,252,.98)
-        );
+
+        border-radius:32px;
+
+        overflow:hidden;
+
+        backdrop-filter:blur(25px);
+
+        background:
+            linear-gradient(
+                135deg,
+                rgba(255,255,255,.96),
+                rgba(248,250,252,.92)
+            );
+
+        border:1px solid rgba(255,255,255,.8);
+
         box-shadow:
-            0 25px 60px rgba(15,23,42,.08);
+            0 20px 60px rgba(15,23,42,.08),
+            0 10px 30px rgba(99,102,241,.08);
+
+        animation:emptyFade .5s ease;
     }
 
-    .empty-search-order .empty-icon{
+    /* Glow background */
 
-        width:120px;
-        height:120px;
+    .empty-bg-circle{
+
+        position:absolute;
+
+        border-radius:50%;
+
+        filter:blur(60px);
+
+        opacity:.18;
+
+        pointer-events:none;
+    }
+
+    .circle-1{
+
+        width:220px;
+        height:220px;
+
+        background:#6366f1;
+
+        top:-80px;
+        left:-80px;
+    }
+
+    .circle-2{
+
+        width:250px;
+        height:250px;
+
+        background:#ec4899;
+
+        right:-100px;
+        bottom:-100px;
+    }
+
+    /* Badge */
+
+    .empty-badge{
+
+        display:inline-flex;
+        align-items:center;
+        gap:8px;
+
+        padding:8px 18px;
+
+        border-radius:999px;
+
+        background:
+            linear-gradient(
+                135deg,
+                rgba(99,102,241,.12),
+                rgba(236,72,153,.12)
+            );
+
+        color:#6366f1;
+
+        font-size:13px;
+        font-weight:700;
+
+        margin-bottom:24px;
+    }
+
+    /* Icon */
+
+    .empty-icon{
+
+        width:140px;
+        height:140px;
+
+        margin:auto auto 30px;
+
+        border-radius:50%;
 
         display:flex;
         align-items:center;
         justify-content:center;
 
-        border-radius:50%;
+        font-size:58px;
+        color:white;
 
         background:
             linear-gradient(
                 135deg,
                 #6366f1,
-                #8b5cf6
+                #8b5cf6,
+                #ec4899
             );
 
-        color:#fff;
+        background-size:200% 200%;
 
-        font-size:52px;
-
-        margin-bottom:24px;
+        animation:
+            floatIcon 4s ease-in-out infinite,
+            gradientMove 5s linear infinite;
 
         box-shadow:
-            0 15px 40px rgba(99,102,241,.35);
-
-        animation:floatIcon 3s ease-in-out infinite;
+            0 25px 50px rgba(99,102,241,.30);
     }
 
-    .empty-search-order h5{
+    .empty-icon i{
+        color:#fff;
+    }
 
-        margin-bottom:10px;
+    /* Title */
 
-        font-size:28px;
-        font-weight:700;
+    .empty-search-order h3{
+
+        font-size:36px;
+        font-weight:800;
+
+        margin-bottom:15px;
 
         color:#0f172a;
     }
 
+    /* Text */
+
     .empty-search-order p{
 
-        margin:0;
+        max-width:500px;
 
-        max-width:320px;
+        margin:auto;
 
-        line-height:1.7;
+        line-height:1.9;
 
         color:#64748b;
 
-        font-size:15px;
+        font-size:16px;
     }
+
+    /* Animated line */
 
     .empty-search-order::after{
 
         content:"";
 
-        margin-top:25px;
+        position:absolute;
 
-        width:80px;
-        height:4px;
+        left:50%;
+        bottom:0;
 
-        border-radius:20px;
+        transform:translateX(-50%);
 
-        background:linear-gradient(
-            90deg,
-            #6366f1,
-            #8b5cf6,
-            #ec4899
-        );
+        width:180px;
+        height:5px;
 
-        background-size:200% 100%;
+        border-radius:999px;
 
-        animation:gradientMove 3s linear infinite;
+        background:
+            linear-gradient(
+                90deg,
+                #6366f1,
+                #8b5cf6,
+                #ec4899,
+                #6366f1
+            );
+
+        background-size:300% 100%;
+
+        animation:gradientMove 4s linear infinite;
     }
+
+    /* Animations */
 
     @keyframes floatIcon{
 
         0%,100%{
-            transform:translateY(0);
+            transform:translateY(0px);
         }
 
         50%{
-            transform:translateY(-10px);
+            transform:translateY(-12px);
         }
-
     }
 
     @keyframes gradientMove{
@@ -344,21 +449,79 @@ include '../../sessions/session.php';
         100%{
             background-position:100% 50%;
         }
-
     }
 
     @keyframes emptyFade{
 
         from{
             opacity:0;
-            transform:translateY(15px);
+            transform:translateY(20px);
         }
 
         to{
             opacity:1;
             transform:translateY(0);
         }
+    }
 
+    /* =========================
+    TABLET
+    ========================= */
+
+    @media(max-width:991px){
+
+        .empty-search-order{
+
+            padding:50px 30px;
+        }
+
+        .empty-search-order h3{
+
+            font-size:30px;
+        }
+
+        .empty-icon{
+
+            width:120px;
+            height:120px;
+
+            font-size:48px;
+        }
+    }
+
+    /* =========================
+    MOBILE
+    ========================= */
+
+    @media(max-width:576px){
+
+        .empty-search-order{
+
+            margin:20px auto;
+
+            padding:35px 22px;
+
+            border-radius:24px;
+        }
+
+        .empty-icon{
+
+            width:95px;
+            height:95px;
+
+            font-size:38px;
+        }
+
+        .empty-search-order h3{
+
+            font-size:24px;
+        }
+
+        .empty-search-order p{
+
+            font-size:14px;
+            line-height:1.7;
+        }
     }
 
     /* ORDER CARD */
@@ -708,15 +871,24 @@ include '../../sessions/session.php';
             <div id="orders-container"></div>
 
             <div id="empty-search-order" class="empty-search-order" style="display:none;">
-                <div class="empty-icon">
+
+                <div class="empty-bg-circle circle-1"></div>
+                <div class="empty-bg-circle circle-2"></div>
+
+                <div class="empty-badge">
                     <i class="fas fa-search"></i>
+                    Tidak Ditemukan
                 </div>
 
-                <h5>Produk Tidak Ditemukan</h5>
+                <div class="empty-icon">
+                    <i class="fas fa-box-open"></i>
+                </div>
+
+                <h3>Pesanan Tidak Ditemukan</h3>
 
                 <p>
-                    Tidak ada produk yang cocok dengan pencarian Anda.
-                    Coba gunakan kata kunci lain atau ubah filter.
+                    Tidak ada pesanan yang sesuai dengan pencarian Anda.
+                    Coba gunakan kata kunci lain atau ubah filter pencarian.
                 </p>
             </div>
         </div>
