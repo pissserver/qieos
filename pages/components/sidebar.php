@@ -181,7 +181,7 @@
                 </a>
             </li>
 
-            <!-- <li class="nav-title">OVERVIEW</li>
+            <li class="nav-title">OVERVIEW</li>
 
             <li class="nav-item <?php echo ($current_page == 'dashboard.php') ? 'active' : ''; ?>">
                 <a href="/qieos/pages/dashboard.php" class="nav-link">
@@ -190,19 +190,31 @@
                     </span>
                     <span class="sidebar-text">Dashboard</span>
                 </a>
-            </li> -->
+            </li>
+
+            <!-- PEMBELIAN STOK -->
+            <li class="nav-title">PURCHASING</li>
+
+            <li class="nav-item <?= ($current_page == 'list.php') ? 'active' : ''; ?>">
+                <a href="/qieos/pages/purchasing/list.php" class="nav-link">
+                    <span class="sidebar-icon">
+                        <i class="fas fa-file-alt me-3"></i>
+                    </span>
+                    <span>Daftar Belanja</span>
+                </a>
+            </li>
+
+            <li class="nav-item <?= ($current_page == 'purchase.php') ? 'active' : ''; ?>">
+                <a href="/qieos/pages/purchasing/purchase.php" class="nav-link">
+                    <span class="sidebar-icon">
+                        <i class="fas fa-cart-plus me-2"></i>
+                    </span>
+                    <span>Input Pembelian</span>
+                </a>
+            </li>
 
             <!-- GUDANG STOK (SUMBER BARANG / FIFO) -->
             <li class="nav-title">GUDANG STOK</li>
-
-            <li class="nav-item <?= ($current_page == 'purchase.php') ? 'active' : ''; ?>">
-                <a href="/qieos/pages/stock/purchase.php" class="nav-link">
-                    <span class="sidebar-icon">
-                        <i class="fas fa-dolly-flatbed me-2"></i>
-                    </span>
-                    <span>Pembelian Stok</span>
-                </a>
-            </li>
 
             <li class="nav-item <?= ($current_page == 'stock.php') ? 'active' : ''; ?>">
                 <a href="/qieos/pages/stock/stock.php" class="nav-link">
@@ -223,7 +235,7 @@
             </li>
 
             <!-- GUDANG PENJUALAN -->
-            <li class="nav-title">GUDANG PENJUALAN</li>
+            <li class="nav-title">PENJUALAN</li>
 
             <li class="nav-item <?= ($current_page == 'sales-stock.php') ? 'active' : ''; ?>">
                 <a href="/qieos/pages/sales/sales-stock.php" class="nav-link">
@@ -246,7 +258,7 @@
             <li class="nav-item <?= ($current_page == 'order.php') ? 'active' : ''; ?>">
                 <a href="/qieos/pages/sales/order.php" class="nav-link">
                     <span class="sidebar-icon">
-                        <i class="fas fa-receipt me-2"></i>
+                        <i class="fas fa-receipt me-3"></i>
                     </span>
                     <span>Pesanan</span>
                 </a>

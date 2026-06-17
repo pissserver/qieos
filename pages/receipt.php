@@ -12,11 +12,11 @@ $order = mysqli_query($conn, "
 ")->fetch_assoc();
 
 $details = mysqli_query($conn, "
-    SELECT od.*, p.product_name 
+    SELECT od.*, p.name AS product_name 
     FROM order_details od
     JOIN products p ON od.product_id = p.id
     WHERE od.order_id = $order_id
-    ORDER BY p.price DESC
+    ORDER BY p.name ASC
 ");
 ?>
 
@@ -25,11 +25,11 @@ $details = mysqli_query($conn, "
 
 <head>
     <meta charset="UTF-8">
-    <title>Struk Pembelian - Cartify</title>
+    <title>Struk Pembelian - Qieos</title>
     <link
         rel="icon"
         sizes="120x120"
-        href="../assets/img/brand/cartify2.png" />
+        href="../assets/img/brand/qieos2.png" />
 
     <style>
         body {
@@ -110,9 +110,9 @@ $details = mysqli_query($conn, "
 <body>
     <div class="receipt">
         <div class="center">
-            <h3>CARTIFY</h3>
+            <h3>QIEOS</h3>
             <p><?= date('d M Y', strtotime($order['tanggal'])) ?></p>
-            <p>Pelanggan: <b><?= ucwords(strtolower($order['customer_name'])) ?></b></p>
+            <p>Order ID: <b><?= $order['code'] ?></b></p>
         </div>
 
         <hr>

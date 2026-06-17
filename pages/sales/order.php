@@ -822,7 +822,7 @@ include '../../sessions/session.php';
 
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>Pesanan - Cartify</title>
+    <title>Pesanan - Qieos</title>
 
     <?php include '../../script/headscript.php'; ?>
 </head>

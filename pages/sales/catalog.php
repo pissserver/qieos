@@ -947,7 +947,7 @@ $query = mysqli_query($conn,
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <!-- Primary Meta Tags -->
-    <title>Katalog Produk - Cartify</title>
+    <title>Katalog Produk - Qieos</title>
 
     <?php include '../../script/headscript.php'; ?>
 </head>
