@@ -5,6 +5,7 @@ $q = mysqli_query($conn,"
     SELECT 
         *
     FROM list_purchases
+    WHERE deleted_at IS NULL
     ORDER BY date_list DESC
 ");
 ?>
@@ -123,6 +124,10 @@ $q = mysqli_query($conn,"
         background:#ef4444;
     }
 
+    .btn-print{
+        background:linear-gradient(135deg,#334155,#0f172a);
+    }
+
     .action-btn:hover{
         transform:translateY(-2px);
         opacity:.92;
@@ -133,7 +138,7 @@ $q = mysqli_query($conn,"
 <thead>
 <tr>
     <th>ID FORM</th>
-    <th class="text-center">TANGGAL PEMBELIAN</th>
+    <th class="text-center">PEMBUATAN DAFTAR BELANJA</th>
     <th class="text-center">AKSI</th>
 </tr>
 </thead>
@@ -152,7 +157,7 @@ $q = mysqli_query($conn,"
             <div>
                 <div class="fw-bold">BELANJA-000<?= $d['id'] ?></div>
                 <small class="text-muted">
-                    <i class="fas fa-receipt me-1"></i>Data Pembelian
+                    <i class="fas fa-receipt me-1"></i>Daftar Belanja
                 </small>
             </div>
         </div>
@@ -173,13 +178,16 @@ $q = mysqli_query($conn,"
             <i class="fas fa-edit"></i>
         </button>
 
-       <button class="action-btn btn-delete deletePurchaseBtn"
+        <button class="action-btn btn-delete deletePurchaseBtn"
             data-id="<?= $d['id'] ?>"
-            data-form="<?= $d['form'] ?>"
-            data-products="<?= htmlspecialchars($d['products']) ?>"
-            data-qty="<?= $d['qty'] ?>"
-            data-unit="<?= $d['unit'] ?>">
+            data-date="<?= $d['date_list'] ?>">
             <i class="fas fa-trash"></i>
+        </button>
+
+        <button class="action-btn btn-print printPurchaseBtn"
+            data-id="<?= $d['id'] ?>"
+            data-date="<?= $d['date_list'] ?>">
+            <i class="fas fa-print"></i>
         </button>
         
     </td>

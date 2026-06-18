@@ -379,7 +379,7 @@ $hasPrevious = $currentFormId > 1;
 
                 <div id="formMode" class="panel-mode active">
                     <form id="form-stock"
-                        action="list-action.php"
+                        action="list-action.php?action=store"
                         method="POST">
 
                         <div id="itemsContainer">
@@ -460,10 +460,10 @@ $hasPrevious = $currentFormId > 1;
 
                     <div>
                         <div class="panel-title">
-                            Edit Form Pembelian 
+                            Edit Daftar Belanja 
                         </div>
                         <div class="panel-subtitle">
-                            Edit informasi pembelian dan detail stok produk
+                            Edit barang, qty, dan satuan daftar belanja
                         </div>
                     </div>
                 </div>
@@ -548,7 +548,7 @@ $hasPrevious = $currentFormId > 1;
                     ordering: true,
                     language:{
                         search:"",
-                        searchPlaceholder:"Cari purchase...",
+                        searchPlaceholder:"Cari daftar belanja...",
                         
                         zeroRecords: `
                             <div class="empty-search">
@@ -627,6 +627,55 @@ $hasPrevious = $currentFormId > 1;
             .insertAdjacentHTML('beforeend', html);
     }
 
+    function addItemEdit()
+    {
+        let html = `
+            <div class="item-row row mb-3">
+
+                <input type="hidden"
+                    name="item_id[]"
+                    value="">
+
+                <div class="col-md-4">
+                    <input type="text"
+                        name="product_name[]"
+                        class="form-control"
+                        placeholder="Nama Produk"
+                        required>
+                </div>
+
+                <div class="col-md-3">
+                    <input type="number"
+                        name="qty[]"
+                        class="form-control"
+                        placeholder="Qty"
+                        required>
+                </div>
+
+                <div class="col-md-3">
+                    <input type="text"
+                        name="unit[]"
+                        class="form-control"
+                        placeholder="Satuan"
+                        required>
+                </div>
+
+                <div class="col-md-2">
+                    <button type="button"
+                            class="btn btn-danger w-100"
+                            onclick="removeItem(this)">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+
+            </div>
+        `;
+
+        document
+            .querySelector('#itemsContainerEdit')
+            .insertAdjacentHTML('beforeend', html);
+    }
+
     function removeItem(button)
     {
         button.closest('.item-row').remove();
@@ -648,7 +697,7 @@ $hasPrevious = $currentFormId > 1;
             </div>
         `;
 
-        fetch('purchase-edit.php?id=' + id)
+        fetch('list-edit.php?id=' + id)
         .then(res => res.text())
         .then(html => {
             document.getElementById('editPurchaseContent').innerHTML = html;
@@ -663,7 +712,7 @@ $hasPrevious = $currentFormId > 1;
         let formData = new FormData(this);
         let id = formData.get('id');
 
-        fetch('purchase-action.php?action=update&id='+id,{
+        fetch('list-action.php?action=update&id='+id,{
             method:'POST',
             body:formData
         })
@@ -703,21 +752,23 @@ $hasPrevious = $currentFormId > 1;
         });
     });
 
+    // Delete Action
     $(document).on('click','.deletePurchaseBtn',function(){
 
         let id = $(this).data('id');
-        let form = $(this).data('form');
-        let products = $(this).data('products');
-        let qty = $(this).data('qty');
-        let unit = $(this).data('unit');
+        let date = $(this).data('date');
+        let formattedDate = new Date(date).toLocaleDateString('en-GB', {
+            day: '2-digit',
+            month: 'long',
+            year: 'numeric'
+        });
 
         Swal.fire({
-            title:'Hapus Purchase?',
+            title:'Hapus Daftar Belanja?',
             html:`
                 <div style="text-align:center">
-                    <b>${form}</b><br><br>
-                    <small style="color:#94a3b8">Produk:</small><br>
-                    ${products} (${qty} ${unit})
+                    <small style="color:#94a3b8">Tanggal pembuatan daftar belanja:</small><br>
+                    ${formattedDate}
                 </div>
             `,
             icon:'warning',
@@ -729,7 +780,10 @@ $hasPrevious = $currentFormId > 1;
 
             if(result.isConfirmed){
 
-                fetch('purchase-action.php?action=destroy&id='+id)
+                fetch('list-action.php?action=destroy', {
+                    method: 'POST',
+                    body: new URLSearchParams({ id: id })
+                })
                 .then(res=>res.json())
                 .then(res=>{
 
@@ -752,6 +806,101 @@ $hasPrevious = $currentFormId > 1;
             }
 
         });
+
+    });
+
+    // Print Action
+    $(document).on('click', '.printPurchaseBtn', function () {
+
+        let id = $(this).data('id');
+        let date = $(this).data('date');
+        let formattedDate = new Date(date).toLocaleDateString('en-GB', {
+            day: '2-digit',
+            month: 'long',
+            year: 'numeric'
+        });
+
+        fetch('list-action.php?action=get_print&id=' + id)
+            .then(res => res.json())
+            .then(res => {
+
+                let items = res.data;
+
+                let rows = '';
+
+                items.forEach((item, i) => {
+                    rows += `
+                        <tr>
+                            <td style="text-align:center">${i + 1}</td>
+                            <td>${item.name}</td>
+                            <td style="text-align:center">${item.qty}</td>
+                            <td style="text-align:center">${item.unit}</td>
+                            <td style="text-align:center">☐</td>
+                        </tr>
+                    `;
+                });
+
+                let win = window.open('', '', 'width=900,height=700');
+
+                win.document.write(`
+                    <html>
+                    <head>
+                        <title>Print Daftar Belanja</title>
+                        <style>
+                            body { font-family: Poppins; padding: 20px; }
+                            h2 { margin-bottom: 5px; text-align: center; text-transform: uppercase;}
+                            .sub { color: #666; margin-bottom: 50px; text-align: center;}
+
+                            table {
+                                width: 100%;
+                                border-collapse: collapse;
+                            }
+
+                            table, th, td {
+                                border: 1px solid #000;
+                            }
+
+                            th, td {
+                                padding: 8px;
+                            }
+
+                            th {
+                                background: #f2f2f2;
+                            }
+                        </style>
+                    </head>
+                    <body>
+
+                        <h2>Daftar Belanja (${formattedDate})</h2>
+                        <div class="sub">by QIEOS</div>
+
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>No</th>
+                                    <th>Nama Barang / Produk</th>
+                                    <th>Qty</th>
+                                    <th>Satuan</th>
+                                    <th>Check</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${rows}
+                            </tbody>
+                        </table>
+
+                    </body>
+                    </html>
+                `);
+
+                win.document.close();
+
+                // 🔥 FIX IMPORTANT
+                setTimeout(() => {
+                    win.print();
+                }, 300);
+
+            });
 
     });
 </script>
