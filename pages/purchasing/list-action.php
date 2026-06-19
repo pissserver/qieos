@@ -2,7 +2,6 @@
     include '../../sessions/session.php';
     header('Content-Type: application/json');
 
-
     if ($_GET['action'] == 'store') {
         $products   = $_POST['product_name'];
         $qtys        = $_POST['qty'];

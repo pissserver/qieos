@@ -219,6 +219,21 @@ include '../../sessions/session.php';
             box-shadow:0 8px 20px rgba(15,23,42,.05);
         }
 
+        /* ACTION */
+        .action-btn{
+            width:38px;
+            height:38px;
+            border:none;
+            border-radius:10px;
+            margin:0 4px;
+            color:#fff;
+            transition:.25s;
+        }
+
+        .btn-edit{
+            background:#f59e0b;
+        }
+
         .empty-search{
             padding:50px 20px;
             text-align:center;
@@ -256,6 +271,173 @@ include '../../sessions/session.php';
             align-items:center;
             gap:10px;
             margin-bottom:15px;
+        }
+
+        /* Modal Edit */
+        /* PANEL */
+            
+        .panel-header{
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            padding:18px 22px;
+            border-radius:18px;
+        }
+
+        .panel-left{
+            display:flex;
+            align-items:center;
+            gap:16px;
+        }
+
+        .panel-icon{
+            width:58px;
+            height:58px;
+            border-radius:16px;
+            background:rgba(255,255,255,.12);
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            font-size:22px;
+        }
+
+        .panel-title{
+            font-size:17px;
+            font-weight:700;
+        }
+
+        .panel-subtitle{
+            font-size:13px;
+            opacity:.85;
+        }
+
+        .panel-primary{
+            background:linear-gradient(
+                135deg,
+                #4f46e5,
+                #4338ca
+            );
+            color:#fff;
+        }
+
+
+        .panel-dark{
+            background:linear-gradient(
+                135deg,
+                #334155,
+                #0f172a
+            );
+            color:#fff;
+        }
+
+        .panel-toggle-wrap{
+            display:flex;
+            align-items:center;
+            gap:10px;
+        }
+
+        .toggle-label{
+            font-size:13px;
+            color:#cbd5e1;
+            font-weight:500;
+            transition:.25s;
+        }
+
+        @keyframes fadeSlide{
+            from{
+                opacity:0;
+                transform:translateY(8px);
+            }
+            to{
+                opacity:1;
+                transform:translateY(0);
+            }
+        }
+
+        /* SECTION */
+        .section-title{
+            display:inline-block;
+            background:#edf4ff;
+            color:var(--primary-dark);
+            padding:5px 12px;
+            border-radius:7px;
+            font-size:12px;
+            font-weight:600;
+            margin-bottom:14px;
+        }
+
+        /* FORM */
+        .input-group-modern{
+            display:flex;
+            align-items:center;
+            margin-bottom:14px;
+        }
+
+        .input-icon{
+            width:42px;
+            height:42px;
+            border-radius:10px;
+            background:linear-gradient(135deg,#334155,#1e293b);
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            color:#fff;
+            margin-right:10px;
+            box-shadow:0 4px 10px rgba(15,23,42,.18);
+        }
+
+        .form-control{
+            height:42px;
+            border-radius:8px;
+            border:1px solid var(--border);
+            font-size:14px;
+        }
+
+        textarea.form-control{
+            height:65px;
+        }
+
+        .form-control:focus{
+            border-color:var(--primary);
+            box-shadow:0 0 0 3px rgba(63,130,196,.15);
+        }
+
+        /* BUTTON */
+        .btn-save{
+            background:linear-gradient(90deg,#1e293b,#334155);
+            border:none;
+            border-radius:8px;
+            color:#fff;
+            padding:10px 24px;
+            font-weight:600;
+        }
+
+        .modal-backdrop.show{
+            opacity:.55 !important;
+        }
+
+        #editStockModal .modal-content{
+            background:#fff !important;
+            border-radius:16px !important;
+            overflow:hidden;
+            box-shadow:0 20px 40px rgba(15,23,42,.25);
+        }
+
+        #editStockModal .stock-body{
+            background:#fff !important;
+        }
+
+        #editStockModal .modal-dialog{
+            max-width:1200px;
+        }
+
+        #editStockModal .btn-close{
+            filter:brightness(0) invert(1);
+            opacity:.85;
+        }
+
+        #editStockModal .modal-content *{
+            opacity:1 !important;
         }
     </style>
 </head>
@@ -307,6 +489,7 @@ include '../../sessions/session.php';
                             <th class="text-center">Stok</th>
                             <th class="text-center">Satuan</th>
                             <th class="text-center">Status</th>
+                            <th class="text-center">Aksi</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -379,7 +562,6 @@ include '../../sessions/session.php';
                         </td>
 
                         <td class="text-center">
-
                             <?php if($stock == 0): ?>
 
                                 <span class="stock-badge stock-empty">
@@ -402,9 +584,13 @@ include '../../sessions/session.php';
                                 </span>
 
                             <?php endif; ?>
-
                         </td>
 
+                        <td class="text-center">
+                            <button class="action-btn btn-edit editStockBtn" data-id="<?= $d['id'] ?>">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                        </td>
                     </tr>
 
                     <?php endwhile; ?>
@@ -415,6 +601,34 @@ include '../../sessions/session.php';
         </div>
     </div>
 
+    <!-- EDIT MODAL -->
+    <div class="modal fade" id="editStockModal" tabindex="-1">
+        <div class="modal-dialog modal-xl modal-dialog-centered">
+            <div class="modal-content stock-panel border-0">
+
+                <div class="panel-header panel-dark my-3 mx-3">
+                    <div class="panel-left">
+                        <div class="panel-icon">
+                            <i class="fas fas fa-file-alt"></i>
+                        </div>
+
+                        <div>
+                            <div class="panel-title">
+                                Edit Stock Gudang 
+                            </div>
+                            <div class="panel-subtitle">
+                                Edit nama, harga jual, dan foto produk
+                            </div>
+                        </div>
+                    </div>
+
+                    <button class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+
+                <div class="mt-2 px-5" id="editStockContent"></div>
+            </div>
+        </div>
+    </div>
 
     <!-- DETAIL FIFO -->
     <div class="fifo-container mt-4 mb-5">
@@ -484,6 +698,75 @@ include '../../sessions/session.php';
                     </div>
                 `
             }
+        });
+    });
+</script>
+
+<!-- Script Edit -->
+<script>
+    // OPEN EDIT MODAL
+    $(document).on('click','.editStockBtn',function(){
+
+        let id = $(this).data('id');
+
+        $('#editStockModal').modal('show');
+
+        document.getElementById('editStockContent').innerHTML = `
+            <div class="text-center py-5">
+                <i class="fas fa-spinner fa-spin fa-2x text-secondary"></i>
+            </div>
+        `;
+
+        fetch('stock-edit.php?id=' + id)
+        .then(res => res.text())
+        .then(html => {
+            document.getElementById('editStockContent').innerHTML = html;
+        });
+
+    });
+
+    // Edit Action
+    $(document).on('submit','#editStockForm',function(e){
+        e.preventDefault();
+
+        let formData = new FormData(this);
+        let id = formData.get('id');
+
+        fetch('stock-action.php?action=update&id='+id,{
+            method:'POST',
+            body:formData
+        })
+        .then(res => res.json())
+        .then(res => {
+
+            if(res.status === 'success'){
+
+                Swal.fire({
+                    icon:'success',
+                    title:'Berhasil',
+                    text:'Data berhasil diperbarui',
+                    showConfirmButton:false
+                });
+
+                $('#editStockModal').modal('hide');
+
+            }else{
+
+                Swal.fire({
+                    icon:'error',
+                    title:'Gagal',
+                    text:res.msg || 'Terjadi kesalahan'
+                });
+
+            }
+
+        })
+        .catch(() => {
+            Swal.fire(
+                'Error',
+                'Gagal memproses update',
+                'error'
+            );
         });
     });
 </script>
