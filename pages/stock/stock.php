@@ -450,7 +450,7 @@ include '../../sessions/session.php';
 <div class="container-fluid px-0 mt-4">
 
     <!-- HEADER -->
-    <div class="stock-header mt-5">
+    <!-- <div class="stock-header mt-5">
         <div>
             <h3>Stok Gudang</h3>
             <p>Monitoring stok produk dan FIFO layer secara realtime</p>
@@ -459,9 +459,9 @@ include '../../sessions/session.php';
         <div class="header-icon">
             <i class="fas fa-warehouse"></i>
         </div>
-    </div>
+    </div> -->
 
-    <div class="section-card mb-4">
+    <div class="section-card mb-4 mt-5">
         <div class="panel-header panel-primary">
             <div class="panel-left">
                 <div class="panel-icon">

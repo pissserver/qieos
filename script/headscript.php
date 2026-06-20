@@ -70,7 +70,7 @@
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 
 <!-- PWA -->
-<link rel="manifest" href="/cartify/manifest.json">
+<!-- <link rel="manifest" href="/cartify/manifest.json">
 <meta name="theme-color" content="#000000">
 <script>
     if ('serviceWorker' in navigator) {
@@ -78,7 +78,7 @@
             .then(reg => console.log('SW OK:', reg.scope))
             .catch(err => console.log('SW ERROR:', err));
     }
-</script>
+</script> -->
 
 <!-- Date Range Picker -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />

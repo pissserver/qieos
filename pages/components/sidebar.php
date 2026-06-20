@@ -4,84 +4,156 @@
 
 <style>
     .sidebar-footer {
-        padding: 15px;
+        padding: 20px 16px;
         text-align: center;
         position: relative;
     }
 
-    /* garis glowing tipis */
+    /* subtle animated divider */
     .sidebar-footer::before {
         content: '';
         display: block;
         height: 1px;
-        width: 60%;
-        margin: 0 auto 10px;
-        background: linear-gradient(90deg, transparent, #4b6cb7, transparent);
-        animation: glowLine 2s infinite linear;
+        width: 75%;
+        margin: 0 auto 16px;
+        background: linear-gradient(
+            90deg,
+            transparent,
+            rgba(120, 180, 255, 0.15),
+            rgba(120, 180, 255, 0.8),
+            rgba(120, 180, 255, 0.15),
+            transparent
+        );
+        background-size: 200% 100%;
+        animation: lineFlow 3s linear infinite;
+        opacity: 0.9;
     }
 
-    @keyframes glowLine {
-        0% {
-            opacity: 0.3;
-        }
-
-        50% {
-            opacity: 1;
-        }
-
-        100% {
-            opacity: 0.3;
-        }
+    @keyframes lineFlow {
+        0% { background-position: 0% 0; }
+        100% { background-position: 200% 0; }
     }
 
-    /* badge version */
+    /* premium animated badge */
     .version-badge {
-        display: inline-block;
-        background: linear-gradient(135deg, #4b6cb7, #182848);
-        padding: 6px 14px;
-        border-radius: 20px;
-        color: #fff;
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+
+        padding: 8px 18px;
+        border-radius: 999px;
+
+        color: #eaf2ff;
         font-size: 12px;
-        font-weight: 500;
-        box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
-        animation: floaty 3s ease-in-out infinite;
+        letter-spacing: 0.5px;
+
+        background: rgba(15, 18, 30, 0.65);
+        backdrop-filter: blur(14px);
+        -webkit-backdrop-filter: blur(14px);
+
+        z-index: 1;
+        overflow: hidden;
+
+        transform: translateY(0);
+        animation: floatBadge 4s ease-in-out infinite;
+
+        box-shadow:
+            0 10px 30px rgba(0, 0, 0, 0.45),
+            inset 0 1px 0 rgba(255, 255, 255, 0.06);
     }
 
-    /* animasi floating halus */
-    @keyframes floaty {
-        0% {
-            transform: translateY(0px);
-        }
+    /* floating motion */
+    @keyframes floatBadge {
+        0%   { transform: translateY(0px); }
+        50%  { transform: translateY(-4px); }
+        100% { transform: translateY(0px); }
+    }
 
-        50% {
-            transform: translateY(-3px);
-        }
+    /* animated gradient border */
+    .version-badge::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        padding: 1px;
+        border-radius: 999px;
 
-        100% {
-            transform: translateY(0px);
-        }
+        background: linear-gradient(
+            120deg,
+            #4b6cb7,
+            #8ec5fc,
+            #182848,
+            #4b6cb7
+        );
+
+        background-size: 300% 300%;
+        animation: gradientMove 6s ease infinite;
+
+        -webkit-mask: 
+            linear-gradient(#000 0 0) content-box, 
+            linear-gradient(#000 0 0);
+        -webkit-mask-composite: xor;
+        mask-composite: exclude;
+
+        pointer-events: none;
+    }
+
+    @keyframes gradientMove {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+    }
+
+    /* inner shine */
+    .version-badge::after {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -60%;
+        width: 60%;
+        height: 200%;
+        background: linear-gradient(
+            120deg,
+            transparent,
+            rgba(255,255,255,0.10),
+            transparent
+        );
+        transform: rotate(20deg);
+        animation: shine 5s infinite;
+    }
+
+    @keyframes shine {
+        0%   { left: -80%; opacity: 0; }
+        20%  { opacity: 1; }
+        50%  { opacity: 0.6; }
+        100% { left: 130%; opacity: 0; }
     }
 
     .version-badge span {
         font-weight: 600;
-        margin-right: 5px;
+        color: #ffffff;
     }
 
     .version-badge small {
-        opacity: 0.8;
+        opacity: 0.7;
+        font-weight: 500;
     }
 
+    /* hover micro-interaction */
     .version-badge:hover {
-        transform: scale(1.05);
-        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        transform: translateY(-6px) scale(1.03);
+        box-shadow:
+            0 15px 40px rgba(0, 0, 0, 0.55),
+            0 0 25px rgba(120, 160, 255, 0.25);
     }
 
     .nav-title {
         font-size: 11px;
         font-weight: 700;
-        color: #9ca3af;
+        color: rgba(210, 220, 240, 0.45);
         margin: 15px 10px 5px;
-        letter-spacing: 1px;
+        letter-spacing: 1.6px;
+        text-transform: uppercase;
     }
 </style>
 
@@ -192,77 +264,82 @@
                 </a>
             </li>
 
-            <!-- PEMBELIAN STOK -->
-            <li class="nav-title">PURCHASING</li>
+            <?php if ($user['role'] == 'developer' || $user['role'] == 'administrator') { ?>
 
-            <li class="nav-item <?= ($current_page == 'list.php') ? 'active' : ''; ?>">
-                <a href="/qieos/pages/purchasing/list.php" class="nav-link">
-                    <span class="sidebar-icon">
-                        <i class="fas fa-file-alt me-3"></i>
-                    </span>
-                    <span>Daftar Belanja</span>
-                </a>
-            </li>
+                <!-- PEMBELIAN STOK -->
+                <li class="nav-title">PURCHASING</li>
 
-            <li class="nav-item <?= ($current_page == 'purchase.php') ? 'active' : ''; ?>">
-                <a href="/qieos/pages/purchasing/purchase.php" class="nav-link">
-                    <span class="sidebar-icon">
-                        <i class="fas fa-cart-plus me-2"></i>
-                    </span>
-                    <span>Input Pembelian</span>
-                </a>
-            </li>
+                <li class="nav-item <?= ($current_page == 'list.php') ? 'active' : ''; ?>">
+                    <a href="/qieos/pages/purchasing/list.php" class="nav-link">
+                        <span class="sidebar-icon">
+                            <i class="fas fa-file-alt me-3"></i>
+                        </span>
+                        <span>Daftar Belanja</span>
+                    </a>
+                </li>
 
-            <!-- GUDANG STOK (SUMBER BARANG / FIFO) -->
-            <li class="nav-title">GUDANG STOK</li>
+                <li class="nav-item <?= ($current_page == 'purchase.php') ? 'active' : ''; ?>">
+                    <a href="/qieos/pages/purchasing/purchase.php" class="nav-link">
+                        <span class="sidebar-icon">
+                            <i class="fas fa-cart-plus me-2"></i>
+                        </span>
+                        <span>Input Pembelian</span>
+                    </a>
+                </li>
 
-            <li class="nav-item <?= ($current_page == 'stock.php') ? 'active' : ''; ?>">
-                <a href="/qieos/pages/stock/stock.php" class="nav-link">
-                    <span class="sidebar-icon">
-                        <i class="fas fa-warehouse me-2"></i>
-                    </span>
-                    <span>Stok Gudang</span>
-                </a>
-            </li>
+                <!-- GUDANG STOK (SUMBER BARANG / FIFO) -->
+                <li class="nav-title">GUDANG STOK</li>
 
-            <li class="nav-item <?= ($current_page == 'transfer.php') ? 'active' : ''; ?>">
-                <a href="/qieos/pages/stock/transfer.php" class="nav-link">
-                    <span class="sidebar-icon">
-                        <i class="fas fa-exchange-alt me-2"></i>
-                    </span>
-                    <span>Transfer ke Penjualan</span>
-                </a>
-            </li>
+                <li class="nav-item <?= ($current_page == 'stock.php') ? 'active' : ''; ?>">
+                    <a href="/qieos/pages/stock/stock.php" class="nav-link">
+                        <span class="sidebar-icon">
+                            <i class="fas fa-warehouse me-2"></i>
+                        </span>
+                        <span>Stok Gudang</span>
+                    </a>
+                </li>
 
-            <!-- GUDANG PENJUALAN -->
-            <li class="nav-title">PENJUALAN</li>
+                <li class="nav-item <?= ($current_page == 'transfer.php') ? 'active' : ''; ?>">
+                    <a href="/qieos/pages/stock/transfer.php" class="nav-link">
+                        <span class="sidebar-icon">
+                            <i class="fas fa-exchange-alt me-2"></i>
+                        </span>
+                        <span>Transfer ke Penjualan</span>
+                    </a>
+                </li>
+            <?php } ?>
 
-            <li class="nav-item <?= ($current_page == 'sales-stock.php') ? 'active' : ''; ?>">
-                <a href="/qieos/pages/sales/sales-stock.php" class="nav-link">
-                    <span class="sidebar-icon">
-                        <i class="fas fa-store me-2"></i>
-                    </span>
-                    <span>Stok Penjualan</span>
-                </a>
-            </li>
+            <?php if ($user['role'] == 'developer' || $user['role'] == 'staff') { ?>
+                <!-- GUDANG PENJUALAN -->
+                <li class="nav-title">PENJUALAN</li>
 
-            <li class="nav-item <?= ($current_page == 'catalog.php') ? 'active' : ''; ?>">
-                <a href="/qieos/pages/sales/catalog.php" class="nav-link">
-                    <span class="sidebar-icon">
-                        <i class="fas fa-book-open me-2"></i>
-                    </span>
-                    <span>Katalog Produk</span>
-                </a>
-            </li>
+                <li class="nav-item <?= ($current_page == 'sales-stock.php') ? 'active' : ''; ?>">
+                    <a href="/qieos/pages/sales/sales-stock.php" class="nav-link">
+                        <span class="sidebar-icon">
+                            <i class="fas fa-store me-2"></i>
+                        </span>
+                        <span>Stok Penjualan</span>
+                    </a>
+                </li>
 
-            <li class="nav-item <?= ($current_page == 'order.php') ? 'active' : ''; ?>">
-                <a href="/qieos/pages/sales/order.php" class="nav-link">
-                    <span class="sidebar-icon">
-                        <i class="fas fa-receipt me-3"></i>
-                    </span>
-                    <span>Pesanan</span>
-                </a>
-            </li>
+                <li class="nav-item <?= ($current_page == 'catalog.php') ? 'active' : ''; ?>">
+                    <a href="/qieos/pages/sales/catalog.php" class="nav-link">
+                        <span class="sidebar-icon">
+                            <i class="fas fa-book-open me-2"></i>
+                        </span>
+                        <span>Katalog Produk</span>
+                    </a>
+                </li>
+
+                <li class="nav-item <?= ($current_page == 'order.php') ? 'active' : ''; ?>">
+                    <a href="/qieos/pages/sales/order.php" class="nav-link">
+                        <span class="sidebar-icon">
+                            <i class="fas fa-receipt me-3"></i>
+                        </span>
+                        <span>Pesanan</span>
+                    </a>
+                </li>
+            <?php } ?>
 
             <!-- LAPORAN -->
             <!-- <li class="nav-title">LAPORAN</li>

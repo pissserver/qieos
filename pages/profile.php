@@ -1,7 +1,5 @@
 <?php
 include '../sessions/session.php';
-
-$currentState = $user['state'];
 ?>
 
 <!doctype html>
@@ -67,36 +65,45 @@ $currentState = $user['state'];
                         <div class="row">
                             <div class="col-sm-12 mb-3">
                                 <div class="form-group">
-                                    <label for="status">Status</label>
-                                    <select name="status" id="status" class="form-control">
-                                        <option value="">Pilih Status Kepemilikan</option>
-                                        <option value="owner" <?= $user['status'] === 'owner' ? 'selected' : '' ?>>Owner</option>
-                                        <option value="staff" <?= $user['status'] === 'staff' ? 'selected' : '' ?>>Staff</option>
+                                    <label for="role">Role</label>
+                                    <select name="role" id="role" class="form-control" disabled>
+                                        <option value="">Role User</option>
+                                        <option value="developer" <?= $user['role'] === 'developer' ? 'selected' : '' ?>>Developer</option>
+                                        <option value="administrator" <?= $user['role'] === 'administrator' ? 'selected' : '' ?>>Owner</option>
+                                        <option value="staff" <?= $user['role'] === 'staff' ? 'selected' : '' ?>>Staff</option>
                                     </select>
                                 </div>
                             </div>
                         </div>
+
                         <div class="row">
                             <div class="col-sm-6 mb-3">
                                 <div class="form-group">
-                                    <label for="city">Kota</label>
+                                    <label for="password">Password Baru</label>
                                     <input
                                         class="form-control"
-                                        id="city"
-                                        type="text"
-                                        placeholder="Kota tempat tinggal"
-                                        value="<?= $user['city'] ?>"
-                                        name="city"
-                                        required />
+                                        id="password"
+                                        type="password"
+                                        placeholder="Masukkan password baru"
+                                        autocomplete="new-password"
+                                        name="password" />
                                 </div>
                             </div>
+
                             <div class="col-sm-6 mb-3">
-                                <label for="state">Provinsi</label>
-                                <select class="form-select w-100 mb-0" id="state" name="state" aria-label="State select example">
-                                    <option selected>Pilih Provinsi</option>
-                                </select>
+                                <div class="form-group">
+                                    <label for="password_confirm">Konfirmasi Password</label>
+                                    <input
+                                        class="form-control"
+                                        id="password_confirm"
+                                        type="password"
+                                        placeholder="Ulangi password"
+                                        autocomplete="new-password"
+                                        name="password_confirm" />
+                                </div>
                             </div>
                         </div>
+
                         <div class="mt-3">
                             <button
                                 class="btn btn-gray-800 animate-up-2"
@@ -139,39 +146,13 @@ $currentState = $user['state'];
                                     <?php echo $user['fullname'] != '' ? ucwords(strtolower($user['fullname'])) : 'Nama tidak tersedia'; ?>
                                 </h4>
 
-                                <!-- Status -->
+                                <!-- Role -->
                                 <h5 style="font-size: 1rem; 
                                             font-weight: 400; 
                                             color: #777; 
                                             margin-bottom: 12px;">
-                                    <?php echo $user['status'] != '' ? ucwords(strtolower($user['status'])) : 'Status tidak tersedia'; ?>
+                                    <?php echo $user['role'] != '' ? ucwords(strtolower($user['role'])) : 'Role tidak tersedia'; ?>
                                 </h5>
-
-                                <?php
-                                // Ambil data provinsi dari API
-                                $provinces = json_decode(file_get_contents("https://www.emsifa.com/api-wilayah-indonesia/api/provinces.json"), true);
-
-                                // Cari nama provinsi berdasarkan ID di database
-                                $stateName = "";
-                                foreach ($provinces as $prov) {
-                                    if ($prov['id'] == $user['state']) {
-                                        $stateName = $prov['name'];
-                                        break;
-                                    }
-                                }
-                                ?>
-
-                                <!-- Lokasi -->
-                                <p style="font-size: 0.95rem; 
-                                            color: #555; 
-                                            background: #f1f1f1; 
-                                            display: inline-block; 
-                                            padding: 6px 14px; 
-                                            border-radius: 20px; 
-                                            font-weight: 500;">
-                                    <?php echo $user['city'] != '' ? ucwords(strtolower($user['city'])) : 'Kota tidak tersedia'; ?>,
-                                    <?php echo $user['state'] != '' ? ucwords(strtolower($stateName)) : 'Provinsi tidak tersedia'; ?>
-                                </p>
                             </div>
                         </div>
                     </div>
@@ -221,29 +202,6 @@ $currentState = $user['state'];
     </main>
 
     <?php include '../script/footscript.php'; ?>
-
-    <!-- Ambil data provinsi dari API -->
-    <script>
-        // Ambil nilai state dari PHP
-        const currentState = "<?php echo $currentState; ?>";
-
-        // Ambil data provinsi dari API
-        fetch("https://www.emsifa.com/api-wilayah-indonesia/api/provinces.json")
-            .then(response => response.json())
-            .then(data => {
-                const select = document.getElementById("state");
-                data.forEach(prov => {
-                    const opt = document.createElement("option");
-                    opt.value = prov.id; // simpan nama provinsi
-                    opt.textContent = prov.name; // tampilkan nama provinsi
-                    if (prov.id === currentState) {
-                        opt.selected = true; // tandai sebagai selected
-                    }
-                    select.appendChild(opt);
-                });
-            })
-            .catch(error => console.error("Gagal memuat data provinsi:", error));
-    </script>
 
     <script>
         function previewImage(event) {

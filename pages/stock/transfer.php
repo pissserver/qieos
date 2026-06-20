@@ -147,7 +147,7 @@
 
             <div class="container-fluid px-0 mt-4">
                 <!-- HEADER -->
-                <div class="transfer-header mt-5">
+                <!-- <div class="transfer-header mt-5">
                     <div>
                         <h3>Transfer ke Penjualan</h3>
                         <p class="mb-0">
@@ -158,10 +158,10 @@
                     <div class="transfer-icon">
                         <i class="fas fa-arrow-right-arrow-left"></i>
                     </div>
-                </div>
+                </div> -->
 
                 <!-- REQUEST PENDING -->
-                <div class="section-card mb-4">
+                <div class="section-card mb-4 mt-5">
                     <div class="panel-header panel-warning">
                         <div class="panel-left">
                             <div class="panel-icon">

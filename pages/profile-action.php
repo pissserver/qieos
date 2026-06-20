@@ -2,16 +2,44 @@
 include '../sessions/session.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $fullname = isset($_POST['fullname']) ? $_POST['fullname'] : '';
-    $email = isset($_POST['email']) ? $_POST['email'] : '';
-    $status = isset($_POST['status']) ? $_POST['status'] : '';
-    $city = isset($_POST['city']) ? $_POST['city'] : '';
-    $state = isset($_POST['state']) ? $_POST['state'] : '';
+    $fullname = $_POST['fullname'];
 
-    $sql = "UPDATE users SET fullname='$fullname', email='$email', status='$status', city='$city', state='$state' WHERE email='$email'";
-    $result = mysqli_query($conn, $sql);
+    $password = $_POST['password'] ? $_POST['password'] : '';
+    $password_confirm = $_POST['password_confirm'] ? $_POST['password_confirm'] : '';
 
-    if ($result) {
+    $email = $_SESSION['email'];
+
+    // update password hanya jika diisi
+    if (!empty($password)) {
+        if ($password !== $password_confirm) {
+            $_SESSION['flash'] = "Password tidak sama.";
+            header("Location: profile.php?status=error&msg=Password tidak sama");
+            exit();
+        }
+
+        $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
+
+        $sql = "UPDATE users 
+                SET fullname='$fullname', 
+                    email='$email', 
+                    password='$hashedPassword'
+                WHERE email='$email'";
+
+        $resultPassword = mysqli_query($conn, $sql);
+    } else {
+        $sql = "UPDATE users 
+                SET fullname='$fullname'
+                WHERE email='$email'";
+
+        $result = mysqli_query($conn, $sql);
+    }
+
+
+    if ($resultPassword) {
+        session_destroy();
+        header("Location: ../sessions/sign-in.php?success=reset");
+        exit();
+    } elseif ($result) {
         $_SESSION['flash'] = "Profil berhasil diperbarui.";
         header("Location: profile.php?status=success&msg=Profil berhasil diperbarui");
         exit();

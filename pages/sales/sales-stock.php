@@ -174,7 +174,7 @@
 
             <div class="container-fluid px-0 mt-4">
                 <!-- Header -->
-                <div class="sales-header mt-5">
+                <!-- <div class="sales-header mt-5">
                     <div>
                         <h3>Stok Penjualan</h3>
                         <p class="mb-0">
@@ -185,10 +185,10 @@
                     <div class="sales-icon">
                         <i class="fas fa-store"></i>
                     </div>
-                </div>
+                </div> -->
 
                 <!-- REQUEST -->
-                <div class="section-card mb-4">
+                <div class="section-card mb-4 mt-5">
                     <div class="panel-header panel-success">
                         <div class="panel-left">
                             <div class="panel-icon">

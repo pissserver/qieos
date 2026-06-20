@@ -6,7 +6,7 @@
 <script src="/qieos/vendor/onscreen/dist/on-screen.umd.min.js"></script>
 
 <!-- Slider -->
-<script src="/qieos/vendor/nouislider/distribute/nouislider.min.js"></script>
+<!-- <script src="/qieos/vendor/nouislider/distribute/nouislider.min.js"></script> -->
 
 <!-- Smooth scroll -->
 <script src="/qieos/vendor/smooth-scroll/dist/smooth-scroll.polyfills.min.js"></script>

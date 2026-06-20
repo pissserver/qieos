@@ -343,89 +343,479 @@
             font-size: 20px;
         }
     }
+
+    /* ==========================================
+    PREMIUM NAVBAR V3
+    ========================================== */
+
+    .premium-navbar{
+        width:100%;
+        min-height:85px;
+
+        display:flex;
+        align-items:center;
+        justify-content:space-between;
+
+        padding:16px 24px;
+        margin-top: 20px;
+
+        border-radius:24px;
+
+        background:
+            linear-gradient(
+                135deg,
+                #081120,
+                #0f1f3a,
+                #081120
+            );
+
+        border:1px solid rgba(255,255,255,.06);
+
+        box-shadow:
+            0 15px 40px rgba(0,0,0,.25);
+
+        margin-bottom:15px;
+    }
+
+    .premium-brand{
+        display:flex;
+        align-items:center;
+        gap:15px;
+    }
+
+    .brand-content h4{
+        margin:0;
+        color:white;
+        font-size:22px;
+        font-weight:700;
+    }
+
+    .brand-content span{
+        color:#94a3b8;
+        font-size:13px;
+    }
+
+    .premium-actions{
+        display:flex;
+        align-items:center;
+        gap:16px;
+    }
+
+    .premium-action-btn{
+        width:56px;
+        height:56px;
+
+        border-radius:18px;
+
+        background:
+            rgba(255,255,255,.05);
+
+        border:
+            1px solid rgba(255,255,255,.08);
+
+        display:flex;
+        align-items:center;
+        justify-content:center;
+
+        color:white;
+        cursor:pointer;
+
+        position:relative;
+
+        transition:.3s;
+    }
+
+    .premium-action-btn:hover{
+        transform:translateY(-3px);
+    }
+
+    .premium-omzet{
+        display:flex;
+        align-items:center;
+        gap:12px;
+
+        padding:12px 18px;
+
+        border-radius:18px;
+
+        background:
+            rgba(255,255,255,.05);
+
+        border:
+            1px solid rgba(255,255,255,.08);
+    }
+
+    .premium-omzet-icon{
+        width:45px;
+        height:45px;
+
+        border-radius:14px;
+
+        background:
+            linear-gradient(
+                135deg,
+                #f59e0b,
+                #facc15
+            );
+
+        display:flex;
+        align-items:center;
+        justify-content:center;
+
+        color:black;
+    }
+
+    .omzet-label{
+        display:block;
+        color:#94a3b8;
+        font-size:11px;
+    }
+
+    .omzet-value{
+        color:white;
+        font-weight:700;
+        font-size:18px;
+    }
+
+    .premium-profile{
+        display:flex;
+        align-items:center;
+        gap:12px;
+
+        padding:8px 14px;
+
+        border-radius:18px;
+
+        background:
+            rgba(255,255,255,.05);
+
+        border:
+            1px solid rgba(255,255,255,.08);
+    }
+
+    .premium-avatar{
+        width:44px;
+        height:44px;
+        border-radius:50%;
+        object-fit:cover;
+    }
+
+    .premium-name{
+        color:white;
+        font-weight:600;
+    }
+
+    .premium-role{
+        color:#94a3b8;
+        font-size:12px;
+    }
+
+    .premium-dropdown{
+        min-width: 230px;
+        margin-top: 14px !important;
+
+        background: rgba(15, 23, 42, 0.95);
+        backdrop-filter: blur(15px);
+        -webkit-backdrop-filter: blur(15px);
+
+        border: 1px solid rgba(255,255,255,0.08);
+        border-radius: 20px;
+        padding: 10px;
+
+        box-shadow:
+            0 10px 30px rgba(0,0,0,0.35),
+            0 0 0 1px rgba(255,255,255,0.03) inset;
+
+        transform-origin: top right;
+
+        /* state awal (hidden) */
+        opacity: 0;
+        transform: translateY(-10px) scale(0.96);
+
+        transition:
+            opacity .25s ease,
+            transform .25s cubic-bezier(0.2, 0.8, 0.2, 1);
+    }
+
+    /* saat bootstrap menambahkan class "show" */
+    .premium-dropdown.show{
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+
+    /* ITEM */
+    .premium-dropdown .dropdown-item{
+        display: flex;
+        align-items: center;
+        gap: 10px;
+
+        color: #f8fafc;
+        font-weight: 500;
+
+        border-radius: 12px;
+        padding: 12px 14px;
+
+        transition: all .2s ease;
+    }
+
+    /* ICON */
+    .premium-dropdown .dropdown-item i{
+        width: 20px;
+        text-align: center;
+        font-size: 1rem;
+        transition: transform .2s ease;
+    }
+
+    /* HOVER ITEM */
+    .premium-dropdown .dropdown-item:hover{
+        background: linear-gradient(
+            135deg,
+            rgba(59,130,246,0.18),
+            rgba(99,102,241,0.18)
+        );
+
+        color: #fff;
+        transform: translateX(4px);
+    }
+
+    .premium-dropdown .dropdown-item:hover i{
+        transform: scale(1.15);
+    }
+
+    /* DIVIDER */
+    .premium-dropdown .dropdown-divider{
+        border-color: rgba(255,255,255,0.08);
+        margin: 8px 0;
+    }
+
+    /* DANGER ITEM */
+    .premium-dropdown .text-danger{
+        color: #f87171 !important;
+    }
+
+    .premium-dropdown .text-danger:hover{
+        background: rgba(239,68,68,.12);
+        color: #ff9c9c !important;
+    }
+
+    .premium-chevron {
+        transition: transform 0.3s ease;
+    }
+
+    /* saat dropdown terbuka */
+    .show .premium-chevron {
+        transform: rotate(180deg);
+    }
+
+    @media(max-width:991px){
+
+        .premium-navbar{
+            flex-direction:column;
+            gap:15px;
+        }
+
+        .premium-actions{
+            width:100%;
+            flex-wrap:wrap;
+            justify-content:center;
+        }
+
+    }
+
+    @media (max-width:576px){
+
+        .premium-navbar{
+            flex-direction:row;
+            align-items:center;
+            justify-content:space-between;
+
+            padding:12px;
+            min-height:auto;
+        }
+
+        .brand-content{
+            display:none;
+        }
+
+        .premium-actions{
+            gap:8px;
+            flex-wrap:nowrap;
+        }
+
+        .premium-action-btn{
+            width:42px;
+            height:42px;
+            border-radius:12px;
+            font-size:14px;
+        }
+
+        .premium-omzet{
+            min-width:auto;
+            padding:8px 10px;
+            gap:8px;
+        }
+
+        .premium-omzet-icon{
+            width:32px;
+            height:32px;
+            border-radius:10px;
+            font-size:12px;
+        }
+
+        .omzet-label{
+            display:none;
+        }
+
+        .omzet-value{
+            font-size:13px;
+            white-space:nowrap;
+        }
+
+        .premium-user{
+            display:none;
+        }
+
+        .premium-profile{
+            padding:5px;
+            border-radius:14px;
+        }
+
+        .premium-avatar{
+            width:36px;
+            height:36px;
+        }
+
+    }
 </style>
 
-<nav
-    class="navbar navbar-top navbar-expand navbar-dashboard navbar-dark ps-0 pe-0 pb-0">
-    <div class="container-fluid px-0">
-        <div
-            class="d-flex justify-content-between w-100"
-            id="navbarSupportedContent">
-            <!-- Cart button -->
-            <div class="d-flex align-items-center">
-                <div class="cart-btn position-relative" onclick="openCart()">
-                    <i class="fas fa-shopping-cart"></i>
+<nav class="premium-navbar">
 
-                    <!-- badge -->
-                    <span id="cart-count" class="cart-badge d-none">0</span>
-                </div>
-            </div>
-
-            <!-- Info Omzet -->
-            <?php
-            // Hitung omzet hari ini
-            $today = date('Y-m-d');
-            $omzetQuery = $conn->prepare("SELECT SUM(total) as omzet FROM orders WHERE DATE(tanggal)=? AND status_payment!='cancelled'");
-            $omzetQuery->bind_param("s", $today);
-            $omzetQuery->execute();
-            $omzetResult = $omzetQuery->get_result();
-            $omzet = 0;
-            if ($omzetResult && $omzetResult->num_rows > 0) {
-                $omzet = $omzetResult->fetch_assoc()['omzet'];
-                if ($omzet === null) {
-                    $omzet = 0;
-                }
-            }
-            ?>
-            <div class="omzet-card">
-                <div class="omzet-icon">
-                    <i class="fas fa-coins"></i>
-                </div>
-                <div class="omzet-content">
-                    <span class="label">Omzet Hari Ini</span>
-                    <h2 class="amount">Rp <span id="omzet-today">0</span></h2>
-                </div>
-            </div>
-
-            <!-- Navbar links -->
-            <ul class="navbar-nav align-items-center">
-                <li class="nav-item dropdown ms-lg-3">
-                    <a class="nav-link dropdown-toggle pt-1 px-0"
-                        href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-
-                        <!-- Card kecil untuk profile -->
-                        <div class="card shadow-sm border-0 d-flex flex-row align-items-center px-2 py-2" style="background: #1F2937;">
-                            <!-- Avatar -->
-                            <img class="avatar rounded-circle border border-2 border-white shadow-sm"
-                                alt="Your Image"
-                                src="<?php echo $user['photo'] ? '/qieos/assets/img/uploads/' . $user['photo'] : '/qieos/assets/img/default-avatar.jpg'; ?>"
-                                style="width:40px; height:40px; object-fit:cover;" />
-                            <!-- Email + ikon dropdown -->
-                            <div class="ms-2 d-none d-lg-block">
-                                <span class="fw-bold text-white"><?php echo $user['fullname'] != '' ? $user['fullname'] : $_SESSION['email']; ?></span>
-                                <i class="fas fa-chevron-down ms-1 text-white"></i>
-                            </div>
-                        </div>
-                    </a>
-
-                    <!-- Dropdown menu -->
-                    <div class="dropdown-menu dashboard-dropdown dropdown-menu-end mt-2 py-1 shadow-lg rounded-1" style="background: #1F2937;">
-                        <a class="dropdown-item d-flex align-items-center text-white" href="../profile.php">
-                            <i class="fas fa-user-circle text-white me-2"></i>
-                            Profil
-                        </a>
-
-                        <div role="separator" class="dropdown-divider my-1"></div>
-
-                        <a class="dropdown-item d-flex align-items-center text-danger" href="../sessions/logout.php">
-                            <i class="fas fa-sign-out-alt me-2"></i>
-                            Sign out
-                        </a>
-                    </div>
-                </li>
-            </ul>
+    <div class="premium-brand">
+        <div class="brand-content">
+            <h4>Dashboard</h4>
+            <span>Point Of Sales Management</span>
         </div>
     </div>
+
+    <div class="premium-actions">
+        <?php if ($user['role'] == 'developer' || $user['role'] == 'staff') { ?>
+        
+        <!-- CART -->
+        <div
+            class="premium-action-btn"
+            onclick="openCart()">
+
+            <i class="fas fa-shopping-cart"></i>
+
+            <span id="cart-count"
+                class="cart-badge d-none">
+                0
+            </span>
+        </div>
+
+        <!-- OMZET -->
+        <?php
+        $today = date('Y-m-d');
+
+        $omzetQuery = $conn->prepare("
+            SELECT SUM(total) as omzet
+            FROM orders
+            WHERE DATE(tanggal)=?
+            AND status_payment!='cancelled'
+        ");
+
+        $omzetQuery->bind_param("s", $today);
+        $omzetQuery->execute();
+
+        $omzetResult = $omzetQuery->get_result();
+
+        $omzet = 0;
+
+        if ($omzetResult && $omzetResult->num_rows > 0) {
+            $omzet = $omzetResult->fetch_assoc()['omzet'];
+
+            if ($omzet === null) {
+                $omzet = 0;
+            }
+        }
+        ?>
+
+
+        <div class="premium-omzet">
+
+            <div class="premium-omzet-icon">
+                <i class="fas fa-coins"></i>
+            </div>
+
+            <div>
+
+                <span class="omzet-label">
+                    Omzet Hari Ini
+                </span>
+
+                <div class="omzet-value">
+                    Rp <span id="omzet-today">0</span>
+                </div>
+
+            </div>
+
+        </div>
+
+        <?php } ?>
+
+        <!-- PROFILE -->
+        <div class="dropdown">
+
+            <a href="#"
+                class="text-decoration-none"
+                data-bs-toggle="dropdown">
+
+                <div class="premium-profile">
+
+                    <img
+                        src="<?php echo $user['photo'] ? '/qieos/assets/img/uploads/' . $user['photo'] : '/qieos/assets/img/default-avatar.jpg'; ?>"
+                        class="premium-avatar">
+
+                    <div class="premium-user">
+
+                        <div class="premium-name">
+                            <?php echo $user['fullname'] != '' ? $user['fullname'] : $_SESSION['email']; ?>
+                        </div>
+
+                        <div class="premium-role">
+                            <?= ucwords(strtolower($user['role'])) ?>
+                        </div>
+
+                    </div>
+
+                    <i class="fas fa-chevron-down text-white premium-chevron"></i>
+
+                </div>
+
+            </a>
+
+            <div class="dropdown-menu dropdown-menu-end premium-dropdown">
+
+                <a class="dropdown-item"
+                href="/qieos/pages/profile.php">
+                    <i class="fas fa-user-circle"></i>
+                    <span>Profil</span>
+                </a>
+
+                <div class="dropdown-divider"></div>
+
+                <a class="dropdown-item text-danger"
+                href="/qieos/sessions/logout.php">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Sign Out</span>
+                </a>
+
+            </div>
+
+        </div>
+
+    </div>
+
 </nav>
 
 <!-- Modal Cart -->
@@ -683,7 +1073,7 @@
 
     // Update Omzet
     function updateOmzet() {
-        fetch('../components/data/get-omzet.php')
+        fetch('/qieos/pages/components/data/get-omzet.php')
             .then(res => res.json())
             .then(data => {
                 const el = document.getElementById('omzet-today');
