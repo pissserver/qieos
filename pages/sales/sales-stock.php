@@ -315,7 +315,7 @@
                         </div>
                     </div>
 
-                    <div class="mt-4 px-4">
+                    <div class="mt-4 px-4 table-responsive">
                         <div id="sales-table"></div>
                     </div>
                 </div>
@@ -339,7 +339,7 @@
                         </div>
                     </div>
 
-                    <div class="mt-4 px-4">
+                    <div class="mt-4 px-4 table-responsive">
                         <div id="history-table"></div>
                     </div>
                 </div>

@@ -8,7 +8,8 @@ $q = mysqli_query($conn,"
         li.id AS item_id,
         li.name,
         li.qty,
-        li.unit
+        li.unit,
+        li.price
     FROM list_purchases lp
     LEFT JOIN list_purchase_items li
         ON li.list_purchase_id = lp.id
@@ -43,7 +44,7 @@ if(!$q){
                        required>
             </div>
 
-            <div class="col-md-3">
+            <div class="col-md-2">
                 <input type="number"
                        name="qty[]"
                        class="form-control"
@@ -51,7 +52,7 @@ if(!$q){
                        required>
             </div>
 
-            <div class="col-md-3">
+            <div class="col-md-2">
                 <input type="text"
                        name="unit[]"
                        class="form-control"
@@ -59,7 +60,16 @@ if(!$q){
                        required>
             </div>
 
-            <div class="col-md-2">
+            <div class="col-md-3">
+                <input type="number"
+                       name="price[]"
+                       class="form-control"
+                       placeholder="0"
+                       value="<?= $d['price'] ?>"
+                       >
+            </div>
+
+            <div class="col-md-1">
                 <button type="button"
                         class="btn btn-danger w-100"
                         onclick="removeItem(this)">

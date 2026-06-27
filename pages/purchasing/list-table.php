@@ -2,12 +2,19 @@
 include '../../sessions/session.php';
 
 $q = mysqli_query($conn,"
-    SELECT 
-        *
-    FROM list_purchases
-    WHERE deleted_at IS NULL
-    ORDER BY date_list DESC
+    SELECT
+        lp.*,
+        COUNT(lpi.id) AS total_items,
+        SUM(lpi.price) AS total_price
+    FROM list_purchases lp
+    LEFT JOIN list_purchase_items lpi
+        ON lp.id = lpi.list_purchase_id
+    WHERE lp.deleted_at IS NULL
+    GROUP BY lp.id
+    ORDER BY lp.date_list DESC
 ");
+
+$totalPrice = 0;
 ?>
 
 <style>
@@ -138,13 +145,17 @@ $q = mysqli_query($conn,"
 <thead>
 <tr>
     <th>ID FORM</th>
-    <th class="text-center">PEMBUATAN DAFTAR BELANJA</th>
+    <th class="text-center">TANGGAL PEMBUATAN</th>
+    <th class="text-center">TOTAL ITEM</th>
+    <th class="text-center">TOTAL BELANJA</th>
     <th class="text-center">AKSI</th>
 </tr>
 </thead>
 
 <tbody>
-<?php while($d=mysqli_fetch_assoc($q)): ?>
+<?php
+    while($d=mysqli_fetch_assoc($q)): 
+?>
 <tr class="purchase-row">
 
     <!-- ID -->
@@ -168,6 +179,22 @@ $q = mysqli_query($conn,"
         <span class="date-badge">
             <i class="fas fa-calendar-alt"></i>
             <?= date('d F Y', strtotime($d['date_list'])) ?>
+        </span>
+    </td>
+
+    <!-- TOTAL PRICE -->
+    <td class="text-center">
+        <span class="note-badge">
+            <i class="fas fa-box"></i>
+            <?= $d['total_items'] ?>
+        </span>
+    </td>
+
+    <!-- TOTAL PRICE -->
+    <td class="text-center">
+        <span class="created-badge">
+            <i class="fas fa-money-bill"></i>
+            Rp <?= number_format($d['total_price'], 0, ',', '.') ?>
         </span>
     </td>
 

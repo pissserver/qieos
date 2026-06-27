@@ -42,18 +42,21 @@
             $name = mysqli_real_escape_string($conn,$name);
             $qty  = (int)$_POST['qty'][$key];
             $unit = mysqli_real_escape_string($conn,$_POST['unit'][$key]);
+            $price= (int)$_POST['price'][$key];
 
             mysqli_query($conn,"
             INSERT INTO list_purchase_items(
                 list_purchase_id,
                 name,
                 qty,
-                unit
+                unit,
+                price
             ) VALUES(
                 '$id',
                 '$name',
                 '$qty',
-                '$unit'
+                '$unit',
+                '$price'
             )
             ");
         }

@@ -835,6 +835,7 @@ $hasPrevious = $currentFormId > 1;
                             <td>${item.name}</td>
                             <td style="text-align:center">${item.qty}</td>
                             <td style="text-align:center">${item.unit}</td>
+                            <td style="text-align:center"></td>
                             <td style="text-align:center">☐</td>
                         </tr>
                     `;
@@ -875,12 +876,22 @@ $hasPrevious = $currentFormId > 1;
                         <div class="sub">by QIEOS</div>
 
                         <table>
+                            <colgroup>
+                                <col style="width:6%">
+                                <col style="width:44%">
+                                <col style="width:10%">
+                                <col style="width:12%">
+                                <col style="width:18%">
+                                <col style="width:10%">
+                            </colgroup>
+                            
                             <thead>
                                 <tr>
                                     <th>No</th>
                                     <th>Nama Barang / Produk</th>
                                     <th>Qty</th>
                                     <th>Satuan</th>
+                                    <th>Harga</th>
                                     <th>Check</th>
                                 </tr>
                             </thead>
