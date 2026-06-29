@@ -299,6 +299,15 @@
                     </a>
                 </li>
 
+                <li class="nav-item <?= ($current_page == 'mutation.php') ? 'active' : ''; ?>">
+                    <a href="/qieos/pages/stock/mutation.php" class="nav-link">
+                        <span class="sidebar-icon">
+                            <i class="fas fa-truck-ramp-box me-2"></i>
+                        </span>
+                        <span>Mutasi Stok</span>
+                    </a>
+                </li>
+
                 <li class="nav-item <?= ($current_page == 'transfer.php') ? 'active' : ''; ?>">
                     <a href="/qieos/pages/stock/transfer.php" class="nav-link">
                         <span class="sidebar-icon">

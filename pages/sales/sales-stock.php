@@ -288,7 +288,7 @@
                                 <div class="col-md-3 d-flex align-items-end">
                                     <button class="btn btn-primary btn-request w-100">
                                         <i class="fas fa-paper-plane me-2"></i>
-                                        Request Stok
+                                        Request
                                     </button>
                                 </div>
                             </div>
