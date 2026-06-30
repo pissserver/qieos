@@ -50,6 +50,7 @@ $bulan = [
     display: flex;
     align-items: center;
     gap: 10px;
+    margin-bottom: 20px;
 }
 
 .table-stock thead {
@@ -126,6 +127,7 @@ $bulan = [
 .form-badge i {
     color: #0ea5e9;
 }
+
 </style>
 
 <div class="stock-wrapper">
@@ -137,16 +139,16 @@ $bulan = [
             Detail Pengeluaran Stok
         </div>
 
-        <div class="card-body p-0">
+        <div class="card-body p-0 mb-3">
 
             <div class="table-responsive">
-                <table class="table table-hover table-stock mb-0">
+                <table id="tableMutation" class="table table-hover table-stock mb-0">
 
                     <thead>
                         <tr>
                             <th><i class="fa-regular fa-calendar"></i> Tanggal</th>
-                            <th class="text-center"><i class="fa-solid fa-file-invoice"></i> Order</th>
-                            <th class="text-center"><i class="fa-solid fa-cubes"></i> Qty</th>
+                            <th><i class="fa-solid fa-file-invoice"></i> Order</th>
+                            <th><i class="fa-solid fa-cubes"></i> Qty</th>
                         </tr>
                     </thead>
 

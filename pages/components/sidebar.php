@@ -316,9 +316,21 @@
                         <span>Transfer ke Penjualan</span>
                     </a>
                 </li>
+
+                <!-- MANAJEMEN STAFF -->
+                <li class="nav-title">MANAJEMEN STAFF</li>
+
+                <li class="nav-item <?= ($current_page == 'cashier.php') ? 'active' : ''; ?>">
+                    <a href="/qieos/pages/management/cashier.php" class="nav-link">
+                        <span class="sidebar-icon">
+                            <i class="fas fa-users me-2"></i>
+                        </span>
+                        <span>Staff Kasir</span>
+                    </a>
+                </li>
             <?php } ?>
 
-            <?php if ($user['role'] == 'developer' || $user['role'] == 'staff') { ?>
+            <?php if ($user['role'] == 'developer' || $user['role'] == 'staff kasir') { ?>
                 <!-- GUDANG PENJUALAN -->
                 <li class="nav-title">PENJUALAN</li>
 

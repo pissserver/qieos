@@ -661,11 +661,38 @@ include '../../sessions/session.php';
 
 <script>
     function loadDetail(id){
-        fetch('stock-detail.php?id='+id)
-        .then(res=>res.text())
-        .then(html=>{
+
+        fetch('stock-detail.php?id=' + id)
+        .then(res => res.text())
+        .then(html => {
+
             document.getElementById("fifo-detail").innerHTML = html;
+
+            if ($.fn.DataTable.isDataTable('#tableStock')) {
+                $('#tableStock').DataTable().destroy();
+            }
+
+            $('#tableStock').DataTable({
+                pageLength: 10,
+                searching: true,
+                responsive: true,
+                autoWidth: false,
+                ordering: false,
+                language: {
+                    search: "",
+                    searchPlaceholder:"Cari detail...",
+                    zeroRecords: "Data tidak ditemukan",
+                    paginate: {
+                        first: "Awal",
+                        last: "Akhir",
+                        next: "›",
+                        previous: "‹"
+                    }
+                }
+            });
+
         });
+
     }
 
     $(document).ready(function(){

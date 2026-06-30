@@ -144,7 +144,6 @@ include '../../sessions/session.php';
             box-shadow:0 8px 18px rgba(15,23,42,.05);
             transition:.25s;
             border-radius:14px;
-            cursor:pointer;
         }
 
         .stock-row:hover{
@@ -232,6 +231,10 @@ include '../../sessions/session.php';
 
         .btn-edit{
             background:#f59e0b;
+        }
+
+        .btn-delete{
+            background:#ef4444;
         }
 
         .empty-search{
@@ -415,6 +418,30 @@ include '../../sessions/session.php';
         .modal-backdrop.show{
             opacity:.55 !important;
         }
+
+        #editStaffModal .modal-content{
+            background:#fff !important;
+            border-radius:16px !important;
+            overflow:hidden;
+            box-shadow:0 20px 40px rgba(15,23,42,.25);
+        }
+
+        #editStaffModal .stock-body{
+            background:#fff !important;
+        }
+
+        #editStaffModal .modal-dialog{
+            max-width:1200px;
+        }
+
+        #editStaffModal .btn-close{
+            filter:brightness(0) invert(1);
+            opacity:.85;
+        }
+
+        #editStaffModal .modal-content *{
+            opacity:1 !important;
+        }
     </style>
 </head>
 
@@ -438,21 +465,21 @@ include '../../sessions/session.php';
     </div> -->
 
     <div class="row">
-        <div class="col-md-7">
+        <div class="col-md-12">
             <!-- Main Table -->
             <div class="section-card mb-4 mt-4">
                 <div class="panel-header panel-primary">
                     <div class="panel-left">
                         <div class="panel-icon">
-                            <i class="fas fa-boxes-stacked"></i>
+                            <i class="fas fa-users"></i>
                         </div>
 
                         <div>
                             <div class="panel-title">
-                                Mutasi Stok
+                                Staff Kasir
                             </div>
                             <div class="panel-subtitle">
-                                Total stok gudang, stok penjualan, dan detail stok
+                                Ubah informasi staff kasir atau hapus dari daftar staff kasir
                             </div>
                         </div>
                     </div>
@@ -464,10 +491,10 @@ include '../../sessions/session.php';
                         <table class="table table-hover align-middle" id="stockTable">
                             <thead>
                                 <tr style="font-size:13px;color:#64748b;">
-                                    <th>Produk</th>
-                                    <th class="text-center">Gudang</th>
-                                    <th class="text-center">Penjualan</th>
-                                    <th class="text-center">Total Stok</th>
+                                    <th>Nama</th>
+                                    <th class="text-center">Role</th>
+                                    <th class="text-center">Terbuat</th>
+                                    <th class="text-center">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -475,19 +502,10 @@ include '../../sessions/session.php';
                             <?php
                             $q = mysqli_query($conn,"
                             SELECT
-                                p.id,
-                                p.name,
-                                p.code,
-                                COALESCE(SUM(pi.remaining_qty),0) stock,
-                                ss.qty as sales_qty
-                            FROM products p
-                            LEFT JOIN purchase_items pi
-                                ON pi.product_id=p.id
-                                AND pi.deleted_at IS NULL
-                            LEFT JOIN sales_stock ss
-                                ON ss.product_id=p.id
-                            GROUP BY p.id
-                            ORDER BY p.name ASC
+                                *
+                            FROM users
+                            WHERE role = 'staff kasir'
+                            ORDER BY fullname ASC
                             ");
                             while($d=mysqli_fetch_assoc($q)): ?>
 
@@ -498,16 +516,16 @@ include '../../sessions/session.php';
                                     <div class="product-wrap">
 
                                         <div class="product-icon">
-                                            <i class="fas fa-box-open"></i>
+                                            <i class="fas fa-user"></i>
                                         </div>
 
                                         <div>
                                             <div class="fw-bold">
-                                                <?= htmlspecialchars($d['name']) ?>
+                                                <?= htmlspecialchars($d['fullname']) ?>
                                             </div>
 
                                             <small class="text-muted">
-                                                <?= htmlspecialchars($d['code']) ?>
+                                                <?= htmlspecialchars($d['email']) ?>
                                             </small>
                                         </div>
 
@@ -516,27 +534,40 @@ include '../../sessions/session.php';
 
                                 <td class="text-center">
 
-                                    <span class="stock-badge stock-success">
-                                        <i class="fas fa-cubes me-1"></i>
-                                        <?= number_format($d['stock']) ?>
+                                    <span class="stock-badge unit-badge text-capitalize">
+                                        <i class="fas fa-id-badge me-1"></i>
+                                        <?= htmlspecialchars($d['role']) ?>
                                     </span>
 
                                 </td>
 
                                 <td class="text-center">
 
-                                    <span class="stock-badge stock-danger">
+                                    <span class="unit-badge">
                                         <i class="fas fa-cubes me-1"></i>
-                                        <?= number_format($d['sales_qty']) ?>
+                                        <?php
+                                        $bulan = [
+                                            1 => 'Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun',
+                                            'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'
+                                        ];
+
+                                        $tgl = strtotime($d['created_at']);
+                                        echo date('d', $tgl) . ' ' . $bulan[(int)date('n', $tgl)] . ' ' . date('Y', $tgl);
+                                        ?>
                                     </span>
 
                                 </td>
 
                                 <td class="text-center">
-                                    <span class="stock-badge stock-empty">
-                                        <i class="fas fa-cubes me-1"></i>
-                                        <?= number_format($d['stock'] + $d['sales_qty']) ?>
-                                    </span>
+                                    <button class="action-btn btn-edit editStaffBtn" data-id="<?= $d['id'] ?>">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+
+                                    <button class="action-btn btn-delete deletePurchaseBtn"
+                                        data-id="<?= $d['id'] ?>"
+                                        data-date="<?= $d['date_list'] ?>">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
                                 </td>
                             </tr>
 
@@ -548,73 +579,42 @@ include '../../sessions/session.php';
                 </div>
             </div>
         </div>
+    </div>
 
-        <div class="col-md-5">
-            <!-- DETAIL FIFO -->
-            <div class="fifo-container mt-4 mb-5">
+    <!-- EDIT MODAL -->
+    <div class="modal fade" id="editStaffModal" tabindex="-1">
+        <div class="modal-dialog modal-xl modal-dialog-centered">
+            <div class="modal-content stock-panel border-0">
 
-                <div class="fifo-title">
-                    <i class="fas fa-layer-group text-primary"></i>
-                    <h5 class="mb-0">Detail Stok</h5>
-                </div>
+                <div class="panel-header panel-dark my-3 mx-3">
+                    <div class="panel-left">
+                        <div class="panel-icon">
+                            <i class="fas fas fa-file-alt"></i>
+                        </div>
 
-                <div id="fifo-detail">
-
-                    <div class="text-center py-4">
-
-                        <i class="fas fa-box-open fa-3x text-secondary mb-3"></i>
-
-                        <p class="text-muted mb-0">
-                            Klik salah satu produk untuk melihat pengeluaran stok
-                        </p>
-
+                        <div>
+                            <div class="panel-title">
+                                Edit Staff Kasir 
+                            </div>
+                            <div class="panel-subtitle">
+                                Edit nama, email, dan password
+                            </div>
+                        </div>
                     </div>
 
+                    <button class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
 
+                <div class="mt-2 px-5" id="editStaffContent"></div>
             </div>
         </div>
     </div>
+</div>
 </main>
 
 <?php include '../../script/footscript.php'; ?>
 
 <script>
-    function loadDetail(id){
-
-        fetch('mutation-detail.php?id=' + id)
-        .then(res => res.text())
-        .then(html => {
-
-            document.getElementById("fifo-detail").innerHTML = html;
-
-            if ($.fn.DataTable.isDataTable('#tableMutation')) {
-                $('#tableMutation').DataTable().destroy();
-            }
-
-            $('#tableMutation').DataTable({
-                pageLength: 10,
-                searching: true,
-                responsive: true,
-                autoWidth: false,
-                ordering: false,
-                language: {
-                    search: "",
-                    searchPlaceholder:"Cari detail...",
-                    zeroRecords: "Data tidak ditemukan",
-                    paginate: {
-                        first: "Awal",
-                        last: "Akhir",
-                        next: "›",
-                        previous: "‹"
-                    }
-                }
-            });
-
-        });
-
-    }
-
     $(document).ready(function(){
         $('#stockTable').DataTable({
             pageLength: 5,
@@ -645,6 +645,75 @@ include '../../sessions/session.php';
                     </div>
                 `
             }
+        });
+    });
+</script>
+
+<!-- Script Edit -->
+<script>
+    // OPEN EDIT MODAL
+    $(document).on('click','.editStaffBtn',function(){
+
+        let id = $(this).data('id');
+
+        $('#editStaffModal').modal('show');
+
+        document.getElementById('editStaffContent').innerHTML = `
+            <div class="text-center py-5">
+                <i class="fas fa-spinner fa-spin fa-2x text-secondary"></i>
+            </div>
+        `;
+
+        fetch('cashier-edit.php?id=' + id)
+        .then(res => res.text())
+        .then(html => {
+            document.getElementById('editStaffContent').innerHTML = html;
+        });
+
+    });
+
+    // Edit Action
+    $(document).on('submit','#editStaffForm',function(e){
+        e.preventDefault();
+
+        let formData = new FormData(this);
+        let id = formData.get('id');
+
+        fetch('cashier-action.php?action=update&id='+id,{
+            method:'POST',
+            body:formData
+        })
+        .then(res => res.json())
+        .then(res => {
+
+            if(res.status === 'success'){
+
+                Swal.fire({
+                    icon:'success',
+                    title:'Berhasil',
+                    text:'Data berhasil diperbarui',
+                    showConfirmButton:false
+                });
+
+                $('#editStaffModal').modal('hide');
+
+            }else{
+
+                Swal.fire({
+                    icon:'error',
+                    title:'Gagal',
+                    text:res.message || 'Terjadi kesalahan'
+                });
+
+            }
+
+        })
+        .catch(() => {
+            Swal.fire(
+                'Error',
+                'Gagal memproses update',
+                'error'
+            );
         });
     });
 </script>

@@ -131,15 +131,15 @@ $bulan = [
 
     <div class="card stock-card">
 
-        <div class="stock-header-detail">
+        <div class="stock-header-detail mb-3">
             <i class="fa-solid fa-boxes-stacked"></i>
             Detail Stok Masuk Barang
         </div>
 
-        <div class="card-body p-0">
+        <div class="card-body p-0 mb-3">
 
             <div class="table-responsive">
-                <table class="table table-hover table-stock mb-0">
+                <table id="tableStock"  class="table table-hover table-stock mb-0">
 
                     <thead>
                         <tr>
