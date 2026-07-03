@@ -318,7 +318,16 @@
                 </li>
 
                 <!-- MANAJEMEN STAFF -->
-                <li class="nav-title">MANAJEMEN STAFF</li>
+                <li class="nav-title">MANAJEMEN USER</li>
+
+                <li class="nav-item <?= ($current_page == 'administrator.php') ? 'active' : ''; ?>">
+                    <a href="/qieos/pages/management/administrator.php" class="nav-link">
+                        <span class="sidebar-icon">
+                            <i class="fas fa-users me-2"></i>
+                        </span>
+                        <span>Administrator</span>
+                    </a>
+                </li>
 
                 <li class="nav-item <?= ($current_page == 'cashier.php') ? 'active' : ''; ?>">
                     <a href="/qieos/pages/management/cashier.php" class="nav-link">

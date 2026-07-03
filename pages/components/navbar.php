@@ -854,6 +854,7 @@
     </div>
 </div>
 
+<?php if ($user['role'] == 'developer' || $user['role'] == 'staff kasir') { ?>
 <script>
     // Load cart from localStorage
     let cart = JSON.parse(localStorage.getItem('cart')) || [];
@@ -1125,3 +1126,5 @@
     let omzet = <?php echo $omzet; ?>;
     animateValue("omzet-today", omzet, 800); // cepat & smooth
 </script>
+
+<?php } ?>

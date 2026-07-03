@@ -219,6 +219,69 @@ include '../../sessions/session.php';
             font-weight:600;
         }
 
+        .dev-badge{
+            position:relative;
+            display:inline-flex;
+            align-items:center;
+            gap:6px;
+            padding:8px 16px;
+            border-radius:12px;
+
+            background:linear-gradient(
+                135deg,
+                #fff8dc 0%,
+                #ffe082 35%,
+                #ffd54f 60%,
+                #ffca28 100%
+            );
+
+            color:#7c5700;
+            border:1px solid #f4c430;
+            font-weight:700;
+            overflow:hidden;
+
+            box-shadow:
+                0 4px 12px rgba(255,193,7,.25),
+                inset 0 1px 0 rgba(255,255,255,.6);
+
+            transition:.25s ease;
+        }
+
+        .dev-badge:hover{
+            transform:translateY(-2px);
+            box-shadow:
+                0 8px 20px rgba(255,193,7,.35),
+                inset 0 1px 0 rgba(255,255,255,.8);
+        }
+
+        .dev-badge::before{
+            content:'';
+            position:absolute;
+            top:0;
+            left:-150%;
+            width:60%;
+            height:100%;
+
+            background:linear-gradient(
+                120deg,
+                transparent,
+                rgba(255,255,255,.7),
+                transparent
+            );
+
+            transform:skewX(-25deg);
+            animation:goldShine 2.8s infinite;
+        }
+
+        @keyframes goldShine{
+            0%{
+                left:-150%;
+            }
+            100%{
+                left:180%;
+            }
+        }
+
         .table-card{
             background:#fff;
             border-radius:20px;
@@ -427,27 +490,27 @@ include '../../sessions/session.php';
             opacity:.55 !important;
         }
 
-        #editStaffModal .modal-content, #addStaffModal .modal-content{
+        #editAdministratorModal .modal-content, #addAdministratorModal .modal-content{
             background:#fff !important;
             border-radius:16px !important;
             overflow:hidden;
             box-shadow:0 20px 40px rgba(15,23,42,.25);
         }
 
-        #editStaffModal .stock-body, #addStaffModal .stock-body{
+        #editAdministratorModal .stock-body, #addAdministratorModal .stock-body{
             background:#fff !important;
         }
 
-        #editStaffModal .modal-dialog, #addStaffModal .modal-dialog{
+        #editAdministratorModal .modal-dialog, #addAdministratorModal .modal-dialog{
             max-width:1200px;
         }
 
-        #editStaffModal .btn-close, #addStaffModal .btn-close{
+        #editAdministratorModal .btn-close, #addAdministratorModal .btn-close{
             filter:brightness(0) invert(1);
             opacity:.85;
         }
 
-        #editStaffModal .modal-content *, #addStaffModal .modal-content *{
+        #editAdministratorModal .modal-content *, #addAdministratorModal .modal-content *{
             opacity:1 !important;
         }
 
@@ -471,7 +534,7 @@ include '../../sessions/session.php';
             height:42px;
         }
 
-        #btnAddStaff{
+        #btnAddAdministrator{
             height:42px;
             display:flex;
             align-items:center;
@@ -511,10 +574,10 @@ include '../../sessions/session.php';
 
                         <div>
                             <div class="panel-title">
-                                Staff Kasir
+                                Administrator
                             </div>
                             <div class="panel-subtitle">
-                                Ubah informasi staff kasir atau hapus dari daftar staff kasir
+                                Ubah informasi administrator atau hapus dari daftar administrator
                             </div>
                         </div>
                     </div>
@@ -526,9 +589,9 @@ include '../../sessions/session.php';
                         <button
                             type="button"
                             class="btn btn-primary"
-                            id="btnAddStaff">
+                            id="btnAddAdministrator">
                             <i class="fas fa-user-plus me-2"></i>
-                            Tambah Staff Kasir
+                            Tambah Administrator
                         </button>
                     </div>
                     
@@ -550,7 +613,7 @@ include '../../sessions/session.php';
                             SELECT
                                 *
                             FROM users
-                            WHERE role = 'staff kasir'
+                            WHERE role IN ('administrator', 'developer') 
                             ORDER BY fullname ASC
                             ");
                             while($d=mysqli_fetch_assoc($q)): ?>
@@ -585,8 +648,12 @@ include '../../sessions/session.php';
 
                                 <td class="text-center">
 
-                                    <span class="stock-badge unit-badge text-capitalize">
-                                        <i class="fas fa-id-badge me-1"></i>
+                                    <span class="stock-badge <?php echo $d['role'] === 'developer' ? 'dev-badge' : 'unit-badge'; ?> text-capitalize">
+                                        <?php if($d['role'] === 'developer'): ?>
+                                            <i class="fas fa-crown me-1"></i>
+                                        <?php else: ?>
+                                            <i class="fas fa-user-shield me-1"></i>
+                                        <?php endif; ?>
                                         <?= htmlspecialchars($d['role']) ?>
                                     </span>
 
@@ -610,15 +677,22 @@ include '../../sessions/session.php';
                                 </td>
 
                                 <td class="text-center">
-                                    <button class="action-btn btn-edit editStaffBtn" data-id="<?= $d['id'] ?>">
-                                        <i class="fas fa-edit"></i>
-                                    </button>
+                                    <?php if($d['role'] === 'developer'): ?>
+                                        <span class="text-muted" style="font-size:13px;">
+                                            <i class="fas fa-lock me-1"></i>
+                                            Tidak dapat diubah
+                                        </span>
+                                    <?php else: ?>
+                                        <button class="action-btn btn-edit editAdministratorBtn" data-id="<?= $d['id'] ?>">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
 
-                                    <button class="action-btn btn-delete deleteStaffBtn"
-                                        data-id="<?= $d['id'] ?>"
-                                        data-fullname="<?= $d['fullname'] ?>">
-                                        <i class="fas fa-trash"></i>
-                                    </button>
+                                        <button class="action-btn btn-delete deleteAdministratorBtn"
+                                            data-id="<?= $d['id'] ?>"
+                                            data-fullname="<?= $d['fullname'] ?>">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    <?php endif; ?>
                                 </td>
                             </tr>
 
@@ -633,7 +707,7 @@ include '../../sessions/session.php';
     </div>
 
     <!-- Add MODAL -->
-    <div class="modal fade" id="addStaffModal" tabindex="-1">
+    <div class="modal fade" id="addAdministratorModal" tabindex="-1">
         <div class="modal-dialog modal-xl modal-dialog-centered">
             <div class="modal-content stock-panel border-0">
 
@@ -645,7 +719,7 @@ include '../../sessions/session.php';
 
                         <div>
                             <div class="panel-title">
-                                Tambah Staff Kasir 
+                                Tambah Administrator 
                             </div>
                             <div class="panel-subtitle">
                                 Tambah nama, email, dan password
@@ -656,13 +730,13 @@ include '../../sessions/session.php';
                     <button class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
 
-                <div class="mt-2 px-5" id="addStaffContent"></div>
+                <div class="mt-2 px-5" id="addAdministratorContent"></div>
             </div>
         </div>
     </div>
 
     <!-- EDIT MODAL -->
-    <div class="modal fade" id="editStaffModal" tabindex="-1">
+    <div class="modal fade" id="editAdministratorModal" tabindex="-1">
         <div class="modal-dialog modal-xl modal-dialog-centered">
             <div class="modal-content stock-panel border-0">
 
@@ -674,7 +748,7 @@ include '../../sessions/session.php';
 
                         <div>
                             <div class="panel-title">
-                                Edit Staff Kasir 
+                                Edit Administrator 
                             </div>
                             <div class="panel-subtitle">
                                 Edit nama, email, dan password
@@ -685,7 +759,7 @@ include '../../sessions/session.php';
                     <button class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
 
-                <div class="mt-2 px-5" id="editStaffContent"></div>
+                <div class="mt-2 px-5" id="editAdministratorContent"></div>
             </div>
         </div>
     </div>
@@ -741,31 +815,31 @@ include '../../sessions/session.php';
 <!-- Script Add -->
 <script>
     // Add Modal
-    $(document).on('click','#btnAddStaff',function(){
+    $(document).on('click','#btnAddAdministrator',function(){
 
-        $('#addStaffModal').modal('show');
+        $('#addAdministratorModal').modal('show');
 
-        document.getElementById('addStaffContent').innerHTML = `
+        document.getElementById('addAdministratorContent').innerHTML = `
             <div class="text-center py-5">
                 <i class="fas fa-spinner fa-spin fa-2x text-secondary"></i>
             </div>
         `;
 
-        fetch('cashier-add.php')
+        fetch('administrator-add.php')
         .then(res => res.text())
         .then(html => {
-            document.getElementById('addStaffContent').innerHTML = html;
+            document.getElementById('addAdministratorContent').innerHTML = html;
         });
 
     });
 
     // Add Action
-    $(document).on('submit','#addStaffForm',function(e){
+    $(document).on('submit','#addAdministratorForm',function(e){
         e.preventDefault();
 
         let formData = new FormData(this);
 
-        fetch('cashier-action.php?action=store',{
+        fetch('administrator-action.php?action=store',{
             method:'POST',
             body:formData
         })
@@ -781,7 +855,7 @@ include '../../sessions/session.php';
                     showConfirmButton:false
                 });
 
-                $('#addStaffModal').modal('hide');
+                $('#addAdministratorModal').modal('hide');
 
                 setTimeout(() => {
                     location.reload();
@@ -811,34 +885,34 @@ include '../../sessions/session.php';
 <!-- Script Edit -->
 <script>
     // OPEN EDIT MODAL
-    $(document).on('click','.editStaffBtn',function(){
+    $(document).on('click','.editAdministratorBtn',function(){
 
         let id = $(this).data('id');
 
-        $('#editStaffModal').modal('show');
+        $('#editAdministratorModal').modal('show');
 
-        document.getElementById('editStaffContent').innerHTML = `
+        document.getElementById('editAdministratorContent').innerHTML = `
             <div class="text-center py-5">
                 <i class="fas fa-spinner fa-spin fa-2x text-secondary"></i>
             </div>
         `;
 
-        fetch('cashier-edit.php?id=' + id)
+        fetch('administrator-edit.php?id=' + id)
         .then(res => res.text())
         .then(html => {
-            document.getElementById('editStaffContent').innerHTML = html;
+            document.getElementById('editAdministratorContent').innerHTML = html;
         });
 
     });
 
     // Edit Action
-    $(document).on('submit','#editStaffForm',function(e){
+    $(document).on('submit','#editAdministratorForm',function(e){
         e.preventDefault();
 
         let formData = new FormData(this);
         let id = formData.get('id');
 
-        fetch('cashier-action.php?action=update&id='+id,{
+        fetch('administrator-action.php?action=update&id='+id,{
             method:'POST',
             body:formData
         })
@@ -854,7 +928,7 @@ include '../../sessions/session.php';
                     showConfirmButton:false
                 });
 
-                $('#editStaffModal').modal('hide');
+                $('#editAdministratorModal').modal('hide');
 
                 setTimeout(() => {
                     location.reload();
@@ -884,16 +958,16 @@ include '../../sessions/session.php';
 <!-- Script Delete -->
 <script>
     // Delete Action
-    $(document).on('click','.deleteStaffBtn',function(){
+    $(document).on('click','.deleteAdministratorBtn',function(){
 
         let id = $(this).data('id');
         let fullname = $(this).data('fullname');
 
         Swal.fire({
-            title:'Hapus Staff Kasir?',
+            title:'Hapus Administrator?',
             html:`
                 <div style="text-align:center">
-                    <small style="color:#94a3b8">Nama staff kasir:</small><br>
+                    <small style="color:#94a3b8">Nama administrator:</small><br>
                     ${fullname}
                 </div>
             `,
@@ -906,7 +980,7 @@ include '../../sessions/session.php';
 
             if(result.isConfirmed){
 
-                fetch('cashier-action.php?action=destroy', {
+                fetch('administrator-action.php?action=destroy', {
                     method: 'POST',
                     body: new URLSearchParams({ id: id })
                 })

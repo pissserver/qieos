@@ -32,7 +32,7 @@
 
         mysqli_query($conn,"
             INSERT INTO users (fullname, email, password, role, created_at)
-            VALUES ('$fullname', '$email', '$hashed_password', 'staff kasir', '$dateNow')
+            VALUES ('$fullname', '$email', '$hashed_password', 'administrator', '$dateNow')
         ");
 
         echo json_encode([
