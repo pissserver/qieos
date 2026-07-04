@@ -1,5 +1,5 @@
 <?php
-include '../sessions/session.php';
+include '../../sessions/session.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $fullname = $_POST['fullname'];

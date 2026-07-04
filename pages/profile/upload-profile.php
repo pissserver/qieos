@@ -1,10 +1,10 @@
 <?php
     session_start();
-    include '../script/connection.php';
+    include '../../script/connection.php';
 
     if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['photo'])) {
         $file = $_FILES['photo'];
-        $targetDir = __DIR__ . "/../assets/img/uploads/"; // path absolut benar
+        $targetDir = __DIR__ . "/../../assets/img/uploads/"; // path absolut benar
         if (!is_dir($targetDir)) {
             mkdir($targetDir, 0777, true);
         }
@@ -12,7 +12,7 @@
         $fileName = basename($file["name"]);
         $targetFile = $targetDir . $fileName;
 
-        // Validasi MIME type dan ekstensi
+        // Validasi type dan ekstensi
         $allowedTypes = ['image/jpeg','image/png','image/gif'];
         $ext = strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
         $allowedExt = ['jpg','jpeg','png','gif'];
@@ -29,8 +29,8 @@
             mysqli_stmt_close($stmtOld);
 
             // Hapus file lama jika ada dan bukan default
-            if ($oldPhoto && file_exists(__DIR__ . "../" . $oldPhoto) && strpos($oldPhoto, "default-avatar.png") === false) {
-                unlink(__DIR__ . "../" . $oldPhoto);
+            if ($oldPhoto && file_exists(__DIR__ . "../../" . $oldPhoto) && strpos($oldPhoto, "default-avatar.png") === false) {
+                unlink(__DIR__ . "../../" . $oldPhoto);
             }
 
             // --- Simpan file baru ---

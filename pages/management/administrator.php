@@ -6,7 +6,7 @@ include '../../sessions/session.php';
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>Mutasi Stok - Qieos</title>
+    <title>Administrator - Qieos</title>
     <?php include '../../script/headscript.php'; ?>
 
     <style>
@@ -681,6 +681,11 @@ include '../../sessions/session.php';
                                         <span class="text-muted" style="font-size:13px;">
                                             <i class="fas fa-lock me-1"></i>
                                             Tidak dapat diubah
+                                        </span>
+                                    <?php elseif($d['email'] === $_SESSION['email']): ?>
+                                        <span class="text-muted" style="font-size:13px;">
+                                            <i class="fas fa-lock me-1"></i>
+                                            Anda
                                         </span>
                                     <?php else: ?>
                                         <button class="action-btn btn-edit editAdministratorBtn" data-id="<?= $d['id'] ?>">

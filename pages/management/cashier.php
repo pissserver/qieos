@@ -6,7 +6,7 @@ include '../../sessions/session.php';
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>Mutasi Stok - Qieos</title>
+    <title>Staff Kasir - Qieos</title>
     <?php include '../../script/headscript.php'; ?>
 
     <style>

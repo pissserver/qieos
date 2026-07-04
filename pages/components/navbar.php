@@ -797,7 +797,7 @@
             <div class="dropdown-menu dropdown-menu-end premium-dropdown">
 
                 <a class="dropdown-item"
-                href="/qieos/pages/profile.php">
+                href="/qieos/pages/profile/profile.php">
                     <i class="fas fa-user-circle"></i>
                     <span>Profil</span>
                 </a>

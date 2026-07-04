@@ -93,56 +93,157 @@
     .stock-low{background:#fef3c7;color:#92400e;}
     .stock-empty{background:#fee2e2;color:#991b1b;}
 
-    /* TOGGLE */
-    .toggle-switch{
+    /* ===========================
+    NEUMORPHIC PREMIUM SWITCH
+    =========================== */
+
+    .neo-switch{
         position:relative;
-        width:95px;
-        height:36px;
         display:inline-block;
+        width:92px;
+        height:46px;
+        cursor:pointer;
     }
 
-    .toggle-switch input{
-        opacity:0;
-        width:0;
-        height:0;
+    .neo-switch input{
+        display:none;
     }
 
-    .slider{
+    /* TRACK */
+
+    .neo-track{
+
         position:absolute;
         inset:0;
-        background:#e5e7eb;
+
         border-radius:999px;
-        cursor:pointer;
-        transition:.3s;
-        display:flex;
-        align-items:center;
-        justify-content:space-between;
-        padding:0 12px;
-        font-size:12px;
-        font-weight:700;
-        color:#64748b;
+
+        background:#eef2f6;
+
+        box-shadow:
+            inset 6px 6px 12px rgba(209,214,230,.8),
+            inset -6px -6px 12px rgba(255,255,255,.95);
+
+        transition:.35s ease;
+
     }
 
-    .slider:before{
-        content:"";
+    /* THUMB */
+
+    .neo-thumb{
+
         position:absolute;
-        height:28px;
-        width:28px;
-        left:4px;
-        bottom:4px;
-        background:#fff;
+
+        left:5px;
+        top:5px;
+
+        width:36px;
+        height:36px;
+
         border-radius:50%;
+
+        background:#ffffff;
+
+        display:flex;
+        justify-content:center;
+        align-items:center;
+
+        box-shadow:
+            4px 4px 10px rgba(209,214,230,.9),
+            -4px -4px 10px rgba(255,255,255,.95);
+
+        transition:all .35s cubic-bezier(.4,0,.2,1);
+
+    }
+
+    /* TEXT */
+
+    .neo-text{
+
+        font-size:11px;
+        font-weight:700;
+        letter-spacing:.5px;
+        color:#64748b;
         transition:.3s;
-        box-shadow:0 3px 10px rgba(0,0,0,.15);
+
     }
 
-    input:checked + .slider{
-        background:linear-gradient(135deg,#22c55e,#16a34a);
-        color:#fff;
+    /* ACTIVE */
+
+    .neo-switch input:checked + .neo-track{
+
+        background:#dcfce7;
+
+        box-shadow:
+            inset 6px 6px 12px rgba(187,247,208,.9),
+            inset -6px -6px 12px rgba(255,255,255,.9);
+
     }
 
-    input:checked + .slider:before{
-        transform:translateX(58px);
+    /* MOVE */
+
+    .neo-switch input:checked + .neo-track .neo-thumb{
+
+        transform:translateX(46px);
+
+        background:#22c55e;
+
+        box-shadow:
+            4px 4px 12px rgba(34,197,94,.25),
+            -4px -4px 12px rgba(255,255,255,.8);
+
+    }
+
+    /* TEXT */
+
+    .neo-switch input:checked + .neo-track .neo-text{
+
+        color:white;
+
+    }
+
+    /* OFF */
+
+    .neo-switch input:not(:checked) + .neo-track .neo-text::before{
+
+        content:"OFF";
+
+    }
+
+    /* ON */
+
+    .neo-switch input:checked + .neo-track .neo-text::before{
+
+        content:"ON";
+
+    }
+
+    /* sembunyikan text asli */
+
+    .neo-text{
+
+        font-size:0;
+
+    }
+
+    /* Hover */
+
+    .neo-switch:hover .neo-thumb{
+
+        transform:scale(1.05);
+
+    }
+
+    .neo-switch input:checked + .neo-track .neo-thumb{
+
+        transform:translateX(46px);
+
+    }
+
+    .neo-switch input:checked:hover + .neo-track .neo-thumb{
+
+        transform:translateX(46px) scale(1.05);
+
     }
 </style>
 
@@ -212,15 +313,19 @@
         </td>
 
         <td class="text-center">
-            <label class="toggle-switch">
-                <input type="checkbox"
+            <label class="neo-switch">
+
+                <input
+                    type="checkbox"
                     <?= $isActive ? 'checked' : '' ?>
                     onchange="toggleCatalog(<?= $d['id'] ?>, this)">
 
-                <span class="slider">
-                    <span><i class="fas fa-times"></i></span>
-                    <span><i class="fas fa-check"></i></span>
+                <span class="neo-track">
+                    <span class="neo-thumb">
+                        <span class="neo-text">OFF</span>
+                    </span>
                 </span>
+
             </label>
         </td>
     </tr>
