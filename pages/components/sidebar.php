@@ -369,6 +369,18 @@
                         <span>Pesanan</span>
                     </a>
                 </li>
+
+                <!-- REKAP -->
+                <li class="nav-title">REKAP</li>
+
+                <li class="nav-item <?= ($current_page == 'recap.php') ? 'active' : ''; ?>">
+                    <a href="/qieos/pages/recap/recap.php" class="nav-link">
+                        <span class="sidebar-icon">
+                            <i class="fas fa-chart-bar me-2"></i>
+                        </span>
+                        <span>Rekap Penjualan</span>
+                    </a>
+                </li>
             <?php } ?>
 
             <!-- LAPORAN -->

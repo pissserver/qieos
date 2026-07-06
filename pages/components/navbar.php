@@ -698,7 +698,7 @@
     </div>
 
     <div class="premium-actions">
-        <?php if ($user['role'] == 'developer' || $user['role'] == 'staff') { ?>
+        <?php if ($user['role'] == 'developer' || $user['role'] == 'staff kasir') { ?>
         
         <!-- CART -->
         <div

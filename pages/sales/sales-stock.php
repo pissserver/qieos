@@ -3,7 +3,7 @@
 <!doctype html>
 <html>
     <head>
-        <title>Stok Penjualan | Qieos</title>
+        <title>Stok Penjualan - Qieos</title>
         <?php include '../../script/headscript.php'; ?>
 
         <style>

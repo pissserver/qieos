@@ -215,7 +215,7 @@
 
         <script>
             function loadTable(){
-                fetch('stock-transfer-table.php')
+                fetch('transfer-table.php')
                 .then(res=>res.text())
                 .then(html=>{
                     document.getElementById("transfer-table").innerHTML = html;
@@ -299,7 +299,7 @@
                 }).then((result)=>{
                     if(result.isConfirmed){
 
-                        fetch('stock-transfer-action.php?action=approve',{
+                        fetch('transfer-action.php?action=approve',{
                             method:'POST',
                             headers:{'Content-Type':'application/x-www-form-urlencoded'},
                             body:'id='+id
@@ -327,7 +327,7 @@
                 }).then((result)=>{
                     if(result.isConfirmed){
 
-                        fetch('stock-transfer-action.php?action=reject',{
+                        fetch('transfer-action.php?action=reject',{
                             method:'POST',
                             headers:{'Content-Type':'application/x-www-form-urlencoded'},
                             body:'id='+id

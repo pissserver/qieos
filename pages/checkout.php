@@ -41,8 +41,8 @@
     $code = $dateCode . '-' . str_pad($nextNumber, 5, '0', STR_PAD_LEFT);
 
     // 1️⃣ insert ke orders
-    $stmt = $conn->prepare("INSERT INTO orders (code, tanggal, total) VALUES (?, NOW(), ?)");
-    $stmt->bind_param("si", $code, $total);
+    $stmt = $conn->prepare("INSERT INTO orders (staff_id, code, tanggal, total) VALUES (?, ?, NOW(), ?)");
+    $stmt->bind_param("iss", $_SESSION['user_id'], $code, $total);
     $stmt->execute();
 
     $order_id = $stmt->insert_id;
