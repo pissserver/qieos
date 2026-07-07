@@ -27,13 +27,13 @@ include '../../sessions/session.php';
         <div class="col-md-6">
             <div class="input-group-modern">
                 <div class="input-icon">
-                    <i class="fas fa-envelope"></i>
+                    <i class="fas fa-user"></i>
                 </div>
                 <input
-                    type="email"
-                    name="email"
+                    type="text"
+                    name="username"
                     class="form-control"
-                    placeholder="Email"
+                    placeholder="Username"
                     required>
             </div>
         </div>

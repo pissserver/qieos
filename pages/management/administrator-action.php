@@ -4,17 +4,17 @@
 
     if ($_GET['action']=='store') {
         $fullname = $_POST['fullname'];
-        $email    = $_POST['email'];
+        $username    = $_POST['username'];
         $password = $_POST['password'];
         $confirm_password = $_POST['confirm_password'];
         $dateNow = date('Y-m-d');
 
-        // Cek email sudah digunakan
-        $check_email = mysqli_query($conn, "SELECT * FROM users WHERE email = '$email'");
-        if (mysqli_num_rows($check_email) > 0) {
+        // Cek username sudah digunakan
+        $check_username = mysqli_query($conn, "SELECT * FROM users WHERE username = '$username'");
+        if (mysqli_num_rows($check_username) > 0) {
             echo json_encode([
                 'status' => 'error',
-                'message' => 'Email sudah digunakan.'
+                'message' => 'Username sudah digunakan.'
             ]);
             exit;
         }
@@ -31,8 +31,8 @@
         $hashed_password = password_hash($password, PASSWORD_DEFAULT);
 
         mysqli_query($conn,"
-            INSERT INTO users (fullname, email, password, role, created_at)
-            VALUES ('$fullname', '$email', '$hashed_password', 'administrator', '$dateNow')
+            INSERT INTO users (fullname, username, password, role, created_at)
+            VALUES ('$fullname', '$username', '$hashed_password', 'administrator', '$dateNow')
         ");
 
         echo json_encode([
@@ -46,7 +46,7 @@
         $id = $_POST['id'];
 
         $fullname = $_POST['fullname'];
-        $email    = $_POST['email'];
+        $username    = $_POST['username'];
         $password = $_POST['password'];
         $confirm_password = $_POST['confirm_password'];
 
@@ -64,7 +64,7 @@
         mysqli_query($conn,"
             UPDATE users 
             SET fullname='$fullname',
-                email='$email',
+                username='$username',
                 password='$hashed_password'
             WHERE id = '$id'
         ");

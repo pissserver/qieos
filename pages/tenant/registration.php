@@ -6,7 +6,7 @@ include '../../sessions/session.php';
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>Staff Kasir - Qieos</title>
+    <title>Pendaftaran Tenant - Qieos</title>
     <?php include '../../script/headscript.php'; ?>
 
     <style>
@@ -219,6 +219,50 @@ include '../../sessions/session.php';
             font-weight:600;
         }
 
+        .status-badge{
+            padding:8px 14px;
+            border-radius:10px;
+            background: #c2fbbf;
+            border:1px solid #e2e8f0;
+            color: #166534;
+            font-weight:600;
+        }
+
+        .dev-badge:hover{
+            transform:translateY(-2px);
+            box-shadow:
+                0 8px 20px rgba(255,193,7,.35),
+                inset 0 1px 0 rgba(255,255,255,.8);
+        }
+
+        .dev-badge::before{
+            content:'';
+            position:absolute;
+            top:0;
+            left:-150%;
+            width:60%;
+            height:100%;
+
+            background:linear-gradient(
+                120deg,
+                transparent,
+                rgba(255,255,255,.7),
+                transparent
+            );
+
+            transform:skewX(-25deg);
+            animation:goldShine 2.8s infinite;
+        }
+
+        @keyframes goldShine{
+            0%{
+                left:-150%;
+            }
+            100%{
+                left:180%;
+            }
+        }
+
         .table-card{
             background:#fff;
             border-radius:20px;
@@ -427,27 +471,27 @@ include '../../sessions/session.php';
             opacity:.55 !important;
         }
 
-        #editStaffModal .modal-content, #addStaffModal .modal-content{
+        #editRegistrationModal .modal-content, #addRegistrationModal .modal-content{
             background:#fff !important;
             border-radius:16px !important;
             overflow:hidden;
             box-shadow:0 20px 40px rgba(15,23,42,.25);
         }
 
-        #editStaffModal .stock-body, #addStaffModal .stock-body{
+        #editRegistrationModal .stock-body, #addRegistrationModal .stock-body{
             background:#fff !important;
         }
 
-        #editStaffModal .modal-dialog, #addStaffModal .modal-dialog{
+        #editRegistrationModal .modal-dialog, #addRegistrationModal .modal-dialog{
             max-width:1200px;
         }
 
-        #editStaffModal .btn-close, #addStaffModal .btn-close{
+        #editRegistrationModal .btn-close, #addRegistrationModal .btn-close{
             filter:brightness(0) invert(1);
             opacity:.85;
         }
 
-        #editStaffModal .modal-content *, #addStaffModal .modal-content *{
+        #editRegistrationModal .modal-content *, #addRegistrationModal .modal-content *{
             opacity:1 !important;
         }
 
@@ -471,7 +515,7 @@ include '../../sessions/session.php';
             height:42px;
         }
 
-        #btnAddStaff{
+        #btnAddRegistration{
             height:42px;
             display:flex;
             align-items:center;
@@ -511,10 +555,10 @@ include '../../sessions/session.php';
 
                         <div>
                             <div class="panel-title">
-                                Staff Kasir
+                                Pendaftaran Tenant
                             </div>
                             <div class="panel-subtitle">
-                                Ubah informasi staff kasir atau hapus dari daftar staff kasir
+                                Kelola pendaftaran dan informasi tenant yang terdaftar di sistem
                             </div>
                         </div>
                     </div>
@@ -526,9 +570,9 @@ include '../../sessions/session.php';
                         <button
                             type="button"
                             class="btn btn-primary"
-                            id="btnAddStaff">
+                            id="btnAddRegistration">
                             <i class="fas fa-user-plus me-2"></i>
-                            Tambah Staff Kasir
+                            Tambah Tenant
                         </button>
                     </div>
                     
@@ -537,9 +581,10 @@ include '../../sessions/session.php';
                         <table class="table table-hover align-middle" id="stockTable">
                             <thead>
                                 <tr style="font-size:13px;color:#64748b;">
-                                    <th>Nama</th>
-                                    <th class="text-center">Role</th>
-                                    <th class="text-center">Terbuat</th>
+                                    <th>Nama Tenant</th>
+                                    <th class="text-center">Pemilik</th>
+                                    <th class="text-center">Status</th>
+                                    <th class="text-center">Tanggal Pendaftaran</th>
                                     <th class="text-center">Aksi</th>
                                 </tr>
                             </thead>
@@ -549,9 +594,9 @@ include '../../sessions/session.php';
                             $q = mysqli_query($conn,"
                             SELECT
                                 *
-                            FROM users
-                            WHERE role = 'staff kasir'
-                            ORDER BY fullname ASC
+                            FROM tenants
+                            WHERE deleted_at IS NULL
+                            ORDER BY tenant_name ASC
                             ");
                             while($d=mysqli_fetch_assoc($q)): ?>
 
@@ -560,23 +605,17 @@ include '../../sessions/session.php';
                                 <td>
                                     <div class="product-wrap">
 
-                                        <?php if(!empty($d['photo'])): ?>
-                                            <img class="avatar-photo"
-                                                src="/qieos/assets/img/uploads/<?= htmlspecialchars($d['photo']) ?>"
-                                                alt="<?= htmlspecialchars($d['fullname']) ?>">
-                                        <?php else: ?>
-                                            <div class="avatar">
-                                                <i class="fas fa-user"></i>
-                                            </div>
-                                        <?php endif; ?>
+                                        <div class="avatar">
+                                            <i class="fas fa-store"></i>
+                                        </div>
 
                                         <div>
                                             <div class="fw-bold">
-                                                <?= htmlspecialchars($d['fullname']) ?>
+                                                <?= htmlspecialchars($d['tenant_name']) ?>
                                             </div>
 
-                                            <small class="text-muted text-capitalize">
-                                                <?= htmlspecialchars($d['username']) ?>
+                                            <small class="text-muted">
+                                                Tenant PISS
                                             </small>
                                         </div>
 
@@ -586,37 +625,45 @@ include '../../sessions/session.php';
                                 <td class="text-center">
 
                                     <span class="stock-badge unit-badge text-capitalize">
-                                        <i class="fas fa-id-badge me-1"></i>
-                                        <?= htmlspecialchars($d['role']) ?>
+                                        <i class="fas fa-user me-1"></i>
+                                        <?= htmlspecialchars($d['tenant_owner']) ?>
+                                    </span>
+
+                                </td>
+                                
+
+                                <td class="text-center">
+
+                                    <span class="stock-badge status-badge text-capitalize">
+                                        <i class="fas fa-check me-1"></i>
+                                        <?= htmlspecialchars($d['status']) ?>
                                     </span>
 
                                 </td>
 
                                 <td class="text-center">
-
                                     <span class="unit-badge">
-                                        <i class="fas fa-cubes me-1"></i>
+                                        <i class="fas fa-calendar-alt me-1"></i>
                                         <?php
                                         $bulan = [
                                             1 => 'Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun',
                                             'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'
                                         ];
 
-                                        $tgl = strtotime($d['created_at']);
+                                        $tgl = strtotime($d['registration_date']);
                                         echo date('d', $tgl) . ' ' . $bulan[(int)date('n', $tgl)] . ' ' . date('Y', $tgl);
                                         ?>
                                     </span>
-
                                 </td>
 
                                 <td class="text-center">
-                                    <button class="action-btn btn-edit editStaffBtn" data-id="<?= $d['id'] ?>">
+                                    <button class="action-btn btn-edit editRegistrationBtn" data-id="<?= $d['id'] ?>">
                                         <i class="fas fa-edit"></i>
                                     </button>
 
-                                    <button class="action-btn btn-delete deleteStaffBtn"
+                                    <button class="action-btn btn-delete deleteRegistrationBtn"
                                         data-id="<?= $d['id'] ?>"
-                                        data-fullname="<?= $d['fullname'] ?>">
+                                        data-name="<?= $d['tenant_name'] ?>">
                                         <i class="fas fa-trash"></i>
                                     </button>
                                 </td>
@@ -633,7 +680,7 @@ include '../../sessions/session.php';
     </div>
 
     <!-- Add MODAL -->
-    <div class="modal fade" id="addStaffModal" tabindex="-1">
+    <div class="modal fade" id="addRegistrationModal" tabindex="-1">
         <div class="modal-dialog modal-xl modal-dialog-centered">
             <div class="modal-content stock-panel border-0">
 
@@ -645,10 +692,10 @@ include '../../sessions/session.php';
 
                         <div>
                             <div class="panel-title">
-                                Tambah Staff Kasir 
+                                Tambah Tenant 
                             </div>
                             <div class="panel-subtitle">
-                                Tambah nama, username, dan password
+                                Masukkan nama tenant dan pemilik tenant
                             </div>
                         </div>
                     </div>
@@ -656,13 +703,13 @@ include '../../sessions/session.php';
                     <button class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
 
-                <div class="mt-2 px-5" id="addStaffContent"></div>
+                <div class="mt-2 px-5" id="addRegistrationContent"></div>
             </div>
         </div>
     </div>
 
     <!-- EDIT MODAL -->
-    <div class="modal fade" id="editStaffModal" tabindex="-1">
+    <div class="modal fade" id="editRegistrationModal" tabindex="-1">
         <div class="modal-dialog modal-xl modal-dialog-centered">
             <div class="modal-content stock-panel border-0">
 
@@ -674,10 +721,10 @@ include '../../sessions/session.php';
 
                         <div>
                             <div class="panel-title">
-                                Edit Staff Kasir 
+                                Edit Tenant 
                             </div>
                             <div class="panel-subtitle">
-                                Edit nama, username, dan password
+                                Edit nama tenant dan pemilik tenant
                             </div>
                         </div>
                     </div>
@@ -685,7 +732,7 @@ include '../../sessions/session.php';
                     <button class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
 
-                <div class="mt-2 px-5" id="editStaffContent"></div>
+                <div class="mt-2 px-5" id="editRegistrationContent"></div>
             </div>
         </div>
     </div>
@@ -703,12 +750,12 @@ include '../../sessions/session.php';
             autoWidth: false,
             language:{
                 search:"",
-                searchPlaceholder:"Cari staff kasir...",
+                searchPlaceholder:"Cari tenant...",
 
                 zeroRecords: `
                     <div class="empty-search">
                         <img src="../../assets/img/illustrations/empty-data.png" class="empty-img">
-                        <div class="empty-title">Staff kasir tidak ditemukan</div>
+                        <div class="empty-title">Tenant tidak ditemukan</div>
                         <div class="empty-sub">
                             Coba gunakan kata kunci lain
                         </div>
@@ -718,9 +765,9 @@ include '../../sessions/session.php';
                 emptyTable: `
                     <div class="empty-search">
                         <img src="../../assets/img/illustrations/empty-data.png" class="empty-img">
-                        <div class="empty-title">Belum ada data staff kasir</div>
+                        <div class="empty-title">Belum ada data Tenant</div>
                         <div class="empty-sub">
-                            Silakan tambahkan staff kasir terlebih dahulu
+                            Silakan tambahkan tenant terlebih dahulu
                         </div>
                     </div>
                 `
@@ -741,31 +788,31 @@ include '../../sessions/session.php';
 <!-- Script Add -->
 <script>
     // Add Modal
-    $(document).on('click','#btnAddStaff',function(){
+    $(document).on('click','#btnAddRegistration',function(){
 
-        $('#addStaffModal').modal('show');
+        $('#addRegistrationModal').modal('show');
 
-        document.getElementById('addStaffContent').innerHTML = `
+        document.getElementById('addRegistrationContent').innerHTML = `
             <div class="text-center py-5">
                 <i class="fas fa-spinner fa-spin fa-2x text-secondary"></i>
             </div>
         `;
 
-        fetch('cashier-add.php')
+        fetch('registration-add.php')
         .then(res => res.text())
         .then(html => {
-            document.getElementById('addStaffContent').innerHTML = html;
+            document.getElementById('addRegistrationContent').innerHTML = html;
         });
 
     });
 
     // Add Action
-    $(document).on('submit','#addStaffForm',function(e){
+    $(document).on('submit','#addRegistrationForm',function(e){
         e.preventDefault();
 
         let formData = new FormData(this);
 
-        fetch('cashier-action.php?action=store',{
+        fetch('registration-action.php?action=store',{
             method:'POST',
             body:formData
         })
@@ -781,7 +828,7 @@ include '../../sessions/session.php';
                     showConfirmButton:false
                 });
 
-                $('#addStaffModal').modal('hide');
+                $('#addRegistrationModal').modal('hide');
 
                 setTimeout(() => {
                     location.reload();
@@ -811,34 +858,34 @@ include '../../sessions/session.php';
 <!-- Script Edit -->
 <script>
     // OPEN EDIT MODAL
-    $(document).on('click','.editStaffBtn',function(){
+    $(document).on('click','.editRegistrationBtn',function(){
 
         let id = $(this).data('id');
 
-        $('#editStaffModal').modal('show');
+        $('#editRegistrationModal').modal('show');
 
-        document.getElementById('editStaffContent').innerHTML = `
+        document.getElementById('editRegistrationContent').innerHTML = `
             <div class="text-center py-5">
                 <i class="fas fa-spinner fa-spin fa-2x text-secondary"></i>
             </div>
         `;
 
-        fetch('cashier-edit.php?id=' + id)
+        fetch('registration-edit.php?id=' + id)
         .then(res => res.text())
         .then(html => {
-            document.getElementById('editStaffContent').innerHTML = html;
+            document.getElementById('editRegistrationContent').innerHTML = html;
         });
 
     });
 
     // Edit Action
-    $(document).on('submit','#editStaffForm',function(e){
+    $(document).on('submit','#editRegistrationForm',function(e){
         e.preventDefault();
 
         let formData = new FormData(this);
         let id = formData.get('id');
 
-        fetch('cashier-action.php?action=update&id='+id,{
+        fetch('registration-action.php?action=update&id='+id,{
             method:'POST',
             body:formData
         })
@@ -854,7 +901,7 @@ include '../../sessions/session.php';
                     showConfirmButton:false
                 });
 
-                $('#editStaffModal').modal('hide');
+                $('#editRegistrationModal').modal('hide');
 
                 setTimeout(() => {
                     location.reload();
@@ -884,17 +931,17 @@ include '../../sessions/session.php';
 <!-- Script Delete -->
 <script>
     // Delete Action
-    $(document).on('click','.deleteStaffBtn',function(){
+    $(document).on('click','.deleteRegistrationBtn',function(){
 
         let id = $(this).data('id');
-        let fullname = $(this).data('fullname');
+        let name = $(this).data('name');
 
         Swal.fire({
-            title:'Hapus Staff Kasir?',
+            title:'Hapus Tenant?',
             html:`
                 <div style="text-align:center">
-                    <small style="color:#94a3b8">Nama staff kasir:</small><br>
-                    ${fullname}
+                    <small style="color:#94a3b8">Nama tenant:</small><br>
+                    ${name}
                 </div>
             `,
             icon:'warning',
@@ -906,7 +953,7 @@ include '../../sessions/session.php';
 
             if(result.isConfirmed){
 
-                fetch('cashier-action.php?action=destroy', {
+                fetch('registration-action.php?action=destroy', {
                     method: 'POST',
                     body: new URLSearchParams({ id: id })
                 })

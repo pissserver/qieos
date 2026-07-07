@@ -86,8 +86,8 @@
                                         $error = $_GET['error'];
                                         if($error == 'empty'){
                                             echo '<div class="alert alert-danger mt-3">Semua field harus diisi.</div>';
-                                        } elseif($error == 'email'){
-                                            echo '<div class="alert alert-danger mt-3">Email tidak ditemukan.</div>';
+                                        } elseif($error == 'username'){
+                                            echo '<div class="alert alert-danger mt-3">Username tidak ditemukan.</div>';
                                         } elseif($error == 'password'){
                                             echo '<div class="alert alert-danger mt-3">Password salah.</div>';
                                         }
@@ -97,7 +97,7 @@
                                 <form action="sign-in-action.php" method="POST" class="mt-4">
                                     <!-- Form -->
                                     <div class="form-group mb-4">
-                                        <label for="email">Email</label>
+                                        <label for="username">Username</label>
                                         <div class="input-group">
                                             <span
                                                 class="input-group-text"
@@ -118,12 +118,12 @@
                                                 </svg>
                                             </span>
                                             <input
-                                                type="email"
+                                                type="text"
                                                 class="form-control"
-                                                placeholder="Email"
-                                                id="email"
-                                                name="email"
-                                                value="<?php echo isset($_COOKIE['email']) ? $_COOKIE['email'] : ''; ?>"
+                                                placeholder="Username"
+                                                id="username"
+                                                name="username"
+                                                value="<?php echo isset($_COOKIE['username']) ? $_COOKIE['username'] : ''; ?>"
                                                 autofocus
                                                 required
                                             />
@@ -172,7 +172,7 @@
                                             class="d-flex justify-content-between align-items-top mb-4"
                                         >
                                             <div class="form-check">
-                                                <input class="form-check-input" type="checkbox" name="remember" id="remember" <?php echo (isset($_COOKIE['email'])) ? 'checked' : ''; ?> />
+                                                <input class="form-check-input" type="checkbox" name="remember" id="remember" <?php echo (isset($_COOKIE['username'])) ? 'checked' : ''; ?> />
                                                 <label class="form-check-label mb-0" for="remember">Ingat saya</label>
                                             </div>
                                             <div>

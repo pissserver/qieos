@@ -3,21 +3,20 @@
     include '../script/connection.php';
 
     if ($_SERVER["REQUEST_METHOD"] == "POST") {
-        $email = isset($_POST['email']) ? $_POST['email'] : '';
+        $username = isset($_POST['username']) ? $_POST['username'] : '';
         $password = isset($_POST['password']) ? $_POST['password'] : '';
 
         // Validasi input
-        if($email==''||$password==''){
+        if($username==''||$password==''){
             header("Location:sign-in.php?error=empty");
             exit;
         }
 
-        // Cek email di database
-        $stmt = $conn->prepare("SELECT id, email, password FROM users WHERE email = ?");
-        $stmt->bind_param("s", $email);
+        // Cek username di database
+        $stmt = $conn->prepare("SELECT id, username, password FROM users WHERE username = ?");
+        $stmt->bind_param("s", $username);
         $stmt->execute();
         $result = $stmt->get_result();
-
 
         if ($result->num_rows > 0) {
             $row = $result->fetch_assoc();
@@ -25,13 +24,13 @@
                 // Login berhasil
                 session_start();
                 $_SESSION['user_id'] = $row['id'];
-                $_SESSION['email'] = $row['email'];
+                $_SESSION['username'] = $row['username'];
 
                 // Jika user centang "ingat saya"
                 if (isset($_POST['remember'])) {
-                    setcookie("email", $row['email'], time() + (86400 * 30), "/"); // 30 hari
+                    setcookie("username", $row['username'], time() + (86400 * 30), "/"); // 30 hari
                 } else {
-                    setcookie("email", "", time() - 3600, "/"); // Hapus cookie
+                    setcookie("username", "", time() - 3600, "/"); // Hapus cookie
                 }
 
                 header("Location:../index.php");
@@ -42,8 +41,8 @@
                 exit;
             }
         } else {
-            // Email tidak ditemukan
-            header("Location:sign-in.php?error=email");
+            // Username tidak ditemukan
+            header("Location:sign-in.php?error=username");
             exit;
         }
 

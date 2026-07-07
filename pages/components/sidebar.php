@@ -3,6 +3,16 @@
 ?>
 
 <style>
+    .sidebar {
+        background:
+            linear-gradient(
+                135deg,
+                #081120,
+                #0f1f3a,
+                #081120
+            );
+    }
+    
     .sidebar-footer {
         padding: 20px 16px;
         text-align: center;
@@ -197,7 +207,7 @@
                         alt="Your Image" />
                 </div>
                 <div class="d-block">
-                    <h2 class="h5 mb-3">Hi, <?php echo $user['fullname'] != '' ? $user['fullname'] : $_SESSION['email']; ?></h2>
+                    <h2 class="h5 mb-3">Hi, <?php echo $user['fullname'] != '' ? $user['fullname'] : $_SESSION['username']; ?></h2>
                     <a
                         href="/qieos/sessions/logout.php"
                         class="btn btn-secondary btn-sm d-inline-flex align-items-center">
@@ -314,6 +324,27 @@
                             <i class="fas fa-exchange-alt me-2"></i>
                         </span>
                         <span>Transfer ke Penjualan</span>
+                    </a>
+                </li>
+
+                <!-- TENANT -->
+                <li class="nav-title">TENANT</li>
+
+                <li class="nav-item <?= ($current_page == 'registration.php') ? 'active' : ''; ?>">
+                    <a href="/qieos/pages/tenant/registration.php" class="nav-link">
+                        <span class="sidebar-icon">
+                            <i class="fas fa-pen-to-square me-2"></i>
+                        </span>
+                        <span>Pendaftaran Tenant</span>
+                    </a>
+                </li>
+
+                <li class="nav-item <?= ($current_page == 'tenant.php') ? 'active' : ''; ?>">
+                    <a href="/qieos/pages/tenant/tenant.php" class="nav-link">
+                        <span class="sidebar-icon">
+                            <i class="fas fa-store me-2"></i>
+                        </span>
+                        <span>Tenant</span>
                     </a>
                 </li>
 

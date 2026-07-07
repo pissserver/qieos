@@ -36,9 +36,9 @@ $d = mysqli_fetch_assoc($q);
 
     <div class="col-md-6">
         <div class="input-group-modern">
-            <div class="input-icon"><i class="fas fa-envelope"></i></div>
-            <input type="email" name="email" class="form-control"
-                value="<?= $d['email'] ?>">
+            <div class="input-icon"><i class="fas fa-user"></i></div>
+            <input type="text" name="username" class="form-control"
+                value="<?= $d['username'] ?>">
         </div>
     </div>
 

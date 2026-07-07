@@ -68,7 +68,7 @@
 
                                     <div class="login-title-wrap">
                                         <h1 class="login-title">Selamat Datang</h1>
-                                        <p class="login-subtitle">Login akun Qieos anda</p>
+                                        <p class="login-subtitle">Daftar akun Qieos anda</p>
                                     </div>
                                 </div>
 
@@ -82,8 +82,8 @@
                                             echo '<div class="alert alert-danger mt-3">Password dan konfirmasi tidak sama.</div>';
                                         }
 
-                                        if($_GET['error']=="email"){
-                                            echo '<div class="alert alert-danger mt-3">Email sudah terdaftar.</div>';
+                                        if($_GET['error']=="username"){
+                                            echo '<div class="alert alert-danger mt-3">Username sudah terdaftar.</div>';
                                         }
                                     }
                                 ?>
@@ -123,7 +123,7 @@
                                     </div>
 
                                     <div class="form-group mb-4">
-                                        <label for="email">Email Anda</label>
+                                        <label for="username">Username Anda</label>
                                         <div class="input-group">
                                             <span
                                                 class="input-group-text"
@@ -136,19 +136,18 @@
                                                     xmlns="http://www.w3.org/2000/svg"
                                                 >
                                                     <path
-                                                        d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z"
-                                                    ></path>
-                                                    <path
-                                                        d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z"
+                                                        fill-rule="evenodd"
+                                                        d="M10 2a4 4 0 100 8 4 4 0 000-8zM4 15a6 6 0 1112 0v1H4v-1z"
+                                                        clip-rule="evenodd"
                                                     ></path>
                                                 </svg>
                                             </span>
                                             <input
-                                                type="email"
+                                                type="text"
                                                 class="form-control"
-                                                placeholder="example@company.com"
-                                                id="email"
-                                                name="email"
+                                                placeholder="Username"
+                                                id="username"
+                                                name="username"
                                                 autofocus
                                                 required
                                             />

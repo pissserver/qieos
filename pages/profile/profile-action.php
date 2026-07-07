@@ -7,7 +7,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $password = $_POST['password'] ? $_POST['password'] : '';
     $password_confirm = $_POST['password_confirm'] ? $_POST['password_confirm'] : '';
 
-    $email = $_SESSION['email'];
+    $username = $_SESSION['username'];
 
     // update password hanya jika diisi
     if (!empty($password)) {
@@ -21,15 +21,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         $sql = "UPDATE users 
                 SET fullname='$fullname', 
-                    email='$email', 
                     password='$hashedPassword'
-                WHERE email='$email'";
+                WHERE username='$username'";
 
         $resultPassword = mysqli_query($conn, $sql);
     } else {
         $sql = "UPDATE users 
                 SET fullname='$fullname'
-                WHERE email='$email'";
+                WHERE username='$username'";
 
         $result = mysqli_query($conn, $sql);
     }

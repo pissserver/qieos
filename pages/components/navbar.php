@@ -779,7 +779,7 @@
                     <div class="premium-user">
 
                         <div class="premium-name">
-                            <?php echo $user['fullname'] != '' ? $user['fullname'] : $_SESSION['email']; ?>
+                            <?php echo $user['fullname'] != '' ? $user['fullname'] : $_SESSION['username']; ?>
                         </div>
 
                         <div class="premium-role">

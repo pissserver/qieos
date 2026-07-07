@@ -638,8 +638,8 @@ include '../../sessions/session.php';
                                                 <?= htmlspecialchars($d['fullname']) ?>
                                             </div>
 
-                                            <small class="text-muted">
-                                                <?= htmlspecialchars($d['email']) ?>
+                                            <small class="text-muted text-capitalize">
+                                                <?= htmlspecialchars($d['username']) ?>
                                             </small>
                                         </div>
 
@@ -682,7 +682,7 @@ include '../../sessions/session.php';
                                             <i class="fas fa-lock me-1"></i>
                                             Tidak dapat diubah
                                         </span>
-                                    <?php elseif($d['email'] === $_SESSION['email']): ?>
+                                    <?php elseif($d['username'] === $_SESSION['username']): ?>
                                         <span class="text-muted" style="font-size:13px;">
                                             <i class="fas fa-lock me-1"></i>
                                             Anda
@@ -727,7 +727,7 @@ include '../../sessions/session.php';
                                 Tambah Administrator 
                             </div>
                             <div class="panel-subtitle">
-                                Tambah nama, email, dan password
+                                Tambah nama, username, dan password
                             </div>
                         </div>
                     </div>
@@ -756,7 +756,7 @@ include '../../sessions/session.php';
                                 Edit Administrator 
                             </div>
                             <div class="panel-subtitle">
-                                Edit nama, email, dan password
+                                Edit nama, username, dan password
                             </div>
                         </div>
                     </div>
@@ -782,12 +782,12 @@ include '../../sessions/session.php';
             autoWidth: false,
             language:{
                 search:"",
-                searchPlaceholder:"Cari produk...",
+                searchPlaceholder:"Cari administrator...",
 
                 zeroRecords: `
                     <div class="empty-search">
                         <img src="../../assets/img/illustrations/empty-data.png" class="empty-img">
-                        <div class="empty-title">Produk tidak ditemukan</div>
+                        <div class="empty-title">Administrator tidak ditemukan</div>
                         <div class="empty-sub">
                             Coba gunakan kata kunci lain
                         </div>
@@ -797,9 +797,9 @@ include '../../sessions/session.php';
                 emptyTable: `
                     <div class="empty-search">
                         <img src="../../assets/img/illustrations/empty-data.png" class="empty-img">
-                        <div class="empty-title">Belum ada data produk</div>
+                        <div class="empty-title">Belum ada data administrator</div>
                         <div class="empty-sub">
-                            Silakan tambahkan stok terlebih dahulu
+                            Silakan tambahkan administrator terlebih dahulu
                         </div>
                     </div>
                 `

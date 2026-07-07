@@ -271,6 +271,28 @@ include '../../sessions/session.php';
 
     }
 
+    .username-badge{
+
+        display:inline-block;
+
+        padding:8px 16px;
+
+        background: #fff6ee;
+
+        color: #e56946;
+
+        border-radius:100px;
+
+        font-size:12px;
+
+        font-weight:700;
+
+        letter-spacing:1px;
+
+        margin-bottom:18px;
+
+    }
+
     .profile-content h2{
 
         font-size:30px;
@@ -503,7 +525,7 @@ include '../../sessions/session.php';
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <!-- Primary Meta Tags -->
-    <title>Profile - Cartify</title>
+    <title>Profile - Qieos</title>
 
     <?php include '../../script/headscript.php'; ?>
 </head>
@@ -551,12 +573,12 @@ include '../../sessions/session.php';
                         </div>
 
                         <div class="field">
-                            <label>Alamat Email</label>
+                            <label>Username</label>
                             <input
-                                type="email"
-                                value="<?= $_SESSION['email']; ?>"
+                                type="text"
+                                value="<?= $_SESSION['username']; ?>"
                                 readonly
-                                name="email">
+                                name="username">
                         </div>
 
                         <div class="field">
@@ -632,9 +654,9 @@ include '../../sessions/session.php';
                             <?= $user['fullname'] != '' ? ucwords(strtolower($user['fullname'])) : 'Unknown User'; ?>
                         </h2>
 
-                        <p>
-                            <?= $_SESSION['email']; ?>
-                        </p>
+                        <span class="username-badge">
+                            <?= strtoupper($user['username']) ?>
+                        </span>
 
                         <div class="profile-divider"></div>
 
