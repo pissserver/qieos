@@ -716,7 +716,7 @@ include '../../sessions/session.php';
                 <div class="panel-header panel-dark my-3 mx-3">
                     <div class="panel-left">
                         <div class="panel-icon">
-                            <i class="fas fas fa-file-alt"></i>
+                            <i class="fas fas fa-store"></i>
                         </div>
 
                         <div>

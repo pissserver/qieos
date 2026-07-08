@@ -339,7 +339,7 @@
                     </a>
                 </li>
 
-                <li class="nav-item <?= ($current_page == 'tenant.php') ? 'active' : ''; ?>">
+                <li class="nav-item <?= ($current_page == 'tenant.php' || $current_page == 'tenant-detail.php') ? 'active' : ''; ?>">
                     <a href="/qieos/pages/tenant/tenant.php" class="nav-link">
                         <span class="sidebar-icon">
                             <i class="fas fa-store me-2"></i>
@@ -401,6 +401,18 @@
                     </a>
                 </li>
 
+                <!-- TENANT -->
+                <li class="nav-title">TENANT</li>
+
+                <li class="nav-item <?= ($current_page == 'tenant.php' || $current_page == 'tenant-detail.php') ? 'active' : ''; ?>">
+                    <a href="/qieos/pages/tenant/tenant.php" class="nav-link">
+                        <span class="sidebar-icon">
+                            <i class="fas fa-store me-2"></i>
+                        </span>
+                        <span>Daftar Tenant</span>
+                    </a>
+                </li>
+
                 <!-- REKAP -->
                 <li class="nav-title">REKAP</li>
 
@@ -409,7 +421,7 @@
                         <span class="sidebar-icon">
                             <i class="fas fa-chart-bar me-2"></i>
                         </span>
-                        <span>Rekap Penjualan</span>
+                        <span>Penjualan & Tenant</span>
                     </a>
                 </li>
             <?php } ?>
