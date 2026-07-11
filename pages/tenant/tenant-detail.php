@@ -14,7 +14,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>Mutasi Stok - Qieos</title>
+    <title>Detail Tenant - Qieos</title>
     <?php include '../../script/headscript.php'; ?>
 
     <style>
@@ -1178,6 +1178,36 @@
             }
         });
     });
+</script>
+
+<!-- Print Receipt -->
+<script>
+    function printReceipt(id, type) {
+        const receiptUrl = `../receipt-tenant.php?payment_id=${id}&type=${type}`;
+
+        // buka struk di tab baru
+        const newWindow = window.open(receiptUrl, '_blank');
+
+        // OPTIONAL: auto focus
+        if (newWindow) {
+            newWindow.focus();
+        }
+
+        if ($type == 'tenant') {
+            $tittle = 'Pembayaran Tenant';
+        } else {
+            $tittle = 'Pembayaran Air & Listrik';
+        }
+
+        // SHARE (jika user klik manual)
+        if (navigator.share) {
+            navigator.share({
+                title: 'Struk ' + $tittle,
+                text: 'Berikut struk ' + $tittle,
+                url: receiptUrl
+            }).catch(err => console.log(err));
+        }
+    }
 </script>
 
 </body>

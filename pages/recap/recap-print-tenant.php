@@ -4,20 +4,27 @@ include '../../sessions/session.php';
 
 $first_date = $_GET['first_date'] ? $_GET['first_date'] : '';
 $last_date  = $_GET['last_date'] ? $_GET['last_date'] : '';
+$type  = $_GET['type'] ? $_GET['type'] : '';
+
+if ($type === 'utility') {
+    $table = 'utility_payments';
+    $title = 'AIR & LISTRIK';
+} elseif ($type === 'tenant') {
+    $table = 'tenant_payments';
+    $title = 'TENANT';
+}
 
 $query = mysqli_query($conn,"
 SELECT
-    o.*,
-    u.fullname
-FROM orders o
-LEFT JOIN users u
-ON o.staff_id = u.id
-WHERE DATE(o.tanggal)
+    p.*, t.tenant_name 
+FROM $table p
+LEFT JOIN tenants t ON p.tenant_id = t.id
+WHERE DATE(payment_date)
 BETWEEN '$first_date' AND '$last_date'
-ORDER BY o.tanggal ASC,o.id ASC
+ORDER BY payment_date ASC, id ASC
 ");
 
-$totalOrder = 0;
+$totalPayment = 0;
 $grandTotal = 0;
 
 $data = [];
@@ -25,12 +32,12 @@ $data = [];
 while($row = mysqli_fetch_assoc($query)){
 
     $data[] = $row;
-    $totalOrder++;
-    $grandTotal += $row['total'];
+    $totalPayment++;
+    $grandTotal += $row['cost_payment'];
     
 }
 
-$avg = $totalOrder ? ($grandTotal / $totalOrder) : 0;
+$avg = $totalPayment ? ($grandTotal / $totalPayment) : 0;
 
 ?>
 
@@ -40,7 +47,7 @@ $avg = $totalOrder ? ($grandTotal / $totalOrder) : 0;
 <head>
 
     <meta charset="UTF-8">
-    <title>Print Rekap Penjualan - Qieos</title>
+    <title>Print Rekap Pembayaran - Qieos</title>
     <link
         rel="icon"
         sizes="120x120"
@@ -199,7 +206,7 @@ $avg = $totalOrder ? ($grandTotal / $totalOrder) : 0;
             </div>
 
             <div class="title">
-                REKAP PENJUALAN
+                REKAP PEMBAYARAN <?= $title ?>
             </div>
 
             <div class="small">
@@ -218,8 +225,8 @@ $avg = $totalOrder ? ($grandTotal / $totalOrder) : 0;
         </div>
 
         <div class="row">
-            <span>Total Order</span>
-            <span><?= $totalOrder; ?></span>
+            <span>Total Pembayaran</span>
+            <span><?= $totalPayment; ?></span>
         </div>
 
         <hr>
@@ -228,19 +235,15 @@ $avg = $totalOrder ? ($grandTotal / $totalOrder) : 0;
             <div class="item">
 
                 <div class="code">
-                    <?= $d['code']; ?>
+                    <?= $d['tenant_name']; ?>
                 </div>
 
                 <div class="date">
-                    <?= date('d/m/Y',strtotime($d['tanggal'])); ?>
-                </div>
-
-                <div class="staff">
-                    <?= $d['fullname']; ?>
+                    <?= date('d/m/Y',strtotime($d['payment_date'])); ?>
                 </div>
 
                 <div class="amount">
-                    Rp <?= number_format($d['total'],0,',','.'); ?>
+                    Rp <?= number_format($d['cost_payment'],0,',','.'); ?>
                 </div>
 
             </div>

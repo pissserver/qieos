@@ -126,6 +126,10 @@ include '../../sessions/session.php';
         background:#ef4444;
     }
 
+    .btn-print{
+        background:linear-gradient(135deg,#334155,#0f172a);
+    }
+
     .date-main {
         font-weight: 600;
         color: #111;
@@ -290,6 +294,7 @@ include '../../sessions/session.php';
                             </td>
 
                             <td class="text-center">
+                                <?php if($user['role'] != 'staff kasir'): ?>
                                 <button class="action-btn btn-edit editPaymentBtn" data-id="<?= $d['id'] ?>" data-type="<?= $type ?>">
                                     <i class="fas fa-edit"></i>
                                 </button>
@@ -300,6 +305,11 @@ include '../../sessions/session.php';
                                     data-type="<?= $type ?>">
                                     <i class="fas fa-trash"></i>
                                 </button>
+                                <?php else: ?>
+                                    <button class="action-btn btn-print" onclick="printReceipt(<?= $d['id'] ?>, '<?= $type ?>')">
+                                        <i class="fas fa-print"></i>
+                                    </button>
+                                <?php endif; ?>
                             </td>
                         </tr>
                         <?php endwhile; ?>
