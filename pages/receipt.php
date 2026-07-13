@@ -8,7 +8,10 @@ $user = mysqli_query($conn, "
 ")->fetch_assoc();
 
 $order = mysqli_query($conn, "
-    SELECT * FROM orders WHERE id = $order_id
+    SELECT o.*, u.fullname
+    FROM orders o
+    LEFT JOIN users u ON o.staff_id = u.id
+    WHERE o.id = $order_id
 ")->fetch_assoc();
 
 $details = mysqli_query($conn, "
@@ -172,7 +175,7 @@ $details = mysqli_query($conn, "
 
         <div class="info row">
             <span>Kasir</span>
-            <span><?= $user['fullname'] ?></span>
+            <span><?= $order['fullname'] ?></span>
         </div>
 
         <hr>

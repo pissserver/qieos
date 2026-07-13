@@ -1003,6 +1003,17 @@
 
             if(res.status === 'success'){
 
+                const receiptUrl = `../receipt-tenant.php?payment_id=${res.payment_id}&type=${res.type}`;
+                    window.open(receiptUrl, '_blank');
+
+                if (navigator.share) {
+                    navigator.share({
+                        title: 'Struk Pembayaran',
+                        text: 'Berikut struk pembayaran' + type,
+                        url: receiptUrl
+                    });
+                }
+
                 Swal.fire({
                     icon:'success',
                     title:'Berhasil',

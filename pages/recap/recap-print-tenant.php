@@ -16,12 +16,13 @@ if ($type === 'utility') {
 
 $query = mysqli_query($conn,"
 SELECT
-    p.*, t.tenant_name 
+    p.*, t.tenant_name, u.fullname 
 FROM $table p
+LEFT JOIN users u ON p.staff_id = u.id
 LEFT JOIN tenants t ON p.tenant_id = t.id
 WHERE DATE(payment_date)
 BETWEEN '$first_date' AND '$last_date'
-ORDER BY payment_date ASC, id ASC
+ORDER BY p.payment_date ASC, t.tenant_name ASC
 ");
 
 $totalPayment = 0;
@@ -240,6 +241,10 @@ $avg = $totalPayment ? ($grandTotal / $totalPayment) : 0;
 
                 <div class="date">
                     <?= date('d/m/Y',strtotime($d['payment_date'])); ?>
+                </div>
+
+                <div class="staff">
+                    <?= $d['fullname']; ?>
                 </div>
 
                 <div class="amount">

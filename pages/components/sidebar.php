@@ -348,6 +348,27 @@
                     </a>
                 </li>
 
+                <!-- LAPORAN -->
+                <li class="nav-title">LAPORAN</li>
+
+                <li class="nav-item <?= ($current_page == 'report.php') ? 'active' : ''; ?>">
+                    <a href="/qieos/pages/management/administrator.php" class="nav-link">
+                        <span class="sidebar-icon">
+                            <i class="fas fa-chart-line me-2"></i>
+                        </span>
+                        <span>Laporan Penjualan</span>
+                    </a>
+                </li>
+
+                <li class="nav-item <?= ($current_page == 'report-tenant.php') ? 'active' : ''; ?>">
+                    <a href="/qieos/pages/report/report-tenant.php" class="nav-link">
+                        <span class="sidebar-icon">
+                            <i class="fas fa-chart-line me-2"></i>
+                        </span>
+                        <span>Laporan Tenant</span>
+                    </a>
+                </li>
+
                 <!-- MANAJEMEN STAFF -->
                 <li class="nav-title">MANAJEMEN USER</li>
 

@@ -12,13 +12,10 @@ if ($type === 'utility') {
     $title = "PEMBAYARAN TENANT";
 }
 
-$user = mysqli_query($conn, "
-    SELECT * FROM users WHERE username = '" . $_SESSION['username'] . "'
-")->fetch_assoc();
-
 $details = mysqli_query($conn, "
-    SELECT d.*, t.tenant_name
+    SELECT d.*, t.tenant_name, u.fullname
     FROM $table d
+    LEFT JOIN users u ON d.staff_id = u.id 
     LEFT JOIN tenants t ON d.tenant_id = t.id
     WHERE d.id = '$payment_id'
 ")->fetch_assoc();
@@ -148,18 +145,13 @@ $details = mysqli_query($conn, "
         <hr>
 
         <div class="row">
-            <span class="label">No.</span>
-            <span><?= $details['id'] ?></span>
-        </div>
-
-        <div class="row">
             <span class="label">Tanggal</span>
             <span><?= date('d/m/Y', strtotime($details['payment_date'])) ?></span>
         </div>
 
         <div class="row">
             <span class="label">Kasir</span>
-            <span><?= $user['fullname'] ?></span>
+            <span><?= $details['fullname'] ?></span>
         </div>
 
         <div class="row">

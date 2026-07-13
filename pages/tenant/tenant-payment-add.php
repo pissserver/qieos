@@ -207,7 +207,7 @@
     <div class="text-end mt-4 mb-3">
         <?php if ($total_payment == 0):?>
             <button type="submit" class="btn-save">
-                <i class="fas fa-plus me-1"></i>
+                <i class="fas fa-money-bill-wave me-1"></i>
                 Bayar
             </button>
         <?php else:?>

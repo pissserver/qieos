@@ -8,6 +8,7 @@
         $tenant_id = $_POST['tenant_id'];
         $cost_payment = $_POST['cost_payment'];
         $payment_date = $_POST['payment_date'];
+        $staff_id = $_SESSION['user_id'];
 
         if($type === 'utility'){
             $table = 'utility_payments';
@@ -16,13 +17,17 @@
         }
 
         mysqli_query($conn,"
-            INSERT INTO $table (tenant_id, cost_payment, payment_date, status)
-            VALUES ('$tenant_id', '$cost_payment', '$payment_date', 'paid')
+            INSERT INTO $table (staff_id, tenant_id, cost_payment, payment_date, status)
+            VALUES ('$staff_id', '$tenant_id', '$cost_payment', '$payment_date', 'paid')
         ");
+
+        $payment_id = mysqli_insert_id($conn);
 
         echo json_encode([
             'status' => 'success',
-            'message' => 'Data berhasil ditambahkan.'
+            'message' => 'Data berhasil ditambahkan.',
+            'payment_id' => $payment_id,
+            'type' => $type
         ]);
 
         exit;
