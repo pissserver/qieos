@@ -1090,6 +1090,40 @@
         let first = $("#first_date_all").val();
         let last  = $("#last_date_all").val();
 
+
+        // jika tanggal belum dipilih
+        if(first == "" || last == ""){
+
+            $("#reportAllBody").html(`
+
+                <tr>
+
+                    <td colspan="5">
+
+                        <div class="loading-box">
+
+                            <i class="fas fa-file-invoice-dollar"></i>
+
+                            <h5>Belum Ada Data</h5>
+
+                            <span>
+                                Silakan pilih tanggal awal dan tanggal akhir
+                                untuk menampilkan laporan.
+                            </span>
+
+                        </div>
+
+                    </td>
+
+                </tr>
+
+            `);
+
+            return;
+
+        }
+
+
         $.get(
             "tenant/report-all.php",
             {
@@ -1117,6 +1151,72 @@
         let id    = $("#tenant_id").val();
         let first = $("#first_date_single").val();
         let last  = $("#last_date_single").val();
+
+
+        // belum pilih tenant
+        if(id == ""){
+
+            $("#reportSingleBody").html(`
+
+                <tr>
+
+                    <td colspan="4">
+
+                        <div class="loading-box">
+
+                            <i class="fas fa-store"></i>
+
+                            <h5>Belum Ada Data</h5>
+
+                            <span>
+                                Pilih tenant terlebih dahulu untuk melihat laporan pembayaran.
+                            </span>
+
+                        </div>
+
+                    </td>
+
+                </tr>
+
+            `);
+
+            return;
+
+        }
+
+
+        // tenant sudah dipilih tapi tanggal belum lengkap
+        if(first == "" || last == ""){
+
+            $("#reportSingleBody").html(`
+
+                <tr>
+
+                    <td colspan="4">
+
+                        <div class="loading-box">
+
+                            <i class="fas fa-calendar-alt"></i>
+
+                            <h5>Pilih Periode</h5>
+
+                            <span>
+                                Silakan pilih tanggal awal dan tanggal akhir
+                                untuk menampilkan laporan.
+                            </span>
+
+                        </div>
+
+                    </td>
+
+                </tr>
+
+            `);
+
+            return;
+
+        }
+
 
         $.get(
             "tenant/report-single.php",

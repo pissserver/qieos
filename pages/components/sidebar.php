@@ -266,7 +266,8 @@
             <li class="nav-title">OVERVIEW</li>
 
             <li class="nav-item <?php echo ($current_page == 'dashboard.php') ? 'active' : ''; ?>">
-                <a href="/qieos/pages/dashboard.php" class="nav-link">
+                <!-- <a href="/qieos/pages/dashboard.php" class="nav-link"> -->
+                <a href="/qieos/pages/coming-soon.php" class="nav-link">
                     <span class="sidebar-icon">
                         <i class="fas fa-dashboard me-2"></i>
                     </span>
@@ -280,7 +281,8 @@
                 <li class="nav-title">PURCHASING</li>
 
                 <li class="nav-item <?= ($current_page == 'list.php') ? 'active' : ''; ?>">
-                    <a href="/qieos/pages/purchasing/list.php" class="nav-link">
+                    <!-- <a href="/qieos/pages/purchasing/list.php" class="nav-link"> -->
+                    <a href="/qieos/pages/coming-soon.php" class="nav-link">
                         <span class="sidebar-icon">
                             <i class="fas fa-file-alt me-3"></i>
                         </span>
@@ -289,7 +291,8 @@
                 </li>
 
                 <li class="nav-item <?= ($current_page == 'purchase.php') ? 'active' : ''; ?>">
-                    <a href="/qieos/pages/purchasing/purchase.php" class="nav-link">
+                    <!-- <a href="/qieos/pages/purchasing/purchase.php" class="nav-link"> -->
+                    <a href="/qieos/pages/coming-soon.php" class="nav-link">
                         <span class="sidebar-icon">
                             <i class="fas fa-cart-plus me-2"></i>
                         </span>
@@ -301,7 +304,8 @@
                 <li class="nav-title">GUDANG STOK</li>
 
                 <li class="nav-item <?= ($current_page == 'stock.php') ? 'active' : ''; ?>">
-                    <a href="/qieos/pages/stock/stock.php" class="nav-link">
+                    <!-- <a href="/qieos/pages/stock/stock.php" class="nav-link"> -->
+                    <a href="/qieos/pages/coming-soon.php" class="nav-link">
                         <span class="sidebar-icon">
                             <i class="fas fa-warehouse me-2"></i>
                         </span>
@@ -310,7 +314,8 @@
                 </li>
 
                 <li class="nav-item <?= ($current_page == 'mutation.php') ? 'active' : ''; ?>">
-                    <a href="/qieos/pages/stock/mutation.php" class="nav-link">
+                    <!-- <a href="/qieos/pages/stock/mutation.php" class="nav-link"> -->
+                    <a href="/qieos/pages/coming-soon.php" class="nav-link">
                         <span class="sidebar-icon">
                             <i class="fas fa-truck-ramp-box me-2"></i>
                         </span>
@@ -319,7 +324,8 @@
                 </li>
 
                 <li class="nav-item <?= ($current_page == 'transfer.php') ? 'active' : ''; ?>">
-                    <a href="/qieos/pages/stock/transfer.php" class="nav-link">
+                    <!-- <a href="/qieos/pages/stock/transfer.php" class="nav-link"> -->
+                    <a href="/qieos/pages/coming-soon.php" class="nav-link">
                         <span class="sidebar-icon">
                             <i class="fas fa-exchange-alt me-2"></i>
                         </span>
@@ -352,7 +358,8 @@
                 <li class="nav-title">LAPORAN</li>
 
                 <li class="nav-item <?= ($current_page == 'report.php') ? 'active' : ''; ?>">
-                    <a href="/qieos/pages/management/administrator.php" class="nav-link">
+                    <!-- <a href="/qieos/pages/management/administrator.php" class="nav-link"> -->
+                    <a href="/qieos/pages/coming-soon.php" class="nav-link">
                         <span class="sidebar-icon">
                             <i class="fas fa-chart-line me-2"></i>
                         </span>
@@ -373,7 +380,8 @@
                 <li class="nav-title">MANAJEMEN USER</li>
 
                 <li class="nav-item <?= ($current_page == 'administrator.php') ? 'active' : ''; ?>">
-                    <a href="/qieos/pages/management/administrator.php" class="nav-link">
+                    <!-- <a href="/qieos/pages/management/administrator.php" class="nav-link"> -->
+                    <a href="/qieos/pages/coming-soon.php" class="nav-link">
                         <span class="sidebar-icon">
                             <i class="fas fa-users me-2"></i>
                         </span>
@@ -382,7 +390,8 @@
                 </li>
 
                 <li class="nav-item <?= ($current_page == 'cashier.php') ? 'active' : ''; ?>">
-                    <a href="/qieos/pages/management/cashier.php" class="nav-link">
+                    <!-- <a href="/qieos/pages/management/cashier.php" class="nav-link"> -->
+                    <a href="/qieos/pages/coming-soon.php" class="nav-link">
                         <span class="sidebar-icon">
                             <i class="fas fa-users me-2"></i>
                         </span>
@@ -396,7 +405,8 @@
                 <li class="nav-title">PENJUALAN</li>
 
                 <li class="nav-item <?= ($current_page == 'sales-stock.php') ? 'active' : ''; ?>">
-                    <a href="/qieos/pages/sales/sales-stock.php" class="nav-link">
+                    <!-- <a href="/qieos/pages/sales/sales-stock.php" class="nav-link"> -->
+                    <a href="/qieos/pages/coming-soon.php" class="nav-link">
                         <span class="sidebar-icon">
                             <i class="fas fa-store me-2"></i>
                         </span>
@@ -405,7 +415,8 @@
                 </li>
 
                 <li class="nav-item <?= ($current_page == 'catalog.php') ? 'active' : ''; ?>">
-                    <a href="/qieos/pages/sales/catalog.php" class="nav-link">
+                    <!-- <a href="/qieos/pages/sales/catalog.php" class="nav-link"> -->
+                    <a href="/qieos/pages/coming-soon.php" class="nav-link">
                         <span class="sidebar-icon">
                             <i class="fas fa-book-open me-2"></i>
                         </span>
@@ -414,7 +425,8 @@
                 </li>
 
                 <li class="nav-item <?= ($current_page == 'order.php') ? 'active' : ''; ?>">
-                    <a href="/qieos/pages/sales/order.php" class="nav-link">
+                    <!-- <a href="/qieos/pages/sales/order.php" class="nav-link"> -->
+                    <a href="/qieos/pages/coming-soon.php" class="nav-link">
                         <span class="sidebar-icon">
                             <i class="fas fa-receipt me-3"></i>
                         </span>
