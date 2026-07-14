@@ -957,7 +957,7 @@
             <!-- Sidebar -->
             <div class="col-lg-3">
 
-                <div class="section-card h-100">
+                <div class="section-card">
 
                     <div class="panel-header panel-dark mb-4">
                         <div class="panel-left">
@@ -1021,28 +1021,34 @@
 
 <!-- Switch Main Tab -->
 <script>
+    let currentMainTab = "tenant";
+    let currentSubTab  = "all";
+
     function switchMainTab(type, el){
 
-        document.querySelectorAll(".payment-tab").forEach(btn=>{
-            btn.classList.remove("active");
-        });
+        $(".payment-tab").removeClass("active");
+        $(el).addClass("active");
 
-        el.classList.add("active");
+        currentMainTab = type;
 
-        // simpan jenis laporan
-        document.getElementById("reportType").value = type;
+        $("#reportType").val(type);
 
-        // refresh sub tab yang sedang aktif
-        const activeTab = document.querySelector(".report-menu-item.active");
+        if(type == "tenant"){
 
-        if(activeTab){
+            $("#titleReport").text("Laporan Pembayaran Tenant");
+            $("#subtitleReport").text("Menampilkan seluruh riwayat pembayaran seluruh tenant.");
 
-            if(activeTab.onclick.toString().includes("'all'")){
-                switchReportTab('all', activeTab);
-            }else{
-                switchReportTab('tenant', activeTab);
-            }
+        }else{
 
+            $("#titleReport").text("Laporan Pembayaran Air & Listrik");
+            $("#subtitleReport").text("Menampilkan seluruh riwayat pembayaran air & listrik.");
+
+        }
+
+        if(currentSubTab == "all"){
+            loadReportAll();
+        }else{
+            loadReportSingle();
         }
 
     }
@@ -1052,69 +1058,114 @@
 <script>
     function switchReportTab(tab, el){
 
-        document.querySelectorAll(".report-menu-item").forEach(item=>{
-            item.classList.remove("active");
-        });
+        currentSubTab = tab;
 
-        el.classList.add("active");
+        $(".report-menu-item").removeClass("active");
+        $(el).addClass("active");
 
-        document.getElementById("allTenantContent").style.display = "none";
-        document.getElementById("tenantContent").style.display = "none";
+        $("#allTenantContent").hide();
+        $("#tenantContent").hide();
 
         if(tab == "all"){
 
-            document.getElementById("allTenantContent").style.display = "block";
+            $("#allTenantContent").show();
+
+            loadReportAll();
 
         }else{
 
-            document.getElementById("tenantContent").style.display = "block";
+            $("#tenantContent").show();
 
-        }
-
-        // ambil type yang sedang aktif
-        const type = document.getElementById("reportType").value;
-
-        // ubah judul
-        const title = document.getElementById("reportTitle");
-
-        if(title){
-
-            title.innerHTML = (type == "tenant")
-                ? "Laporan Pembayaran Tenant"
-                : "Laporan Pembayaran Air & Listrik";
+            loadReportSingle();
 
         }
 
     }
 </script>
 
-<!-- Print Receipt -->
+<!-- Load Data Report -->
 <script>
-    function printReceipt(id, type) {
-        const receiptUrl = `../receipt-tenant.php?payment_id=${id}&type=${type}`;
+    function loadReportAll(){
 
-        // buka struk di tab baru
-        const newWindow = window.open(receiptUrl, '_blank');
+        let first = $("#first_date_all").val();
+        let last  = $("#last_date_all").val();
 
-        // OPTIONAL: auto focus
-        if (newWindow) {
-            newWindow.focus();
+        $.get(
+            "tenant/report-all.php",
+            {
+                type: $("#reportType").val(),
+                first_date: first,
+                last_date: last
+            },
+            function(res){
+
+                $("#reportAllBody").html(res);
+
+            }
+        );
+
+    }
+
+    $("#first_date_all,#last_date_all").on("change",function(){
+
+        loadReportAll();
+
+    });
+
+    function loadReportSingle(){
+
+        let id    = $("#tenant_id").val();
+        let first = $("#first_date_single").val();
+        let last  = $("#last_date_single").val();
+
+        $.get(
+            "tenant/report-single.php",
+            {
+                type: $("#reportType").val(),
+                tenant_id: id,
+                first_date: first,
+                last_date: last
+            },
+            function(res){
+
+                $("#reportSingleBody").html(res);
+
+            }
+        );
+
+    }
+
+    $("#tenant_id,#first_date_single,#last_date_single").on("change",function(){
+
+        loadReportSingle();
+
+    });
+</script>
+
+<!-- Print & Export -->
+<script>
+    function printPDF(tab){
+
+        let type = $("#reportType").val();
+        let url = "tenant/print-pdf.php?type=" + type;
+
+        if(tab == "all"){
+
+            url += "&tab=all";
+            url += "&first_date=" + $("#first_date_all").val();
+            url += "&last_date=" + $("#last_date_all").val();
+
+        }else{
+
+            url += "&tab=single";
+            url += "&tenant_id=" + $("#tenant_id").val();
+            url += "&first_date=" + $("#first_date_single").val();
+            url += "&last_date=" + $("#last_date_single").val();
+
         }
 
-        if ($type == 'tenant') {
-            $tittle = 'Pembayaran Tenant';
-        } else {
-            $tittle = 'Pembayaran Air & Listrik';
-        }
+        window.open(url, "_blank");
 
-        // SHARE (jika user klik manual)
-        if (navigator.share) {
-            navigator.share({
-                title: 'Struk ' + $tittle,
-                text: 'Berikut struk ' + $tittle,
-                url: receiptUrl
-            }).catch(err => console.log(err));
-        }
     }
 </script>
 

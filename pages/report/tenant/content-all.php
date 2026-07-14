@@ -52,7 +52,7 @@
                     Export Excel
                 </button>
 
-                <button class="btn btn-danger w-100">
+                <button class="btn btn-danger w-100" onclick="printPDF('all')">
                     <i class="fas fa-file-pdf me-2"></i>
                     Print PDF
                 </button>
@@ -73,17 +73,17 @@
 
                 <tr>
 
-                    <th width="60">No</th>
-                    <th>Nama Tenant</th>
-                    <th>Tanggal Pembayaran</th>
-                    <th>Jumlah Pembayaran</th>
-                    <th>Status</th>
+                    <th class="text-center" width="60">No</th>
+                    <th class="text-center">Nama Tenant</th>
+                    <th class="text-center">Tanggal Pembayaran</th>
+                    <th class="text-center">Jumlah Pembayaran</th>
+                    <th class="text-center">Status</th>
 
                 </tr>
 
             </thead>
 
-            <tbody>
+            <tbody id="reportAllBody">
 
                 <tr>
 

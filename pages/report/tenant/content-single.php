@@ -40,6 +40,18 @@
                     <option value="">
                         -- Pilih Tenant --
                     </option>
+                    <?php
+                        $qTenant = mysqli_query($conn,"
+                            SELECT *
+                            FROM tenants
+                            WHERE id != '$d[tenant_id]'
+                            ORDER BY tenant_name ASC
+                        ");
+
+                        while($tenant = mysqli_fetch_assoc($qTenant)){
+                            echo '<option value="'.$tenant['id'].'">'.$tenant['tenant_name'].'</option>';
+                        }
+                    ?>
 
                 </select>
 
@@ -77,7 +89,7 @@
                     <i class="fas fa-file-excel"></i>
                 </button>
 
-                <button class="btn btn-danger w-100">
+                <button class="btn btn-danger w-100" onclick="printPDF('single')">
                     <i class="fas fa-file-pdf"></i>
                 </button>
 
@@ -97,16 +109,16 @@
 
                 <tr>
 
-                    <th width="60">No</th>
-                    <th>Tanggal Pembayaran</th>
-                    <th>Jumlah Pembayaran</th>
-                    <th>Status</th>
+                    <th class="text-center" width="60">No</th>
+                    <th class="text-center">Tanggal Pembayaran</th>
+                    <th class="text-center">Jumlah Pembayaran</th>
+                    <th class="text-center">Status</th>
 
                 </tr>
 
             </thead>
 
-            <tbody>
+            <tbody id="reportSingleBody">
 
                 <tr>
 
