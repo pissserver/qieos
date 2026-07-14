@@ -7,4 +7,5 @@ $baseDir = dirname($vendorDir);
 
 return array(
     'Sabberworm\\CSS' => array($vendorDir . '/sabberworm/php-css-parser/lib'),
+    'PHPExcel' => array($vendorDir . '/phpoffice/phpexcel/Classes'),
 );

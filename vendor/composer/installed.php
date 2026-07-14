@@ -5,7 +5,7 @@
         'type' => 'library',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
-        'reference' => '0f5bc1e00ec04f3c00e1c848a6f92880e0f10919',
+        'reference' => 'edb88582899478b4e510d5f4cb5b2b0362000bb4',
         'name' => '__root__',
         'dev' => true,
     ),
@@ -16,7 +16,7 @@
             'type' => 'library',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
-            'reference' => '0f5bc1e00ec04f3c00e1c848a6f92880e0f10919',
+            'reference' => 'edb88582899478b4e510d5f4cb5b2b0362000bb4',
             'dev_requirement' => false,
         ),
         'dompdf/dompdf' => array(
@@ -44,6 +44,15 @@
             'install_path' => __DIR__ . '/../phenx/php-svg-lib',
             'aliases' => array(),
             'reference' => '5fa61b65e612ce1ae15f69b3d223cb14ecc60e32',
+            'dev_requirement' => false,
+        ),
+        'phpoffice/phpexcel' => array(
+            'pretty_version' => '1.8.2',
+            'version' => '1.8.2.0',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../phpoffice/phpexcel',
+            'aliases' => array(),
+            'reference' => '1441011fb7ecdd8cc689878f54f8b58a6805f870',
             'dev_requirement' => false,
         ),
         'sabberworm/php-css-parser' => array(

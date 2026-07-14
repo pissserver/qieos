@@ -85,7 +85,7 @@
 
             <div class="col-md-2 d-flex align-items-end">
 
-                <button class="btn btn-success me-2 w-100">
+                <button class="btn btn-success me-2 w-100" onclick="printExcel('single')">
                     <i class="fas fa-file-excel"></i>
                 </button>
 

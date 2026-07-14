@@ -47,7 +47,7 @@
 
             <div class="col-md-4 d-flex align-items-end">
 
-                <button class="btn btn-success me-2 w-100">
+                <button class="btn btn-success me-2 w-100" onclick="printExcel('all')">
                     <i class="fas fa-file-excel me-2"></i>
                     Export Excel
                 </button>

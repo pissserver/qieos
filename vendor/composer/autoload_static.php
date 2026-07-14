@@ -44,6 +44,13 @@ class ComposerStaticInit64864f1fcf37bd3661bbe55d7652f22c
                 0 => __DIR__ . '/..' . '/sabberworm/php-css-parser/lib',
             ),
         ),
+        'P' => 
+        array (
+            'PHPExcel' => 
+            array (
+                0 => __DIR__ . '/..' . '/phpoffice/phpexcel/Classes',
+            ),
+        ),
     );
 
     public static $classMap = array (

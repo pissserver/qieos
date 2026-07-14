@@ -1167,6 +1167,30 @@
         window.open(url, "_blank");
 
     }
+
+    function printExcel(tab){
+
+        let type = $("#reportType").val();
+        let url = "tenant/export-excel.php?type=" + type;
+
+        if(tab == "all"){
+
+            url += "&tab=all";
+            url += "&first_date=" + $("#first_date_all").val();
+            url += "&last_date=" + $("#last_date_all").val();
+
+        }else{
+
+            url += "&tab=single";
+            url += "&tenant_id=" + $("#tenant_id").val();
+            url += "&first_date=" + $("#first_date_single").val();
+            url += "&last_date=" + $("#last_date_single").val();
+
+        }
+
+        window.open(url, "_self");
+
+    }
 </script>
 
 </body>
