@@ -7,7 +7,7 @@
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
         <!-- Primary Meta Tags -->
-        <title>Lupa Password - Cartify</title>
+        <title>Lupa Password - Qieos</title>
         
         <?php include '../script/headscript.php'; ?>
     </head>
@@ -50,7 +50,7 @@
                             >
                                 <h1 class="h3">Lupa Password?</h1>
                                 <p class="mb-4">
-                                    Jangan khawatir! Cukup ketik email Anda dan kami
+                                    Jangan khawatir! Cukup ketik username Anda dan kami
                                     akan mengarahkan ke halaman untuk mereset password Anda.
                                 </p>
 
@@ -59,7 +59,7 @@
                                     if(isset($_GET['error'])){
                                         $error = $_GET['error'];
                                         if($error == 'invalid'){
-                                            echo '<div class="alert alert-danger mt-3">Email tidak ditemukan.</div>';
+                                            echo '<div class="alert alert-danger mt-3">Username tidak ditemukan.</div>';
                                         }
                                     }
                                 ?>
@@ -67,14 +67,14 @@
                                 <form action="forgot-password-action.php" method="POST">
                                     <!-- Form -->
                                     <div class="mb-4">
-                                        <label for="email">Email Anda</label>
+                                        <label for="username">Username Anda</label>
                                         <div class="input-group">
                                             <input
-                                                type="email"
+                                                type="username"
                                                 class="form-control"
-                                                id="email"
-                                                placeholder="example@gmail.com"
-                                                name="email"
+                                                id="username"
+                                                placeholder="Masukkan username"
+                                                name="username"
                                                 required
                                                 autofocus
                                             />

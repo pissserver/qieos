@@ -8,7 +8,7 @@
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
         <!-- Primary Meta Tags -->
-        <title>Reset Password - Cartify</title>
+        <title>Reset Password - Qieos</title>
         
         <?php include '../script/headscript.php'; ?>
     </head>
@@ -66,13 +66,13 @@
                                 <form action="reset-password-action.php" method="POST">
                                     <!-- Form -->
                                     <div class="mb-4">
-                                        <label for="email">Email Anda</label>
+                                        <label for="username">Username Anda</label>
                                         <div class="input-group">
                                             <input
-                                                type="email"
+                                                type="username"
                                                 class="form-control"
-                                                id="email"
-                                                value="<?php echo isset($_SESSION['reset_email']) ? $_SESSION['reset_email'] : ''; ?>"
+                                                id="username"
+                                                value="<?php echo isset($_SESSION['reset_username']) ? $_SESSION['reset_username'] : ''; ?>"
                                                 required
                                                 disabled
                                             />

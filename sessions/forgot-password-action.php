@@ -3,20 +3,20 @@
     include '../script/connection.php';
 
     if ($_SERVER["REQUEST_METHOD"] == "POST") {
-        $email = isset($_POST['email']) ? $_POST['email'] : '';
+        $username = isset($_POST['username']) ? $_POST['username'] : '';
 
-        // Cek email di database
-        $sql = "SELECT email FROM users WHERE email='$email'";
+        // Cek username di database
+        $sql = "SELECT username FROM users WHERE username='$username'";
         $result = $conn->query($sql);
 
         if ($result->num_rows > 0) {
             $row = $result->fetch_assoc();
 
-            $_SESSION['reset_email'] = $row['email'];
+            $_SESSION['reset_username'] = $row['username'];
             header("Location:reset-password.php");
             exit;
         } else {
-            // Email tidak ditemukan
+            // username tidak ditemukan
             header("Location:forgot-password.php?error=invalid");
             exit;
         }

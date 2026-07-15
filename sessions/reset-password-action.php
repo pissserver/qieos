@@ -15,7 +15,7 @@
         $hashed_password = password_hash($password, PASSWORD_DEFAULT);
 
         // Update database
-        $sql = "UPDATE users SET password='$hashed_password' WHERE email='".$_SESSION['reset_email']."'";
+        $sql = "UPDATE users SET password='$hashed_password' WHERE username='".$_SESSION['reset_username']."'";
         
         if ($conn->query($sql) === TRUE) {
             header("Location:sign-in.php?success=reset");
