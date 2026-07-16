@@ -472,7 +472,11 @@ include '../../sessions/session.php';
         border-radius:18px;
 
         background:
-        linear-gradient(135deg,#6366f1,#2563eb);
+        linear-gradient(
+            135deg,
+            #6366f1,
+            #2563eb
+        );
 
         color:white;
 

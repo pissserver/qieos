@@ -36,7 +36,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if ($resultPassword) {
         session_destroy();
-        header("Location: ../sessions/sign-in.php?success=reset");
+        header("Location: ../../sessions/sign-in.php?success=reset");
         exit();
     } elseif ($result) {
         $_SESSION['flash'] = "Profil berhasil diperbarui.";
