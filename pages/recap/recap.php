@@ -163,7 +163,9 @@
                     </div>
                 </div> -->
 
-                <!-- <div class="section-card mb-4 mt-5">
+                <!-- Hapus kondisi ketika sudah launching -->
+                <?php if ($user['role'] == 'developer') { ?>
+                <div class="section-card mb-4 mt-5">
                     <div class="panel-header panel-success">
                         <div class="panel-left">
                             <div class="panel-icon">
@@ -232,7 +234,8 @@
                             </div>
                         </form>
                     </div>
-                </div> -->
+                </div>
+                <?php } ?>
 
                 <div class="section-card mb-5 mt-2">
                     <div class="panel-header panel-primary">

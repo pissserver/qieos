@@ -254,6 +254,67 @@ include '../sessions/session.php';
 
                 }
 
+                /* Mobile */
+                @media (max-width: 768px) {
+
+                    .coming-card{
+                        padding:40px 25px;
+                        border-radius:18px;
+                    }
+
+                    .rocket{
+                        width:90px;
+                        height:90px;
+                        font-size:40px;
+                    }
+
+                    .coming-title{
+                        font-size:30px;
+                        line-height:1.25;
+                        text-align:center;
+                        word-break:break-word;
+                    }
+
+                    .coming-subtitle{
+                        font-size:15px;
+                        line-height:1.7;
+                        margin:18px auto 35px;
+                    }
+
+                    .coming-badge{
+                        font-size:12px;
+                        padding:8px 16px;
+                    }
+
+                    .feature-title{
+                        font-size:17px;
+                    }
+
+                    .feature-desc{
+                        font-size:14px;
+                    }
+
+                }
+
+                /* Extra Small Device */
+                @media (max-width: 480px){
+
+                    .coming-card{
+                        padding:35px 20px;
+                    }
+
+                    .coming-title{
+                        font-size:26px;
+                        line-height:1.3;
+                        padding:0 8px;
+                    }
+
+                    .coming-subtitle{
+                        font-size:14px;
+                    }
+
+                }
+
             </style>
 
             <div class="coming-wrapper">

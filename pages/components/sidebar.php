@@ -275,7 +275,11 @@
                 </a>
             </li>
 
-            <?php if ($user['role'] == 'developer' || $user['role'] == 'administrator') { ?>
+            <?php if ($user['role'] == 'developer') { ?>
+                <?php include 'sidebar_developer.php' ?>
+            <?php } ?>
+
+            <?php if ($user['role'] == 'administrator') { ?>
 
                 <!-- PEMBELIAN STOK -->
                 <li class="nav-title">PURCHASING</li>
@@ -400,7 +404,7 @@
                 </li>
             <?php } ?>
 
-            <?php if ($user['role'] == 'developer' || $user['role'] == 'staff kasir') { ?>
+            <?php if ($user['role'] == 'staff kasir') { ?>
                 <!-- GUDANG PENJUALAN -->
                 <li class="nav-title">PENJUALAN</li>
 
@@ -458,36 +462,7 @@
                     </a>
                 </li>
             <?php } ?>
-
-            <!-- LAPORAN -->
-            <!-- <li class="nav-title">LAPORAN</li>
-
-            <li class="nav-item <?= ($current_page == 'report-sales.php') ? 'active' : ''; ?>">
-                <a href="/qieos/pages/report-sales.php" class="nav-link">
-                    <span class="sidebar-icon">
-                        <i class="fas fa-chart-line me-2"></i>
-                    </span>
-                    <span>Laporan Penjualan</span>
-                </a>
-            </li>
-
-            <li class="nav-item <?= ($current_page == 'report-stock.php') ? 'active' : ''; ?>">
-                <a href="/qieos/pages/report-stock.php" class="nav-link">
-                    <span class="sidebar-icon">
-                        <i class="fas fa-boxes me-2"></i>
-                    </span>
-                    <span>Laporan Stok</span>
-                </a>
-            </li>
-
-            <li class="nav-item <?= ($current_page == 'report-profit.php') ? 'active' : ''; ?>">
-                <a href="/qieos/pages/report-profit.php" class="nav-link">
-                    <span class="sidebar-icon">
-                        <i class="fas fa-coins me-2"></i>
-                    </span>
-                    <span>Laba Bersih</span>
-                </a>
-            </li> -->
+        
         </ul>
     </div>
 
