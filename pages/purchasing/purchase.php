@@ -414,7 +414,7 @@ $hasPrevious = $currentFormId > 1;
                                         id="productCode"
                                         class="form-control"
                                         list="productCodeList"
-                                        placeholder="Pilih / ketik kode produk"
+                                        placeholder="Pilih / ketik kode produk baru"
                                         autocomplete="off"
                                         required>
 
@@ -583,7 +583,7 @@ $hasPrevious = $currentFormId > 1;
     </div>    
 
     <!-- TABLE -->
-    <div class="section-card mb-4">
+    <div class="section-card mb-5">
         <div class="panel-header panel-primary">
             <div class="panel-left">
                 <div class="panel-icon">
@@ -652,7 +652,13 @@ $hasPrevious = $currentFormId > 1;
         .then(res=>res.json())
         .then(res=>{
             if(res.status==="success"){
-                Swal.fire("Berhasil",res.msg,"success");
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Berhasil',
+                    text: res.msg,
+                    timer: 1500,
+                    showConfirmButton: false
+                });
                 this.reset();
                 document.getElementById('productCode').focus();
                 loadTable();
@@ -829,6 +835,7 @@ $hasPrevious = $currentFormId > 1;
                 option.dataset.name = item.name;
                 option.dataset.category = item.category;
                 option.dataset.sellPrice = item.sell_price;
+                option.dataset.unit = item.unit;
                 list.appendChild(option);
             });
 
@@ -847,6 +854,7 @@ $hasPrevious = $currentFormId > 1;
                 document.getElementById('productName').value = opt.dataset.name;
                 document.getElementById('productCategory').value = opt.dataset.category;
                 document.querySelector('input[name="sell_price"]').value = opt.dataset.sellPrice;
+                document.querySelector('input[name="unit"]').value = opt.dataset.unit;
                 found = true;
             }
         });
