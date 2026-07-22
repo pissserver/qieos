@@ -70,15 +70,15 @@
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 
 <!-- PWA -->
-<!-- <link rel="manifest" href="/cartify/manifest.json">
-<meta name="theme-color" content="#000000">
+<link rel="manifest" href="/qieos/manifest.json">
+<link rel="apple-touch-icon" href="/qieos/assets/img/brand/icon-192.png">
+<meta name="theme-color" content="#4f46e5">
+
 <script>
-    if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('/qieos/sw.js')
-            .then(reg => console.log('SW OK:', reg.scope))
-            .catch(err => console.log('SW ERROR:', err));
+    if ("serviceWorker" in navigator) {
+        navigator.serviceWorker.register("/qieos/sw.js");
     }
-</script> -->
+</script>
 
 <!-- Date Range Picker -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />

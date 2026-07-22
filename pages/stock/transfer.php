@@ -3,7 +3,7 @@
 <!doctype html>
 <html>
     <head>
-        <title>Transfer ke Penjualan | Qieos</title>
+        <title>Transfer ke Penjualan - Qieos</title>
         <?php include '../../script/headscript.php'; ?>
 
         <style>
