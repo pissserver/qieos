@@ -1,6 +1,7 @@
 <?php
     session_start();
     require_once __DIR__ . '/../script/connection.php';
+    date_default_timezone_set('Asia/Jakarta');
     
     if (!isset($_SESSION['username'])) {
         header("Location: ../sessions/sign-in.php");
