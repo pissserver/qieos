@@ -74,37 +74,71 @@
 
     }
 
-    if($_GET['action']=='update'){
+    if ($_GET['action'] == 'update') {
 
-        $id = $_POST['id'];
+        $id = (int)$_POST['id'];
 
-        $fullname = $_POST['fullname'];
-        $username    = $_POST['username'];
-        $password = $_POST['password'];
-        $confirm_password = $_POST['confirm_password'];
+        $update_name    = mysqli_real_escape_string($conn, $_POST['update_name']);
+        $update_version = mysqli_real_escape_string($conn, $_POST['update_version']);
+        $update_type    = mysqli_real_escape_string($conn, $_POST['update_type']);
+        $update_date    = mysqli_real_escape_string($conn, $_POST['update_date']);
 
-        // Cek confirm password
-        if ($password != $confirm_password) {
+        $descriptions = $_POST['description'];
+
+        // Validasi
+        if (empty($descriptions)) {
             echo json_encode([
                 'status' => 'error',
-                'message' => 'Konfirmasi password tidak sesuai.'
+                'message' => 'Minimal harus ada satu deskripsi.'
             ]);
             exit;
         }
 
-        $hashed_password = password_hash($password, PASSWORD_DEFAULT);
-
-        mysqli_query($conn,"
-            UPDATE users 
-            SET fullname='$fullname',
-                username='$username',
-                password='$hashed_password'
+        // Update tabel updates
+        mysqli_query($conn, "
+            UPDATE updates
+            SET
+                update_name    = '$update_name',
+                update_version = '$update_version',
+                update_type    = '$update_type',
+                update_date    = '$update_date'
             WHERE id = '$id'
         ");
 
+        // Hapus detail lama
+        mysqli_query($conn, "
+            DELETE FROM update_details
+            WHERE update_id = '$id'
+        ");
+
+        // Simpan ulang detail
+        foreach ($descriptions as $description) {
+
+            $description = trim($description);
+
+            if ($description == '') {
+                continue;
+            }
+
+            $description = mysqli_real_escape_string($conn, $description);
+
+            mysqli_query($conn, "
+                INSERT INTO update_details
+                (
+                    update_id,
+                    description
+                )
+                VALUES
+                (
+                    '$id',
+                    '$description'
+                )
+            ");
+        }
+
         echo json_encode([
             'status' => 'success',
-            'message' => 'Data berhasil diupdate.'
+            'message' => 'Log update berhasil diperbarui.'
         ]);
 
         exit;
@@ -113,9 +147,10 @@
     if($_GET['action']=='destroy'){
 
         $id = $_POST['id'];
+        $deleted_at = Date('Y-m-d H:i:s');
 
         mysqli_query($conn,"
-            DELETE FROM users 
+            UPDATE updates SET deleted_at = '$deleted_at'
             WHERE id = '$id'
         ");
 

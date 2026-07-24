@@ -238,7 +238,7 @@ include '../../sessions/session.php';
         }
 
         .btn-show{
-            background: #0b94f5;
+            background: #0284c7;
         }
         
         .btn-edit{
@@ -481,6 +481,222 @@ include '../../sessions/session.php';
             align-items:center;
             white-space:nowrap;
         }
+
+        /* Show Details */
+        .update-overlay{
+            position:fixed;
+            inset:0;
+
+            display:none;
+
+            justify-content:center;
+            align-items:center;
+
+            background:rgba(7,15,30,.45);
+            backdrop-filter:blur(10px);
+
+            z-index:999999;
+        }
+
+        .update-modal{
+
+            width:650px;
+            max-width:92%;
+
+            height:700px; 
+            max-height:90vh;
+
+            background:#fff;
+
+            border-radius:24px;
+
+            overflow:hidden;
+
+            box-shadow:
+                0 30px 80px rgba(0,0,0,.30);
+
+            animation:showUpdate .35s ease;
+        }
+
+        .update-header{
+
+            padding:35px;
+
+            text-align:center;
+
+            color:white;
+
+            background:
+                linear-gradient(135deg,#4338ca,#7c3aed);
+
+            position:relative;
+
+        }
+
+        .update-icon{
+
+            width:72px;
+            height:72px;
+
+            margin:auto;
+
+            border-radius:50%;
+
+            display:flex;
+            justify-content:center;
+            align-items:center;
+
+            font-size:34px;
+
+            background:rgba(255,255,255,.18);
+
+            margin-bottom:15px;
+
+        }
+
+        .update-header h4{
+
+            font-size:28px;
+
+            font-weight:700;
+
+            margin-bottom:15px;
+
+        }
+
+        .update-meta{
+
+            display:flex;
+
+            justify-content:center;
+
+            gap:12px;
+
+            flex-wrap:wrap;
+
+        }
+
+        .update-meta span{
+
+            padding:8px 16px;
+
+            border-radius:999px;
+
+            font-weight:600;
+
+            font-size:13px;
+
+        }
+
+        #updateTitle {
+            color: #fff;
+        }
+
+        .update-body{
+
+            padding:30px;
+
+            max-height:60vh;
+
+            overflow:auto;
+
+        }
+
+        .update-item{
+
+            display:flex;
+
+            gap:18px;
+
+            align-items:flex-start;
+
+            padding:15px 18px;
+
+            border-radius:14px;
+
+            background:#f8fafc;
+
+            margin-bottom:12px;
+
+            transition:.25s;
+
+        }
+
+        .update-item:hover{
+
+            transform:translateX(5px);
+
+            background:#eef4ff;
+
+        }
+
+        .update-item:last-child{
+
+            border:none;
+
+        }
+
+        .update-item i{
+
+            color:#10b981;
+
+            font-size:20px;
+
+            margin-top:2px;
+
+        }
+
+        .closeUpdate{
+
+            position:absolute;
+
+            right:20px;
+            top:20px;
+
+            width:42px;
+            height:42px;
+
+            border:none;
+
+            border-radius:50%;
+
+            background:rgba(255,255,255,.18);
+
+            color:white;
+
+            transition:.25s;
+
+        }
+
+        .closeUpdate:hover{
+
+            background:white;
+
+            color:#4f46e5;
+
+            transform:rotate(90deg);
+
+        }
+
+        @keyframes showUpdate{
+
+            0%{
+
+                opacity:0;
+
+                transform:scale(.85);
+
+            }
+
+            100%{
+
+                opacity:1;
+
+                transform:scale(1);
+
+            }
+
+        }
     </style>
 </head>
 
@@ -503,7 +719,7 @@ include '../../sessions/session.php';
         </div>
     </div> -->
 
-    <div class="row">
+    <div class="row mb-4">
         <div class="col-md-12">
             <!-- Main Table -->
             <div class="section-card mb-4 mt-4">
@@ -555,6 +771,7 @@ include '../../sessions/session.php';
                             SELECT
                                 *
                             FROM updates
+                            WHERE deleted_at IS NULL
                             ORDER BY update_date DESC
                             ");
                             while($d=mysqli_fetch_assoc($q)): ?>
@@ -634,7 +851,8 @@ include '../../sessions/session.php';
 
                                     <button class="action-btn btn-delete deleteUpdateBtn"
                                         data-id="<?= $d['id'] ?>"
-                                        data-fullname="<?= $d['fullname'] ?>">
+                                        data-name="<?= $d['update_name'] ?>"
+                                        data-version="<?= $d['update_version'] ?>">
                                         <i class="fas fa-trash"></i>
                                     </button>
                                 </td>
@@ -680,22 +898,22 @@ include '../../sessions/session.php';
     </div>
 
     <!-- EDIT MODAL -->
-    <div class="modal fade" id="editAdministratorModal" tabindex="-1">
+    <div class="modal fade" id="editUpdateModal" tabindex="-1">
         <div class="modal-dialog modal-xl modal-dialog-centered">
             <div class="modal-content stock-panel border-0">
 
                 <div class="panel-header panel-dark my-3 mx-3">
                     <div class="panel-left">
                         <div class="panel-icon">
-                            <i class="fas fas fa-user"></i>
+                            <i class="fas fas fa-rocket"></i>
                         </div>
 
                         <div>
                             <div class="panel-title">
-                                Edit Administrator 
+                                Edit Update Log 
                             </div>
                             <div class="panel-subtitle">
-                                Edit nama, username, dan password
+                                Edit nama update, tanggal, tipe, version dan deskripsi log update
                             </div>
                         </div>
                     </div>
@@ -703,9 +921,56 @@ include '../../sessions/session.php';
                     <button class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
 
-                <div class="mt-2 px-5" id="editAdministratorContent"></div>
+                <div class="mt-2 px-5" id="editUpdateContent"></div>
             </div>
         </div>
+    </div>
+
+    <!-- Show Details -->
+    <div class="update-overlay" id="updateOverlay">
+
+        <div class="update-modal">
+
+            <div class="update-header">
+
+                <div>
+                    <div class="update-icon">
+                        <i class="fas fa-rocket"></i>
+                    </div>
+
+                    <h4 id="updateTitle"></h4>
+
+                    <div class="update-meta">
+
+                        <span id="updateVersion"></span>
+
+                        <span id="updateType" style="color: #000;"></span>
+
+                        <span id="updateDate"></span>
+
+                    </div>
+
+                </div>
+
+                <button class="closeUpdate">
+                    <i class="fas fa-times"></i>
+                </button>
+
+            </div>
+
+            <div class="update-body">
+
+                <h6 class="mb-3">
+                    <i class="fas fa-sparkles me-2"></i>
+                    What's New
+                </h6>
+
+                <div id="updateDetailList" class="mb-5"></div>
+
+            </div>
+
+        </div>
+
     </div>
 </div>
 </main>
@@ -887,34 +1152,84 @@ include '../../sessions/session.php';
 <!-- Script Edit -->
 <script>
     // OPEN EDIT MODAL
-    $(document).on('click','.editAdministratorBtn',function(){
+    $(document).on('click','.editUpdateBtn',function(){
 
         let id = $(this).data('id');
 
-        $('#editAdministratorModal').modal('show');
+        $('#editUpdateModal').modal('show');
 
-        document.getElementById('editAdministratorContent').innerHTML = `
+        document.getElementById('editUpdateContent').innerHTML = `
             <div class="text-center py-5">
                 <i class="fas fa-spinner fa-spin fa-2x text-secondary"></i>
             </div>
         `;
 
-        fetch('administrator-edit.php?id=' + id)
+        fetch('update-edit.php?id=' + id)
         .then(res => res.text())
         .then(html => {
-            document.getElementById('editAdministratorContent').innerHTML = html;
+            document.getElementById('editUpdateContent').innerHTML = html;
         });
 
     });
 
+    // Add Details Update Description
+    $(document).on("click", "#addDescriptionEdit", function () {
+
+        $("#descriptionContainer").append(`
+            <div class="row description-row mb-3">
+
+                <div class="col-md-11">
+
+                    <div class="input-group-modern">
+
+                        <div class="input-icon">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+
+                        <input
+                            type="text"
+                            name="description[]"
+                            class="form-control"
+                            placeholder="Masukkan deskripsi update"
+                            required>
+
+                    </div>
+
+                </div>
+
+                <div class="col-md-1">
+
+                    <button
+                        type="button"
+                        class="btn btn-danger w-100 removeDescription">
+
+                        <i class="fas fa-trash"></i>
+
+                    </button>
+
+                </div>
+
+            </div>
+        `);
+
+    });
+
+    $(document).on("click", ".removeDescriptionEdit", function () {
+
+        if ($(".description-row").length > 1) {
+            $(this).closest(".description-row").remove();
+        }
+
+    });
+
     // Edit Action
-    $(document).on('submit','#editAdministratorForm',function(e){
+    $(document).on('submit','#editUpdateForm',function(e){
         e.preventDefault();
 
         let formData = new FormData(this);
         let id = formData.get('id');
 
-        fetch('administrator-action.php?action=update&id='+id,{
+        fetch('update-action.php?action=update&id='+id,{
             method:'POST',
             body:formData
         })
@@ -930,7 +1245,7 @@ include '../../sessions/session.php';
                     showConfirmButton:false
                 });
 
-                $('#editAdministratorModal').modal('hide');
+                $('#editUpdateModal').modal('hide');
 
                 setTimeout(() => {
                     location.reload();
@@ -960,17 +1275,18 @@ include '../../sessions/session.php';
 <!-- Script Delete -->
 <script>
     // Delete Action
-    $(document).on('click','.deleteAdministratorBtn',function(){
+    $(document).on('click','.deleteUpdateBtn',function(){
 
         let id = $(this).data('id');
-        let fullname = $(this).data('fullname');
+        let name = $(this).data('name');
+        let version = $(this).data('version');
 
         Swal.fire({
-            title:'Hapus Administrator?',
+            title:'Hapus Update Log?',
             html:`
                 <div style="text-align:center">
-                    <small style="color:#94a3b8">Nama administrator:</small><br>
-                    ${fullname}
+                    <small style="color:#94a3b8">Update Log:</small><br>
+                    ${name} - ${version}
                 </div>
             `,
             icon:'warning',
@@ -982,7 +1298,7 @@ include '../../sessions/session.php';
 
             if(result.isConfirmed){
 
-                fetch('administrator-action.php?action=destroy', {
+                fetch('update-action.php?action=destroy', {
                     method: 'POST',
                     body: new URLSearchParams({ id: id })
                 })
@@ -1009,6 +1325,65 @@ include '../../sessions/session.php';
     });
 </script>
 
+
+<!-- Script Show Details -->
+<script>
+    $(document).on("click", ".showUpdateBtn", function () {
+
+        let id = $(this).data("id");
+
+        $.get("update-detail.php", { id: id }, function (res) {
+
+            if (res.status != "success") {
+                Swal.fire("Error", res.message, "error");
+                return;
+            }
+
+            $("#updateTitle").text(res.update_name);
+
+            $("#updateVersion").html(`
+                <span class="stock-badge">${res.update_version}</span>
+            `);
+
+            $("#updateType").html(res.badge);
+            $("#updateDate").text(res.update_date);
+
+            let html = "";
+
+            res.details.forEach(function (item) {
+
+                html += `
+                    <div class="update-item">
+                        <i class="fas fa-check-circle"></i>
+                        <div>${item.description}</div>
+                    </div>
+                `;
+
+            });
+
+            $("#updateDetailList").html(html);
+
+            $("#updateOverlay")
+            .css("display","flex")
+            .hide()
+            .fadeIn(200);
+
+        }, "json");
+
+    });
+
+    $(document).on("click", ".closeUpdate", function () {
+        $("#updateOverlay").fadeOut(150);
+    });
+
+    $(document).on("click", "#updateOverlay", function (e) {
+
+        if (e.target === this) {
+            $(this).fadeOut(150);
+        }
+
+    });
+</script>
 
 
 </body>
