@@ -17,7 +17,7 @@ GROUP BY p.id;
 ");
 ?>
 
-<link rel="stylesheet" href="/qieos/css/pages/purchase-stock-table.css">
+<link rel="stylesheet" href="<?php echo BASE_URL; ?>/css/pages/purchase-stock-table.css">
 
 <table id="stockTable" class="table table-hover align-middle">
 <thead>

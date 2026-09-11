@@ -9,7 +9,7 @@ include '../../sessions/session.php';
     <title>Master Supplier - Qieos</title>
     <?php include '../../script/headscript.php'; ?>
 
-    <link rel="stylesheet" href="/qieos/css/pages/master-product.css">
+    <link rel="stylesheet" href="<?php echo BASE_URL; ?>/css/pages/master-product.css">
 </head>
 
 <body>

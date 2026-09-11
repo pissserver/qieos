@@ -9,7 +9,7 @@
     <title>Laporan Tenant - Qieos</title>
     <?php include '../../script/headscript.php'; ?>
 
-    <link rel="stylesheet" href="/qieos/css/pages/report-tenant.css?v=<?= filemtime($_SERVER['DOCUMENT_ROOT'] . '/qieos/css/pages/report-tenant.css') ?>">
+    <link rel="stylesheet" href="<?php echo BASE_URL; ?>/css/pages/report-tenant.css?v=<?= filemtime(__DIR__ . '/../../css/pages/report-tenant.css') ?>">
 </head>
 
 <body>

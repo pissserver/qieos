@@ -2,7 +2,7 @@
 include '../../sessions/session.php';
 ?>
 
-<link rel="stylesheet" href="/qieos/css/pages/profile.css">
+<link rel="stylesheet" href="<?php echo BASE_URL; ?>/css/pages/profile.css">
 
 <!doctype html>
 <html lang="en">
@@ -124,7 +124,7 @@ include '../../sessions/session.php';
                         <div class="profile-overlay"></div>
 
                         <img
-                            src="<?php echo $user['photo'] ? '/qieos/assets/img/uploads/' . $user['photo'] : '/qieos/assets/img/default-avatar.jpg'; ?>"
+                            src="<?php echo $user['photo'] ? BASE_URL . '/assets/img/uploads/' . $user['photo'] : BASE_URL . '/assets/img/default-avatar.jpg'; ?>"
                             class="profile-avatar">
 
                     </div>

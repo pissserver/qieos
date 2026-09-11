@@ -27,7 +27,7 @@ if(!empty($d['supplier_id'])){
     }
 }
 
-$photo = !empty($d['photo']) ? '/qieos/assets/img/products/' . htmlspecialchars($d['photo']) : '';
+$photo = !empty($d['photo']) ? BASE_URL . '/assets/img/products/' . htmlspecialchars($d['photo']) : '';
 $code  = htmlspecialchars($d['code']);
 $name  = htmlspecialchars($d['name']);
 $cat   = ucwords(strtolower(htmlspecialchars($d['category'])));
@@ -53,7 +53,7 @@ $currentPrice    = isset($d['sell_price']) ? $d['sell_price'] : 0;
     <title><?= $name ?> - Detail Produk</title>
     <?php include '../../script/headscript.php'; ?>
 
-    <link rel="stylesheet" href="/qieos/css/pages/master-product-detail.css">
+    <link rel="stylesheet" href="<?php echo BASE_URL; ?>/css/pages/master-product-detail.css">
 </head>
 
 <body>
@@ -77,7 +77,7 @@ $currentPrice    = isset($d['sell_price']) ? $d['sell_price'] : 0;
 
     <!-- TOP BAR -->
     <div class="top-bar">
-        <a href="/qieos/pages/master/master-product.php" class="back-btn">
+        <a href="<?php echo BASE_URL; ?>/pages/master/master-product.php" class="back-btn">
             <i class="fas fa-arrow-left"></i> Kembali
         </a>
 
@@ -206,7 +206,7 @@ $currentPrice    = isset($d['sell_price']) ? $d['sell_price'] : 0;
                     <div class="photo-upload-box">
                         <div class="photo-preview" id="editPhotoPreview">
                             <?php if(!empty($d['photo'])): ?>
-                                <img src="/qieos/assets/img/products/<?= htmlspecialchars($d['photo']) ?>" alt="Preview">
+                                <img src="<?php echo BASE_URL; ?>/assets/img/products/<?= htmlspecialchars($d['photo']) ?>" alt="Preview">
                             <?php else: ?>
                                 <i class="fas fa-camera"></i>
                             <?php endif; ?>
@@ -417,7 +417,7 @@ document.getElementById('btnDeleteProduct').addEventListener('click', function()
                 if(res.status === 'success'){
                     QToast('Terhapus', 'Produk berhasil dihapus', 'success');
                     setTimeout(function(){
-                        window.location.href = '/qieos/pages/master/master-product.php';
+                        window.location.href = BASE_URL + '/pages/master/master-product.php';
                     }, 600);
                 }
             });
@@ -507,7 +507,7 @@ document.getElementById('btnDeleteProduct').addEventListener('click', function()
         if(delBtn) delBtn.setAttribute('data-id', item.id);
 
         // URL & title
-        window.history.pushState({}, '', '/qieos/pages/master/master-product-detail.php?id=' + item.id);
+        window.history.pushState({}, '', BASE_URL + '/pages/master/master-product-detail.php?id=' + item.id);
         document.title = item.name + ' - Detail Produk';
 
         // Animasi hero card
@@ -530,7 +530,7 @@ document.getElementById('btnDeleteProduct').addEventListener('click', function()
         }
 
         searchTimeout = setTimeout(function(){
-            var url = '/qieos/pages/master/master-product-search.php?q=' + encodeURIComponent(val);
+            var url = BASE_URL + '/pages/master/master-product-search.php?q=' + encodeURIComponent(val);
             fetch(url)
             .then(function(res){ return res.json(); })
             .then(function(data){
@@ -567,7 +567,7 @@ document.getElementById('btnDeleteProduct').addEventListener('click', function()
 
         var itemId = link.getAttribute('data-id');
 
-        fetch('/qieos/pages/master/master-product-search.php?q=' + encodeURIComponent(link.getAttribute('data-name')))
+        fetch(BASE_URL + '/pages/master/master-product-search.php?q=' + encodeURIComponent(link.getAttribute('data-name')))
         .then(function(res){ return res.json(); })
         .then(function(data){
             var found = null;

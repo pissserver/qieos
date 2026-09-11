@@ -1,4 +1,4 @@
-﻿<?php include '../../sessions/session.php'; ?>
+<?php include '../../sessions/session.php'; ?>
 
 <!doctype html>
 <html>
@@ -6,8 +6,8 @@
         <title>Transfer Gudang - Qieos</title>
         <?php include '../../script/headscript.php'; ?>
 
-        <link rel="stylesheet" href="/qieos/css/pages/transfer.css">
-        <link rel="stylesheet" href="/qieos/css/pages/transfer-table.css">
+        <link rel="stylesheet" href="<?php echo BASE_URL; ?>/css/pages/transfer.css">
+        <link rel="stylesheet" href="<?php echo BASE_URL; ?>/css/pages/transfer-table.css">
     </head>
 
     <body>
@@ -129,12 +129,12 @@
 
                     setTimeout(() => {
 
-                        // ðŸ”¥ DESTROY DULU
+                        // 🔥 DESTROY DULU
                         if ($.fn.DataTable.isDataTable('#requestHistory')) {
                             $('#requestHistory').DataTable().destroy();
                         }
 
-                        // ðŸ”¥ INIT ULANG
+                        // 🔥 INIT ULANG
                         $('#requestHistory').DataTable({
                             pageLength: 5,
                             lengthMenu:[[5,10,25,50],[5,10,25,50]],
@@ -165,7 +165,7 @@
                                 `
                             },
 
-                            // ðŸ”¥ PENTING: IKUTIN SORT SQL
+                            // 🔥 PENTING: IKUTIN SORT SQL
                             order: [] 
                         });
 

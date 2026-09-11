@@ -13,29 +13,29 @@ if ($q === '') {
 $like = '%' . $conn->real_escape_string($q) . '%';
 
 $pages = [
-    ['name' => 'Dashboard', 'url' => '/qieos/pages/dashboard.php', 'icon' => 'fas fa-chart-pie', 'category' => 'Halaman'],
-    ['name' => 'Katalog Produk', 'url' => '/qieos/pages/coming-soon.php', 'icon' => 'fas fa-th-large', 'category' => 'Penjualan'],
-    ['name' => 'Pesanan', 'url' => '/qieos/pages/coming-soon.php', 'icon' => 'fas fa-receipt', 'category' => 'Penjualan'],
-    ['name' => 'Stok Penjualan', 'url' => '/qieos/pages/coming-soon.php', 'icon' => 'fas fa-boxes-stacked', 'category' => 'Penjualan'],
-    ['name' => 'Tenant', 'url' => '/qieos/pages/tenant/tenant.php', 'icon' => 'fas fa-store', 'category' => 'Tenant'],
-    ['name' => 'Pendaftaran Tenant', 'url' => '/qieos/pages/tenant/registration.php', 'icon' => 'fas fa-file-signature', 'category' => 'Tenant'],
-    ['name' => 'Laporan Penjualan', 'url' => '/qieos/pages/report/report-sales.php', 'icon' => 'fas fa-chart-bar', 'category' => 'Laporan'],
-    ['name' => 'Laporan Tenant', 'url' => '/qieos/pages/report/report-tenant.php', 'icon' => 'fas fa-file-invoice-dollar', 'category' => 'Laporan'],
-    ['name' => 'Rekap', 'url' => '/qieos/pages/recap/recap.php', 'icon' => 'fas fa-clipboard-list', 'category' => 'Laporan'],
-    ['name' => 'Stok Gudang', 'url' => '/qieos/pages/coming-soon.php', 'icon' => 'fas fa-warehouse', 'category' => 'Persediaan'],
-    ['name' => 'Mutasi Stok', 'url' => '/qieos/pages/coming-soon.php', 'icon' => 'fas fa-exchange-alt', 'category' => 'Persediaan'],
-    ['name' => 'Transfer ke Penjualan', 'url' => '/qieos/pages/coming-soon.php', 'icon' => 'fas fa-truck-loading', 'category' => 'Persediaan'],
-    ['name' => 'Daftar Belanja', 'url' => '/qieos/pages/coming-soon.php', 'icon' => 'fas fa-cart-plus', 'category' => 'Purchasing'],
-    ['name' => 'Input Pembelian', 'url' => '/qieos/pages/coming-soon.php', 'icon' => 'fas fa-dolly', 'category' => 'Purchasing'],
-    ['name' => 'Administrator', 'url' => '/qieos/pages/coming-soon.php', 'icon' => 'fas fa-user-shield', 'category' => 'Management'],
-    ['name' => 'Staff Kasir', 'url' => '/qieos/pages/coming-soon.php', 'icon' => 'fas fa-cash-register', 'category' => 'Management'],
-    ['name' => 'Profil', 'url' => '/qieos/pages/profile/profile.php', 'icon' => 'fas fa-user-circle', 'category' => 'Akun'],
-    ['name' => 'Update', 'url' => '/qieos/pages/other/update.php', 'icon' => 'fas fa-rocket', 'category' => 'Sistem'],
+    ['name' => 'Dashboard', 'url' => BASE_URL . '/pages/dashboard.php', 'icon' => 'fas fa-chart-pie', 'category' => 'Halaman'],
+    ['name' => 'Katalog Produk', 'url' => BASE_URL . '/pages/coming-soon.php', 'icon' => 'fas fa-th-large', 'category' => 'Penjualan'],
+    ['name' => 'Pesanan', 'url' => BASE_URL . '/pages/coming-soon.php', 'icon' => 'fas fa-receipt', 'category' => 'Penjualan'],
+    ['name' => 'Stok Penjualan', 'url' => BASE_URL . '/pages/coming-soon.php', 'icon' => 'fas fa-boxes-stacked', 'category' => 'Penjualan'],
+    ['name' => 'Tenant', 'url' => BASE_URL . '/pages/tenant/tenant.php', 'icon' => 'fas fa-store', 'category' => 'Tenant'],
+    ['name' => 'Pendaftaran Tenant', 'url' => BASE_URL . '/pages/tenant/registration.php', 'icon' => 'fas fa-file-signature', 'category' => 'Tenant'],
+    ['name' => 'Laporan Penjualan', 'url' => BASE_URL . '/pages/report/report-sales.php', 'icon' => 'fas fa-chart-bar', 'category' => 'Laporan'],
+    ['name' => 'Laporan Tenant', 'url' => BASE_URL . '/pages/report/report-tenant.php', 'icon' => 'fas fa-file-invoice-dollar', 'category' => 'Laporan'],
+    ['name' => 'Rekap', 'url' => BASE_URL . '/pages/recap/recap.php', 'icon' => 'fas fa-clipboard-list', 'category' => 'Laporan'],
+    ['name' => 'Stok Gudang', 'url' => BASE_URL . '/pages/coming-soon.php', 'icon' => 'fas fa-warehouse', 'category' => 'Persediaan'],
+    ['name' => 'Mutasi Stok', 'url' => BASE_URL . '/pages/coming-soon.php', 'icon' => 'fas fa-exchange-alt', 'category' => 'Persediaan'],
+    ['name' => 'Transfer ke Penjualan', 'url' => BASE_URL . '/pages/coming-soon.php', 'icon' => 'fas fa-truck-loading', 'category' => 'Persediaan'],
+    ['name' => 'Daftar Belanja', 'url' => BASE_URL . '/pages/coming-soon.php', 'icon' => 'fas fa-cart-plus', 'category' => 'Purchasing'],
+    ['name' => 'Input Pembelian', 'url' => BASE_URL . '/pages/coming-soon.php', 'icon' => 'fas fa-dolly', 'category' => 'Purchasing'],
+    ['name' => 'Administrator', 'url' => BASE_URL . '/pages/coming-soon.php', 'icon' => 'fas fa-user-shield', 'category' => 'Management'],
+    ['name' => 'Staff Kasir', 'url' => BASE_URL . '/pages/coming-soon.php', 'icon' => 'fas fa-cash-register', 'category' => 'Management'],
+    ['name' => 'Profil', 'url' => BASE_URL . '/pages/profile/profile.php', 'icon' => 'fas fa-user-circle', 'category' => 'Akun'],
+    ['name' => 'Update', 'url' => BASE_URL . '/pages/other/update.php', 'icon' => 'fas fa-rocket', 'category' => 'Sistem'],
 ];
 
 if ($role === 'developer' || $role === 'staff kasir') {
-    $pages[] = ['name' => 'Checkout', 'url' => '/qieos/pages/checkout.php', 'icon' => 'fas fa-credit-card', 'category' => 'Penjualan'];
-    $pages[] = ['name' => 'Riwayat Pesanan', 'url' => '/qieos/pages/sales/order.php', 'icon' => 'fas fa-history', 'category' => 'Penjualan'];
+    $pages[] = ['name' => 'Checkout', 'url' => BASE_URL . '/pages/checkout.php', 'icon' => 'fas fa-credit-card', 'category' => 'Penjualan'];
+    $pages[] = ['name' => 'Riwayat Pesanan', 'url' => BASE_URL . '/pages/sales/order.php', 'icon' => 'fas fa-history', 'category' => 'Penjualan'];
 }
 
 $matched_pages = [];
@@ -55,7 +55,7 @@ if ($prod_q) {
             'code' => $row['code'],
             'category' => $row['category'],
             'price' => 'Rp ' . number_format($row['sell_price'], 0, ',', '.'),
-            'url' => '/qieos/pages/sales/catalog.php?highlight='.$row['id'],
+            'url' => BASE_URL . '/pages/sales/catalog.php?highlight='.$row['id'],
             'icon' => 'fas fa-box',
             'category_label' => 'Produk'
         ];
@@ -73,7 +73,7 @@ if ($ord_q) {
             'date' => date('d M Y', strtotime($row['tanggal'])),
             'total' => 'Rp ' . number_format($row['total'], 0, ',', '.'),
             'status' => $status_label,
-            'url' => '/qieos/pages/receipt.php?id=' . $row['id'],
+            'url' => BASE_URL . '/pages/receipt.php?id=' . $row['id'],
             'icon' => 'fas fa-receipt',
             'category_label' => 'Pesanan'
         ];
@@ -88,7 +88,7 @@ if ($tnt_q) {
             'id' => $row['id'],
             'name' => $row['tenant_name'],
             'owner' => $row['tenant_owner'],
-            'url' => '/qieos/pages/tenant/tenant-detail.php?id=' . $row['id'],
+            'url' => BASE_URL . '/pages/tenant/tenant-detail.php?id=' . $row['id'],
             'icon' => 'fas fa-store',
             'category_label' => 'Tenant'
         ];

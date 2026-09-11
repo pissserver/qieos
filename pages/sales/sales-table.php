@@ -1,4 +1,4 @@
-﻿<?php
+<?php
     include '../../sessions/session.php';
 
     $q = mysqli_query($conn,"
@@ -15,7 +15,7 @@
     ");
 ?>
 
-<link rel="stylesheet" href="/qieos/css/pages/sales-table.css">
+<link rel="stylesheet" href="<?php echo BASE_URL; ?>/css/pages/sales-table.css">
 
 <table id="salesTable">
     <thead>

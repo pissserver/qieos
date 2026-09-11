@@ -27,7 +27,7 @@ $hasPrevious = $currentFormId > 1;
 <title>Input Pembelian - Qieos</title>
 <?php include '../../script/headscript.php'; ?>
 
-<link rel="stylesheet" href="/qieos/css/pages/purchase.css">
+<link rel="stylesheet" href="<?php echo BASE_URL; ?>/css/pages/purchase.css">
 
 </head>
 

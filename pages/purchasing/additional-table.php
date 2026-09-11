@@ -10,7 +10,7 @@ ORDER BY name ASC;
 ");
 ?>
 
-<link rel="stylesheet" href="/qieos/css/pages/additional-table.css">
+<link rel="stylesheet" href="<?php echo BASE_URL; ?>/css/pages/additional-table.css">
 
 <table id="stockTable" class="table table-hover align-middle">
 <thead>

@@ -29,7 +29,7 @@ include '../../sessions/session.php';
 
                 <?php if(!empty($d['photo'])): ?>
                     <img class="product-img"
-                        src="/qieos/assets/img/products/<?= htmlspecialchars($d['photo']) ?>"
+                        src="<?php echo BASE_URL; ?>/assets/img/products/<?= htmlspecialchars($d['photo']) ?>"
                         alt="<?= htmlspecialchars($d['name']) ?>">
                 <?php else: ?>
                     <div class="product-img-placeholder">
@@ -65,7 +65,7 @@ include '../../sessions/session.php';
         </td>
 
         <td class="text-center">
-            <a href="/qieos/pages/master/master-product-detail.php?id=<?= $d['id'] ?>"
+            <a href="<?php echo BASE_URL; ?>/pages/master/master-product-detail.php?id=<?= $d['id'] ?>"
                class="action-btn btn-view"
                title="Lihat Detail">
                 <i class="fas fa-eye"></i>

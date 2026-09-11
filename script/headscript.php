@@ -1,3 +1,8 @@
+<?php
+if (!defined('BASE_URL')) {
+    require_once __DIR__ . '/connection.php';
+}
+?>
 <!-- Meta -->
 <meta
     name="viewport"
@@ -31,24 +36,24 @@
 <link
     rel="icon"
     sizes="120x120"
-    href="/qieos/assets/img/brand/qieos2.png" />
+    href="<?php echo BASE_URL; ?>/assets/img/brand/qieos2.png" />
 
 <meta name="msapplication-TileColor" content="#4f46e5" />
 
 <!-- Sweet Alert -->
 <link
     type="text/css"
-    href="/qieos/vendor/sweetalert2/dist/sweetalert2.min.css"
+    href="<?php echo BASE_URL; ?>/vendor/sweetalert2/dist/sweetalert2.min.css"
     rel="stylesheet" />
 
 <!-- Notyf -->
-<link type="text/css" href="/qieos/vendor/notyf/notyf.min.css" rel="stylesheet" />
+<link type="text/css" href="<?php echo BASE_URL; ?>/vendor/notyf/notyf.min.css" rel="stylesheet" />
 
 <!-- Volt CSS -->
-<link type="text/css" href="/qieos/css/volt.css" rel="stylesheet" />
+<link type="text/css" href="<?php echo BASE_URL; ?>/css/volt.css" rel="stylesheet" />
 
 <!-- Qieos Toast -->
-<link type="text/css" href="/qieos/css/components/toast.css?v=<?php echo filemtime(__DIR__ . '/../css/components/toast.css'); ?>" rel="stylesheet" />
+<link type="text/css" href="<?php echo BASE_URL; ?>/css/components/toast.css?v=<?php echo filemtime(__DIR__ . '/../css/components/toast.css'); ?>" rel="stylesheet" />
 
 <!-- Font Awesome -->
 <link
@@ -72,7 +77,7 @@
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 
 <!-- PWA -->
-<link rel="manifest" href="/qieos/manifest.json">
+<link rel="manifest" href="<?php echo BASE_URL; ?>/manifest.php">
 <meta name="theme-color" content="#4f46e5">
 
 <!-- PWA: iOS / iPadOS standalone support -->
@@ -80,9 +85,9 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Qieos">
-<link rel="apple-touch-icon" href="/qieos/assets/img/brand/icon-192.png">
-<link rel="apple-touch-icon" sizes="192x192" href="/qieos/assets/img/brand/icon-192.png">
-<link rel="apple-touch-icon" sizes="512x512" href="/qieos/assets/img/brand/icon-512.png">
+<link rel="apple-touch-icon" href="<?php echo BASE_URL; ?>/assets/img/brand/icon-192.png">
+<link rel="apple-touch-icon" sizes="192x192" href="<?php echo BASE_URL; ?>/assets/img/brand/icon-192.png">
+<link rel="apple-touch-icon" sizes="512x512" href="<?php echo BASE_URL; ?>/assets/img/brand/icon-512.png">
 
 <!-- PWA: fullscreen/standalone display + safe-area handling -->
 <style>
@@ -117,15 +122,16 @@
 </style>
 
 <script>
+    const BASE_URL = '<?php echo BASE_URL; ?>';
     if ("serviceWorker" in navigator) {
         window.addEventListener("load", function () {
-            navigator.serviceWorker.register("/qieos/sw.js?v=4").catch(function (err) {
+            navigator.serviceWorker.register(BASE_URL + "/sw.js?v=4").catch(function (err) {
                 console.warn("SW registration failed:", err);
             });
             // Unregister old service workers
             navigator.serviceWorker.getRegistrations().then(function(registrations) {
                 registrations.forEach(function(registration) {
-                    if (registration.scope.indexOf('/qieos/') !== -1) {
+                    if (registration.scope.indexOf(BASE_URL + '/') !== -1) {
                         registration.update();
                     }
                 });

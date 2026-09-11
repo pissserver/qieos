@@ -29,7 +29,7 @@
     $total_payment = $data['total'];
 ?>
 
-<link rel="stylesheet" href="/qieos/css/pages/tenant-payment-add.css">
+<link rel="stylesheet" href="<?php echo BASE_URL; ?>/css/pages/tenant-payment-add.css">
 
 <form id="addPaymentForm">
 

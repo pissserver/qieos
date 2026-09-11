@@ -17,7 +17,7 @@ $q = mysqli_query($conn,"
 $totalPrice = 0;
 ?>
 
-<link rel="stylesheet" href="/qieos/css/pages/list-table.css">
+<link rel="stylesheet" href="<?php echo BASE_URL; ?>/css/pages/list-table.css">
 
 <table id="purchaseTable" class="table table-hover align-middle">
 <thead>

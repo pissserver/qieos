@@ -29,7 +29,7 @@ include '../../sessions/session.php';
 
                 <?php if(!empty($d['photo'])): ?>
                     <img class="avatar-photo"
-                        src="/qieos/assets/img/uploads/<?= htmlspecialchars($d['photo']) ?>"
+                        src="<?php echo BASE_URL; ?>/assets/img/uploads/<?= htmlspecialchars($d['photo']) ?>"
                         alt="<?= htmlspecialchars($d['fullname']) ?>">
                 <?php else: ?>
                     <div class="avatar">

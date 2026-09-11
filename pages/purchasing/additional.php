@@ -9,7 +9,7 @@ include '../../sessions/session.php';
 <title>Input Pembelian - Qieos</title>
 <?php include '../../script/headscript.php'; ?>
 
-<link rel="stylesheet" href="/qieos/css/pages/additional.css">
+<link rel="stylesheet" href="<?php echo BASE_URL; ?>/css/pages/additional.css">
 
 </head>
 

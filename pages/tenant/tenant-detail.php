@@ -17,7 +17,7 @@
     <title>Detail Tenant - Qieos</title>
     <?php include '../../script/headscript.php'; ?>
 
-    <link rel="stylesheet" href="/qieos/css/pages/tenant-detail.css">
+    <link rel="stylesheet" href="<?php echo BASE_URL; ?>/css/pages/tenant-detail.css">
 
     <style>
         /* ===== PANEL ACTION BUTTONS ===== */

@@ -2,9 +2,9 @@
     session_start();
     require_once __DIR__ . '/../script/connection.php';
     date_default_timezone_set('Asia/Jakarta');
-    
+
     if (!isset($_SESSION['username'])) {
-        header("Location: /qieos/sessions/sign-in.php");
+        header("Location: " . BASE_URL . "/sessions/sign-in.php");
         exit();
     }
 

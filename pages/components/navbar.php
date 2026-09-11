@@ -1,4 +1,12 @@
-<link rel="stylesheet" href="/qieos/css/pages/navbar.css">
+<?php
+if (!defined('BASE_URL')) {
+    require_once __DIR__ . '/../../script/connection.php';
+}
+?>
+<script>
+    const BASE_URL = '<?php echo BASE_URL; ?>';
+</script>
+<link rel="stylesheet" href="<?php echo BASE_URL; ?>/css/pages/navbar.css">
 
 <nav class="premium-navbar">
 
@@ -181,7 +189,7 @@
         countEl.textContent = '';
 
         var role = '<?php echo $user["role"]; ?>';
-        fetch('/qieos/pages/components/data/search-api.php?q='+encodeURIComponent(q)+'&role='+encodeURIComponent(role))
+        fetch(BASE_URL + '/pages/components/data/search-api.php?q='+encodeURIComponent(q)+'&role='+encodeURIComponent(role))
         .then(function(r){ return r.json(); })
         .then(function(data){
             if(data.status !== 'success') return;
@@ -367,7 +375,7 @@
                 <div class="premium-profile">
 
                     <img
-                        src="<?php echo $user['photo'] ? '/qieos/assets/img/uploads/' . $user['photo'] : '/qieos/assets/img/default-avatar.jpg'; ?>"
+                        src="<?php echo $user['photo'] ? BASE_URL . '/assets/img/uploads/' . $user['photo'] : BASE_URL . '/assets/img/default-avatar.jpg'; ?>"
                         class="premium-avatar">
 
                     <div class="premium-user">
@@ -391,7 +399,7 @@
             <div class="dropdown-menu dropdown-menu-end premium-dropdown">
 
                 <a class="dropdown-item"
-                href="/qieos/pages/profile/profile.php">
+                href="<?php echo BASE_URL; ?>/pages/profile/profile.php">
                     <i class="fas fa-user-circle"></i>
                     <span>Profil</span>
                 </a>
@@ -399,7 +407,7 @@
                 <div class="dropdown-divider"></div>
 
                 <a class="dropdown-item text-danger"
-                href="/qieos/sessions/logout.php">
+                href="<?php echo BASE_URL; ?>/sessions/logout.php">
                     <i class="fas fa-sign-out-alt"></i>
                     <span>Sign Out</span>
                 </a>
@@ -490,7 +498,7 @@
 
     // Show Latest Update Details
     function showLatestUpdate() {
-        $.get("/qieos/pages/other/update-detail.php", function(res) {
+        $.get(BASE_URL + "/pages/other/update-detail.php", function(res) {
             if (res.status != "success") {
                 QToast("Error", "Tidak dapat memuat update terbaru", "error");
                 return;
@@ -767,7 +775,7 @@
 
     // Update Omzet
     function updateOmzet() {
-        fetch('/qieos/pages/components/data/get-omzet.php')
+        fetch(BASE_URL + '/pages/components/data/get-omzet.php')
             .then(res => res.json())
             .then(data => {
                 const el = document.getElementById('omzet-today');

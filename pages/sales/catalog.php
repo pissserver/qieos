@@ -7,7 +7,7 @@ $query = mysqli_query($conn,
         );
 ?>
 
-<link rel="stylesheet" href="/qieos/css/pages/catalog.css">
+<link rel="stylesheet" href="<?php echo BASE_URL; ?>/css/pages/catalog.css">
 
 <!doctype html>
 <html lang="en">

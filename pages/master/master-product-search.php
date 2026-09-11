@@ -62,7 +62,7 @@ if($query && $query->num_rows > 0){
             'category' => $d['category'],
             'price' => (int)$d['sell_price'],
             'priceFormatted' => number_format((int)$d['sell_price'], 0, ',', '.'),
-            'photo' => !empty($d['photo']) ? '/qieos/assets/img/products/' . $d['photo'] : '',
+            'photo' => !empty($d['photo']) ? BASE_URL . '/assets/img/products/' . $d['photo'] : '',
             'supplier' => $supplierName,
             'totalQty' => $totalQty,
             'totalQtyFormatted' => number_format($totalQty, 0, ',', '.'),

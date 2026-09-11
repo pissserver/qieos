@@ -9,7 +9,7 @@ include '../../sessions/session.php';
     <title>Administrator - Qieos</title>
     <?php include '../../script/headscript.php'; ?>
 
-    <link rel="stylesheet" href="/qieos/css/pages/administrator.css">
+    <link rel="stylesheet" href="<?php echo BASE_URL; ?>/css/pages/administrator.css">
 </head>
 
 <body>

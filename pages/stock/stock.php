@@ -1,4 +1,4 @@
-ï»¿<?php
+<?php
 include '../../sessions/session.php';
 ?>
 
@@ -9,7 +9,7 @@ include '../../sessions/session.php';
     <title>Stok Gudang - Qieos</title>
     <?php include '../../script/headscript.php'; ?>
 
-    <link rel="stylesheet" href="/qieos/css/pages/stock.css">
+    <link rel="stylesheet" href="<?php echo BASE_URL; ?>/css/pages/stock.css">
 </head>
 
 <body>
@@ -184,8 +184,8 @@ include '../../sessions/session.php';
                     paginate: {
                         first: "Awal",
                         last: "Akhir",
-                        next: "â€º",
-                        previous: "â€¹"
+                        next: "›",
+                        previous: "‹"
                     }
                 }
             });

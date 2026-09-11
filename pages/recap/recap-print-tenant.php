@@ -54,7 +54,7 @@ $avg = $totalPayment ? ($grandTotal / $totalPayment) : 0;
         sizes="120x120"
         href="../../assets/img/brand/qieos2.png" />
 
-<link rel="stylesheet" href="/qieos/css/pages/recap-print-tenant.css">
+<link rel="stylesheet" href="<?php echo BASE_URL; ?>/css/pages/recap-print-tenant.css">
 
 </head>
 

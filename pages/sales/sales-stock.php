@@ -1,4 +1,4 @@
-﻿<?php include '../../sessions/session.php'; ?>
+<?php include '../../sessions/session.php'; ?>
 
 <!doctype html>
 <html>
@@ -6,7 +6,7 @@
         <title>Stok Kantin - Qieos</title>
         <?php include '../../script/headscript.php'; ?>
 
-        <link rel="stylesheet" href="/qieos/css/pages/sales-stock.css">
+        <link rel="stylesheet" href="<?php echo BASE_URL; ?>/css/pages/sales-stock.css">
     </head>
 
     <body>
@@ -201,7 +201,7 @@
             const qtyInput = form.querySelector('input[name="qty"]');
             const stockInfo = document.getElementById("stock-info");
 
-            /* ðŸ”¥ SET MAX QTY */
+            /* 🔥 SET MAX QTY */
             productSelect.addEventListener("change", function () {
                 let stock = parseInt(
                     this.options[this.selectedIndex].dataset.stock || 0,
@@ -212,7 +212,7 @@
                 qtyInput.placeholder = stock != 0 ? "Max: " + stock : "Stok kosong";
             });
 
-            /* ðŸ”¥ VALIDASI */
+            /* 🔥 VALIDASI */
             form.addEventListener("submit", async function (e) {
                 e.preventDefault();
 
@@ -255,7 +255,7 @@
                 btn.innerText = "Request Stok";
             });
 
-            /* ðŸ”¥ LOAD TABLE */
+            /* 🔥 LOAD TABLE */
             function loadTable() {
                 fetch("sales-table.php")
                     .then((res) => res.text())
@@ -300,7 +300,7 @@
                     });
             }
 
-            /* ðŸ”¥ LOAD REQUEST */
+            /* 🔥 LOAD REQUEST */
             function loadHistory(){
                 fetch('../components/tables/history-request-table.php')
                 .then(res=>res.text())
@@ -309,12 +309,12 @@
 
                     setTimeout(() => {
 
-                        // ðŸ”¥ DESTROY DULU
+                        // 🔥 DESTROY DULU
                         if ($.fn.DataTable.isDataTable('#requestHistory')) {
                             $('#requestHistory').DataTable().destroy();
                         }
 
-                        // ðŸ”¥ INIT ULANG
+                        // 🔥 INIT ULANG
                         $('#requestHistory').DataTable({
                             pageLength: 5,
                             lengthMenu:[[5,10,25,50],[5,10,25,50]],
@@ -345,7 +345,7 @@
                                 `
                             },
 
-                            // ðŸ”¥ PENTING: IKUTIN SORT SQL
+                            // 🔥 PENTING: IKUTIN SORT SQL
                             order: [] 
                         });
 

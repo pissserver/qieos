@@ -19,7 +19,7 @@ include '../sessions/session.php';
 
         <div class="container-fluid px-0 mt-4 mb-5">
 
-            <link rel="stylesheet" href="/qieos/css/pages/coming-soon.css">
+            <link rel="stylesheet" href="<?php echo BASE_URL; ?>/css/pages/coming-soon.css">
 
             <div class="coming-wrapper">
 

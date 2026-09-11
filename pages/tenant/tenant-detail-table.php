@@ -38,7 +38,7 @@ include '../../sessions/session.php';
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
-<link rel="stylesheet" href="/qieos/css/pages/tenant-detail-table.css">
+<link rel="stylesheet" href="<?php echo BASE_URL; ?>/css/pages/tenant-detail-table.css">
 
 <div class="stock-wrapper">
 

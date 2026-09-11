@@ -16,7 +16,7 @@ if (!isset($_SESSION['welcome_shown'])) {
     <?php include '../script/headscript.php'; ?>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/qieos/css/pages/dashboard.css">
+    <link rel="stylesheet" href="<?php echo BASE_URL; ?>/css/pages/dashboard.css">
 </head>
 <body>
     <?php include 'components/sidebar.php'; ?>
@@ -108,7 +108,7 @@ if (!isset($_SESSION['welcome_shown'])) {
     function go(){
         var s=document.getElementById('fS').value,e=document.getElementById('fE').value;
         document.getElementById('fLd').style.display='inline-block';document.getElementById('fBtn').disabled=true;
-        fetch('/qieos/pages/components/data/dashboard-data.php?start='+encodeURIComponent(s)+'&end='+encodeURIComponent(e)+'&_='+Date.now())
+        fetch(BASE_URL + '/pages/components/data/dashboard-data.php?start='+encodeURIComponent(s)+'&end='+encodeURIComponent(e)+'&_='+Date.now())
         .then(function(r){if(!r.ok)throw new Error(r.status);return r.text()})
         .then(function(t){
             var d;try{d=JSON.parse(t)}catch(x){

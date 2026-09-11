@@ -6,7 +6,7 @@
         <title>Rekap Penjualan - Qieos</title>
         <?php include '../../script/headscript.php'; ?>
 
-        <link rel="stylesheet" href="/qieos/css/pages/recap.css">
+        <link rel="stylesheet" href="<?php echo BASE_URL; ?>/css/pages/recap.css">
     </head>
 
     <body>

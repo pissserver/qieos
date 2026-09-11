@@ -9,7 +9,7 @@
     <title>Laporan Penjualan - Qieos</title>
     <?php include '../../script/headscript.php'; ?>
 
-    <link rel="stylesheet" href="/qieos/css/pages/report-sales.css?v=<?= filemtime($_SERVER['DOCUMENT_ROOT'] . '/qieos/css/pages/report-sales.css') ?>">
+    <link rel="stylesheet" href="<?php echo BASE_URL; ?>/css/pages/report-sales.css?v=<?= filemtime(__DIR__ . '/../../css/pages/report-sales.css') ?>">
 </head>
 
 <body>

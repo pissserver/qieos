@@ -9,7 +9,7 @@ include '../../sessions/session.php';
     <title>Update - Qieos</title>
     <?php include '../../script/headscript.php'; ?>
 
-    <link rel="stylesheet" href="/qieos/css/pages/update.css">
+    <link rel="stylesheet" href="<?php echo BASE_URL; ?>/css/pages/update.css">
 </head>
 
 <body>

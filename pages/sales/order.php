@@ -1,8 +1,8 @@
-﻿<?php
+<?php
 include '../../sessions/session.php';
 ?>
 
-<link rel="stylesheet" href="/qieos/css/pages/order.css">
+<link rel="stylesheet" href="<?php echo BASE_URL; ?>/css/pages/order.css">
 
 <!doctype html>
 <html>

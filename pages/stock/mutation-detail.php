@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 include '../../sessions/session.php';
 
 $id = $_GET['id'];
@@ -28,7 +28,7 @@ $bulan = [
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
-<link rel="stylesheet" href="/qieos/css/pages/mutation-detail.css">
+<link rel="stylesheet" href="<?php echo BASE_URL; ?>/css/pages/mutation-detail.css">
 
 <div class="stock-wrapper">
 
