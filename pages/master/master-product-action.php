@@ -1,7 +1,11 @@
 <?php
-include '../../sessions/session.php';
+error_reporting(0);
+ini_set('display_errors', '0');
+include __DIR__ . '/../../sessions/session.php';
 
 header('Content-Type: application/json');
+header('Cache-Control: no-store, no-cache, must-revalidate');
+mysqli_report(MYSQLI_REPORT_OFF);
 
 $action = isset($_GET['action']) ? $_GET['action'] : '';
 
@@ -25,17 +29,67 @@ function uploadPhoto($file){
     return ['ok'=>false, 'msg'=>'Gagal upload file'];
 }
 
+// Normalisasi daftar supplier_id dari POST (mendukung scalara tau array)
+function normalizeSupplierIds($raw){
+    $ids = [];
+    $arr = is_array($raw) ? $raw : [$raw];
+    foreach($arr as $v){
+        $v = trim($v);
+        if($v !== '' && $v !== '0'){
+            $id = (int)$v;
+            if($id > 0 && !in_array($id, $ids)){
+                $ids[] = $id;
+            }
+        }
+    }
+    return $ids;
+}
+
+// Simpan ulang relasi produk-supplier (hapus lama, insert baru)
+function saveProductSuppliers($conn, $productId, array $supplierIds){
+    mysqli_query($conn, "DELETE FROM product_supplier WHERE product_id = $productId");
+    foreach($supplierIds as $sid){
+        mysqli_query($conn, "INSERT INTO product_supplier (product_id, supplier_id) VALUES ($productId, $sid)");
+    }
+}
+
+// Ambil daftar supplier_id lama sebuah produk
+function currentSupplierIds($conn, $productId){
+    $ids = [];
+    $r = mysqli_query($conn, "SELECT supplier_id FROM product_supplier WHERE product_id = $productId");
+    if($r){
+        while($row = mysqli_fetch_assoc($r)){
+            $ids[] = (int)$row['supplier_id'];
+        }
+    }
+    return $ids;
+}
+
+// Bandingkan dua set supplier (abaikan urutan) — jika sama, jangan rewrite agar id relasi tidak terbuang
+function supplierIdsEqual(array $a, array $b){
+    sort($a);
+    sort($b);
+    return $a === $b;
+}
+
 // STORE
 if($action === 'store'){
 
-    $code        = mysqli_real_escape_string($conn, trim(isset($_POST['code']) ? $_POST['code'] : ''));
-    $name        = mysqli_real_escape_string($conn, trim(isset($_POST['name']) ? $_POST['name'] : ''));
-    $category    = mysqli_real_escape_string($conn, trim(isset($_POST['category']) ? $_POST['category'] : ''));
-    $price       = isset($_POST['price']) ? (int)$_POST['price'] : 0;
-    $supplier_id = isset($_POST['supplier_id']) && $_POST['supplier_id'] !== '' ? (int)$_POST['supplier_id'] : 'NULL';
+    $code         = mysqli_real_escape_string($conn, trim(isset($_POST['code']) ? $_POST['code'] : ''));
+    $name         = mysqli_real_escape_string($conn, trim(isset($_POST['name']) ? $_POST['name'] : ''));
+    $category     = mysqli_real_escape_string($conn, trim(isset($_POST['category']) ? $_POST['category'] : ''));
+    $price        = isset($_POST['price']) ? (int)$_POST['price'] : 0;
+    $supplierIds  = normalizeSupplierIds(isset($_POST['supplier_id']) ? $_POST['supplier_id'] : '');
 
     if($code === '' || $name === '' || $category === '' || $price <= 0){
         echo json_encode(['status'=>'error', 'message'=>'Semua field wajib diisi']);
+        exit;
+    }
+
+    // Cek duplikasi kode produk
+    $dup = mysqli_query($conn, "SELECT id FROM products WHERE code = '$code' AND deleted_at IS NULL LIMIT 1");
+    if($dup && mysqli_num_rows($dup) > 0){
+        echo json_encode(['status'=>'error', 'message'=>'Kode sudah ada']);
         exit;
     }
 
@@ -50,13 +104,14 @@ if($action === 'store'){
         $photoName = $upload['name'];
     }
 
-    $suppVal = $supplier_id === 'NULL' ? "NULL" : $supplier_id;
     $q = mysqli_query($conn,"
-        INSERT INTO products (code, name, category, sell_price, supplier_id, photo, created_at)
-        VALUES ('$code', '$name', '$category', $price, $suppVal, '$photoName', NOW())
+        INSERT INTO products (code, name, category, sell_price, photo, created_at)
+        VALUES ('$code', '$name', '$category', $price, '$photoName', NOW())
     ");
 
     if($q){
+        $newId = mysqli_insert_id($conn);
+        saveProductSuppliers($conn, $newId, $supplierIds);
         echo json_encode(['status'=>'success']);
     }else{
         echo json_encode(['status'=>'error', 'message'=>'Gagal menyimpan data']);
@@ -67,16 +122,23 @@ if($action === 'store'){
 // UPDATE
 if($action === 'update'){
 
-    $id          = isset($_GET['id']) ? (int)$_GET['id'] : 0;
-    $code        = mysqli_real_escape_string($conn, trim(isset($_POST['code']) ? $_POST['code'] : ''));
-    $name        = mysqli_real_escape_string($conn, trim(isset($_POST['name']) ? $_POST['name'] : ''));
-    $category    = mysqli_real_escape_string($conn, trim(isset($_POST['category']) ? $_POST['category'] : ''));
-    $price       = isset($_POST['price']) ? (int)$_POST['price'] : 0;
-    $oldPhoto    = isset($_POST['old_photo']) ? $_POST['old_photo'] : '';
-    $rawSupplier = isset($_POST['supplier_id']) ? $_POST['supplier_id'] : '';
+    $id           = isset($_GET['id']) ? (int)$_GET['id'] : 0;
+    $code         = mysqli_real_escape_string($conn, trim(isset($_POST['code']) ? $_POST['code'] : ''));
+    $name         = mysqli_real_escape_string($conn, trim(isset($_POST['name']) ? $_POST['name'] : ''));
+    $category     = mysqli_real_escape_string($conn, trim(isset($_POST['category']) ? $_POST['category'] : ''));
+    $price        = isset($_POST['price']) ? (int)$_POST['price'] : 0;
+    $oldPhoto     = isset($_POST['old_photo']) ? $_POST['old_photo'] : '';
+    $supplierIds  = normalizeSupplierIds(isset($_POST['supplier_id']) ? $_POST['supplier_id'] : '');
 
     if($id <= 0 || $code === '' || $name === '' || $category === '' || $price <= 0){
         echo json_encode(['status'=>'error', 'message'=>'Semua field wajib diisi']);
+        exit;
+    }
+
+    // Cek duplikasi kode produk (kecuali milik produk ini sendiri)
+    $dup = mysqli_query($conn, "SELECT id FROM products WHERE code = '$code' AND id != $id AND deleted_at IS NULL LIMIT 1");
+    if($dup && mysqli_num_rows($dup) > 0){
+        echo json_encode(['status'=>'error', 'message'=>'Kode sudah ada']);
         exit;
     }
 
@@ -99,20 +161,17 @@ if($action === 'update'){
         }
     }
 
-    // Handle supplier_id: NULL if empty, else integer
-    if($rawSupplier !== '' && $rawSupplier !== '0'){
-        $suppSql = "$rawSupplier";
-    } else {
-        $suppSql = "NULL";
-    }
-
     $q = mysqli_query($conn,"
         UPDATE products
-        SET code='$code', name='$name', category='$category', sell_price=$price, supplier_id=$suppSql, photo='$photoName'
+        SET code='$code', name='$name', category='$category', sell_price=$price, photo='$photoName'
         WHERE id = $id
     ");
 
     if($q){
+        // Rewrite relasi hanya jika set supplier benar-benar berubah (hindari buang id auto-increment)
+        if(!supplierIdsEqual(currentSupplierIds($conn, $id), $supplierIds)){
+            saveProductSuppliers($conn, $id, $supplierIds);
+        }
         echo json_encode(['status'=>'success']);
     }else{
         echo json_encode(['status'=>'error', 'message'=>'Gagal memperbarui data']);
@@ -130,12 +189,13 @@ if($action === 'destroy'){
         exit;
     }
 
-    // Soft delete
+    // Soft delete + bersihkan relasi supplier
     $q = mysqli_query($conn,"
         UPDATE products SET deleted_at = NOW() WHERE id = $id
     ");
 
     if($q){
+        mysqli_query($conn, "DELETE FROM product_supplier WHERE product_id = $id");
         echo json_encode(['status'=>'success']);
     }else{
         echo json_encode(['status'=>'error', 'message'=>'Gagal menghapus data']);

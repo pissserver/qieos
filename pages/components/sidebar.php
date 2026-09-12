@@ -146,13 +146,6 @@
                     </a>
                 </li>
 
-                <li class="nav-item <?= ($current_page == 'additional.php' || ($current_page == 'coming-soon.php' && $menu == 'additional')) ? 'active' : ''; ?>">
-                    <a href="<?php echo BASE_URL; ?>/pages/coming-soon.php?menu=additional" class="nav-link" data-tooltip="Produk Tambahan">
-                        <span class="sidebar-icon"><i class="fas fa-box-open"></i></span>
-                        <span class="sidebar-text">Produk Tambahan</span>
-                    </a>
-                </li>
-
                 <!-- GUDANG STOK (SUMBER BARANG / FIFO) -->
                 <li class="nav-title">GUDANG STOK</li>
 

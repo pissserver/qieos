@@ -1,6 +1,8 @@
 <?php
 include '../../sessions/session.php';
 
+header('Cache-Control: no-store, no-cache, must-revalidate');
+
 $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 $q = mysqli_query($conn, "SELECT * FROM products WHERE id = $id");
 $d = mysqli_fetch_assoc($q);
@@ -18,13 +20,37 @@ $qi = mysqli_query($conn,"
 ");
 $di = mysqli_fetch_assoc($qi);
 
-// Ambil nama supplier
-$supplierName = '-';
-if(!empty($d['supplier_id'])){
-    $qs = mysqli_query($conn, "SELECT name FROM suppliers WHERE id = {$d['supplier_id']} AND deleted_at IS NULL");
-    if($qs && mysqli_num_rows($qs) > 0){
-        $supplierName = mysqli_fetch_assoc($qs)['name'];
+// Ambil suppliers dari tabel relasi product_supplier (multi supplier)
+$supplierNamesArr = [];
+$currentSupplierIds = [];
+$qs = mysqli_query($conn, "
+    SELECT s.id, s.name
+    FROM product_supplier ps
+    JOIN suppliers s ON s.id = ps.supplier_id
+    WHERE ps.product_id = {$d['id']} AND s.deleted_at IS NULL
+    ORDER BY s.name ASC
+");
+while($s = mysqli_fetch_assoc($qs)){
+    $currentSupplierIds[] = (int)$s['id'];
+    $supplierNamesArr[] = $s['name'];
+}
+
+// Semua supplier aktif (untuk opsi dropdown & JS)
+$allSuppliers = [];
+$qs = mysqli_query($conn, "SELECT id, name FROM suppliers WHERE deleted_at IS NULL ORDER BY name ASC");
+while($s = mysqli_fetch_assoc($qs)){
+    $allSuppliers[] = ['id' => (int)$s['id'], 'name' => $s['name']];
+}
+
+// Bangun opsi <option> untuk satu baris supplier (filter supplier yang sudah dipilih di row lain)
+function buildSupplierOptions($selectedId, $excludeIds, $allSuppliers){
+    $html = '<option value="">Supplier (opsional)</option>';
+    foreach($allSuppliers as $s){
+        if(in_array((int)$s['id'], $excludeIds)) continue;
+        $sel = ((int)$selectedId === (int)$s['id']) ? ' selected' : '';
+        $html .= '<option value="' . (int)$s['id'] . '"' . $sel . '>' . htmlspecialchars($s['name']) . '</option>';
     }
+    return $html;
 }
 
 $photo = !empty($d['photo']) ? BASE_URL . '/assets/img/products/' . htmlspecialchars($d['photo']) : '';
@@ -41,7 +67,6 @@ $tgl = strtotime($created);
 $tglStr = date('d', $tgl) . ' ' . $bulan[(int)date('n', $tgl)] . ' ' . date('Y', $tgl) . ', ' . date('H:i', $tgl);
 
 $currentCategory = isset($d['category']) ? $d['category'] : '';
-$currentSupplier = isset($d['supplier_id']) ? $d['supplier_id'] : '';
 $currentPrice    = isset($d['sell_price']) ? $d['sell_price'] : 0;
 ?>
 
@@ -53,7 +78,7 @@ $currentPrice    = isset($d['sell_price']) ? $d['sell_price'] : 0;
     <title><?= $name ?> - Detail Produk</title>
     <?php include '../../script/headscript.php'; ?>
 
-    <link rel="stylesheet" href="<?php echo BASE_URL; ?>/css/pages/master-product-detail.css">
+    <link rel="stylesheet" href="<?php echo BASE_URL; ?>/css/pages/master-product-detail.css?v=<?= filemtime(__DIR__ . '/../../css/pages/master-product-detail.css') ?>">
 </head>
 
 <body>
@@ -115,7 +140,7 @@ $currentPrice    = isset($d['sell_price']) ? $d['sell_price'] : 0;
                 <div class="hero-category" id="heroCategory"><i class="fas fa-tag"></i> <?= $cat ?></div>
                 <h1 class="hero-name" id="heroName"><?= $name ?></h1>
                 <div class="hero-code"><i class="fas fa-barcode"></i> Kode: <span class="code-tag" id="heroCode"><?= $code ?></span></div>
-                <div class="hero-supplier"><i class="fas fa-truck"></i> Supplier: <span class="supp-tag"><i class="fas fa-store"></i> <span id="heroSupplierName"><?= htmlspecialchars($supplierName) ?></span></span></div>
+                <div class="hero-supplier"><i class="fas fa-truck"></i> Supplier: <span class="supp-badge-list" id="heroSupplierName"><?php if(empty($supplierNamesArr)): ?><span class="supp-badge"><i class="fas fa-store"></i> -</span><?php else: foreach($supplierNamesArr as $nm): ?><span class="supp-badge"><i class="fas fa-store"></i> <?= htmlspecialchars($nm) ?></span><?php endforeach; endif; ?></span></div>
                 <div class="hero-price" id="heroPrice">Rp <?= $price ?></div>
                 <div class="hero-date"><i class="fas fa-calendar-alt"></i> Ditambahkan: <?= $tglStr ?></div>
             </div>
@@ -189,18 +214,43 @@ $currentPrice    = isset($d['sell_price']) ? $d['sell_price'] : 0;
                 </div>
                 <div class="col-md-12 mb-4">
                     <label class="form-label"><i class="fas fa-truck"></i> Supplier</label>
-                    <div class="form-input-wrap">
-                        <div class="form-input-icon"><i class="fas fa-truck"></i></div>
-                        <select name="supplier_id" class="form-input">
-                            <option value="">Supplier (opsional)</option>
-                            <?php
-                            $qs = mysqli_query($conn, "SELECT id, name FROM suppliers WHERE deleted_at IS NULL ORDER BY name ASC");
-                            while($s = mysqli_fetch_assoc($qs)):
-                            ?>
-                            <option value="<?= $s['id'] ?>" <?= $currentSupplier == $s['id'] ? 'selected' : '' ?>><?= htmlspecialchars($s['name']) ?></option>
-                            <?php endwhile; ?>
-                        </select>
+                    <div id="supplierFields" class="supplier-fields">
+                        <?php
+                        $rowsRender = !empty($currentSupplierIds) ? $currentSupplierIds : [''];
+                        foreach($rowsRender as $rowVal):
+                            $exclude = array_filter($currentSupplierIds, function($v) use ($rowVal){
+                                return $rowVal !== '' && (int)$v !== (int)$rowVal;
+                            });
+                        ?>
+                        <div class="supplier-field-row">
+                            <div class="form-input-wrap">
+                                <div class="form-input-icon"><i class="fas fa-truck"></i></div>
+                                <div class="select-wrap">
+                                    <select name="supplier_id[]" class="form-input">
+                                        <?= buildSupplierOptions($rowVal, $exclude, $allSuppliers) ?>
+                                    </select>
+                                </div>
+                                <button type="button" class="btn-remove-supplier" data-remove title="Hapus supplier"><i class="fas fa-minus"></i></button>
+                            </div>
+                        </div>
+                        <?php endforeach; ?>
                     </div>
+                    <button type="button" class="btn-add-supplier" id="btnAddSupplier">
+                        <i class="fas fa-plus"></i><span>Tambah Supplier</span>
+                    </button>
+                    <template id="supplierFieldTemplate">
+                        <div class="supplier-field-row">
+                            <div class="form-input-wrap">
+                                <div class="form-input-icon"><i class="fas fa-truck"></i></div>
+                                <div class="select-wrap">
+                                    <select name="supplier_id[]" class="form-input">
+                                        <option value="">Supplier (opsional)</option>
+                                    </select>
+                                </div>
+                                <button type="button" class="btn-remove-supplier" data-remove title="Hapus supplier"><i class="fas fa-minus"></i></button>
+                            </div>
+                        </div>
+                    </template>
                 </div>
                 <div class="col-md-12">
                     <div class="photo-upload-box">
@@ -262,7 +312,7 @@ $currentPrice    = isset($d['sell_price']) ? $d['sell_price'] : 0;
                 <div class="info-item">
                     <div class="info-item-icon"><i class="fas fa-truck"></i></div>
                     <div class="info-item-label">Supplier</div>
-                    <div class="info-item-value" id="infoSupplier"><?= htmlspecialchars($supplierName) ?></div>
+                    <div class="info-item-value"><div class="supp-badge-list" id="infoSupplier"><?php if(empty($supplierNamesArr)): ?><span class="supp-badge"><i class="fas fa-store"></i> -</span><?php else: foreach($supplierNamesArr as $nm): ?><span class="supp-badge"><i class="fas fa-store"></i> <?= htmlspecialchars($nm) ?></span><?php endforeach; endif; ?></div></div>
                 </div>
                 <div class="info-item">
                     <div class="info-item-icon"><i class="fas fa-cubes"></i></div>
@@ -309,16 +359,156 @@ document.getElementById('btnCancelEdit').addEventListener('click', function(){
     document.getElementById('editCard').classList.remove('show');
 });
 
-// Photo preview
-document.querySelector('input[name="photo"]').addEventListener('change', function(){
-    var file = this.files[0];
-    var preview = document.getElementById('editPhotoPreview');
-    if(file){
-        var reader = new FileReader();
-        reader.onload = function(e){ preview.innerHTML = '<img src="' + e.target.result + '" alt="Preview">'; };
-        reader.readAsDataURL(file);
+// Photo preview — klik area upload membuka file dialog
+var photoBox = document.querySelector('.photo-upload-box');
+var photoInput = document.querySelector('input[name="photo"]');
+if(photoBox && photoInput){
+    photoBox.addEventListener('click', function(e){
+        if(photoInput.contains(e.target)) return;
+        photoInput.click();
+    });
+}
+if(photoInput){
+    photoInput.addEventListener('change', function(){
+        var file = this.files[0];
+        var preview = document.getElementById('editPhotoPreview');
+        if(file){
+            var reader = new FileReader();
+            reader.onload = function(e){ preview.innerHTML = '<img src="' + e.target.result + '" alt="Preview">'; };
+            reader.readAsDataURL(file);
+        }
+    });
+}
+
+// Supplier tambahan — tambah / hapus dropdown dengan desain yang sama
+var SUPPLIER_LIST = <?= json_encode($allSuppliers) ?>;
+var supplierFields = document.getElementById('supplierFields');
+var supplierTemplate = document.getElementById('supplierFieldTemplate');
+
+function escHtml(s){
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function supplierOptionsHtml(selectedId, excludeIds){
+    var html = '<option value="">Supplier (opsional)</option>';
+    for(var i = 0; i < SUPPLIER_LIST.length; i++){
+        var s = SUPPLIER_LIST[i];
+        var sid = String(s.id);
+        if(excludeIds.indexOf(sid) >= 0) continue;
+        var sel = sid === String(selectedId) ? ' selected' : '';
+        html += '<option value="' + s.id + '"' + sel + '>' + escHtml(s.name) + '</option>';
+    }
+    return html;
+}
+
+function refreshAllSupplierRows(){
+    var rows = supplierFields.querySelectorAll('.supplier-field-row');
+    // Hilangkan duplikat nilai antar row
+    var seen = {};
+    rows.forEach(function(r){
+        var sel = r.querySelector('select');
+        if(sel.value && seen[sel.value] && sel.value !== ''){ sel.value = ''; }
+        seen[sel.value || ''] = true;
+    });
+    // Bangun ulang opsi tiap row: exclude supplier yang dipilih di row lain
+    rows.forEach(function(r){
+        var sel = r.querySelector('select');
+        var selected = sel.value;
+        var others = [];
+        rows.forEach(function(o){
+            var s = o.querySelector('select');
+            if(o !== r && s.value) others.push(s.value);
+        });
+        sel.innerHTML = supplierOptionsHtml(selected, others);
+    });
+}
+
+function getSelectedSupplierNames(){
+    var names = [];
+    var rows = supplierFields.querySelectorAll('.supplier-field-row');
+    rows.forEach(function(r){
+        var v = r.querySelector('select').value;
+        if(!v) return;
+        for(var i = 0; i < SUPPLIER_LIST.length; i++){
+            if(String(SUPPLIER_LIST[i].id) === String(v)){
+                names.push(SUPPLIER_LIST[i].name);
+                break;
+            }
+        }
+    });
+    return names;
+}
+
+function getSelectedSupplierIds(){
+    var ids = [];
+    supplierFields.querySelectorAll('.supplier-field-row').forEach(function(r){
+        var v = r.querySelector('select').value;
+        if(v) ids.push(v);
+    });
+    return ids;
+}
+
+function renderSupplierBadges(el, names){
+    if(!el) return;
+    if(names && names.length){
+        el.innerHTML = names.map(function(n){
+            return '<span class="supp-badge"><i class="fas fa-store"></i> ' + escHtml(n) + '</span>';
+        }).join('');
+    } else {
+        el.innerHTML = '<span class="supp-badge"><i class="fas fa-store"></i> -</span>';
+    }
+}
+
+function setSupplierRows(ids){
+    ids = ids || [];
+    var need = ids.length > 0 ? ids.length : 1;
+    var rows = supplierFields.querySelectorAll('.supplier-field-row');
+    while(rows.length < need){
+        supplierFields.appendChild(supplierTemplate.content.cloneNode(true));
+        rows = supplierFields.querySelectorAll('.supplier-field-row');
+    }
+    // Isi opsi dulu agar .value bisa diterapkan pada row kloningan
+    refreshAllSupplierRows();
+    for(var i = 0; i < rows.length; i++){
+        if(i < need){
+            rows[i].querySelector('select').value = ids[i] || '';
+        } else {
+            rows[i].remove();
+        }
+    }
+    refreshAllSupplierRows();
+}
+
+document.getElementById('btnAddSupplier').addEventListener('click', function(){
+    if(!supplierFields || !supplierTemplate) return;
+    var clone = supplierTemplate.content.cloneNode(true);
+    var row = clone.querySelector('.supplier-field-row');
+    supplierFields.appendChild(clone);
+    refreshAllSupplierRows();
+    if(row){
+        try { row.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
+        catch(e){}
+        var sel = row.querySelector('select');
+        if(sel) sel.focus();
     }
 });
+
+supplierFields.addEventListener('change', function(e){
+    if(e.target.tagName === 'SELECT'){
+        refreshAllSupplierRows();
+    }
+});
+
+supplierFields.addEventListener('click', function(e){
+    var btn = e.target.closest('[data-remove]');
+    if(!btn) return;
+    var row = btn.closest('.supplier-field-row');
+    if(row) row.remove();
+    refreshAllSupplierRows();
+});
+
+// Inisialisasi opsi dropdown sesuai data awal
+refreshAllSupplierRows();
 
 // Update action — in-place tanpa refresh
 document.getElementById('editProductForm').addEventListener('submit', function(e){
@@ -333,60 +523,57 @@ document.getElementById('editProductForm').addEventListener('submit', function(e
     .then(function(res){ return res.json(); })
     .then(function(res){
         if(res.status === 'success'){
-            // Ambil nilai baru dari form
-            var newCode = formData.get('code');
-            var newName = formData.get('name');
-            var newCat  = formData.get('category');
-            var newPrice = formData.get('price');
-            var newSupplierId = formData.get('supplier_id');
+            try {
+                // Ambil nilai baru dari form
+                var newCode = formData.get('code');
+                var newName = formData.get('name');
+                var newCat  = formData.get('category');
+                var newPrice = formData.get('price');
 
-            // Update hero card
-            document.getElementById('heroName').textContent = newName;
-            document.getElementById('heroCode').textContent = newCode;
-            document.getElementById('heroCategory').textContent = newCat;
-            document.getElementById('heroPrice').textContent = 'Rp ' + parseInt(newPrice).toLocaleString('id-ID');
+                // Update hero card
+                document.getElementById('heroName').textContent = newName;
+                document.getElementById('heroCode').textContent = newCode;
+                document.getElementById('heroCategory').textContent = newCat;
+                document.getElementById('heroPrice').textContent = 'Rp ' + parseInt(newPrice).toLocaleString('id-ID');
 
-            // Update supplier
-            var suppEl = document.getElementById('heroSupplierName');
-            if(newSupplierId){
-                var sel = document.querySelector('select[name="supplier_id"]');
-                var opt = sel.querySelector('option[value="' + newSupplierId + '"]');
-                suppEl.textContent = opt ? opt.textContent : '-';
-            } else {
-                suppEl.textContent = '-';
-            }
+                // Update supplier (bisa lebih dari satu)
+                var supNames = getSelectedSupplierNames();
+                renderSupplierBadges(document.getElementById('heroSupplierName'), supNames);
+                renderSupplierBadges(document.getElementById('infoSupplier'), supNames);
 
-            // Update info card
-            document.getElementById('infoCode').textContent = newCode;
-            document.getElementById('infoName').textContent = newName;
-            document.getElementById('infoCategory').textContent = newCat;
-            document.getElementById('infoPrice').textContent = 'Rp ' + parseInt(newPrice).toLocaleString('id-ID');
-            document.getElementById('infoSupplier').textContent = suppEl.textContent;
+                // Update info card
+                document.getElementById('infoCode').textContent = newCode;
+                document.getElementById('infoName').textContent = newName;
+                document.getElementById('infoCategory').textContent = newCat;
+                document.getElementById('infoPrice').textContent = 'Rp ' + parseInt(newPrice).toLocaleString('id-ID');
 
-            // Update foto hero jika ada file baru
-            var photoFile = formData.get('photo');
-            if(photoFile && photoFile.name){
-                var reader = new FileReader();
-                reader.onload = function(ev){
-                    var heroImg = document.querySelector('.hero-photo img');
-                    if(heroImg){
-                        heroImg.src = ev.target.result;
-                    } else {
-                        var placeholder = document.querySelector('.hero-photo-placeholder');
-                        if(placeholder){
-                            placeholder.outerHTML = '<img src="' + ev.target.result + '" alt="' + newName + '">';
+                // Update foto hero jika ada file baru
+                var photoFile = formData.get('photo');
+                if(photoFile && photoFile.name){
+                    var reader = new FileReader();
+                    reader.onload = function(ev){
+                        var heroImg = document.querySelector('.hero-photo img');
+                        if(heroImg){
+                            heroImg.src = ev.target.result;
+                        } else {
+                            var placeholder = document.querySelector('.hero-photo-placeholder');
+                            if(placeholder){
+                                placeholder.outerHTML = '<img src="' + ev.target.result + '" alt="' + newName + '">';
+                            }
                         }
-                    }
-                };
-                reader.readAsDataURL(photoFile);
-            }
+                    };
+                    reader.readAsDataURL(photoFile);
+                }
 
-            // Tutup edit card & scroll ke atas
-            document.getElementById('editCard').classList.remove('show');
-            setTimeout(function(){
-                try { contentEl.scrollTo({ top: 0, behavior: 'smooth' }); }
-                catch(e){ contentEl.scrollTop = 0; }
-            }, 150);
+                // Tutup edit card & scroll ke atas
+                document.getElementById('editCard').classList.remove('show');
+                setTimeout(function(){
+                    try { contentEl.scrollTo({ top: 0, behavior: 'smooth' }); }
+                    catch(e){ contentEl.scrollTop = 0; }
+                }, 150);
+            } catch(e){
+                console.error(e);
+            }
             QToast('Berhasil', 'Data produk berhasil diperbarui', 'success');
         } else {
             QToast('Gagal', res.message || 'Terjadi kesalahan', 'error');
@@ -450,14 +637,15 @@ document.getElementById('btnDeleteProduct').addEventListener('click', function()
         set('heroCode', item.code);
         set('heroCategory', item.category);
         set('heroPrice', 'Rp ' + item.priceFormatted);
-        set('heroSupplierName', item.supplier);
+        var supNames = item.supplierNames || [];
+        renderSupplierBadges(document.getElementById('heroSupplierName'), supNames);
+        renderSupplierBadges(document.getElementById('infoSupplier'), supNames);
 
         // Info card
         set('infoCode', item.code);
         set('infoName', item.name);
         set('infoCategory', item.category);
         set('infoPrice', 'Rp ' + item.priceFormatted);
-        set('infoSupplier', item.supplier);
 
         // Stats
         var sv = document.querySelectorAll('.stat-value');
@@ -490,11 +678,8 @@ document.getElementById('btnDeleteProduct').addEventListener('click', function()
             }
         }
 
-        // Update supplier select
-        var suppSelect = document.querySelector('#editProductForm select[name="supplier_id"]');
-        if(suppSelect){
-            suppSelect.value = item.supplierId || '';
-        }
+        // Update supplier select (sesuaikan jumlah row dengan supplier produk)
+        setSupplierRows(item.supplierIds || (item.supplierId ? [item.supplierId] : []));
 
         // Update photo preview
         var photoPrev = document.getElementById('editPhotoPreview');

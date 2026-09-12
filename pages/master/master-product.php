@@ -10,6 +10,7 @@ include '../../sessions/session.php';
     <?php include '../../script/headscript.php'; ?>
 
     <link rel="stylesheet" href="<?php echo BASE_URL; ?>/css/pages/master-product.css">
+    <link rel="stylesheet" href="<?php echo BASE_URL; ?>/css/pages/master-product-detail.css?v=<?= filemtime(__DIR__ . '/../../css/pages/master-product-detail.css') ?>">
 </head>
 
 <body>
@@ -176,9 +177,105 @@ include '../../sessions/session.php';
         .then(res => res.text())
         .then(html => {
             document.getElementById('addProductContent').innerHTML = html;
+            initAddProductSuppliers();
+            bindAddPhotoBox();
         });
 
     });
+
+    // ===== MULTI SUPPLIER (sama seperti halaman detail) =====
+    let ADD_SUPPLIER_STATE = { fields:null, template:null, list:[] };
+
+    function initAddProductSuppliers(){
+        const content = document.getElementById('addProductContent');
+        const fields = content.querySelector('#supplierFields');
+        const template = content.querySelector('#supplierFieldTemplate');
+        ADD_SUPPLIER_STATE.fields = fields;
+        ADD_SUPPLIER_STATE.template = template;
+        ADD_SUPPLIER_STATE.list = [];
+        if(!fields) return;
+        // Ambil daftar supplier dari opsi select pertama (render awal berisi semua)
+        const firstSel = fields.querySelector('select');
+        if(firstSel){
+            for(let i = 0; i < firstSel.options.length; i++){
+                const o = firstSel.options[i];
+                if(o.value !== '') ADD_SUPPLIER_STATE.list.push({ id: o.value, name: o.text });
+            }
+        }
+        refreshAddSupplierRows();
+    }
+
+    function addSupplierOptionsHtml(selectedId, excludeIds){
+        const esc = s => String(s)
+            .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+            .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+        let html = '<option value="">Supplier (opsional)</option>';
+        for(let i = 0; i < ADD_SUPPLIER_STATE.list.length; i++){
+            const s = ADD_SUPPLIER_STATE.list[i];
+            const sid = String(s.id);
+            if(excludeIds.indexOf(sid) >= 0) continue;
+            const sel = sid === String(selectedId) ? ' selected' : '';
+            html += '<option value="' + s.id + '"' + sel + '>' + esc(s.name) + '</option>';
+        }
+        return html;
+    }
+
+    function refreshAddSupplierRows(){
+        if(!ADD_SUPPLIER_STATE.fields) return;
+        const rows = ADD_SUPPLIER_STATE.fields.querySelectorAll('.supplier-field-row');
+        // Hilangkan duplikat nilai antar row
+        const seen = {};
+        rows.forEach(function(r){
+            const sel = r.querySelector('select');
+            if(sel.value && seen[sel.value] && sel.value !== ''){ sel.value = ''; }
+            seen[sel.value || ''] = true;
+        });
+        // Bangun ulang opsi tiap row: exclude supplier yang dipilih di row lain
+        rows.forEach(function(r){
+            const sel = r.querySelector('select');
+            const selected = sel.value;
+            const others = [];
+            rows.forEach(function(o){
+                const s = o.querySelector('select');
+                if(o !== r && s.value) others.push(s.value);
+            });
+            sel.innerHTML = addSupplierOptionsHtml(selected, others);
+        });
+    }
+
+    $(document).on('click','#addProductContent #btnAddSupplier',function(){
+        if(!ADD_SUPPLIER_STATE.fields || !ADD_SUPPLIER_STATE.template) return;
+        ADD_SUPPLIER_STATE.fields.appendChild(ADD_SUPPLIER_STATE.template.content.cloneNode(true));
+        refreshAddSupplierRows();
+        const rows = ADD_SUPPLIER_STATE.fields.querySelectorAll('.supplier-field-row');
+        const last = rows[rows.length - 1];
+        if(last){
+            const sel = last.querySelector('select');
+            if(sel) sel.focus();
+        }
+    });
+
+    $(document).on('click','#addProductContent [data-remove]',function(){
+        const row = this.closest('.supplier-field-row');
+        if(row) row.parentNode.removeChild(row);
+        refreshAddSupplierRows();
+    });
+
+    $(document).on('change','#addProductContent #supplierFields select',function(){
+        refreshAddSupplierRows();
+    });
+
+    // Klik area upload foto membuka dialog file (sama seperti detail)
+    function bindAddPhotoBox(){
+        const box = document.querySelector('#addProductContent .photo-upload-box');
+        const input = document.querySelector('#addProductContent input[name="photo"]');
+        if(box && input){
+            box.addEventListener('click', function(e){
+                if(input.contains(e.target)) return;
+                input.click();
+            });
+        }
+    }
 
     // Photo preview - Add
     $(document).on('change','#addProductContent input[name="photo"]',function(){

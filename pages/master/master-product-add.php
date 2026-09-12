@@ -69,21 +69,43 @@ include '../../sessions/session.php';
             </div>
         </div>
 
-        <div class="col-md-12">
-            <div class="input-group-modern">
-                <div class="input-icon">
-                    <i class="fas fa-truck"></i>
+        <div class="col-md-12 mb-4">
+            <label class="form-label supplier-form-label"><i class="fas fa-truck"></i> Supplier</label>
+            <div id="supplierFields" class="supplier-fields">
+                <div class="supplier-field-row">
+                    <div class="form-input-wrap">
+                        <div class="form-input-icon"><i class="fas fa-truck"></i></div>
+                        <div class="select-wrap">
+                            <select name="supplier_id[]" class="form-input">
+                                <option value="">Supplier (opsional)</option>
+                                <?php
+                                $qs = mysqli_query($conn, "SELECT id, name FROM suppliers WHERE deleted_at IS NULL ORDER BY name ASC");
+                                while($s = mysqli_fetch_assoc($qs)):
+                                ?>
+                                <option value="<?= (int)$s['id'] ?>"><?= htmlspecialchars($s['name']) ?></option>
+                                <?php endwhile; ?>
+                            </select>
+                        </div>
+                        <button type="button" class="btn-remove-supplier" data-remove title="Hapus supplier"><i class="fas fa-minus"></i></button>
+                    </div>
                 </div>
-                <select name="supplier_id" class="form-control">
-                    <option value="">Supplier (opsional)</option>
-                    <?php
-                    $qs = mysqli_query($conn, "SELECT id, name FROM suppliers WHERE deleted_at IS NULL ORDER BY name ASC");
-                    while($s = mysqli_fetch_assoc($qs)):
-                    ?>
-                    <option value="<?= $s['id'] ?>"><?= htmlspecialchars($s['name']) ?></option>
-                    <?php endwhile; ?>
-                </select>
             </div>
+            <button type="button" class="btn-add-supplier" id="btnAddSupplier">
+                <i class="fas fa-plus"></i><span>Tambah Supplier</span>
+            </button>
+            <template id="supplierFieldTemplate">
+                <div class="supplier-field-row">
+                    <div class="form-input-wrap">
+                        <div class="form-input-icon"><i class="fas fa-truck"></i></div>
+                        <div class="select-wrap">
+                            <select name="supplier_id[]" class="form-input">
+                                <option value="">Supplier (opsional)</option>
+                            </select>
+                        </div>
+                        <button type="button" class="btn-remove-supplier" data-remove title="Hapus supplier"><i class="fas fa-minus"></i></button>
+                    </div>
+                </div>
+            </template>
         </div>
 
         <div class="col-md-12">
