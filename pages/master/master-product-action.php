@@ -79,6 +79,7 @@ if($action === 'store'){
     $name         = mysqli_real_escape_string($conn, trim(isset($_POST['name']) ? $_POST['name'] : ''));
     $category     = mysqli_real_escape_string($conn, trim(isset($_POST['category']) ? $_POST['category'] : ''));
     $price        = isset($_POST['price']) ? (int)$_POST['price'] : 0;
+    $unit         = mysqli_real_escape_string($conn, trim(isset($_POST['unit']) ? $_POST['unit'] : ''));
     $supplierIds  = normalizeSupplierIds(isset($_POST['supplier_id']) ? $_POST['supplier_id'] : '');
 
     if($code === '' || $name === '' || $category === '' || $price <= 0){
@@ -104,9 +105,11 @@ if($action === 'store'){
         $photoName = $upload['name'];
     }
 
+    $unitSql = $unit === '' ? 'NULL' : "'$unit'";
+
     $q = mysqli_query($conn,"
-        INSERT INTO products (code, name, category, sell_price, photo, created_at)
-        VALUES ('$code', '$name', '$category', $price, '$photoName', NOW())
+        INSERT INTO products (code, name, category, unit, sell_price, photo, created_at)
+        VALUES ('$code', '$name', '$category', $unitSql, $price, '$photoName', NOW())
     ");
 
     if($q){
@@ -127,6 +130,7 @@ if($action === 'update'){
     $name         = mysqli_real_escape_string($conn, trim(isset($_POST['name']) ? $_POST['name'] : ''));
     $category     = mysqli_real_escape_string($conn, trim(isset($_POST['category']) ? $_POST['category'] : ''));
     $price        = isset($_POST['price']) ? (int)$_POST['price'] : 0;
+    $unit         = mysqli_real_escape_string($conn, trim(isset($_POST['unit']) ? $_POST['unit'] : ''));
     $oldPhoto     = isset($_POST['old_photo']) ? $_POST['old_photo'] : '';
     $supplierIds  = normalizeSupplierIds(isset($_POST['supplier_id']) ? $_POST['supplier_id'] : '');
 
@@ -161,9 +165,11 @@ if($action === 'update'){
         }
     }
 
+    $unitSql = $unit === '' ? 'NULL' : "'$unit'";
+
     $q = mysqli_query($conn,"
         UPDATE products
-        SET code='$code', name='$name', category='$category', sell_price=$price, photo='$photoName'
+        SET code='$code', name='$name', category='$category', sell_price=$price, unit=$unitSql, photo='$photoName'
         WHERE id = $id
     ");
 

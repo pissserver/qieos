@@ -57,6 +57,7 @@ $photo = !empty($d['photo']) ? BASE_URL . '/assets/img/products/' . htmlspecialc
 $code  = htmlspecialchars($d['code']);
 $name  = htmlspecialchars($d['name']);
 $cat   = ucwords(strtolower(htmlspecialchars($d['category'])));
+$unit  = !empty($d['unit']) ? htmlspecialchars($d['unit']) : '-';
 $price = number_format($d['sell_price'], 0, ',', '.');
 $totalQty    = number_format($di['total_qty'], 0, ',', '.');
 $totalTrans  = $di['total_transaksi'];
@@ -212,6 +213,13 @@ $currentPrice    = isset($d['sell_price']) ? $d['sell_price'] : 0;
                         <input type="number" name="price" class="form-input" value="<?= $currentPrice ?>" min="0" step="100" required>
                     </div>
                 </div>
+                <div class="col-md-12 mb-3">
+                    <label class="form-label"><i class="fas fa-ruler"></i> Satuan</label>
+                    <div class="form-input-wrap">
+                        <div class="form-input-icon"><i class="fas fa-ruler"></i></div>
+                        <input type="text" name="unit" class="form-input" value="<?= !empty($d['unit']) ? htmlspecialchars($d['unit']) : '' ?>" placeholder="Opsional, contoh: pcs, botol, dus">
+                    </div>
+                </div>
                 <div class="col-md-12 mb-4">
                     <label class="form-label"><i class="fas fa-truck"></i> Supplier</label>
                     <div id="supplierFields" class="supplier-fields">
@@ -310,24 +318,24 @@ $currentPrice    = isset($d['sell_price']) ? $d['sell_price'] : 0;
                     <div class="info-item-value price-val" id="infoPrice">Rp <?= $price ?></div>
                 </div>
                 <div class="info-item">
+                    <div class="info-item-icon"><i class="fas fa-ruler"></i></div>
+                    <div class="info-item-label">Satuan</div>
+                    <div class="info-item-value" id="infoUnit"><?= $unit ?></div>
+                </div>
+                <div class="info-item">
                     <div class="info-item-icon"><i class="fas fa-truck"></i></div>
                     <div class="info-item-label">Supplier</div>
                     <div class="info-item-value"><div class="supp-badge-list" id="infoSupplier"><?php if(empty($supplierNamesArr)): ?><span class="supp-badge"><i class="fas fa-store"></i> -</span><?php else: foreach($supplierNamesArr as $nm): ?><span class="supp-badge"><i class="fas fa-store"></i> <?= htmlspecialchars($nm) ?></span><?php endforeach; endif; ?></div></div>
                 </div>
                 <div class="info-item">
                     <div class="info-item-icon"><i class="fas fa-cubes"></i></div>
-                    <div class="info-item-label">Total Dibeli</div>
+                    <div class="info-item-label">Total Qty Dibeli</div>
                     <div class="info-item-value"><?= $totalQty ?> unit</div>
                 </div>
                 <div class="info-item">
                     <div class="info-item-icon"><i class="fas fa-shopping-cart"></i></div>
                     <div class="info-item-label">Total Transaksi</div>
                     <div class="info-item-value"><?= $totalTrans ?> kali</div>
-                </div>
-                <div class="info-item">
-                    <div class="info-item-icon"><i class="fas fa-calendar-alt"></i></div>
-                    <div class="info-item-label">Tanggal Input</div>
-                    <div class="info-item-value"><?= $tglStr ?></div>
                 </div>
             </div>
         </div>
@@ -529,6 +537,7 @@ document.getElementById('editProductForm').addEventListener('submit', function(e
                 var newName = formData.get('name');
                 var newCat  = formData.get('category');
                 var newPrice = formData.get('price');
+                var newUnit  = formData.get('unit');
 
                 // Update hero card
                 document.getElementById('heroName').textContent = newName;
@@ -546,6 +555,7 @@ document.getElementById('editProductForm').addEventListener('submit', function(e
                 document.getElementById('infoName').textContent = newName;
                 document.getElementById('infoCategory').textContent = newCat;
                 document.getElementById('infoPrice').textContent = 'Rp ' + parseInt(newPrice).toLocaleString('id-ID');
+                document.getElementById('infoUnit').textContent = newUnit ? newUnit : '-';
 
                 // Update foto hero jika ada file baru
                 var photoFile = formData.get('photo');
@@ -646,6 +656,7 @@ document.getElementById('btnDeleteProduct').addEventListener('click', function()
         set('infoName', item.name);
         set('infoCategory', item.category);
         set('infoPrice', 'Rp ' + item.priceFormatted);
+        set('infoUnit', item.unit || '-');
 
         // Stats
         var sv = document.querySelectorAll('.stat-value');
@@ -665,6 +676,7 @@ document.getElementById('btnDeleteProduct').addEventListener('click', function()
         setForm('name', item.name);
         setForm('category', item.category);
         setForm('price', item.price);
+        setForm('unit', item.unit || '');
 
         // Update category select
         var catSelect = document.querySelector('#editProductForm select[name="category"]');

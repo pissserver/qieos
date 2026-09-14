@@ -49,6 +49,7 @@ include '../../sessions/session.php';
                     <option value="Minuman">Minuman</option>
                     <option value="Jajanan">Jajanan</option>
                     <option value="Pelengkap">Pelengkap</option>
+                    <option value="Additional">Additional</option>
                 </select>
             </div>
         </div>
@@ -66,6 +67,19 @@ include '../../sessions/session.php';
                     min="0"
                     step="100"
                     required>
+            </div>
+        </div>
+
+        <div class="col-md-12">
+            <div class="input-group-modern">
+                <div class="input-icon">
+                    <i class="fas fa-ruler"></i>
+                </div>
+                <input
+                    type="text"
+                    name="unit"
+                    class="form-control"
+                    placeholder="Satuan (opsional, contoh: pcs, botol, dus)">
             </div>
         </div>
 

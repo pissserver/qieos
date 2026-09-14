@@ -25,7 +25,7 @@ if($q === ''){
 $safeQ = $conn->real_escape_string($q);
 
 $query = $conn->query("
-    SELECT id, code, name, category, sell_price, photo, created_at
+    SELECT id, code, name, category, sell_price, unit, photo, created_at
     FROM products
     WHERE deleted_at IS NULL AND (name LIKE '%$safeQ%' OR code LIKE '%$safeQ%' OR category LIKE '%$safeQ%')
     ORDER BY name ASC
@@ -72,6 +72,7 @@ if($query && $query->num_rows > 0){
             'category' => $d['category'],
             'price' => (int)$d['sell_price'],
             'priceFormatted' => number_format((int)$d['sell_price'], 0, ',', '.'),
+            'unit' => $d['unit'],
             'photo' => !empty($d['photo']) ? BASE_URL . '/assets/img/products/' . $d['photo'] : '',
             'supplier' => $supplierName,
             'supplierId' => $supplierIds ? $supplierIds[0] : '',
