@@ -294,7 +294,7 @@
     #editPurchaseModal .modal-content{
         background:#fff !important;
         border-radius:16px !important;
-        overflow:hidden;
+        overflow:visible !important;
         box-shadow:0 20px 40px rgba(15,23,42,.25);
     }
 
@@ -435,4 +435,69 @@
         .dataTables_wrapper .dataTables_filter{
             width:100%;
         }
+    }
+
+    /* ===== SELECT2 - samakan dengan .form-control ===== */
+    .select2-container--default .select2-selection--single{
+        height:42px;
+        border:1px solid var(--border);
+        border-radius:8px;
+        font-size:14px;
+    }
+
+    .select2-container--default .select2-selection--single .select2-selection__rendered{
+        line-height:40px;
+        padding-left:12px;
+        color:var(--text);
+        font-size:14px;
+    }
+
+    .select2-container--default .select2-selection--single .select2-selection__arrow{
+        right:10px;
+    }
+
+    .select2-container--default .select2-selection--single .select2-selection__clear{
+        line-height:40px;
+        margin-right:20px;
+        color:var(--muted);
+    }
+
+    .select2-container--default .select2-selection--single .select2-selection__placeholder{
+        color:var(--muted);
+    }
+
+    .select2-container--default.select2-container--open .select2-selection--single,
+    .select2-container--default .select2-selection--single:hover,
+    .select2-container--default.select2-container--focus .select2-selection--single{
+        border-color:var(--primary);
+        box-shadow:0 0 0 3px rgba(30,41,59,.15);
+        outline:none;
+    }
+
+    .select2-container--default .select2-dropdown{
+        border:1px solid var(--border);
+        border-radius:8px;
+        box-shadow:0 8px 24px rgba(15,23,42,.12);
+    }
+
+    .select2-container--default .select2-search--dropdown .select2-search__field{
+        border:1px solid var(--border);
+        border-radius:8px;
+        padding:6px 10px;
+        font-size:14px;
+    }
+
+    .select2-container--default .select2-search--dropdown .select2-search__field:focus{
+        border-color:var(--primary);
+        box-shadow:0 0 0 3px rgba(30,41,59,.15);
+        outline:none;
+    }
+
+    .select2-container--default .select2-results__option--highlighted[aria-selected]{
+        background:var(--primary);
+    }
+
+    .select2-container--default .select2-results__option[aria-selected="true"]{
+        background:#e8edf5;
+        color:var(--text);
     }

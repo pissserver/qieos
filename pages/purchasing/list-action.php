@@ -3,22 +3,34 @@
     header('Content-Type: application/json');
 
     if ($_GET['action'] == 'store') {
-        $products   = $_POST['product_name'];
-        $qtys        = $_POST['qty'];
-        $units       = $_POST['unit'];
-        $dateNow    = date('Y-m-d');
+        $product_ids = isset($_POST['product_id']) ? $_POST['product_id'] : [];
+        $qtys_buy    = isset($_POST['qty_buy']) ? $_POST['qty_buy'] : [];
+        $units_buy   = isset($_POST['unit_buy']) ? $_POST['unit_buy'] : [];
+        $prices_buy  = isset($_POST['price_buy']) ? $_POST['price_buy'] : [];
 
-        // Insert ke tabel list_purchases
-        mysqli_query($conn, "INSERT INTO list_purchases (date_list) VALUES ('$dateNow')");
-        $list_purchase_id = mysqli_insert_id($conn);
+        $qLast = mysqli_query($conn,"SELECT MAX(CAST(REPLACE(form, 'FORM-', '') AS UNSIGNED)) AS last_num FROM purchases");
+        $dLast = mysqli_fetch_assoc($qLast);
+        $nextNum = ($dLast && $dLast['last_num'] ? (int)$dLast['last_num'] : 0) + 1;
+        $formNumber = 'FORM-' . str_pad($nextNum, 7, '0', STR_PAD_LEFT);
+        $dateNow = date('Y-m-d');
 
-        for ($i=0; $i < count($products); $i++) { 
-            $product = mysqli_real_escape_string($conn,$products[$i]);
-            $qty     = mysqli_real_escape_string($conn,$qtys[$i]);
-            $unit    = mysqli_real_escape_string($conn,$units[$i]);
+        mysqli_query($conn, "INSERT INTO purchases (form, date) VALUES ('$formNumber', '$dateNow')");
+        $purchase_id = mysqli_insert_id($conn);
 
-            // Insert ke table list_purchase_items
-            mysqli_query($conn, "INSERT INTO list_purchase_items (list_purchase_id, name, qty, unit) VALUES ('$list_purchase_id', '$product', '$qty', '$unit')");
+        for ($i = 0; $i < count($product_ids); $i++) {
+            $product_id = (int)$product_ids[$i];
+            if ($product_id <= 0) continue;
+
+            $qty_buy   = mysqli_real_escape_string($conn, isset($qtys_buy[$i]) ? $qtys_buy[$i] : 0);
+            $unit_buy  = mysqli_real_escape_string($conn, isset($units_buy[$i]) ? $units_buy[$i] : '');
+            $price_buy = isset($prices_buy[$i]) && $prices_buy[$i] !== ''
+                ? (float)$prices_buy[$i]
+                : 0;
+
+            mysqli_query($conn, "INSERT INTO purchase_items
+                (purchase_id, product_id, qty_buy, unit_buy, price_buy)
+                VALUES
+                ($purchase_id, $product_id, $qty_buy, '$unit_buy', $price_buy)");
         }
 
         echo json_encode([
@@ -30,40 +42,37 @@
     if ($_GET['action'] == 'update') {
 
         $id = (int)$_POST['id'];
-        $dateNow = date('Y-m-d');
 
         mysqli_query($conn,"
-            DELETE FROM list_purchase_items
-            WHERE list_purchase_id = '$id'
+            DELETE FROM purchase_items
+            WHERE purchase_id = '$id'
         ");
 
-        $names = isset($_POST['product_name']) ? $_POST['product_name'] : [];
+        $product_ids = isset($_POST['product_id']) ? $_POST['product_id'] : [];
 
-        foreach($names as $key => $name){
+        foreach($product_ids as $key => $product_id){
+            $product_id = (int)$product_id;
+            if ($product_id <= 0) continue;
 
-            $name = trim($name);
-            if($name === '') continue;
-
-            $name  = mysqli_real_escape_string($conn, $name);
-            $qty   = isset($_POST['qty'][$key]) ? (int)$_POST['qty'][$key] : 0;
-            $unit  = mysqli_real_escape_string($conn, isset($_POST['unit'][$key]) ? $_POST['unit'][$key] : '');
-            $price = isset($_POST['price'][$key]) && $_POST['price'][$key] !== ''
-                ? (int)$_POST['price'][$key]
+            $qty_buy   = isset($_POST['qty_buy'][$key]) ? mysqli_real_escape_string($conn, $_POST['qty_buy'][$key]) : 0;
+            $unit_buy  = mysqli_real_escape_string($conn, isset($_POST['unit_buy'][$key]) ? $_POST['unit_buy'][$key] : '');
+            $price_buy = isset($_POST['price_buy'][$key]) && $_POST['price_buy'][$key] !== ''
+                ? (float)$_POST['price_buy'][$key]
                 : 0;
 
             mysqli_query($conn,"
-            INSERT INTO list_purchase_items(
-                list_purchase_id,
-                name,
-                qty,
-                unit,
-                price
+            INSERT INTO purchase_items(
+                purchase_id,
+                product_id,
+                qty_buy,
+                unit_buy,
+                price_buy
             ) VALUES(
                 '$id',
-                '$name',
-                '$qty',
-                '$unit',
-                '$price'
+                '$product_id',
+                '$qty_buy',
+                '$unit_buy',
+                '$price_buy'
             )
             ");
         }
@@ -77,13 +86,19 @@
     if ($_GET['action'] == 'destroy') {
         $id = (int)$_POST['id'];
 
-        $update = mysqli_query($conn,"
-            UPDATE list_purchases
+        $u1 = mysqli_query($conn,"
+            UPDATE purchases
             SET deleted_at = NOW()
             WHERE id='$id'
         ");
 
-        if($update){
+        $u2 = mysqli_query($conn,"
+            UPDATE purchase_items
+            SET deleted_at = NOW()
+            WHERE purchase_id='$id'
+        ");
+
+        if($u1 && $u2){
             echo json_encode([
                 'status'=>'success',
                 "msg" => "Daftar belanja berhasil dihapus"
@@ -103,9 +118,16 @@
         $id = (int)$_GET['id'];
 
         $q = mysqli_query($conn,"
-            SELECT name, qty, unit
-            FROM list_purchase_items
-            WHERE list_purchase_id = '$id'
+            SELECT
+                COALESCE(products.name, '') AS name,
+                pi.qty_buy AS qty,
+                pi.unit_buy AS unit,
+                pi.price_buy AS price
+            FROM purchase_items pi
+            LEFT JOIN products
+                ON products.id = pi.product_id
+            WHERE pi.purchase_id = '$id'
+              AND pi.deleted_at IS NULL
         ");
 
         $data = [];

@@ -13,12 +13,12 @@ function sc($conn, $sql) { $row = sq($conn, $sql); return $row ? (int)$row['c'] 
 
 $d_paid = "status_payment='paid' AND tanggal >= '$start' AND tanggal <= '$end'";
 $d = "tanggal >= '$start' AND tanggal <= '$end'";
-$lpi = "lp.date_list >= '$start' AND lp.date_list <= '$end'";
+$dateP = "p.date >= '$start' AND p.date <= '$end'";
 $t = "tp.payment_date >= '$start' AND tp.payment_date <= '$end'";
 $u = "up.payment_date >= '$start' AND up.payment_date <= '$end'";
 
 $pendapatan = sv($conn, "SELECT COALESCE(SUM(total),0) as v FROM orders WHERE status_payment='paid' AND $d");
-$pengeluaran_beli = sv($conn, "SELECT COALESCE(SUM(lpi2.price),0) as v FROM list_purchase_items lpi2 JOIN list_purchases lp ON lpi2.list_purchase_id=lp.id WHERE lp.deleted_at IS NULL AND $lpi");
+$pengeluaran_beli = sv($conn, "SELECT COALESCE(SUM(pi.price_buy),0) as v FROM purchase_items pi JOIN purchases p ON pi.purchase_id=p.id WHERE p.deleted_at IS NULL AND pi.deleted_at IS NULL AND pi.price_buy > 0 AND $dateP");
 $bayar_tenant = sv($conn, "SELECT COALESCE(SUM(tp.cost_payment),0) as v FROM tenant_payments tp WHERE tp.status='paid' AND $t");
 $bayar_utility = sv($conn, "SELECT COALESCE(SUM(up.cost_payment),0) as v FROM utility_payments up WHERE up.status='paid' AND $u");
 $total_pengeluaran = $pengeluaran_beli;
@@ -39,7 +39,7 @@ if ($cr) while ($row = mysqli_fetch_assoc($cr)) {
     $chart_months[] = $row['label'];
     $chart_p[] = (float)$row['v'];
     $km = $row['km'];
-    $chart_b[] = sv($conn, "SELECT COALESCE(SUM(lpi2.price),0) as v FROM list_purchase_items lpi2 JOIN list_purchases lp ON lpi2.list_purchase_id=lp.id WHERE lp.deleted_at IS NULL AND DATE_FORMAT(lp.date_list,'%Y-%m')='$km'");
+    $chart_b[] = sv($conn, "SELECT COALESCE(SUM(pi.price_buy),0) as v FROM purchase_items pi JOIN purchases p ON pi.purchase_id=p.id WHERE p.deleted_at IS NULL AND pi.deleted_at IS NULL AND pi.price_buy > 0 AND DATE_FORMAT(p.date,'%Y-%m')='$km'");
 }
 
 $week = [];
@@ -55,7 +55,7 @@ $tpr = @mysqli_query($conn, "SELECT p.name, p.category, COALESCE(SUM(od.qty),0) 
 if ($tpr) while ($row = mysqli_fetch_assoc($tpr)) $top_products[] = $row;
 
 $recent_list_purchases = [];
-$rpr = @mysqli_query($conn, "SELECT lp.date_list, COUNT(lpi2.id) as items, COALESCE(SUM(lpi2.price),0) as total FROM list_purchases lp JOIN list_purchase_items lpi2 ON lp.id=lpi2.list_purchase_id WHERE lp.deleted_at IS NULL GROUP BY lp.id ORDER BY lp.date_list DESC, lp.id DESC LIMIT 5");
+$rpr = @mysqli_query($conn, "SELECT p.date AS date_list, COUNT(pi.id) as items, COALESCE(SUM(pi.price_buy),0) as total FROM purchases p JOIN purchase_items pi ON p.id=pi.purchase_id AND pi.deleted_at IS NULL WHERE p.deleted_at IS NULL GROUP BY p.id ORDER BY p.date DESC, p.id DESC LIMIT 5");
 if ($rpr) while ($row = mysqli_fetch_assoc($rpr)) $recent_list_purchases[] = $row;
 
 echo json_encode([

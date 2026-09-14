@@ -46,11 +46,12 @@
             $remaining = $qty;
 
             $fifo = mysqli_query($conn,"
-                SELECT id, remaining_qty, date
-                FROM purchase_items
-                WHERE product_id = $product_id
-                AND remaining_qty > 0
-                ORDER BY date ASC
+                SELECT pi.id, pi.remaining_qty, p.date
+                FROM purchase_items pi
+                JOIN purchases p ON p.id = pi.purchase_id
+                WHERE pi.product_id = $product_id
+                AND pi.remaining_qty > 0
+                ORDER BY p.date ASC
                 FOR UPDATE
             ");
 

@@ -7,9 +7,9 @@ $q = mysqli_query($conn, "
     SELECT 
         pi.qty,
         pi.remaining_qty,
-        pi.date,
+        p.date,
         pi.unit,
-        pi.buy_price,
+        pi.price,
         p.form
     FROM purchase_items pi
     LEFT JOIN purchases p ON p.id = pi.purchase_id
@@ -101,7 +101,7 @@ $bulan = [
                             <!-- PRICE -->
                             <td>
                                 <span class="badge-price">
-                                    Rp <?= number_format($d['buy_price'], 0, ',', '.') ?>
+                                    Rp <?= number_format($d['price'], 0, ',', '.') ?>
                                 </span>
                             </td>
 

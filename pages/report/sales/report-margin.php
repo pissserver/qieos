@@ -11,12 +11,12 @@ $query = mysqli_query($conn, "
         COALESCE(SUM(od.qty), 0) AS qty_sold,
         COALESCE(AVG(od.price), 0) AS sell_price,
         COALESCE((
-            SELECT AVG(pi.buy_price)
+            SELECT AVG(pi.price)
             FROM purchase_items pi
             WHERE pi.product_id = p.id
               AND pi.deleted_at IS NULL
-              AND pi.buy_price > 0
-        ), 0) AS buy_price,
+              AND pi.price > 0
+        ), 0) AS price,
         COALESCE(SUM(od.subtotal), 0) AS revenue
     FROM order_details od
     JOIN orders o ON od.order_id = o.id
@@ -35,7 +35,7 @@ if ($hasData) {
     while ($row = mysqli_fetch_assoc($query)) {
         $qty = (int) $row['qty_sold'];
         $sell = (float) $row['sell_price'];
-        $buy = (float) $row['buy_price'];
+        $buy = (float) $row['price'];
         $marginPct = $sell > 0 ? (($sell - $buy) / $sell) * 100 : 0;
         $profit = ($sell - $buy) * $qty;
         $totalProfit += $profit;

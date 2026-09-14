@@ -6,7 +6,6 @@ SELECT
     purchases.id,
     purchases.form,
     purchases.date,
-    purchases.note,
     purchases.created_at,
     purchase_items.qty,
     purchase_items.remaining_qty,
@@ -23,6 +22,13 @@ LEFT JOIN products
     ON products.id = purchase_items.product_id
 
 WHERE purchases.deleted_at IS NULL
+  AND EXISTS (
+      SELECT 1
+      FROM purchase_items pi2
+      WHERE pi2.purchase_id = purchases.id
+        AND pi2.deleted_at IS NULL
+        AND pi2.qty IS NOT NULL
+  )
 
 GROUP BY purchases.id
 ORDER BY purchases.id DESC
@@ -36,7 +42,6 @@ ORDER BY purchases.id DESC
 <tr>
     <th>ID FORM</th>
     <th class="text-center">TANGGAL PEMBELIAN</th>
-    <th class="text-center">CATATAN</th>
     <th class="text-center">PEMBUATAN FORM</th>
     <th class="text-center">AKSI</th>
 </tr>
@@ -73,14 +78,6 @@ ORDER BY purchases.id DESC
     <!-- NOTE -->
     <td class="text-center">
         <span class="note-badge">
-            <i class="fas fa-sticky-note"></i>
-            <?= $d['note'] ?: 'Tidak ada catatan' ?>
-        </span>
-    </td>
-
-    <!-- CREATED -->
-    <td class="text-center">
-        <span class="created-badge">
             <i class="fas fa-clock"></i>
             <?= date('d F Y', strtotime($d['created_at'])) ?>
         </span>
