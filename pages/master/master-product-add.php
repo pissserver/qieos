@@ -1,5 +1,7 @@
 <?php
 include '../../sessions/session.php';
+include __DIR__ . '/../components/data/stock-status.php';
+$lowStockDefault = get_low_stock_default($conn);
 ?>
 
 <form id="addProductForm" enctype="multipart/form-data">
@@ -70,7 +72,7 @@ include '../../sessions/session.php';
             </div>
         </div>
 
-        <div class="col-md-12">
+        <div class="col-md-12" id="addFieldUnit">
             <div class="input-group-modern">
                 <div class="input-icon">
                     <i class="fas fa-ruler"></i>
@@ -83,7 +85,25 @@ include '../../sessions/session.php';
             </div>
         </div>
 
-        <div class="col-md-12 mb-4">
+        <div class="col-md-12" id="addFieldLowStock">
+            <div class="input-group-modern">
+                <div class="input-icon">
+                    <i class="fas fa-gauge-high"></i>
+                </div>
+                <input
+                    type="number"
+                    name="low_stock"
+                    class="form-control"
+                    placeholder="Batas Stok Menipis"
+                    value="<?= (int)$lowStockDefault ?>"
+                    min="0">
+            </div>
+            <small class="text-muted d-block mb-3 ms-5" style="font-size:11px;">
+                Stok di bawah batas ini berstatus Menipis, 0 = Habis. Kosongkan sudah terisi default dari pengaturan.
+            </small>
+        </div>
+
+        <div class="col-md-12 mb-4" id="addFieldSupplier">
             <label class="form-label supplier-form-label"><i class="fas fa-truck"></i> Supplier</label>
             <div id="supplierFields" class="supplier-fields">
                 <div class="supplier-field-row">

@@ -1,5 +1,6 @@
 <?php
 include '../../sessions/session.php';
+include __DIR__ . '/../components/data/stock-status.php';
 
 header('Cache-Control: no-store, no-cache, must-revalidate');
 
@@ -14,15 +15,31 @@ if(!$d){
 
 // Hitung jumlah pembelian (semua item, kecuali yang di-soft-delete)
 $qi = mysqli_query($conn,"
-    SELECT
-        COALESCE(SUM(pi.qty),0) AS total_qty,
-        COUNT(CASE WHEN pi.qty IS NOT NULL THEN 1 END) AS total_transaksi
+    SELECT COALESCE(SUM(pi.qty),0) AS total_qty
     FROM purchase_items pi
     INNER JOIN purchases p ON p.id = pi.purchase_id AND p.deleted_at IS NULL
     WHERE pi.product_id = {$d['id']}
       AND pi.deleted_at IS NULL
 ");
 $di = mysqli_fetch_assoc($qi);
+
+// Hitung total terjual dari order_details (SUM qty per produk, kecuali order dibatalkan)
+$qo = mysqli_query($conn,"
+    SELECT COALESCE(SUM(od.qty),0) AS total_terjual
+    FROM order_details od
+    INNER JOIN orders o ON o.id = od.order_id
+    WHERE od.product_id = {$d['id']}
+      AND o.status_payment != 'cancelled'
+");
+$do = mysqli_fetch_assoc($qo);
+
+// Batas stok menipis + stok per layer (gudang & kantin) + status
+$lowStock    = resolve_product_low_stock($conn, $d);
+$stock       = get_product_stock($conn, $d['id']);
+$stockGudang = $stock['gudang'];
+$stockKantin = $stock['kantin'];
+$stockTotal  = $stock['total'];
+$statusInfo  = product_status_view($stockTotal, $lowStock);
 
 // Ambil suppliers dari tabel relasi product_supplier (multi supplier)
 $supplierNamesArr = [];
@@ -64,7 +81,13 @@ $cat   = ucwords(strtolower(htmlspecialchars($d['category'])));
 $unit  = !empty($d['unit']) ? htmlspecialchars($d['unit']) : '-';
 $price = number_format($d['sell_price'], 0, ',', '.');
 $totalQty    = number_format($di['total_qty'], 0, ',', '.');
-$totalTrans  = $di['total_transaksi'];
+$totalTrans  = (int)$do['total_terjual'];
+$totalTransFmt = number_format($totalTrans, 0, ',', '.');
+
+$stockGudangFmt = fmt($stockGudang);
+$stockKantinFmt = fmt($stockKantin);
+$stockTotalFmt  = fmt($stockTotal);
+$lowStockFmt    = fmt($lowStock);
 
 $bulan = [1=>'Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
 $created = isset($d['created_at']) ? $d['created_at'] : date('Y-m-d H:i:s');
@@ -73,6 +96,10 @@ $tglStr = date('d', $tgl) . ' ' . $bulan[(int)date('n', $tgl)] . ' ' . date('Y',
 
 $currentCategory = isset($d['category']) ? $d['category'] : '';
 $currentPrice    = isset($d['sell_price']) ? $d['sell_price'] : 0;
+
+// Kategori additional: tidak pakai stok/supplier/batas menipis
+$isAdditional = (!empty($d['category']) && strtolower($d['category']) === 'additional');
+$hid = $isAdditional ? ' style="display:none"' : '';
 ?>
 
 <!doctype html>
@@ -143,6 +170,12 @@ $currentPrice    = isset($d['sell_price']) ? $d['sell_price'] : 0;
             </div>
             <div class="hero-info">
                 <div class="hero-category" id="heroCategory"><i class="fas fa-tag"></i> <?= $cat ?></div>
+                <div class="hero-status-row" id="heroStatusRow"<?= $hid ?>>
+                    <span class="st-badge st-badge-lg <?= $statusInfo['css'] ?>" id="heroStatusBadge">
+                        <i class="fas <?= $statusInfo['icon'] ?>"></i> <?= $statusInfo['label'] ?>
+                    </span>
+                    <span class="st-limit-hint"><i class="fas fa-gauge-high"></i> Batas menipis: <?= $lowStockFmt ?> <?= $unit ?></span>
+                </div>
                 <h1 class="hero-name" id="heroName"><?= $name ?></h1>
                 <div class="hero-code"><i class="fas fa-barcode"></i> Kode: <span class="code-tag" id="heroCode"><?= $code ?></span></div>
                 <div class="hero-supplier"><i class="fas fa-truck"></i> Supplier: <span class="supp-badge-list" id="heroSupplierName"><?php if(empty($supplierNamesArr)): ?><span class="supp-badge"><i class="fas fa-store"></i> -</span><?php else: foreach($supplierNamesArr as $nm): ?><span class="supp-badge"><i class="fas fa-store"></i> <?= htmlspecialchars($nm) ?></span><?php endforeach; endif; ?></span></div>
@@ -150,21 +183,55 @@ $currentPrice    = isset($d['sell_price']) ? $d['sell_price'] : 0;
                 <div class="hero-date"><i class="fas fa-calendar-alt"></i> Ditambahkan: <?= $tglStr ?></div>
             </div>
         </div>
-        <div class="stats-row">
+        <div class="stats-row<?= $isAdditional ? ' stats-row--add' : '' ?>" id="statsRow">
             <div class="stat-item">
                 <div class="stat-icon stat-icon-purple"><i class="fas fa-shopping-cart"></i></div>
-                <div class="stat-value"><?= $totalTrans ?></div>
-                <div class="stat-label">Total Transaksi</div>
+                <div class="stat-value"><?= $totalTransFmt ?></div>
+                <div class="stat-label">Total Terjual <span class="stat-note">(Order)</span></div>
             </div>
-            <div class="stat-item">
+            <div class="stat-item" id="statTotalQty"<?= $hid ?>>
                 <div class="stat-icon stat-icon-green"><i class="fas fa-cubes"></i></div>
                 <div class="stat-value"><?= $totalQty ?></div>
-                <div class="stat-label">Total Qty Dibeli</div>
+                <div class="stat-label">Total Qty Dibeli <span class="stat-note">(Keseluruhan)</span></div>
             </div>
             <div class="stat-item">
                 <div class="stat-icon stat-icon-amber"><i class="fas fa-coins"></i></div>
                 <div class="stat-value">Rp <?= $price ?></div>
                 <div class="stat-label">Harga Jual</div>
+            </div>
+        </div>
+
+        <div class="stock-ov-row" id="stockOverviewRow"<?= $hid ?>>
+            <div class="stock-ov-item ov-status ov-st-<?= $statusInfo['key'] ?>" id="ovStatusTile">
+                <div class="ov-icon"><i class="fas <?= $statusInfo['icon'] ?>"></i></div>
+                <div class="ov-info">
+                    <div class="ov-value" id="ovStatusLabel"><?= $statusInfo['label'] ?></div>
+                    <div class="ov-label">Ketersediaan</div>
+                </div>
+            </div>
+            <div class="stock-ov-item ov-gudang" id="ovGudangTile">
+                <div class="ov-icon"><i class="fas fa-warehouse"></i></div>
+                <div class="ov-info">
+                    <div class="ov-value" id="ovGudang"><?= $stockGudangFmt ?></div>
+                    <div class="ov-label">Stok Gudang</div>
+                </div>
+                <div class="ov-unit"><?= $unit ?></div>
+            </div>
+            <div class="stock-ov-item ov-kantin" id="ovKantinTile">
+                <div class="ov-icon"><i class="fas fa-store"></i></div>
+                <div class="ov-info">
+                    <div class="ov-value" id="ovKantin"><?= $stockKantinFmt ?></div>
+                    <div class="ov-label">Stok Kantin</div>
+                </div>
+                <div class="ov-unit"><?= $unit ?></div>
+            </div>
+            <div class="stock-ov-item ov-total" id="ovTotalTile">
+                <div class="ov-icon"><i class="fas fa-boxes-stacked"></i></div>
+                <div class="ov-info">
+                    <div class="ov-value" id="ovTotal"><?= $stockTotalFmt ?></div>
+                    <div class="ov-label">Total Stok</div>
+                </div>
+                <div class="ov-unit"><?= $unit ?></div>
             </div>
         </div>
     </div>
@@ -217,14 +284,21 @@ $currentPrice    = isset($d['sell_price']) ? $d['sell_price'] : 0;
                         <input type="number" name="price" class="form-input" value="<?= $currentPrice ?>" min="0" step="100" required>
                     </div>
                 </div>
-                <div class="col-md-12 mb-3">
+                <div class="col-md-12 mb-3" id="editFieldUnit"<?= $hid ?>>
                     <label class="form-label"><i class="fas fa-ruler"></i> Satuan</label>
                     <div class="form-input-wrap">
                         <div class="form-input-icon"><i class="fas fa-ruler"></i></div>
                         <input type="text" name="unit" class="form-input" value="<?= !empty($d['unit']) ? htmlspecialchars($d['unit']) : '' ?>" placeholder="Opsional, contoh: pcs, botol, dus">
                     </div>
                 </div>
-                <div class="col-md-12 mb-4">
+                <div class="col-md-12 mb-3" id="editFieldLowStock"<?= $hid ?>>
+                    <label class="form-label"><i class="fas fa-gauge-high"></i> Batas Stok Menipis</label>
+                    <div class="form-input-wrap">
+                        <div class="form-input-icon"><i class="fas fa-gauge-high"></i></div>
+                        <input type="number" name="low_stock" class="form-input" value="<?= $lowStock ?>" min="0">
+                    </div>
+                </div>
+                <div class="col-md-12 mb-4" id="editFieldSupplier"<?= $hid ?>>
                     <label class="form-label"><i class="fas fa-truck"></i> Supplier</label>
                     <div id="supplierFields" class="supplier-fields">
                         <?php
@@ -307,11 +381,6 @@ $currentPrice    = isset($d['sell_price']) ? $d['sell_price'] : 0;
                     <div class="info-item-value" id="infoCode"><?= $code ?></div>
                 </div>
                 <div class="info-item">
-                    <div class="info-item-icon"><i class="fas fa-box"></i></div>
-                    <div class="info-item-label">Nama Produk</div>
-                    <div class="info-item-value" id="infoName"><?= $name ?></div>
-                </div>
-                <div class="info-item">
                     <div class="info-item-icon"><i class="fas fa-tags"></i></div>
                     <div class="info-item-label">Kategori</div>
                     <div class="info-item-value" id="infoCategory"><?= $cat ?></div>
@@ -321,25 +390,58 @@ $currentPrice    = isset($d['sell_price']) ? $d['sell_price'] : 0;
                     <div class="info-item-label">Harga Jual</div>
                     <div class="info-item-value price-val" id="infoPrice">Rp <?= $price ?></div>
                 </div>
-                <div class="info-item">
+                <div class="info-item" id="infoItemUnit"<?= $hid ?>>
                     <div class="info-item-icon"><i class="fas fa-ruler"></i></div>
                     <div class="info-item-label">Satuan</div>
                     <div class="info-item-value" id="infoUnit"><?= $unit ?></div>
                 </div>
-                <div class="info-item">
+                <div class="info-item" id="infoItemSupplier"<?= $hid ?>>
                     <div class="info-item-icon"><i class="fas fa-truck"></i></div>
                     <div class="info-item-label">Supplier</div>
                     <div class="info-item-value"><div class="supp-badge-list" id="infoSupplier"><?php if(empty($supplierNamesArr)): ?><span class="supp-badge"><i class="fas fa-store"></i> -</span><?php else: foreach($supplierNamesArr as $nm): ?><span class="supp-badge"><i class="fas fa-store"></i> <?= htmlspecialchars($nm) ?></span><?php endforeach; endif; ?></div></div>
                 </div>
-                <div class="info-item">
+                <div class="info-item" id="infoItemTotalQty"<?= $hid ?>>
                     <div class="info-item-icon"><i class="fas fa-cubes"></i></div>
                     <div class="info-item-label">Total Qty Dibeli</div>
                     <div class="info-item-value" id="infoTotalQty"><?= $totalQty ?> unit</div>
+                    <div class="info-item-note"><i class="fas fa-infinity"></i> Keseluruhan / overall</div>
                 </div>
                 <div class="info-item">
                     <div class="info-item-icon"><i class="fas fa-shopping-cart"></i></div>
-                    <div class="info-item-label">Total Transaksi</div>
-                    <div class="info-item-value" id="infoTotalTrans"><?= $totalTrans ?> kali</div>
+                    <div class="info-item-label">Total Terjual</div>
+                    <div class="info-item-value" id="infoTotalTrans"><?= $totalTransFmt ?> unit</div>
+                    <div class="info-item-note"><i class="fas fa-receipt"></i> Total order produk</div>
+                </div>
+                <div class="info-item" id="infoItemLowStock"<?= $hid ?>>
+                    <div class="info-item-icon"><i class="fas fa-gauge-high"></i></div>
+                    <div class="info-item-label">Batas Stok Menipis</div>
+                    <div class="info-item-value" id="infoLowStock"><?= $lowStockFmt ?> unit</div>
+                    <div class="info-item-note">status <b>Habis</b> bila 0</div>
+                </div>
+                <div class="info-item" id="infoItemStockGudang"<?= $hid ?>>
+                    <div class="info-item-icon"><i class="fas fa-warehouse"></i></div>
+                    <div class="info-item-label">Stok Gudang</div>
+                    <div class="info-item-value" id="infoStockGudang"><?= $stockGudangFmt ?> unit</div>
+                </div>
+                <div class="info-item" id="infoItemStockKantin"<?= $hid ?>>
+                    <div class="info-item-icon"><i class="fas fa-store"></i></div>
+                    <div class="info-item-label">Stok Kantin</div>
+                    <div class="info-item-value" id="infoStockKantin"><?= $stockKantinFmt ?> unit</div>
+                </div>
+                <div class="info-item" id="infoItemStockTotal"<?= $hid ?>>
+                    <div class="info-item-icon"><i class="fas fa-boxes-stacked"></i></div>
+                    <div class="info-item-label">Total Stok</div>
+                    <div class="info-item-value" id="infoStockTotal"><?= $stockTotalFmt ?> unit</div>
+                    <div class="info-item-note">Gudang + Kantin</div>
+                </div>
+                <div class="info-item" id="infoItemStockStatus"<?= $hid ?>>
+                    <div class="info-item-icon"><i class="fas fa-circle-check"></i></div>
+                    <div class="info-item-label">Status Stok</div>
+                    <div class="info-item-value">
+                        <span class="st-badge <?= $statusInfo['css'] ?>" id="infoStockStatus">
+                            <i class="fas <?= $statusInfo['icon'] ?>"></i> <?= $statusInfo['label'] ?>
+                        </span>
+                    </div>
                 </div>
             </div>
         </div>
@@ -358,17 +460,28 @@ document.getElementById('btnToggleEdit').addEventListener('click', function(){
     card.classList.toggle('show');
     if(card.classList.contains('show')){
         setTimeout(function(){
-            var scrollTarget = window.innerWidth < 992
-                ? window.innerHeight * 2
-                : window.innerHeight * 0.8;
-            try { contentEl.scrollTo({ top: scrollTarget, behavior: 'smooth' }); }
-            catch(e){ contentEl.scrollTop = scrollTarget; }
-        }, 200);
+            try {
+                card.scrollIntoView({ behavior:'smooth', block:'start' });
+            } catch(e){
+                card.scrollIntoView();
+            }
+        }, 150);
     }
 });
 
 document.getElementById('btnCancelEdit').addEventListener('click', function(){
     document.getElementById('editCard').classList.remove('show');
+    // Kembalikan UI ke kondisi awal sesuai kategori asli produk
+    applyAdditionalMode(<?= $isAdditional ? 'true' : 'false' ?>);
+    var catSelect = document.querySelector('#editProductForm select[name="category"]');
+    if(catSelect){
+        var origCat = '<?= htmlspecialchars($d['category'], ENT_QUOTES) ?>';
+        catSelect.value = origCat;
+    }
+    var ls = document.querySelector('#editProductForm input[name="low_stock"]');
+    if(ls) ls.value = <?= (int)$lowStock ?>;
+    try { contentEl.scrollTo({ top: 0, behavior: 'smooth' }); }
+    catch(e){ contentEl.scrollTop = 0; }
 });
 
 // Photo preview — klik area upload membuka file dialog
@@ -399,6 +512,32 @@ var supplierTemplate = document.getElementById('supplierFieldTemplate');
 
 function escHtml(s){
     return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function renderStatusBadge(el, status, big){
+    if(!el || !status) return;
+    el.className = 'st-badge' + (big ? ' st-badge-lg' : '') + ' ' + (status.css || 'st-ready');
+    el.innerHTML = '<i class="fas ' + (status.icon || 'fa-circle-check') + '"></i> ' + (status.label || 'Ready');
+}
+
+function stockStatusOf(total, low){
+    total = parseInt(total) || 0;
+    low = parseInt(low) || 0;
+    if(total <= 0) return {key:'habis', label:'Habis', css:'st-habis', icon:'fa-circle-xmark'};
+    if(total <= low) return {key:'menipis', label:'Menipis', css:'st-menipis', icon:'fa-triangle-exclamation'};
+    return {key:'ready', label:'Ready', css:'st-ready', icon:'fa-circle-check'};
+}
+
+window.__stockData = { gudang: <?= $stockGudang ?>, kantin: <?= $stockKantin ?>, total: <?= $stockTotal ?> };
+
+function applyAdditionalMode(additional){
+    var ids = ['heroStatusRow','stockOverviewRow','statTotalQty','infoItemSupplier','infoItemUnit','infoItemTotalQty','infoItemLowStock','infoItemStockGudang','infoItemStockKantin','infoItemStockTotal','infoItemStockStatus','editFieldUnit','editFieldLowStock','editFieldSupplier'];
+    for(var i = 0; i < ids.length; i++){
+        var el = document.getElementById(ids[i]);
+        if(el) el.style.display = additional ? 'none' : '';
+    }
+    var statsRow = document.getElementById('statsRow');
+    if(statsRow) statsRow.classList.toggle('stats-row--add', additional);
 }
 
 function supplierOptionsHtml(selectedId, excludeIds){
@@ -522,6 +661,20 @@ supplierFields.addEventListener('click', function(e){
 // Inisialisasi opsi dropdown sesuai data awal
 refreshAllSupplierRows();
 
+// Toggle additional mode saat kategori di-edit form berubah
+(function(){
+    var catSelect = document.querySelector('#editProductForm select[name="category"]');
+    if(!catSelect) return;
+    catSelect.addEventListener('change', function(){
+        var isAdd = (this.value || '').toLowerCase() === 'additional';
+        applyAdditionalMode(isAdd);
+        if(isAdd){
+            var ls = document.querySelector('#editProductForm input[name="low_stock"]');
+            if(ls) ls.value = '';
+        }
+    });
+})();
+
 // Update action — in-place tanpa refresh
 document.getElementById('editProductForm').addEventListener('submit', function(e){
     e.preventDefault();
@@ -546,8 +699,11 @@ document.getElementById('editProductForm').addEventListener('submit', function(e
                 // Update hero card
                 document.getElementById('heroName').textContent = newName;
                 document.getElementById('heroCode').textContent = newCode;
-                document.getElementById('heroCategory').textContent = newCat;
+                document.getElementById('heroCategory').innerHTML = '<i class="fas fa-tag"></i> ' + newCat;
                 document.getElementById('heroPrice').textContent = 'Rp ' + parseInt(newPrice).toLocaleString('id-ID');
+
+                // Toggle additional mode sesuai kategori baru
+                applyAdditionalMode(newCat.toLowerCase() === 'additional');
 
                 // Update supplier (bisa lebih dari satu)
                 var supNames = getSelectedSupplierNames();
@@ -556,10 +712,26 @@ document.getElementById('editProductForm').addEventListener('submit', function(e
 
                 // Update info card
                 document.getElementById('infoCode').textContent = newCode;
-                document.getElementById('infoName').textContent = newName;
                 document.getElementById('infoCategory').textContent = newCat;
                 document.getElementById('infoPrice').textContent = 'Rp ' + parseInt(newPrice).toLocaleString('id-ID');
                 document.getElementById('infoUnit').textContent = newUnit ? newUnit : '-';
+
+                // Update batas stok menipis & status (sesuai low_stock produk)
+                var newLow = formData.get('low_stock');
+                var lowInt = newCat.toLowerCase() === 'additional' ? 0 : (parseInt(newLow) || 0);
+                var unitTxt = newUnit ? newUnit : 'unit';
+                var hint = document.querySelector('.st-limit-hint');
+                if(hint) hint.innerHTML = '<i class="fas fa-gauge-high"></i> Batas menipis: ' + lowInt + ' ' + unitTxt;
+                document.getElementById('infoLowStock').textContent = lowInt + ' unit';
+                var st = stockStatusOf(window.__stockData.total, lowInt);
+                renderStatusBadge(document.getElementById('heroStatusBadge'), st, true);
+                renderStatusBadge(document.getElementById('infoStockStatus'), st, false);
+                document.getElementById('ovStatusLabel').textContent = st.label;
+                var tile = document.getElementById('ovStatusTile');
+                if(tile){
+                    tile.classList.remove('ov-st-ready','ov-st-menipis','ov-st-habis');
+                    tile.classList.add('ov-st-' + st.key);
+                }
 
                 // Update foto hero jika ada file baru
                 var photoFile = formData.get('photo');
@@ -651,6 +823,7 @@ document.getElementById('btnDeleteProduct').addEventListener('click', function()
         set('heroCode', item.code);
         set('heroCategory', item.category);
         set('heroPrice', 'Rp ' + item.priceFormatted);
+        applyAdditionalMode((item.category || '').toLowerCase() === 'additional');
         var supNames = item.supplierNames || [];
         renderSupplierBadges(document.getElementById('heroSupplierName'), supNames);
         renderSupplierBadges(document.getElementById('infoSupplier'), supNames);
@@ -662,12 +835,32 @@ document.getElementById('btnDeleteProduct').addEventListener('click', function()
         set('infoPrice', 'Rp ' + item.priceFormatted);
         set('infoUnit', item.unit || '-');
         set('infoTotalQty', item.totalQtyFormatted + ' unit');
-        set('infoTotalTrans', item.totalTransaksi + ' kali');
+        set('infoTotalTrans', item.totalTransaksiFormatted + ' unit');
+
+        // Status stok & stok per layer
+        renderStatusBadge(document.getElementById('heroStatusBadge'), item.stockStatus, true);
+        renderStatusBadge(document.getElementById('infoStockStatus'), item.stockStatus, false);
+        set('ovStatusLabel', item.stockStatus.label);
+        var ovTile = document.getElementById('ovStatusTile');
+        if(ovTile){
+            ovTile.classList.remove('ov-st-ready','ov-st-menipis','ov-st-habis');
+            ovTile.classList.add('ov-st-' + (item.stockStatus.key || 'ready'));
+        }
+        var hint = document.querySelector('.st-limit-hint');
+        if(hint) hint.innerHTML = '<i class="fas fa-gauge-high"></i> Batas menipis: ' + item.lowStock + ' ' + (item.unit || 'unit');
+
+        set('ovGudang', item.stockGudangFormatted);
+        set('ovKantin', item.stockKantinFormatted);
+        set('ovTotal', item.stockTotalFormatted);
+        set('infoLowStock', item.lowStock + ' unit');
+        set('infoStockGudang', item.stockGudangFormatted + ' unit');
+        set('infoStockKantin', item.stockKantinFormatted + ' unit');
+        set('infoStockTotal', item.stockTotalFormatted + ' unit');
 
         // Stats
         var sv = document.querySelectorAll('.stat-value');
         if(sv.length >= 3){
-            sv[0].textContent = item.totalTransaksi;
+            sv[0].textContent = item.totalTransaksiFormatted;
             sv[1].textContent = item.totalQtyFormatted;
             sv[2].textContent = 'Rp ' + item.priceFormatted;
         }
@@ -683,6 +876,7 @@ document.getElementById('btnDeleteProduct').addEventListener('click', function()
         setForm('category', item.category);
         setForm('price', item.price);
         setForm('unit', item.unit || '');
+        setForm('low_stock', item.lowStock !== undefined && item.lowStock !== null ? item.lowStock : '');
 
         // Update category select
         var catSelect = document.querySelector('#editProductForm select[name="category"]');

@@ -2,6 +2,7 @@
 error_reporting(0);
 ini_set('display_errors', '0');
 include __DIR__ . '/../../sessions/session.php';
+include __DIR__ . '/../components/data/stock-status.php';
 
 header('Content-Type: application/json');
 header('Cache-Control: no-store, no-cache, must-revalidate');
@@ -80,6 +81,7 @@ if($action === 'store'){
     $category     = mysqli_real_escape_string($conn, trim(isset($_POST['category']) ? $_POST['category'] : ''));
     $price        = isset($_POST['price']) ? (int)$_POST['price'] : 0;
     $unit         = mysqli_real_escape_string($conn, trim(isset($_POST['unit']) ? $_POST['unit'] : ''));
+    $lowStock     = isset($_POST['low_stock']) && $_POST['low_stock'] !== '' ? max(0, (int)$_POST['low_stock']) : get_low_stock_default($conn);
     $supplierIds  = normalizeSupplierIds(isset($_POST['supplier_id']) ? $_POST['supplier_id'] : '');
 
     if($code === '' || $name === '' || $category === '' || $price <= 0){
@@ -105,11 +107,15 @@ if($action === 'store'){
         $photoName = $upload['name'];
     }
 
-    $unitSql = $unit === '' ? 'NULL' : "'$unit'";
+    // Kategori Additional: tidak pakai satuan, batas stok & supplier → simpan NULL
+    $isAdd = strtolower(trim($category)) === 'additional';
+    $unitSql   = ($unit === '' || $isAdd) ? 'NULL' : "'$unit'";
+    $lowStockSql = $isAdd ? 'NULL' : $lowStock;
+    if($isAdd){ $supplierIds = []; }
 
     $q = mysqli_query($conn,"
-        INSERT INTO products (code, name, category, unit, sell_price, photo, created_at)
-        VALUES ('$code', '$name', '$category', $unitSql, $price, '$photoName', NOW())
+        INSERT INTO products (code, name, category, unit, sell_price, low_stock, photo, created_at)
+        VALUES ('$code', '$name', '$category', $unitSql, $price, $lowStockSql, '$photoName', NOW())
     ");
 
     if($q){
@@ -131,6 +137,7 @@ if($action === 'update'){
     $category     = mysqli_real_escape_string($conn, trim(isset($_POST['category']) ? $_POST['category'] : ''));
     $price        = isset($_POST['price']) ? (int)$_POST['price'] : 0;
     $unit         = mysqli_real_escape_string($conn, trim(isset($_POST['unit']) ? $_POST['unit'] : ''));
+    $lowStock     = isset($_POST['low_stock']) && $_POST['low_stock'] !== '' ? max(0, (int)$_POST['low_stock']) : get_low_stock_default($conn);
     $oldPhoto     = isset($_POST['old_photo']) ? $_POST['old_photo'] : '';
     $supplierIds  = normalizeSupplierIds(isset($_POST['supplier_id']) ? $_POST['supplier_id'] : '');
 
@@ -165,11 +172,15 @@ if($action === 'update'){
         }
     }
 
-    $unitSql = $unit === '' ? 'NULL' : "'$unit'";
+    // Kategori Additional: simpan unit & low_stock sebagai NULL + kosongkan supplier
+    $isAdd = strtolower(trim($category)) === 'additional';
+    $unitSql   = ($unit === '' || $isAdd) ? 'NULL' : "'$unit'";
+    $lowStockSql = $isAdd ? 'NULL' : $lowStock;
+    if($isAdd){ $supplierIds = []; }
 
     $q = mysqli_query($conn,"
         UPDATE products
-        SET code='$code', name='$name', category='$category', sell_price=$price, unit=$unitSql, photo='$photoName'
+        SET code='$code', name='$name', category='$category', sell_price=$price, unit=$unitSql, low_stock=$lowStockSql, photo='$photoName'
         WHERE id = $id
     ");
 
@@ -181,6 +192,27 @@ if($action === 'update'){
         echo json_encode(['status'=>'success']);
     }else{
         echo json_encode(['status'=>'error', 'message'=>'Gagal memperbarui data']);
+    }
+    exit;
+}
+
+// SAVE GLOBAL DEFAULT (batas stok menipis)
+if($action === 'save_low_stock_default'){
+
+    $val = isset($_POST['low_stock_default']) && $_POST['low_stock_default'] !== ''
+        ? max(0, (int)$_POST['low_stock_default'])
+        : get_low_stock_default($conn);
+
+    $q = mysqli_query($conn, "
+        INSERT INTO app_settings (name, value)
+        VALUES ('low_stock_default', '$val')
+        ON DUPLICATE KEY UPDATE value = '$val'
+    ");
+
+    if($q){
+        echo json_encode(['status'=>'success', 'value'=>$val]);
+    }else{
+        echo json_encode(['status'=>'error', 'message'=>'Gagal menyimpan pengaturan']);
     }
     exit;
 }

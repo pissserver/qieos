@@ -5,6 +5,7 @@ mysqli_report(MYSQLI_REPORT_OFF);
 
 // Koneksi + definisi BASE_URL (untuk URL foto) dari connection.php
 include __DIR__ . '/../../script/connection.php';
+include __DIR__ . '/../components/data/stock-status.php';
 
 header('Content-Type: application/json; charset=utf-8');
 
@@ -36,15 +37,22 @@ $results = [];
 
 if($query && $query->num_rows > 0){
     while($d = $query->fetch_assoc()){
-        // Stats
+        // Stats (total qty beli keseluruhan, kecuali soft-delete; total terjual dari order_details)
         $totalQty = 0;
         $totalTrans = 0;
-        $pi = @$conn->query("SELECT COALESCE(SUM(pi.qty),0) as tq, COUNT(CASE WHEN pi.qty IS NOT NULL THEN 1 END) as tt FROM purchase_items pi INNER JOIN purchases p ON p.id = pi.purchase_id AND p.deleted_at IS NULL WHERE pi.product_id = {$d['id']} AND pi.deleted_at IS NULL");
+        $pi = @$conn->query("SELECT COALESCE(SUM(pi.qty),0) as tq FROM purchase_items pi INNER JOIN purchases p ON p.id = pi.purchase_id AND p.deleted_at IS NULL WHERE pi.product_id = {$d['id']} AND pi.deleted_at IS NULL");
         if($pi && $pi->num_rows > 0){
-            $piRow = $pi->fetch_assoc();
-            $totalQty = (int)$piRow['tq'];
-            $totalTrans = (int)$piRow['tt'];
+            $totalQty = (int)$pi->fetch_assoc()['tq'];
         }
+        $od = @$conn->query("SELECT COALESCE(SUM(od.qty),0) as total_od FROM order_details od INNER JOIN orders o ON o.id = od.order_id WHERE od.product_id = {$d['id']} AND o.status_payment != 'cancelled'");
+        if($od && $od->num_rows > 0){
+            $totalTrans = (int)$od->fetch_assoc()['total_od'];
+        }
+
+        // Stok & status
+        $stock = get_product_stock($conn, $d['id']);
+        $lowStock = resolve_product_low_stock($conn, $d);
+        $stStatus = product_status_view($stock['total'], $lowStock);
 
         // Suppliers (multi) dari tabel relasi product_supplier
         $supplierName = '-';
@@ -80,7 +88,16 @@ if($query && $query->num_rows > 0){
             'supplierIds' => $supplierIds,
             'totalQty' => $totalQty,
             'totalQtyFormatted' => number_format($totalQty, 0, ',', '.'),
-            'totalTransaksi' => $totalTrans
+            'totalTransaksi' => $totalTrans,
+            'totalTransaksiFormatted' => number_format($totalTrans, 0, ',', '.'),
+            'lowStock' => (int)$lowStock,
+            'stockGudang' => $stock['gudang'],
+            'stockKantin' => $stock['kantin'],
+            'stockTotal' => $stock['total'],
+            'stockGudangFormatted' => number_format($stock['gudang'], 0, ',', '.'),
+            'stockKantinFormatted' => number_format($stock['kantin'], 0, ',', '.'),
+            'stockTotalFormatted' => number_format($stock['total'], 0, ',', '.'),
+            'stockStatus' => $stStatus
         ];
     }
 }
