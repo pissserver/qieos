@@ -51,7 +51,7 @@
 
                 <div class="section-card">
 
-                    <div class="panel-header panel-dark mb-4">
+                    <div class="panel-header panel-primary mb-4">
                         <div class="panel-left">
                             <div class="panel-icon">
                                 <i class="fas fa-folder-open"></i>

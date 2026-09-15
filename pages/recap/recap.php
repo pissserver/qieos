@@ -33,7 +33,7 @@
                 <!-- Hapus kondisi ketika sudah launching -->
                 <?php if ($user['role'] == 'developer') { ?>
                 <div class="section-card mb-4 mt-5">
-                    <div class="panel-header panel-success">
+                    <div class="panel-header panel-primary">
                         <div class="panel-left">
                             <div class="panel-icon">
                                 <i class="fas fa-chart-bar"></i>

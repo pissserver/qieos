@@ -33,7 +33,7 @@
 
                 <!-- REQUEST PENDING -->
                 <div class="section-card mb-4 mt-5">
-                    <div class="panel-header panel-warning">
+                    <div class="panel-header panel-primary">
                         <div class="panel-left">
                             <div class="panel-icon">
                                 <i class="fas fa-clock"></i>
@@ -57,7 +57,7 @@
 
                 <!-- HISTORY -->
                 <div class="section-card mb-5">
-                    <div class="panel-header panel-dark">
+                    <div class="panel-header panel-primary">
                         <div class="panel-left">
                             <div class="panel-icon">
                                 <i class="fas fa-history"></i>

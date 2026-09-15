@@ -17,38 +17,7 @@ $query = mysqli_query($conn,
     <?php include '../../script/headscript.php'; ?>
 
     <style>
-        /* ===== FORM CARD ===== */
-        .reg-card{
-            background:linear-gradient(135deg,#ffffff 0%,#f8fafc 100%);
-            border-radius:20px;
-            border:1px solid rgba(226,232,240,0.6);
-            box-shadow:0 8px 32px rgba(15,23,42,0.06),0 2px 8px rgba(0,0,0,0.03);
-            overflow:hidden;margin-bottom:24px;
-            transition:all 0.35s cubic-bezier(0.4,0,0.2,1);
-        }
-        .reg-card:hover{box-shadow:0 14px 40px rgba(15,23,42,0.1),0 4px 12px rgba(99,102,241,0.08)}
-
-        .reg-head{
-            background:linear-gradient(135deg,#0f172a 0%,#1e293b 50%,#334155 100%);
-            padding:20px 28px;position:relative;overflow:hidden;
-        }
-        .reg-head::before{
-            content:'';position:absolute;top:-60px;right:-30px;
-            width:180px;height:180px;
-            background:radial-gradient(circle,rgba(99,102,241,0.2) 0%,transparent 70%);
-            pointer-events:none;
-        }
-        .reg-head-inner{display:flex;align-items:center;gap:16px;position:relative;z-index:2}
-        .reg-head-icon{
-            width:50px;height:50px;border-radius:14px;
-            background:linear-gradient(135deg,#6366f1,#4f46e5);
-            color:#fff;display:flex;align-items:center;justify-content:center;
-            font-size:21px;box-shadow:0 8px 20px rgba(99,102,241,0.4);flex-shrink:0;
-        }
-        .reg-head-text h3{color:#fff;font-size:18px;font-weight:700;margin:0 0 3px}
-        .reg-head-text p{color:#94a3b8;font-size:13px;margin:0}
-
-        .reg-body{padding:24px 28px;background:#fff}
+        /* ===== FORM ===== */
         .reg-label{display:block;font-size:13px;font-weight:600;color:#334155;margin-bottom:8px}
         .reg-label i{color:#6366f1;margin-right:4px}
 
@@ -159,14 +128,9 @@ $query = mysqli_query($conn,
 
         /* ===== RESPONSIVE ===== */
         @media(max-width:991px){
-            .reg-head{padding:16px 20px}.reg-body{padding:20px}.reg-btn{margin-top:4px}
+            .reg-btn{margin-top:4px}
         }
         @media(max-width:575px){
-            .reg-card{border-radius:16px}
-            .reg-head{padding:14px 16px}
-            .reg-head-icon{width:40px;height:40px;font-size:17px;border-radius:12px}
-            .reg-head-text h3{font-size:15px}.reg-head-text p{font-size:11px}
-            .reg-body{padding:16px}
             .reg-label{font-size:12px;margin-bottom:6px}
             .reg-inp{height:46px;font-size:13px;padding-left:42px;border-radius:12px}
             .reg-inp-wrap .reg-inp-icon{left:14px;font-size:14px}
@@ -184,19 +148,21 @@ $query = mysqli_query($conn,
         <div class="container-fluid px-0 mt-5 mb-5">
 
             <!-- FORM PENDAFTARAN -->
-            <div class="reg-card">
-                <div class="reg-head">
-                    <div class="reg-head-inner">
-                        <div class="reg-head-icon">
+            <div class="section-card mb-5">
+                <div class="panel-header panel-primary">
+                    <div class="panel-left">
+                        <div class="panel-icon">
                             <i class="fas fa-user-plus"></i>
                         </div>
-                        <div class="reg-head-text">
-                            <h3 id="formTitle">Pendaftaran Tenant Baru</h3>
-                            <p id="formSubtitle">Tambahkan tenant baru ke dalam ekosistem Qieos</p>
+
+                        <div>
+                            <div class="panel-title" id="formTitle">Pendaftaran Tenant Baru</div>
+                            <div class="panel-subtitle" id="formSubtitle">Tambahkan tenant baru ke dalam ekosistem Qieos</div>
                         </div>
                     </div>
                 </div>
-                <div class="reg-body">
+
+                <div class="mt-4">
                     <form id="form-add-tenant">
                         <input type="hidden" name="id" id="formTenantId" value="">
                         <div class="row g-3 align-items-end">
@@ -375,9 +341,9 @@ $query = mysqli_query($conn,
             document.querySelector('.content').scrollTo({ top: 0, behavior: 'smooth' });
 
             // Highlight card form
-            document.querySelector('.reg-card').style.boxShadow = '0 0 0 3px rgba(99,102,241,0.3), 0 14px 40px rgba(15,23,42,0.1)';
+            document.querySelector('.section-card').style.boxShadow = '0 0 0 3px rgba(99,102,241,0.3), 0 14px 40px rgba(15,23,42,0.1)';
             setTimeout(() => {
-                document.querySelector('.reg-card').style.boxShadow = '';
+                document.querySelector('.section-card').style.boxShadow = '';
             }, 2000);
         }
 

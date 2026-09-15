@@ -88,6 +88,19 @@
 
             /* REQUEST PANEL */
 
+            .panel-primary{
+                background:linear-gradient(
+                    135deg,
+                    #4f46e5,
+                    #4338ca
+                );
+                color:#fff;
+            }
+
+            .panel-primary .panel-icon{
+                background:rgba(255,255,255,.12);
+            }
+
             .panel-warning{
                 background:linear-gradient(
                     135deg,

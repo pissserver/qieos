@@ -43,7 +43,7 @@ while($f = mysqli_fetch_assoc($qForms)){
 <div class="container-fluid px-0 mt-5">
     <!-- FORM -->
     <div class="section-card mb-4">
-        <div class="panel-header panel-dark">
+        <div class="panel-header panel-primary">
             <div class="panel-left">
                 <div class="panel-icon">
                     <i class="fas fas fa-file-alt"></i>

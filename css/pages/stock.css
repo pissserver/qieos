@@ -200,6 +200,45 @@
             font-weight:600;
         }
 
+        /* BADGE STATUS (sama dengan detail produk) */
+        .st-badge{
+            display:inline-flex;
+            align-items:center;
+            gap:7px;
+            padding:7px 14px;
+            border-radius:999px;
+            font-size:12px;
+            font-weight:800;
+            letter-spacing:.02em;
+            border:1px solid transparent;
+            white-space:nowrap;
+        }
+
+        .st-badge i{
+            font-size:11px;
+        }
+
+        .st-ready{
+            background:linear-gradient(135deg,#dcfce7,#bbf7d0);
+            color:#15803d;
+            border-color:rgba(21,128,61,.18);
+            box-shadow:0 4px 14px rgba(22,163,74,.15);
+        }
+
+        .st-menipis{
+            background:linear-gradient(135deg,#fef3c7,#fde68a);
+            color:#b45309;
+            border-color:rgba(180,83,9,.18);
+            box-shadow:0 4px 14px rgba(245,158,11,.18);
+        }
+
+        .st-habis{
+            background:linear-gradient(135deg,#fee2e2,#fecaca);
+            color:#b91c1c;
+            border-color:rgba(185,28,28,.18);
+            box-shadow:0 4px 14px rgba(239,68,68,.16);
+        }
+
         .table-card{
             background:#fff;
             border-radius:20px;
@@ -571,7 +610,8 @@
             }
 
             .stock-badge,
-            .unit-badge{
+            .unit-badge,
+            .st-badge{
                 padding:6px 10px;
                 font-size:12px;
                 white-space:nowrap;

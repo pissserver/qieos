@@ -21,6 +21,11 @@ include '../../sessions/session.php';
     <main class="content">
         <?php include '../components/navbar.php'; ?>
 
+        <div class="container-fluid px-0 mt-4">
+            <?php $blue_strip_icon='fa-user-gear'; $blue_strip_title='Profil'; $blue_strip_subtitle='Kelola informasi profil dan pengaturan keamanan Anda'; ?>
+            <?php include '../components/blue-strip.php'; ?>
+        </div>
+
         <div class="row mt-5">
             <div class="col-12 col-xl-7">
                 <div class="profile-panel">

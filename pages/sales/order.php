@@ -19,7 +19,11 @@ include '../../sessions/session.php';
     <main class="content">
         <?php include '../components/navbar.php'; ?>
 
+        <?php $blue_strip_icon='fa-receipt'; $blue_strip_title='Pesanan'; $blue_strip_subtitle='Daftar pesanan penjualan di kantin'; ?>
+
         <div class="container-fluid px-0 mt-5">
+            <?php include '../components/blue-strip.php'; ?>
+
             <div class="premium-toolbar mb-4">
 
                 <div class="search-modern">

@@ -25,7 +25,11 @@ $query = mysqli_query($conn,
     <main class="content">
         <?php include '../components/navbar.php'; ?>
 
+        <?php $blue_strip_icon='fa-book-open'; $blue_strip_title='Katalog Produk'; $blue_strip_subtitle='Kelola menu produk yang siap dijual'; ?>
+
         <div class="container-fluid px-0 mt-5 mb-5">
+
+            <?php include '../components/blue-strip.php'; ?>
 
             <div class="catalog-toolbar mb-5">
 
