@@ -129,29 +129,6 @@ while($f = mysqli_fetch_assoc($qForms)){
         </div>
     </div>    
 
-    <!-- TABLE -->
-    <div class="section-card mb-5">
-        <div class="panel-header panel-primary">
-            <div class="panel-left">
-                <div class="panel-icon">
-                    <i class="fas fa-boxes-stacked"></i>
-                </div>
-
-                <div>
-                    <div class="panel-title">
-                        Pembelian Produk 
-                    </div>
-                    <div class="panel-subtitle">
-                        List produk yang sudah dibeli
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="mt-4 px-4">
-            <div id="table-stock"></div>
-        </div>
-    </div>
 </div>
 </main>
 
@@ -227,7 +204,6 @@ while($f = mysqli_fetch_assoc($qForms)){
                 $('#purchaseFormSelect option[value="' + res.form_id + '"]').remove();
                 $('#purchaseFormSelect').val(null).trigger('change');
 
-                loadTable();
                 loadPurchaseTable();
             }else{
                 QToast("Error", res.msg, "error");
@@ -274,49 +250,6 @@ while($f = mysqli_fetch_assoc($qForms)){
     }
 
     document.addEventListener('DOMContentLoaded', initPurchaseSelect);
-
-    function loadTable(){
-        fetch('purchase-stock-table.php')
-        .then(res=>res.text())
-        .then(html=>{
-            document.getElementById("table-stock").innerHTML=html;
-
-            setTimeout(()=>{
-                $('#stockTable').DataTable({
-                    pageLength:5,
-                    lengthMenu:[[5,10,25,50],[5,10,25,50]],
-                    responsive:true,
-                    autoWidth:false,
-                    language:{
-                        search:"",
-                        searchPlaceholder:"Cari produk...",
-
-                        zeroRecords: `
-                            <div class="empty-search">
-                                <img src="../../assets/img/illustrations/empty-data.png" class="empty-img">
-                                <div class="empty-title">Produk tidak ditemukan</div>
-                                <div class="empty-sub">
-                                    Coba gunakan kata kunci lain
-                                </div>
-                            </div>
-                        `,
-
-                        emptyTable: `
-                            <div class="empty-search">
-                                <img src="../../assets/img/illustrations/empty-data.png" class="empty-img">
-                                <div class="empty-title">Belum ada data produk</div>
-                                <div class="empty-sub">
-                                    Silakan tambahkan stok terlebih dahulu
-                                </div>
-                            </div>
-                        `
-                    }
-                });
-            },100);
-        });
-    }
-
-    loadTable();
 
     const panelToggle = document.getElementById('panelToggle');
 
@@ -445,7 +378,6 @@ while($f = mysqli_fetch_assoc($qForms)){
                 $('#editPurchaseModal').modal('hide');
 
                 loadPurchaseTable();
-                loadTable();
 
             }else{
 
@@ -457,35 +389,6 @@ while($f = mysqli_fetch_assoc($qForms)){
         .catch(() => {
             QToast('Error', 'Gagal memproses update', 'error');
         });
-    });
-
-    $(document).on('click','.deletePurchaseBtn',function(){
-
-        let id = $(this).data('id');
-        let form = $(this).data('form');
-        let products = $(this).data('products');
-        let qty = $(this).data('qty');
-        let unit = $(this).data('unit');
-
-        QConfirm('Hapus Data Pembelian?', 'Data pembelian form ' + form + ' akan dihapus permanen.', {confirmText:'Hapus', icon:'fa-trash-can', confirmClass:'q-confirm-btn-danger', iconClass:'q-confirm-icon-danger'}).then(function(ok){
-            if(ok){
-                fetch('purchase-action.php?action=destroy&id='+id)
-                .then(res=>res.json())
-                .then(res=>{
-
-                    if(res.status==='success'){
-
-                        QToast('Terhapus', 'Data berhasil dihapus', 'success');
-
-                        loadPurchaseTable();
-                        loadTable();
-
-                    }
-
-                });
-            }
-        });
-
     });
 </script>
 

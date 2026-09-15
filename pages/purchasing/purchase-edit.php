@@ -12,7 +12,10 @@ $q = mysqli_query($conn,"
         COALESCE(products.name, '') AS name,
         products.unit AS unit,
         pi.qty,
-        pi.price
+        pi.price,
+        pi.qty_buy,
+        pi.unit_buy,
+        pi.price_buy
     FROM purchase_items pi
     LEFT JOIN products
         ON products.id = pi.product_id
@@ -53,27 +56,36 @@ while($d = mysqli_fetch_assoc($q)){
 
     <?php else: ?>
 
-    <?php foreach($items as $it): ?>
+    <?php foreach($items as $i => $it): ?>
 
-    <div class="item-row row mb-3">
+    <div class="item-row purchase-card mb-3">
 
         <input type="hidden" name="item_id[]" value="<?= $it['item_id'] ?>">
 
-        <!-- NAMA PRODUK -->
-        <div class="col-md-4">
-            <div class="input-group-modern">
-                <div class="input-icon">
-                    <i class="fas fa-box"></i>
-                </div>
-                <input type="text"
-                       class="form-control"
-                       value="<?= htmlspecialchars($it['name']) ?>"
-                       readonly>
+        <!-- HEAD: nama produk + daftar belanja -->
+        <div class="item-head">
+            <div class="item-index"><?= $i+1 ?></div>
+
+            <div class="item-name">
+                <i class="fas fa-box"></i>
+                <span><?= htmlspecialchars($it['name']) ?></span>
+            </div>
+
+            <div class="item-plan">
+                <span class="plan-label">Belanja</span>
+                <span class="plan-chip plan-qty">
+                    <i class="fas fa-basket-shopping"></i>
+                    <?= $it['qty_buy'] !== null ? (int)$it['qty_buy'] . ' ' . htmlspecialchars($it['unit_buy'] ?: $it['unit']) : '-' ?>
+                </span>
+                <span class="plan-chip plan-price">
+                    <i class="fas fa-tag"></i>
+                    <?= $it['price_buy'] !== null ? 'Rp ' . number_format((float)$it['price_buy'], 0, ',', '.') : '-' ?>
+                </span>
             </div>
         </div>
 
-        <!-- QTY -->
-        <div class="col-md-3">
+        <!-- INPUTS -->
+        <div class="item-inputs">
             <div class="input-group-modern">
                 <div class="input-icon">
                     <i class="fas fa-cubes"></i>
@@ -83,13 +95,10 @@ while($d = mysqli_fetch_assoc($q)){
                        class="form-control"
                        placeholder="Qty"
                        min="0"
-                       value="<?= $it['qty'] !== null ? $it['qty'] : '' ?>"
-                       required>
+                       required
+                       value="<?= $it['qty'] !== null ? $it['qty'] : '' ?>">
             </div>
-        </div>
 
-        <!-- SATUAN -->
-        <div class="col-md-2">
             <div class="input-group-modern">
                 <div class="input-icon">
                     <i class="fas fa-balance-scale"></i>
@@ -99,10 +108,7 @@ while($d = mysqli_fetch_assoc($q)){
                        value="<?= htmlspecialchars($it['unit']) ?>"
                        readonly>
             </div>
-        </div>
 
-        <!-- HARGA BELI -->
-        <div class="col-md-3">
             <div class="input-group-modern">
                 <div class="input-icon">
                     <i class="fas fa-wallet"></i>
@@ -110,10 +116,10 @@ while($d = mysqli_fetch_assoc($q)){
                 <input type="number"
                        name="price[]"
                        class="form-control"
-                       placeholder="Harga Beli"
+                       placeholder="Harga beli"
                        min="0"
-                       value="<?= $it['price'] !== null ? $it['price'] : '' ?>"
-                       required>
+                       required
+                       value="<?= $it['price'] !== null ? $it['price'] : '' ?>">
             </div>
         </div>
 

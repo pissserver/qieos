@@ -514,3 +514,149 @@
         background:#e8edf5;
         color:var(--text);
     }
+
+    /* ===== ITEM CARD (Form Pembelian & Edit) ===== */
+    .item-row.purchase-card{
+        background:#f8fafc;
+        border:1px solid #eef2f7;
+        border-radius:14px;
+        padding:12px 14px;
+        margin-bottom:12px;
+        transition:box-shadow .2s ease,border-color .2s ease;
+    }
+
+    .item-row.purchase-card:hover{
+        border-color:#d7e1ee;
+        box-shadow:0 4px 14px rgba(15,23,42,.06);
+    }
+
+    .item-row.purchase-card .item-head{
+        display:flex;
+        align-items:center;
+        gap:10px;
+        margin-bottom:10px;
+    }
+
+    .item-row.purchase-card .item-index{
+        width:26px;
+        height:26px;
+        flex-shrink:0;
+        border-radius:8px;
+        background:linear-gradient(135deg,#334155,#1e293b);
+        color:#fff;
+        font-size:11px;
+        font-weight:700;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+    }
+
+    .item-row.purchase-card .item-name{
+        flex:1;
+        min-width:0;
+        display:flex;
+        align-items:center;
+        gap:8px;
+        font-size:13.5px;
+        font-weight:600;
+        color:#0f172a;
+    }
+
+    .item-row.purchase-card .item-name i{
+        color:#94a3b8;
+        font-size:13px;
+    }
+
+    .item-row.purchase-card .item-name span{
+        white-space:nowrap;
+        overflow:hidden;
+        text-overflow:ellipsis;
+    }
+
+    .item-row.purchase-card .item-plan{
+        display:flex;
+        align-items:center;
+        gap:6px;
+        flex-shrink:0;
+        flex-wrap:wrap;
+        justify-content:flex-end;
+        margin-left:auto;
+    }
+
+    .item-row.purchase-card .plan-label{
+        font-size:10px;
+        font-weight:700;
+        text-transform:uppercase;
+        letter-spacing:.05em;
+        color:#94a3b8;
+        margin-right:2px;
+    }
+
+    .item-row.purchase-card .plan-chip{
+        display:inline-flex;
+        align-items:center;
+        gap:5px;
+        font-size:11px;
+        font-weight:600;
+        padding:4px 10px;
+        border-radius:999px;
+        background:#fff;
+        border:1px solid #e2e8f0;
+        color:#334155;
+        white-space:nowrap;
+    }
+
+    .item-row.purchase-card .plan-chip i{
+        font-size:10px;
+    }
+
+    .item-row.purchase-card .plan-chip.plan-qty{
+        color:#0f766e;
+        background:#f0fdfa;
+        border-color:#c7efe9;
+    }
+
+    .item-row.purchase-card .plan-chip.plan-price{
+        color:#b45309;
+        background:#fffbeb;
+        border-color:#fde9c3;
+    }
+
+    .item-row.purchase-card .item-inputs{
+        display:grid;
+        grid-template-columns:repeat(3,1fr);
+        gap:10px;
+    }
+
+    .item-row.purchase-card .item-inputs .input-group-modern{
+        margin-bottom:0;
+        min-width:0;
+    }
+
+    .item-row.purchase-card .item-inputs .form-control{
+        min-width:0;
+    }
+
+    @media (max-width:575.98px){
+        .item-row.purchase-card .item-head{
+            flex-wrap:wrap;
+        }
+
+        .item-row.purchase-card .item-name{
+            width:100%;
+            min-width:100%;
+        }
+
+        .item-row.purchase-card .item-plan{
+            width:100%;
+            justify-content:flex-start;
+        }
+
+        .item-row.purchase-card .item-inputs{
+            grid-template-columns:1fr 1fr;
+        }
+
+        .item-row.purchase-card .item-inputs .input-group-modern:last-child{
+            grid-column:1 / -1;
+        }
+    }

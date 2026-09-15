@@ -39,7 +39,7 @@ if($query && $query->num_rows > 0){
         // Stats
         $totalQty = 0;
         $totalTrans = 0;
-        $pi = @$conn->query("SELECT COALESCE(SUM(qty),0) as tq, COUNT(id) as tt FROM purchase_items WHERE product_id = {$d['id']} AND deleted_at IS NULL");
+        $pi = @$conn->query("SELECT COALESCE(SUM(pi.qty),0) as tq, COUNT(CASE WHEN pi.qty IS NOT NULL THEN 1 END) as tt FROM purchase_items pi INNER JOIN purchases p ON p.id = pi.purchase_id AND p.deleted_at IS NULL WHERE pi.product_id = {$d['id']} AND pi.deleted_at IS NULL");
         if($pi && $pi->num_rows > 0){
             $piRow = $pi->fetch_assoc();
             $totalQty = (int)$piRow['tq'];

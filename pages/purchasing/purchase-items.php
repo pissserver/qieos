@@ -7,7 +7,10 @@ $q = mysqli_query($conn,"
     SELECT
         pi.id AS item_id,
         COALESCE(products.name, '') AS name,
-        products.unit AS unit
+        products.unit AS unit,
+        pi.qty_buy,
+        pi.unit_buy,
+        pi.price_buy
     FROM purchase_items pi
     LEFT JOIN products
         ON products.id = pi.product_id
@@ -30,31 +33,38 @@ if($count === 0){ ?>
     Form ini tidak memiliki daftar belanja yang bisa diinput.
 </p>
 
-<?php } else { ?>
+<?php } else { $i = 0; while($d = mysqli_fetch_assoc($q)){ $i++; ?>
 
-<?php while($d = mysqli_fetch_assoc($q)){ ?>
-
-<div class="item-row row mb-3">
+<div class="item-row purchase-card mb-3">
 
     <input type="hidden"
            name="item_id[]"
            value="<?= $d['item_id'] ?>">
 
-    <!-- NAMA PRODUK -->
-    <div class="col-md-5">
-        <div class="input-group-modern">
-            <div class="input-icon">
-                <i class="fas fa-box"></i>
-            </div>
-            <input type="text"
-                   class="form-control"
-                   value="<?= htmlspecialchars($d['name']) ?>"
-                   readonly>
+    <!-- HEAD: nama produk + daftar belanja -->
+    <div class="item-head">
+        <div class="item-index"><?= $i ?></div>
+
+        <div class="item-name">
+            <i class="fas fa-box"></i>
+            <span><?= htmlspecialchars($d['name']) ?></span>
+        </div>
+
+        <div class="item-plan">
+            <span class="plan-label">Belanja</span>
+            <span class="plan-chip plan-qty">
+                <i class="fas fa-basket-shopping"></i>
+                <?= (int)$d['qty_buy'] ?> <?= htmlspecialchars($d['unit_buy'] ?: $d['unit']) ?>
+            </span>
+            <span class="plan-chip plan-price">
+                <i class="fas fa-tag"></i>
+                <?= $d['price_buy'] !== null ? 'Rp ' . number_format((float)$d['price_buy'], 0, ',', '.') : '-' ?>
+            </span>
         </div>
     </div>
 
-    <!-- QTY -->
-    <div class="col-md-2">
+    <!-- INPUTS -->
+    <div class="item-inputs">
         <div class="input-group-modern">
             <div class="input-icon">
                 <i class="fas fa-cubes"></i>
@@ -62,14 +72,11 @@ if($count === 0){ ?>
             <input type="number"
                    name="qty[]"
                    class="form-control"
-                   placeholder="Qty"
+                   placeholder="Qty input stok"
                    min="0"
                    required>
         </div>
-    </div>
 
-    <!-- SATUAN -->
-    <div class="col-md-2">
         <div class="input-group-modern">
             <div class="input-icon">
                 <i class="fas fa-balance-scale"></i>
@@ -79,10 +86,7 @@ if($count === 0){ ?>
                    value="<?= htmlspecialchars($d['unit']) ?>"
                    readonly>
         </div>
-    </div>
 
-    <!-- HARGA BELI -->
-    <div class="col-md-3">
         <div class="input-group-modern">
             <div class="input-icon">
                 <i class="fas fa-wallet"></i>
@@ -90,7 +94,7 @@ if($count === 0){ ?>
             <input type="number"
                    name="price[]"
                    class="form-control"
-                   placeholder="Harga Beli"
+                   placeholder="Harga beli satuan"
                    min="0"
                    required>
         </div>

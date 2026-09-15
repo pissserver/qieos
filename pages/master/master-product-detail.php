@@ -12,11 +12,15 @@ if(!$d){
     exit;
 }
 
-// Hitung jumlah pembelian
+// Hitung jumlah pembelian (semua item, kecuali yang di-soft-delete)
 $qi = mysqli_query($conn,"
-    SELECT COALESCE(SUM(pi.qty),0) as total_qty, COUNT(pi.id) as total_transaksi
+    SELECT
+        COALESCE(SUM(pi.qty),0) AS total_qty,
+        COUNT(CASE WHEN pi.qty IS NOT NULL THEN 1 END) AS total_transaksi
     FROM purchase_items pi
-    WHERE pi.product_id = {$d['id']} AND pi.deleted_at IS NULL
+    INNER JOIN purchases p ON p.id = pi.purchase_id AND p.deleted_at IS NULL
+    WHERE pi.product_id = {$d['id']}
+      AND pi.deleted_at IS NULL
 ");
 $di = mysqli_fetch_assoc($qi);
 
@@ -330,12 +334,12 @@ $currentPrice    = isset($d['sell_price']) ? $d['sell_price'] : 0;
                 <div class="info-item">
                     <div class="info-item-icon"><i class="fas fa-cubes"></i></div>
                     <div class="info-item-label">Total Qty Dibeli</div>
-                    <div class="info-item-value"><?= $totalQty ?> unit</div>
+                    <div class="info-item-value" id="infoTotalQty"><?= $totalQty ?> unit</div>
                 </div>
                 <div class="info-item">
                     <div class="info-item-icon"><i class="fas fa-shopping-cart"></i></div>
                     <div class="info-item-label">Total Transaksi</div>
-                    <div class="info-item-value"><?= $totalTrans ?> kali</div>
+                    <div class="info-item-value" id="infoTotalTrans"><?= $totalTrans ?> kali</div>
                 </div>
             </div>
         </div>
@@ -657,6 +661,8 @@ document.getElementById('btnDeleteProduct').addEventListener('click', function()
         set('infoCategory', item.category);
         set('infoPrice', 'Rp ' + item.priceFormatted);
         set('infoUnit', item.unit || '-');
+        set('infoTotalQty', item.totalQtyFormatted + ' unit');
+        set('infoTotalTrans', item.totalTransaksi + ' kali');
 
         // Stats
         var sv = document.querySelectorAll('.stat-value');

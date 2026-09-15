@@ -11,7 +11,8 @@ SELECT
     purchase_items.remaining_qty,
     purchase_items.unit,
 
-    GROUP_CONCAT(products.name SEPARATOR ', ') as products
+    GROUP_CONCAT(products.name SEPARATOR ', ') as products,
+    COUNT(CASE WHEN purchase_items.qty IS NOT NULL AND purchase_items.deleted_at IS NULL THEN 1 END) as total_item
 
 FROM purchases
 
@@ -42,7 +43,7 @@ ORDER BY purchases.id DESC
 <tr>
     <th>ID FORM</th>
     <th class="text-center">TANGGAL PEMBELIAN</th>
-    <th class="text-center">PEMBUATAN FORM</th>
+    <th class="text-center">TOTAL ITEM</th>
     <th class="text-center">AKSI</th>
 </tr>
 </thead>
@@ -75,11 +76,11 @@ ORDER BY purchases.id DESC
         </span>
     </td>
 
-    <!-- NOTE -->
+    <!-- TOTAL ITEM -->
     <td class="text-center">
-        <span class="note-badge">
-            <i class="fas fa-clock"></i>
-            <?= date('d F Y', strtotime($d['created_at'])) ?>
+        <span class="created-badge">
+            <i class="fas fa-boxes-stacked"></i>
+            <?= (int)$d['total_item'] ?> item
         </span>
     </td>
 
@@ -90,15 +91,6 @@ ORDER BY purchases.id DESC
 
         <button class="action-btn btn-edit editPurchaseBtn" data-id="<?= $d['id'] ?>">
             <i class="fas fa-edit"></i>
-        </button>
-
-       <button class="action-btn btn-delete deletePurchaseBtn"
-            data-id="<?= $d['id'] ?>"
-            data-form="<?= $d['form'] ?>"
-            data-products="<?= htmlspecialchars($d['products']) ?>"
-            data-qty="<?= $d['qty'] ?>"
-            data-unit="<?= $d['unit'] ?>">
-            <i class="fas fa-trash"></i>
         </button>
 
         <?php else: ?>

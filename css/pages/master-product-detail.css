@@ -860,6 +860,8 @@ body {
 
 .hero-photo {
     flex: 0 0 420px;
+    height: 420px;
+    align-self: flex-start;
     position: relative;
     overflow: hidden;
     background: linear-gradient(135deg, #0a0a1a 0%, #1a1a3e 50%, #0f172a 100%);
@@ -2160,7 +2162,11 @@ body {
 
     .hero-photo {
         flex: none;
-        height: 300px;
+        width: 100%;
+        max-width: 400px;
+        margin: 0 auto;
+        aspect-ratio: 1 / 1;
+        height: auto;
     }
 
     .hero-info {
@@ -2213,7 +2219,7 @@ body {
     }
 
     .hero-photo {
-        height: 240px;
+        max-width: 340px;
     }
 
     .hero-info {
