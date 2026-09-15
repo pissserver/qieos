@@ -57,6 +57,12 @@
                 display:flex;
                 align-items:center;
                 gap:16px;
+                min-width:0;
+                flex:1 1 auto;
+            }
+
+            .panel-left > div{
+                min-width:0;
             }
 
             .panel-icon{
@@ -105,6 +111,87 @@
                     #0f172a
                 );
                 color:#fff;
+            }
+
+            /* TOGGLE */
+            .panel-toggle-wrap{
+                display:flex;
+                align-items:center;
+                gap:10px;
+            }
+
+            .toggle-label{
+                font-size:13px;
+                color:#cbd5e1;
+                font-weight:500;
+                transition:.25s;
+            }
+
+            .toggle-label.active{
+                color:#fff;
+                font-weight:700;
+            }
+
+            .switch-toggle{
+                position:relative;
+                display:inline-block;
+                width:54px;
+                height:28px;
+            }
+
+            .switch-toggle input{
+                opacity:0;
+                width:0;
+                height:0;
+            }
+
+            .slider-toggle{
+                position:absolute;
+                cursor:pointer;
+                inset:0;
+                background:#475569;
+                border-radius:50px;
+                transition:.3s;
+            }
+
+            .slider-toggle:before{
+                content:"";
+                position:absolute;
+                width:22px;
+                height:22px;
+                left:3px;
+                top:3px;
+                background:#fff;
+                border-radius:50%;
+                transition:.3s;
+            }
+
+            .switch-toggle input:checked + .slider-toggle{
+                background:#22c55e;
+            }
+
+            .switch-toggle input:checked + .slider-toggle:before{
+                transform:translateX(26px);
+            }
+
+            .panel-mode{
+                display:none;
+                animation:fadeSlide .3s ease;
+            }
+
+            .panel-mode.active{
+                display:block;
+            }
+
+            @keyframes fadeSlide{
+                from{
+                    opacity:0;
+                    transform:translateY(8px);
+                }
+                to{
+                    opacity:1;
+                    transform:translateY(0);
+                }
             }
 
             /* FORM */

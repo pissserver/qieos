@@ -15,7 +15,7 @@
         <main class="content">
             <?php include '../components/navbar.php'; ?>
 
-            <div class="container-fluid px-0 mt-4">
+            <div class="container-fluid px-0 mt-4 mb-5">
                 <!-- Header -->
                 <!-- <div class="sales-header mt-5">
                     <div>
@@ -30,7 +30,7 @@
                     </div>
                 </div> -->
 
-                <!-- REQUEST -->
+                <!-- REQUEST / HISTORY -->
                 <div class="section-card mb-4 mt-5">
                     <div class="panel-header panel-primary">
                         <div class="panel-left">
@@ -48,96 +48,113 @@
                                 </div>
                             </div>
                         </div>
+
+                        <div class="panel-toggle-wrap">
+                            <span class="toggle-label active" id="labelForm">Request</span>
+
+                            <label class="switch-toggle">
+                                <input type="checkbox" id="panelToggle">
+                                <span class="slider-toggle"></span>
+                            </label>
+
+                            <span class="toggle-label" id="labelEdit">Riwayat</span>
+                        </div>
                     </div>
 
                     <div class="my-4 px-4">
-                        <form id="form-request">
-                            <div class="row g-3">
-                                <div class="col-md-6">
-                                    <label class="form-label-modern">
-                                        Produk
-                                    </label>
+                        <div id="formMode" class="panel-mode active">
+                            <form id="form-request">
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label-modern">
+                                            Produk
+                                        </label>
 
-                                    <div class="input-group">
-                                        <span class="input-group-text">
-                                            <i class="fas fa-box-open"></i>
-                                        </span>
+                                        <div class="input-group">
+                                            <span class="input-group-text">
+                                                <i class="fas fa-box-open"></i>
+                                            </span>
 
-                                        <select
-                                            name="product_id"
-                                            class="form-select form-product"
-                                            required>
+                                            <select
+                                                name="product_id"
+                                                class="form-select form-product"
+                                                required>
 
-                                            <option value="">
-                                                Pilih Produk
-                                            </option>
+                                                <option value="">
+                                                    Pilih Produk
+                                                </option>
 
-                                            <?php
-                                            $q = mysqli_query($conn,"
-                                                SELECT id,name,code
-                                                FROM products
-                                                WHERE category != 'additional'
-                                                ORDER BY name ASC
-                                            ");
-
-                                            function getStock($conn,$product_id){
-                                                $q2=mysqli_query($conn,"
-                                                    SELECT
-                                                    COALESCE(SUM(remaining_qty),0) stock
-                                                    FROM purchase_items
-                                                    WHERE product_id=$product_id
-                                                    AND deleted_at IS NULL
+                                                <?php
+                                                $q = mysqli_query($conn,"
+                                                    SELECT id,name,code
+                                                    FROM products
+                                                    WHERE category != 'additional'
+                                                    ORDER BY name ASC
                                                 ");
 
-                                                return mysqli_fetch_assoc($q2)['stock'];
-                                            }
+                                                function getStock($conn,$product_id){
+                                                    $q2=mysqli_query($conn,"
+                                                        SELECT
+                                                        COALESCE(SUM(remaining_qty),0) stock
+                                                        FROM purchase_items
+                                                        WHERE product_id=$product_id
+                                                        AND deleted_at IS NULL
+                                                    ");
 
-                                            while($p=mysqli_fetch_assoc($q)):
-                                            ?>
+                                                    return mysqli_fetch_assoc($q2)['stock'];
+                                                }
 
-                                            <option
-                                                value="<?= $p['id'] ?>"
-                                                data-stock="<?= getStock($conn,$p['id']) ?>">
-                                                <?= $p['name'] ?>
-                                                (<?= $p['code'] ?>)
-                                            </option>
+                                                while($p=mysqli_fetch_assoc($q)):
+                                                ?>
 
-                                            <?php endwhile; ?>
+                                                <option
+                                                    value="<?= $p['id'] ?>"
+                                                    data-stock="<?= getStock($conn,$p['id']) ?>">
+                                                    <?= $p['name'] ?>
+                                                    (<?= $p['code'] ?>)
+                                                </option>
 
-                                        </select>
-                                    </div>
-                                </div>
+                                                <?php endwhile; ?>
 
-                                <div class="col-md-3">
-                                    <label class="form-label-modern">
-                                        Qty
-                                    </label>
-
-                                    <div class="input-group">
-                                        <span class="input-group-text">
-                                            <i class="fas fa-cubes"></i>
-                                        </span>
-
-                                        <input
-                                            type="number"
-                                            name="qty"
-                                            class="form-control form-qty"
-                                            placeholder="0"
-                                            min="1"
-                                            required>
+                                            </select>
+                                        </div>
                                     </div>
 
-                                    <small id="stock-info" class="text-muted"></small>
-                                </div>
+                                    <div class="col-md-3">
+                                        <label class="form-label-modern">
+                                            Qty
+                                        </label>
 
-                                <div class="col-md-3 d-flex align-items-end">
-                                    <button class="btn btn-primary btn-request w-100">
-                                        <i class="fas fa-paper-plane me-2"></i>
-                                        Request
-                                    </button>
+                                        <div class="input-group">
+                                            <span class="input-group-text">
+                                                <i class="fas fa-cubes"></i>
+                                            </span>
+
+                                            <input
+                                                type="number"
+                                                name="qty"
+                                                class="form-control form-qty"
+                                                placeholder="0"
+                                                min="1"
+                                                required>
+                                        </div>
+
+                                        <small id="stock-info" class="text-muted"></small>
+                                    </div>
+
+                                    <div class="col-md-3 d-flex align-items-end">
+                                        <button class="btn btn-primary btn-request w-100">
+                                            <i class="fas fa-paper-plane me-2"></i>
+                                            Request
+                                        </button>
+                                    </div>
                                 </div>
-                            </div>
-                        </form>
+                            </form>
+                        </div>
+
+                        <div id="editMode" class="panel-mode">
+                            <div id="history-table"></div>
+                        </div>
                     </div>
                 </div>
 
@@ -160,32 +177,8 @@
                         </div>
                     </div>
 
-                    <div class="mt-4 px-4 table-responsive">
+                    <div class="mt-4 px-4">
                         <div id="sales-table"></div>
-                    </div>
-                </div>
-
-                <!-- HISTORY -->
-                <div class="section-card mb-5">
-                    <div class="panel-header panel-primary">
-                        <div class="panel-left">
-                            <div class="panel-icon">
-                                <i class="fas fa-history"></i>
-                            </div>
-
-                            <div>
-                                <div class="panel-title">
-                                    Riwayat Request Stok
-                                </div>
-                                <div class="panel-subtitle">
-                                    Histori seluruh permintaan stok gudang
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="mt-4 px-4 table-responsive">
-                        <div id="history-table"></div>
                     </div>
                 </div>
             </div>
@@ -297,6 +290,10 @@
                             },
                             order: [],
                         });
+
+                        if ($.fn.DataTable.isDataTable('#salesTable')) {
+                            $('#salesTable').DataTable().columns.adjust();
+                        }
                     });
             }
 
@@ -315,7 +312,7 @@
                         }
 
                         // 🔥 INIT ULANG
-                        $('#requestHistory').DataTable({
+                        let ht = $('#requestHistory').DataTable({
                             pageLength: 5,
                             lengthMenu:[[5,10,25,50],[5,10,25,50]],
                             responsive: true,
@@ -349,12 +346,41 @@
                             order: [] 
                         });
 
+                        ht.columns.adjust();
+
                     }, 100);
                 });
             }
 
             loadTable();
-            loadHistory();
+
+            /* 🔥 TOGGLE REQUEST / RIWAYAT */
+            const panelToggle = document.getElementById('panelToggle');
+            let historyLoaded = false;
+
+            panelToggle.addEventListener('change', function () {
+                const formMode = document.getElementById('formMode');
+                const editMode = document.getElementById('editMode');
+                const labelForm = document.getElementById('labelForm');
+                const labelEdit = document.getElementById('labelEdit');
+
+                if (this.checked) {
+                    formMode.classList.remove('active');
+                    editMode.classList.add('active');
+                    labelForm.classList.remove('active');
+                    labelEdit.classList.add('active');
+
+                    if (!historyLoaded) {
+                        historyLoaded = true;
+                        loadHistory();
+                    }
+                } else {
+                    editMode.classList.remove('active');
+                    formMode.classList.add('active');
+                    labelEdit.classList.remove('active');
+                    labelForm.classList.add('active');
+                }
+            });
 
             function toggleCatalog(id, el){
 
