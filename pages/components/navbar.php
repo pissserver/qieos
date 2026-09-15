@@ -227,6 +227,34 @@ if (!defined('BASE_URL')) {
                 });
             }
 
+            if(r.suppliers && r.suppliers.length){
+                html += '<div class="search-section-label"><i class="fas fa-truck"></i> Supplier</div>';
+                r.suppliers.forEach(function(s){
+                    var idx = allItems.length;
+                    allItems.push(s.url);
+                    html += '<div class="search-item" data-idx="'+idx+'" onclick="window._goSearchItem('+idx+')">';
+                    html += '<div class="search-item-icon supplier-icon"><i class="'+s.icon+'"></i></div>';
+                    html += '<div class="search-item-info"><div class="search-item-name">'+escapeHtml(s.name)+'</div><div class="search-item-meta">'+escapeHtml(s.phone)+' &middot; '+escapeHtml(s.address)+'</div></div>';
+                    html += '<span class="search-item-badge badge-supplier">Supplier</span>';
+                    html += '</div>';
+                    total++;
+                });
+            }
+
+            if(r.customers && r.customers.length){
+                html += '<div class="search-section-label"><i class="fas fa-users"></i> Customer</div>';
+                r.customers.forEach(function(c){
+                    var idx = allItems.length;
+                    allItems.push(c.url);
+                    html += '<div class="search-item" data-idx="'+idx+'" onclick="window._goSearchItem('+idx+')">';
+                    html += '<div class="search-item-icon customer-icon"><i class="'+c.icon+'"></i></div>';
+                    html += '<div class="search-item-info"><div class="search-item-name">'+escapeHtml(c.name)+'</div><div class="search-item-meta">'+escapeHtml(c.phone)+'</div></div>';
+                    html += '<span class="search-item-badge badge-customer">Customer</span>';
+                    html += '</div>';
+                    total++;
+                });
+            }
+
             if(r.orders && r.orders.length){
                 html += '<div class="search-section-label"><i class="fas fa-receipt"></i> Pesanan</div>';
                 r.orders.forEach(function(o){

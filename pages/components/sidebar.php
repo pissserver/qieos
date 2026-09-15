@@ -108,22 +108,22 @@
                 <!-- MASTER DATA -->
                 <li class="nav-title">MASTER</li>
 
-                <li class="nav-item <?= ($current_page == 'master-product.php' || $current_page == 'master-product-detail.php') ? 'active' : ''; ?>">
-                    <a href="<?php echo BASE_URL; ?>/pages/master/master-product.php" class="nav-link" data-tooltip="Master Produk">
+                <li class="nav-item <?= ($current_page == 'coming-soon.php' && $menu == 'master-product') ? 'active' : ''; ?>">
+                    <a href="<?php echo BASE_URL; ?>/pages/coming-soon.php?menu=master-product" class="nav-link" data-tooltip="Master Produk">
                         <span class="sidebar-icon"><i class="fas fa-boxes-stacked"></i></span>
                         <span class="sidebar-text">Master Produk</span>
                     </a>
                 </li>
 
-                <li class="nav-item <?= ($current_page == 'master-supplier.php') ? 'active' : ''; ?>">
-                    <a href="<?php echo BASE_URL; ?>/pages/master/master-supplier.php" class="nav-link" data-tooltip="Master Supplier">
+                <li class="nav-item <?= ($current_page == 'coming-soon.php' && $menu == 'master-supplier') ? 'active' : ''; ?>">
+                    <a href="<?php echo BASE_URL; ?>/pages/coming-soon.php?menu=master-supplier" class="nav-link" data-tooltip="Master Supplier">
                         <span class="sidebar-icon"><i class="fas fa-truck"></i></span>
                         <span class="sidebar-text">Master Supplier</span>
                     </a>
                 </li>
 
-                <li class="nav-item <?= ($current_page == 'master-customer.php') ? 'active' : ''; ?>">
-                    <a href="<?php echo BASE_URL; ?>/pages/master/master-customer.php" class="nav-link" data-tooltip="Master Customer">
+                <li class="nav-item <?= ($current_page == 'coming-soon.php' && $menu == 'master-customer') ? 'active' : ''; ?>">
+                    <a href="<?php echo BASE_URL; ?>/pages/coming-soon.php?menu=master-customer" class="nav-link" data-tooltip="Master Customer">
                         <span class="sidebar-icon"><i class="fas fa-users"></i></span>
                         <span class="sidebar-text">Master Customer</span>
                     </a>

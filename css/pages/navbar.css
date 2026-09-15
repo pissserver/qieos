@@ -1015,15 +1015,17 @@ PREMIUM NAVBAR V3
 .search-item:hover,.search-item.focused{background:linear-gradient(135deg,rgba(99,102,241,.12),rgba(139,92,246,.1))}
 .search-item:hover .search-item-icon,.search-item.focused .search-item-icon{transform:scale(1.1)}
 
-.search-item-icon{
+.search-overlay .search-item-icon{
     width:38px;height:38px;border-radius:12px;background:rgba(99,102,241,.1);color:#818cf8;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;transition:transform .2s
 }
-.search-item-icon.product-icon{background:rgba(16,185,129,.1);color:#34d399}
-.search-item-icon.tenant-icon{background:rgba(245,158,11,.1);color:#fbbf24}
+.search-overlay .search-item-icon.product-icon{background:rgba(16,185,129,.1);color:#34d399}
+.search-overlay .search-item-icon.tenant-icon{background:rgba(245,158,11,.1);color:#fbbf24}
+.search-overlay .search-item-icon.supplier-icon{background:rgba(14,165,233,.1);color:#38bdf8}
+.search-overlay .search-item-icon.customer-icon{background:rgba(244,63,94,.1);color:#fb7185}
 
 .search-item-info{flex:1;min-width:0}
-.search-item-name{color:#f1f5f9;font-size:13.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.search-item-meta{color:#64748b;font-size:11px;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.search-overlay .search-item-name{color:#ffffff !important;font-size:13.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.search-overlay .search-item-meta{color:#64748b !important;font-size:11px;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 
 .search-item-badge{
     font-size:10px;font-weight:600;padding:3px 8px;border-radius:6px;flex-shrink:0
@@ -1031,6 +1033,8 @@ PREMIUM NAVBAR V3
 .search-item-badge.badge-page{background:rgba(99,102,241,.1);color:#818cf8}
 .search-item-badge.badge-product{background:rgba(16,185,129,.1);color:#34d399}
 .search-item-badge.badge-tenant{background:rgba(245,158,11,.1);color:#fbbf24}
+.search-item-badge.badge-supplier{background:rgba(14,165,233,.1);color:#38bdf8}
+.search-item-badge.badge-customer{background:rgba(244,63,94,.1);color:#fb7185}
 
 .search-empty{
     text-align:center;padding:40px 20px;color:#64748b
