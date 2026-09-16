@@ -33,7 +33,7 @@ include '../../sessions/session.php';
                         alt="<?= htmlspecialchars($d['name']) ?>">
                 <?php else: ?>
                     <div class="product-img-placeholder">
-                        <i class="fas fa-box"></i>
+                        <i class="fas fa-box-open"></i>
                     </div>
                 <?php endif; ?>
 

@@ -7,7 +7,8 @@ $q = mysqli_query($conn,"
         p.form,
         p.date,
         COUNT(pi.id) AS total_items,
-        COALESCE(SUM(pi.price_buy), 0) AS total_price
+        COALESCE(SUM(pi.price_buy), 0) AS total_price,
+        MAX(CASE WHEN pi.qty IS NOT NULL THEN 1 ELSE 0 END) AS used_flag
     FROM purchases p
     LEFT JOIN purchase_items pi
         ON p.id = pi.purchase_id
@@ -86,11 +87,13 @@ $q = mysqli_query($conn,"
             <i class="fas fa-edit"></i>
         </button>
 
+        <?php if((int)$d['used_flag'] === 0): ?>
         <button class="action-btn btn-delete deletePurchaseBtn"
             data-id="<?= $d['id'] ?>"
             data-date="<?= $d['date'] ?>">
             <i class="fas fa-trash"></i>
         </button>
+        <?php endif; ?>
 
         <button class="action-btn btn-print printPurchaseBtn"
             data-id="<?= $d['id'] ?>"

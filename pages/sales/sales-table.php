@@ -7,6 +7,7 @@
         p.id,
         p.name,
         p.code,
+        p.photo,
         p.catalog
     FROM sales_stock s
     JOIN products p
@@ -54,9 +55,15 @@
     <tr class="sales-row <?= $isActive ? 'catalog-active' : '' ?>" id="row-<?= $d['id'] ?>">
         <td>
             <div class="product-wrap">
+                <?php if(!empty($d['photo'])): ?>
+                <img class="product-img"
+                    src="<?= BASE_URL ?>/assets/img/products/<?= htmlspecialchars($d['photo']) ?>"
+                    alt="<?= htmlspecialchars($d['name']) ?>">
+                <?php else: ?>
                 <div class="product-icon">
                     <i class="fas fa-box"></i>
                 </div>
+                <?php endif; ?>
                 <div>
                     <div class="product-name">
                         <?= htmlspecialchars($d['name']) ?>

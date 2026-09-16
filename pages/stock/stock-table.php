@@ -19,6 +19,7 @@ include __DIR__ . '/../components/data/stock-status.php';
         p.name,
         p.code,
         p.unit,
+        p.photo,
         COALESCE(SUM(pi.remaining_qty),0) stock
     FROM products p
     LEFT JOIN purchase_items pi
@@ -43,9 +44,15 @@ include __DIR__ . '/../components/data/stock-status.php';
         <td>
             <div class="product-wrap">
 
-                <div class="product-icon">
-                    <i class="fas fa-box-open"></i>
-                </div>
+                    <?php if(!empty($d['photo'])): ?>
+                    <img class="product-img"
+                        src="<?= BASE_URL ?>/assets/img/products/<?= htmlspecialchars($d['photo']) ?>"
+                        alt="<?= htmlspecialchars($d['name']) ?>">
+                    <?php else: ?>
+                    <div class="product-icon">
+                        <i class="fas fa-box-open"></i>
+                    </div>
+                    <?php endif; ?>
 
                 <div>
                     <div class="fw-bold">

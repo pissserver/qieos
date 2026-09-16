@@ -72,6 +72,7 @@ include '../../sessions/session.php';
                                 p.id,
                                 p.name,
                                 p.code,
+                                p.photo,
                                 COALESCE(SUM(pi.remaining_qty),0) stock,
                                 ss.qty as sales_qty
                             FROM products p
@@ -92,9 +93,15 @@ include '../../sessions/session.php';
                                 <td>
                                     <div class="product-wrap">
 
+                                        <?php if(!empty($d['photo'])): ?>
+                                        <img class="product-img"
+                                            src="<?= BASE_URL ?>/assets/img/products/<?= htmlspecialchars($d['photo']) ?>"
+                                            alt="<?= htmlspecialchars($d['name']) ?>">
+                                        <?php else: ?>
                                         <div class="product-icon">
                                             <i class="fas fa-box-open"></i>
                                         </div>
+                                        <?php endif; ?>
 
                                         <div>
                                             <div class="fw-bold">
@@ -200,8 +207,8 @@ include '../../sessions/session.php';
                     paginate: {
                         first: "Awal",
                         last: "Akhir",
-                        next: "›",
-                        previous: "‹"
+                        next: "ï¿½",
+                        previous: "ï¿½"
                     }
                 }
             });

@@ -50,6 +50,15 @@
         color:#fff;
     }
 
+    .product-img{
+        width:46px;
+        height:46px;
+        border-radius:14px;
+        object-fit:cover;
+        display:block;
+        border:2px solid #e2e8f0;
+    }
+
     .product-name{
         font-weight:700;
         color:#0f172a;

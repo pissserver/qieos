@@ -5,7 +5,8 @@ $q = mysqli_query($conn,"
 SELECT
     r.*,
     p.name,
-    p.code
+    p.code,
+    p.photo
 FROM stock_requests r
 JOIN products p
     ON p.id = r.product_id
@@ -78,9 +79,15 @@ LIMIT 20
 
             <div class="product-wrap">
 
-                <div class="product-icon">
-                    <i class="fas fa-box-open"></i>
-                </div>
+                    <?php if(!empty($d['photo'])): ?>
+                    <img class="product-img"
+                        src="<?= BASE_URL ?>/assets/img/products/<?= htmlspecialchars($d['photo']) ?>"
+                        alt="<?= htmlspecialchars($d['name']) ?>">
+                    <?php else: ?>
+                    <div class="product-icon">
+                        <i class="fas fa-box-open"></i>
+                    </div>
+                    <?php endif; ?>
 
                 <div>
 
