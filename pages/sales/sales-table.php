@@ -3,15 +3,16 @@
 
     $q = mysqli_query($conn,"
     SELECT
-        s.qty,
         p.id,
         p.name,
         p.code,
         p.photo,
-        p.catalog
+        p.catalog,
+        COALESCE(SUM(s.qty),0) AS qty
     FROM sales_stock s
     JOIN products p
         ON p.id = s.product_id
+    GROUP BY p.id
     ORDER BY p.name ASC
     ");
 ?>

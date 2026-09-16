@@ -73,16 +73,10 @@ include '../../sessions/session.php';
                                 p.name,
                                 p.code,
                                 p.photo,
-                                COALESCE(SUM(pi.remaining_qty),0) stock,
-                                ss.qty as sales_qty
+                                COALESCE((SELECT SUM(pi.remaining_qty) FROM purchase_items pi WHERE pi.product_id = p.id AND pi.deleted_at IS NULL),0) stock,
+                                COALESCE((SELECT SUM(ss.qty) FROM sales_stock ss WHERE ss.product_id = p.id),0) sales_qty
                             FROM products p
-                            LEFT JOIN purchase_items pi
-                                ON pi.product_id=p.id
-                                AND pi.deleted_at IS NULL
-                            LEFT JOIN sales_stock ss
-                                ON ss.product_id=p.id
                             WHERE p.category != 'additional'
-                            GROUP BY p.id
                             ORDER BY p.name ASC
                             ");
                             while($d=mysqli_fetch_assoc($q)): ?>

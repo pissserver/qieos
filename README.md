@@ -75,22 +75,21 @@ _Catatan:_ Akun **Developer** bersifat terproteksi dan tidak dapat diubah/dihapu
 
 Nama Database: **`db_kantin`** (MySQL)
 
-### Daftar Tabel (14 Tabel)
+### Daftar Tabel (13 Tabel)
 
 1. **`users`**: Data akun pengguna (username, password bcrypt, fullname, role, photo).
 2. **`products`**: Master data produk (nama, kode, kategori, harga jual, foto, status katalog, starred).
 3. **`purchases`**: Header transaksi pembelian & daftar belanja (nomor form, tanggal).
 4. **`purchase_items`**: Detail item pembelian dengan tracking stok FIFO (`qty`, `remaining_qty`, `price`) serta data rencana belanja (`qty_buy`, `unit_buy`, `price_buy`).
-5. **`sales_stock`**: Stok produk yang siap dijual di kasir.
+5. **`sales_stock`**: Tabel pergerakan stok kantin (ledger). Setiap baris mencatat satu pergerakan (`type`: `balance`, `transfer`, `sale`, `return`) dengan qty positif/negatif; saldo saat ini = `SUM(qty)` per produk.
 6. **`stock_requests`**: Permintaan transfer stok dari kasir ke gudang (`pending`, `approved`, `rejected`).
-7. **`stock_transfers`**: Log riwayat persetujuan transfer stok.
-8. **`orders`**: Header transaksi penjualan (kode transaksi, staff_id, total, status_payment).
-9. **`order_details`**: Detail item penjualan (order_id, product_id, qty, price, subtotal).
-10. **`tenants`**: Data penyewa / tenant (nama tenant, pemikir/owner, status).
-11. **`tenant_payments`**: Transaksi pembayaran uang sewa tenant.
-12. **`utility_payments`**: Transaksi pembayaran biaya air & listrik tenant.
-13. **`updates`**: Header changelog versi aplikasi.
-14. **`update_details`**: Detail uraian pembaruan versi.
+7. **`orders`**: Header transaksi penjualan (kode transaksi, staff_id, total, status_payment).
+8. **`order_details`**: Detail item penjualan (order_id, product_id, qty, price, subtotal).
+9. **`tenants`**: Data penyewa / tenant (nama tenant, pemikir/owner, status).
+10. **`tenant_payments`**: Transaksi pembayaran uang sewa tenant.
+11. **`utility_payments`**: Transaksi pembayaran biaya air & listrik tenant.
+12. **`updates`**: Header changelog versi aplikasi.
+13. **`update_details`**: Detail uraian pembaruan versi.
 
 ### Diagram Relasi Sederhana
 
@@ -101,9 +100,8 @@ users ──(staff_id)──> orders ──(order_id)──> order_details ─�
   └──(staff_id)──> utility_payments <──(tenant_id)──┘                            │
                                                                                    │
 purchases ──(purchase_id)──> purchase_items ──────(product_id)─────────────────────┤
-                                                                                    ├─> sales_stock
-                                                                                    ├─> stock_requests
-updates ────> update_details                                                       └─> stock_transfers
+                                                                                     ├─> sales_stock
+updates ────> update_details                                                       └─> stock_requests
 ```
 
 ---

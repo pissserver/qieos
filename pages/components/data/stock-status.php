@@ -1,7 +1,7 @@
 <?php
 // Helper stok & status produk
 // - Stok Gudang  : sisa FIFO (purchase_items.remaining_qty)
-// - Stok Kantin  : sales_stock.qty
+// - Stok Kantin  : SUM(sales_stock.qty) per produk
 // - Total Stok   : gudang + kantin
 // - Status       : 0 = Habis, >0 s/d batas = Menipis, > batas = Ready
 //   Batas menipis diambil dari products.low_stock, fallback ke app_settings.low_stock_default
@@ -52,10 +52,9 @@ if(!function_exists('get_product_stock')){
 
         $kantin = 0;
         $ss = @mysqli_query($conn, "
-            SELECT COALESCE(qty,0) AS v
+            SELECT COALESCE(SUM(qty),0) AS v
             FROM sales_stock
             WHERE product_id = $productId
-            LIMIT 1
         ");
         if($ss && $row = mysqli_fetch_assoc($ss)) $kantin = (int)$row['v'];
 

@@ -74,45 +74,23 @@
                 $remaining -= $take;
             }
 
-            /* 🔥 4. UPDATE SALES STOCK */
-            $cekSales = mysqli_query($conn,"
-                SELECT id, qty 
-                FROM sales_stock
-                WHERE product_id = $product_id
-                LIMIT 1
-                FOR UPDATE
+            /* 🔥 4. CATAT MOVEMENT KE SALES STOCK (ledger) */
+            $log = mysqli_query($conn,"
+                INSERT INTO sales_stock (product_id, qty, type)
+                VALUES ($product_id, $qty, 'transfer')
             ");
 
-            if(mysqli_num_rows($cekSales) > 0){
-
-                $s = mysqli_fetch_assoc($cekSales);
-                $newQty = $s['qty'] + $qty;
-
-                mysqli_query($conn,"
-                    UPDATE sales_stock
-                    SET qty = $newQty
-                    WHERE id = {$s['id']}
-                ");
-
-            } else {
-
-                mysqli_query($conn,"
-                    INSERT INTO sales_stock (product_id, qty)
-                    VALUES ($product_id, $qty)
-                ");
+            if(!$log){
+                throw new Exception(mysqli_error($conn));
             }
 
             /* 🔥 5. UPDATE STATUS REQUEST */
             mysqli_query($conn,"
                 UPDATE stock_requests
-                SET status = 'approved'
+                SET status = 'approved',
+                    approved_by = ".(int)$_SESSION['user_id'].",
+                    approved_at = NOW()
                 WHERE id = $id
-            ");
-
-            /* 🔥 6. LOG */
-            mysqli_query($conn,"
-                INSERT INTO stock_transfers (product_id, qty)
-                VALUES ($product_id, $qty)
             ");
 
             mysqli_commit($conn);
@@ -166,7 +144,9 @@
             /* 🔥 update */
             $update = mysqli_query($conn,"
                 UPDATE stock_requests
-                SET status = 'rejected'
+                SET status = 'rejected',
+                    approved_by = ".(int)$_SESSION['user_id'].",
+                    approved_at = NOW()
                 WHERE id=$id
             ");
 

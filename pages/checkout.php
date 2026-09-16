@@ -67,11 +67,20 @@
 
         $stmt_detail->execute();
 
-        mysqli_query($conn, "
-            UPDATE sales_stock
-            SET qty = GREATEST(qty - {$item['qty']}, 0)
+        $bal = mysqli_fetch_assoc(mysqli_query($conn, "
+            SELECT COALESCE(SUM(qty),0) v
+            FROM sales_stock
             WHERE product_id = {$item['id']}
-        ");
+        "));
+
+        $deduct = min((int)$item['qty'], (int)$bal['v']);
+
+        if($deduct > 0){
+            mysqli_query($conn, "
+                INSERT INTO sales_stock (product_id, qty, type)
+                VALUES ({$item['id']}, -$deduct, 'sale')
+            ");
+        }
     }
 
     echo json_encode([
