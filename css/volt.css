@@ -1047,7 +1047,7 @@
     --bs-white-rgb: 255, 255, 255;
     --bs-black-rgb: 17, 24, 39;
     --bs-body-color-rgb: 55, 65, 81;
-    --bs-body-bg-rgb: 242, 244, 246;
+    --bs-body-bg-rgb: 10, 15, 26;
     --bs-font-sans-serif: "Inter", sans-serif;
     --bs-font-monospace: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
     --bs-gradient: linear-gradient(180deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0));
@@ -1056,7 +1056,7 @@
     --bs-body-font-weight: 400;
     --bs-body-line-height: 1.5;
     --bs-body-color: #374151;
-    --bs-body-bg: #F2F4F6;
+    --bs-body-bg: #0a0f1a;
 }
 
 *,
@@ -22834,14 +22834,15 @@ textarea.form-control-lg {
 .sidebar {
     display: block;
     position: fixed;
-    top: 0;
-    bottom: 0;
-    left: 0;
+    top: 12px;
+    bottom: 12px;
+    left: 12px;
     z-index: 100;
-    max-height: 100%;
+    max-height: calc(100% - 24px);
     overflow-y: auto;
     width: 100%;
     transition: max-width 0.1s;
+    border-radius: 24px;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -22854,6 +22855,10 @@ textarea.form-control-lg {
     .sidebar {
         width: 100%;
         max-width: 260px;
+        top: 12px;
+        bottom: 12px;
+        left: 12px;
+        border-radius: 24px;
     }
 }
 
@@ -23016,7 +23021,7 @@ textarea.form-control-lg {
 
 @media (min-width: 992px) {
     .content {
-        margin-left: 260px;
+        margin-left: 284px;
     }
 }
 

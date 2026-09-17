@@ -394,11 +394,12 @@ if (!defined('BASE_URL')) {
 </script>
 
         <!-- PROFILE -->
-        <div class="dropdown">
+        <div class="dropdown" style="position: relative; z-index: 1050;">
 
             <a href="#"
                 class="text-decoration-none"
-                data-bs-toggle="dropdown">
+                data-bs-toggle="dropdown"
+                data-bs-auto-close="true">
 
                 <div class="premium-profile">
 
