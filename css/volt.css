@@ -28768,3 +28768,45 @@ body.sidebar-locked {
     overflow: hidden;
 }
 /*# sourceMappingURL=volt.css.map */
+
+/* ===== GLOBAL PANEL HEADER ===== */
+.panel-header {
+    position: relative;
+    overflow: hidden;
+}
+
+.panel-header::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at 30% 50%, rgba(99, 102, 241, 0.18) 0%, transparent 35%),
+                radial-gradient(circle at 70% 50%, rgba(139, 92, 246, 0.15) 0%, transparent 35%);
+    pointer-events: none;
+    animation: pulsePanelSilhouette 10s ease-in-out infinite;
+    z-index: 0;
+    border-radius: inherit;
+}
+
+.panel-header .panel-left,
+.panel-header .panel-right {
+    position: relative;
+    z-index: 1;
+}
+
+.panel-icon {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.08)) !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+}
+
+.panel-primary {
+    background: linear-gradient(135deg, #0f172a, #1e293b, #334155) !important;
+    border: 1px solid rgba(99, 102, 241, 0.3) !important;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3) !important;
+    color: #fff !important;
+}
+
+@keyframes pulsePanelSilhouette {
+    0%, 100% { opacity: 0.5; transform: scale(1); }
+    50% { opacity: 1; transform: scale(1.05); }
+}
