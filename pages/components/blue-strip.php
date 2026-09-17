@@ -13,21 +13,39 @@ $blueStripSub    = isset($blue_strip_subtitle) ? $blue_strip_subtitle : '';
     gap:16px;
     padding:18px 22px;
     border-radius:18px;
-    background:linear-gradient(135deg,#4f46e5,#4338ca);
+    background:linear-gradient(135deg,#0f172a,#1e293b,#334155);
+    border:1px solid rgba(99,102,241,.3);
     color:#fff;
-    box-shadow:0 8px 22px rgba(79,70,229,.22);
+    box-shadow:0 8px 20px rgba(0,0,0,.3);
     margin-bottom:20px;
+    position:relative;
+    overflow:hidden;
+}
+.blue-strip::before{
+    content:'';
+    position:absolute;
+    inset:0;
+    background:radial-gradient(circle at 30% 50%,rgba(99,102,241,.18) 0%,transparent 35%),
+               radial-gradient(circle at 70% 50%,rgba(139,92,246,.15) 0%,transparent 35%);
+    pointer-events:none;
+    z-index:0;
+}
+.blue-strip > *{
+    position:relative;
+    z-index:1;
 }
 .blue-strip .strip-icon{
     width:58px;
     height:58px;
     flex-shrink:0;
-    border-radius:16px;
-    background:rgba(255,255,255,.12);
+    border-radius:14px;
+    background:linear-gradient(135deg,rgba(255,255,255,.15),rgba(255,255,255,.08));
+    border:1px solid rgba(255,255,255,.2);
     display:flex;
     align-items:center;
     justify-content:center;
     font-size:22px;
+    box-shadow:0 4px 12px rgba(0,0,0,.1);
 }
 .blue-strip .strip-title{
     font-size:17px;
@@ -35,7 +53,7 @@ $blueStripSub    = isset($blue_strip_subtitle) ? $blue_strip_subtitle : '';
 }
 .blue-strip .strip-subtitle{
     font-size:13px;
-    opacity:.85;
+    color:#94a3b8;
     margin:0;
 }
 @media (max-width:575.98px){

@@ -2,16 +2,15 @@
 include '../../sessions/session.php';
 ?>
 
-<link rel="stylesheet" href="<?php echo BASE_URL; ?>/css/pages/order.css">
-
 <!doctype html>
-<html>
+<html lang="en">
 
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <title>Pesanan - Qieos</title>
 
     <?php include '../../script/headscript.php'; ?>
+    <link rel="stylesheet" href="<?php echo BASE_URL; ?>/css/pages/order.css?v=<?php echo filemtime(__DIR__ . '/../../css/pages/order.css'); ?>">
 </head>
 
 <body>

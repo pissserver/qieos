@@ -18,8 +18,8 @@
     ");
 ?>
 
-<link rel="stylesheet" href="<?php echo BASE_URL; ?>/css/pages/stock.css">
-<link rel="stylesheet" href="<?php echo BASE_URL; ?>/css/pages/sales-table.css">
+<link rel="stylesheet" href="<?php echo BASE_URL; ?>/css/pages/stock.css?v=<?php echo filemtime(__DIR__ . '/../../css/pages/stock.css'); ?>">
+<link rel="stylesheet" href="<?php echo BASE_URL; ?>/css/pages/sales-table.css?v=<?php echo filemtime(__DIR__ . '/../../css/pages/sales-table.css'); ?>">
 
 <table class="table table-hover align-middle" id="stockTable">
     <thead>

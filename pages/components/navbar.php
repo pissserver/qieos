@@ -6,7 +6,7 @@ if (!defined('BASE_URL')) {
 <script>
     const BASE_URL = '<?php echo BASE_URL; ?>';
 </script>
-<link rel="stylesheet" href="<?php echo BASE_URL; ?>/css/pages/navbar.css">
+<link rel="stylesheet" href="<?php echo BASE_URL; ?>/css/pages/navbar.css?v=<?php echo filemtime(__DIR__ . '/../../css/pages/navbar.css'); ?>">
 
 <nav class="premium-navbar">
 

@@ -50,7 +50,7 @@ if (!defined('BASE_URL')) {
 <link type="text/css" href="<?php echo BASE_URL; ?>/vendor/notyf/notyf.min.css" rel="stylesheet" />
 
 <!-- Volt CSS -->
-<link type="text/css" href="<?php echo BASE_URL; ?>/css/volt.css" rel="stylesheet" />
+<link type="text/css" href="<?php echo BASE_URL; ?>/css/volt.css?v=<?php echo filemtime(__DIR__ . '/../css/volt.css'); ?>" rel="stylesheet" />
 
 <!-- Qieos Toast -->
 <link type="text/css" href="<?php echo BASE_URL; ?>/css/components/toast.css?v=<?php echo filemtime(__DIR__ . '/../css/components/toast.css'); ?>" rel="stylesheet" />

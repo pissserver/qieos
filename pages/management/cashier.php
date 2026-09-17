@@ -9,7 +9,7 @@ include '../../sessions/session.php';
     <title>Staff Kasir - Qieos</title>
     <?php include '../../script/headscript.php'; ?>
 
-    <link rel="stylesheet" href="<?php echo BASE_URL; ?>/css/pages/cashier.css">
+    <link rel="stylesheet" href="<?php echo BASE_URL; ?>/css/pages/cashier.css?v=<?php echo filemtime(__DIR__ . '/../../css/pages/cashier.css'); ?>">
 </head>
 
 <body>

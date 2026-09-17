@@ -5,7 +5,7 @@ $query = mysqli_query($conn,
         );
 ?>
 
-<link rel="stylesheet" href="<?php echo BASE_URL; ?>/css/pages/tenant.css">
+<link rel="stylesheet" href="<?php echo BASE_URL; ?>/css/pages/tenant.css?v=<?php echo filemtime(__DIR__ . '/../../css/pages/tenant.css'); ?>">
 
 <!doctype html>
 <html lang="en">

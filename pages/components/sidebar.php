@@ -17,7 +17,7 @@
     }
 ?>
 
-<link rel="stylesheet" href="<?php echo BASE_URL; ?>/css/pages/sidebar.css">
+<link rel="stylesheet" href="<?php echo BASE_URL; ?>/css/pages/sidebar.css?v=<?php echo filemtime(__DIR__ . '/../../css/pages/sidebar.css'); ?>">
 
 <!-- Mobile Overlay Backdrop -->
 <div class="sidebar-overlay" id="sidebarOverlay"></div>

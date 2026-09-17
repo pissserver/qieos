@@ -1047,7 +1047,7 @@
     --bs-white-rgb: 255, 255, 255;
     --bs-black-rgb: 17, 24, 39;
     --bs-body-color-rgb: 55, 65, 81;
-    --bs-body-bg-rgb: 10, 15, 26;
+    --bs-body-bg-rgb: 242, 244, 246;
     --bs-font-sans-serif: "Inter", sans-serif;
     --bs-font-monospace: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
     --bs-gradient: linear-gradient(180deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0));
@@ -1056,7 +1056,7 @@
     --bs-body-font-weight: 400;
     --bs-body-line-height: 1.5;
     --bs-body-color: #374151;
-    --bs-body-bg: #0a0f1a;
+    --bs-body-bg: #F2F4F6;
 }
 
 *,

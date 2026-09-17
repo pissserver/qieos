@@ -6,8 +6,8 @@
         <title>Transfer Gudang - Qieos</title>
         <?php include '../../script/headscript.php'; ?>
 
-        <link rel="stylesheet" href="<?php echo BASE_URL; ?>/css/pages/transfer.css">
-        <link rel="stylesheet" href="<?php echo BASE_URL; ?>/css/pages/transfer-table.css">
+        <link rel="stylesheet" href="<?php echo BASE_URL; ?>/css/pages/transfer.css?v=<?php echo filemtime(__DIR__ . '/../../css/pages/transfer.css'); ?>">
+        <link rel="stylesheet" href="<?php echo BASE_URL; ?>/css/pages/transfer-table.css?v=<?php echo filemtime(__DIR__ . '/../../css/pages/transfer-table.css'); ?>">
     </head>
 
     <body>

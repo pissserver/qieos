@@ -39,7 +39,7 @@ while($prod = mysqli_fetch_assoc($pq)){
         <title>Stok Kantin - Qieos</title>
         <?php include '../../script/headscript.php'; ?>
 
-        <link rel="stylesheet" href="<?php echo BASE_URL; ?>/css/pages/sales-stock.css">
+        <link rel="stylesheet" href="<?php echo BASE_URL; ?>/css/pages/sales-stock.css?v=<?php echo filemtime(__DIR__ . '/../../css/pages/sales-stock.css'); ?>">
     </head>
 
     <body>

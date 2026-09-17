@@ -36,7 +36,7 @@ ORDER BY purchases.id DESC
 ");
 ?>
 
-<link rel="stylesheet" href="<?php echo BASE_URL; ?>/css/pages/purchase-table.css">
+<link rel="stylesheet" href="<?php echo BASE_URL; ?>/css/pages/purchase-table.css?v=<?php echo filemtime(__DIR__ . '/../../css/pages/purchase-table.css'); ?>">
 
 <table id="purchaseTable" class="table table-hover align-middle">
 <thead>

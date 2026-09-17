@@ -21,7 +21,7 @@ $q = mysqli_query($conn,"
 ");
 ?>
 
-<link rel="stylesheet" href="<?php echo BASE_URL; ?>/css/pages/list-table.css">
+<link rel="stylesheet" href="<?php echo BASE_URL; ?>/css/pages/list-table.css?v=<?php echo filemtime(__DIR__ . '/../../css/pages/list-table.css'); ?>">
 
 <table id="purchaseTable" class="table table-hover align-middle">
 <thead>

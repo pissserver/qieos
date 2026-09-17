@@ -20,7 +20,7 @@ LIMIT 20
 ");
 ?>
 
-<link rel="stylesheet" href="<?php echo BASE_URL; ?>/css/pages/history-request-table.css">
+<link rel="stylesheet" href="<?php echo BASE_URL; ?>/css/pages/history-request-table.css?v=<?php echo filemtime(__DIR__ . '/../../../css/pages/history-request-table.css'); ?>">
 
 <?php if(mysqli_num_rows($q)==0): ?>
 

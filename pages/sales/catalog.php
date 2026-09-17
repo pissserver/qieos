@@ -7,8 +7,6 @@ $query = mysqli_query($conn,
         );
 ?>
 
-<link rel="stylesheet" href="<?php echo BASE_URL; ?>/css/pages/catalog.css">
-
 <!doctype html>
 <html lang="en">
 
@@ -17,6 +15,7 @@ $query = mysqli_query($conn,
     <title>Katalog Produk - Qieos</title>
 
     <?php include '../../script/headscript.php'; ?>
+    <link rel="stylesheet" href="<?php echo BASE_URL; ?>/css/pages/catalog.css?v=<?php echo filemtime(__DIR__ . '/../../css/pages/catalog.css'); ?>">
 </head>
 
 <body>
