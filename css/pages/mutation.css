@@ -496,6 +496,46 @@
             .section-card.mb-5{
                 margin-bottom:1.5rem !important;
             }
+
+            #stockTable{
+                table-layout:fixed;
+                width:100% !important;
+            }
+
+            #stockTable thead th:nth-child(1),
+            #stockTable tbody td:nth-child(1){
+                width:52%;
+            }
+
+            #stockTable thead th:nth-child(2),
+            #stockTable tbody td:nth-child(2){
+                width:15%;
+            }
+
+            #stockTable thead th:nth-child(3),
+            #stockTable tbody td:nth-child(3){
+                width:15%;
+            }
+
+            #stockTable thead th:nth-child(4),
+            #stockTable tbody td:nth-child(4){
+                width:18%;
+            }
+
+            .product-wrap{
+                min-width:0;
+            }
+
+            .product-wrap > div{
+                min-width:0;
+                flex:1 1 auto;
+            }
+
+            .product-wrap .fw-bold{
+                white-space:normal;
+                overflow-wrap:break-word;
+                word-break:break-word;
+            }
         }
 
         @media (max-width:575.98px){
@@ -525,6 +565,27 @@
 
             #stockTable{
                 border-spacing:0 10px;
+                min-width:520px;
+            }
+
+            #stockTable thead th:nth-child(1),
+            #stockTable tbody td:nth-child(1){
+                width:50%;
+            }
+
+            #stockTable thead th:nth-child(2),
+            #stockTable tbody td:nth-child(2){
+                width:17%;
+            }
+
+            #stockTable thead th:nth-child(3),
+            #stockTable tbody td:nth-child(3){
+                width:16%;
+            }
+
+            #stockTable thead th:nth-child(4),
+            #stockTable tbody td:nth-child(4){
+                width:17%;
             }
 
             #stockTable thead th{

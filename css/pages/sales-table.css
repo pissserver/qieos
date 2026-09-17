@@ -1,263 +1,85 @@
-﻿#salesTable{
-        border-collapse:separate;
-        border-spacing:0 14px;
-        width:100%;
+﻿/* ============================================
+    TABEL STOK KANTIN
+    Desain disamakan dengan tabel Stok Gudang
+    (stock.css menangani bagian besar tabel ini)
+   ============================================ */
+
+/* Baris tidak diklik, hanya tombol katalog yang interaktif */
+.stock-row{
+    cursor:default;
+}
+
+/* ===== KATALOG TOGGLE (switch kompak) ===== */
+.toggle-switch{
+    position:relative;
+    display:inline-block;
+    width:44px;
+    height:24px;
+    cursor:pointer;
+    vertical-align:middle;
+}
+
+.toggle-switch input{
+    position:absolute;
+    opacity:0;
+    pointer-events:none;
+}
+
+.toggle-track{
+    position:absolute;
+    inset:0;
+    border-radius:999px;
+    background:#e2e8f0;
+    box-shadow:inset 0 1px 3px rgba(15,23,42,.15);
+    transition:background .25s ease;
+}
+
+.toggle-thumb{
+    position:absolute;
+    left:3px;
+    top:3px;
+    width:18px;
+    height:18px;
+    border-radius:50%;
+    background:#fff;
+    box-shadow:0 1px 3px rgba(15,23,42,.35);
+    transition:transform .25s cubic-bezier(.4,0,.2,1);
+}
+
+/* AKTIF */
+.toggle-switch input:checked + .toggle-track{
+    background:#22c55e;
+}
+
+.toggle-switch input:checked + .toggle-track .toggle-thumb{
+    transform:translateX(20px);
+}
+
+.toggle-switch input:checked:not(:disabled) + .toggle-track{
+    box-shadow:inset 0 1px 3px rgba(21,128,61,.25);
+}
+
+/* Hover */
+.toggle-switch:hover .toggle-thumb{
+    transform:scale(1.08);
+}
+
+.toggle-switch input:checked:hover + .toggle-track .toggle-thumb{
+    transform:translateX(20px) scale(1.08);
+}
+
+/* ===== MOBILE =====
+   Batalkan table-layout fixed + lebar kolom persen
+   dari stock.css supaya kolom menyesuaikan isinya
+   (badge tidak berdempetan saat tabel digeser) */
+@media (max-width:991.98px){
+    #stockTable{
+        table-layout:auto;
+        width:100% !important;
     }
 
-    /* HEADER */
-    #salesTable thead th{
-        border:none !important;
-        color:#64748b;
-        font-size:12px;
-        text-transform:uppercase;
-        font-weight:700;
+    #stockTable thead th,
+    #stockTable tbody td{
+        width:auto !important;
     }
-
-    /* ROW */
-    .sales-row{
-        background:#fff;
-        border-radius:16px;
-        box-shadow:0 6px 18px rgba(15,23,42,.05);
-        transition:.25s;
-    }
-
-    .sales-row:hover{
-        box-shadow:0 12px 24px rgba(15,23,42,.10);
-        transform:translateY(-2px);
-    }
-
-    .sales-row td{
-        padding:18px;
-        border:none !important;
-        vertical-align:middle;
-    }
-
-    /* PRODUCT */
-    .product-wrap{
-        display:flex;
-        align-items:center;
-        gap:12px;
-    }
-
-    .product-icon{
-        width:46px;
-        height:46px;
-        border-radius:14px;
-        background:linear-gradient(135deg,#334155,#0f172a);
-        display:flex;
-        align-items:center;
-        justify-content:center;
-        color:#fff;
-    }
-
-    .product-img{
-        width:46px;
-        height:46px;
-        border-radius:14px;
-        object-fit:cover;
-        display:block;
-        border:2px solid #e2e8f0;
-    }
-
-    .product-name{
-        font-weight:700;
-        color:#0f172a;
-    }
-
-    .product-code{
-        font-size:12px;
-        color:#64748b;
-    }
-
-    /* STOCK BADGE */
-    .stock-badge{
-        display:inline-flex;
-        align-items:center;
-        gap:6px;
-        padding:6px 12px;
-        border-radius:10px;
-        font-weight:700;
-        font-size:12px;
-    }
-
-    .stock-success{background:#dcfce7;color:#166534;}
-    .stock-low{background:#fef3c7;color:#92400e;}
-    .stock-empty{background:#fee2e2;color:#991b1b;}
-
-    /* DATATABLE */
-    .dataTables_filter input{
-        border-radius:8px !important;
-        border:1px solid #cbd5e1 !important;
-        padding:8px 14px !important;
-        width:180px !important;
-    }
-
-    .dataTables_length select{
-        min-width:80px !important;
-        height:38px !important;
-        padding:0 34px 0 14px !important;
-        border-radius:8px !important;
-        border:1px solid #cbd5e1 !important;
-        background-position:right 10px center;
-    }
-
-    .dataTables_length{
-        display:flex;
-        align-items:center;
-        gap:6px;
-        color:#64748b;
-        font-size:13px;
-    }
-
-    /* ===========================
-    NEUMORPHIC PREMIUM SWITCH
-    =========================== */
-
-    .neo-switch{
-        position:relative;
-        display:inline-block;
-        width:92px;
-        height:46px;
-        cursor:pointer;
-    }
-
-    .neo-switch input{
-        display:none;
-    }
-
-    /* TRACK */
-
-    .neo-track{
-
-        position:absolute;
-        inset:0;
-
-        border-radius:999px;
-
-        background:#eef2f6;
-
-        box-shadow:
-            inset 6px 6px 12px rgba(209,214,230,.8),
-            inset -6px -6px 12px rgba(255,255,255,.95);
-
-        transition:.35s ease;
-
-    }
-
-    /* THUMB */
-
-    .neo-thumb{
-
-        position:absolute;
-
-        left:5px;
-        top:5px;
-
-        width:36px;
-        height:36px;
-
-        border-radius:50%;
-
-        background:#ffffff;
-
-        display:flex;
-        justify-content:center;
-        align-items:center;
-
-        box-shadow:
-            4px 4px 10px rgba(209,214,230,.9),
-            -4px -4px 10px rgba(255,255,255,.95);
-
-        transition:all .35s cubic-bezier(.4,0,.2,1);
-
-    }
-
-    /* TEXT */
-
-    .neo-text{
-
-        font-size:11px;
-        font-weight:700;
-        letter-spacing:.5px;
-        color:#64748b;
-        transition:.3s;
-
-    }
-
-    /* ACTIVE */
-
-    .neo-switch input:checked + .neo-track{
-
-        background:#dcfce7;
-
-        box-shadow:
-            inset 6px 6px 12px rgba(187,247,208,.9),
-            inset -6px -6px 12px rgba(255,255,255,.9);
-
-    }
-
-    /* MOVE */
-
-    .neo-switch input:checked + .neo-track .neo-thumb{
-
-        transform:translateX(46px);
-
-        background:#22c55e;
-
-        box-shadow:
-            4px 4px 12px rgba(34,197,94,.25),
-            -4px -4px 12px rgba(255,255,255,.8);
-
-    }
-
-    /* TEXT */
-
-    .neo-switch input:checked + .neo-track .neo-text{
-
-        color:white;
-
-    }
-
-    /* OFF */
-
-    .neo-switch input:not(:checked) + .neo-track .neo-text::before{
-
-        content:"OFF";
-
-    }
-
-    /* ON */
-
-    .neo-switch input:checked + .neo-track .neo-text::before{
-
-        content:"ON";
-
-    }
-
-    /* sembunyikan text asli */
-
-    .neo-text{
-
-        font-size:0;
-
-    }
-
-    /* Hover */
-
-    .neo-switch:hover .neo-thumb{
-
-        transform:scale(1.05);
-
-    }
-
-    .neo-switch input:checked + .neo-track .neo-thumb{
-
-        transform:translateX(46px);
-
-    }
-
-    .neo-switch input:checked:hover + .neo-track .neo-thumb{
-
-        transform:translateX(46px) scale(1.05);
-
-    }
+}

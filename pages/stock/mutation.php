@@ -201,8 +201,8 @@ include '../../sessions/session.php';
                     paginate: {
                         first: "Awal",
                         last: "Akhir",
-                        next: "�",
-                        previous: "�"
+                        next: "→",
+                        previous: "←"
                     }
                 }
             });
