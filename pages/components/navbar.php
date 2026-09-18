@@ -10,6 +10,19 @@ if (!defined('BASE_URL')) {
 
 <nav class="premium-navbar">
 
+    <!-- Twinkling Stars Background -->
+    <div class="premium-navbar-stars" aria-hidden="true">
+        <?php
+            for ($i = 0; $i < 28; $i++) {
+                $t = 5 + ($i * 7) % 82;
+                $l = 5 + ($i * 13) % 88;
+                $s = 2 + ($i % 3);
+                $d = ($i % 10) * 0.3 + (($i * 5) % 9) * 0.08;
+                echo '<span class="star" style="top:' . $t . '%;left:' . $l . '%;width:' . $s . 'px;height:' . $s . 'px;--d:' . round($d, 2) . 's;"></span>';
+            }
+        ?>
+    </div>
+
     <div class="premium-brand">
         <div class="brand-content">
             <h4>Dashboard</h4>

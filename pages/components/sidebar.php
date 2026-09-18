@@ -51,6 +51,43 @@
 
 <!-- Main Collapsible Sidebar -->
 <div class="sidebar" id="sidebarMenu">
+    <!-- Meteor Shower Background -->
+    <div class="sidebar-meteors" aria-hidden="true">
+        <span class="meteor"></span>
+        <span class="meteor"></span>
+        <span class="meteor"></span>
+        <span class="meteor"></span>
+        <span class="meteor"></span>
+    </div>
+
+    <!-- Scroll Parallax Layers -->
+    <div class="sidebar-parallax" aria-hidden="true">
+        <div class="plx-depth plx-far">
+            <span class="plx-glow"></span>
+            <span class="pstar" style="top:16%;left:12%;--s:1.5px;--d:.2s"></span>
+            <span class="pstar" style="top:26%;left:78%;--s:2px;--d:1.1s"></span>
+            <span class="pstar" style="top:44%;left:20%;--s:1.5px;--d:1.8s"></span>
+            <span class="pstar" style="top:56%;left:85%;--s:2px;--d:.6s"></span>
+            <span class="pstar" style="top:72%;left:38%;--s:1.5px;--d:2.3s"></span>
+        </div>
+        <div class="plx-depth plx-mid">
+            <span class="plx-moon" style="top:30%;left:58%"></span>
+            <span class="pstar" style="top:12%;left:34%;--s:2.5px;--d:0s"></span>
+            <span class="pstar" style="top:22%;left:90%;--s:2px;--d:1.4s"></span>
+            <span class="pstar" style="top:38%;left:8%;--s:2.5px;--d:2.1s"></span>
+            <span class="pstar" style="top:52%;left:64%;--s:2px;--d:.8s"></span>
+            <span class="pstar" style="top:68%;left:26%;--s:2.5px;--d:1.7s"></span>
+            <span class="pstar" style="top:82%;left:72%;--s:2px;--d:2.6s"></span>
+        </div>
+        <div class="plx-depth plx-near">
+            <span class="pstar" style="top:20%;left:48%;--s:4px;--d:0s"></span>
+            <span class="pstar" style="top:34%;left:14%;--s:3px;--d:1.2s"></span>
+            <span class="pstar" style="top:50%;left:80%;--s:4px;--d:2s"></span>
+            <span class="pstar" style="top:62%;left:40%;--s:3px;--d:.5s"></span>
+            <span class="pstar" style="top:76%;left:88%;--s:3.5px;--d:1.6s"></span>
+        </div>
+    </div>
+
     <!-- Header -->
     <div class="sidebar-header">
         <a href="<?php echo BASE_URL; ?>/pages/dashboard.php" class="sidebar-logo">
@@ -313,6 +350,15 @@
             }
         }
 
+        // Staggered entrance animation (first load only, once per session)
+        if (menuContainer && sessionStorage.getItem('sidebar_animate_in') !== '1') {
+            menuContainer.querySelectorAll(':scope > ul > li').forEach(function(item, index) {
+                item.style.setProperty('--i', index);
+            });
+            sidebar.classList.add('animate-in');
+            sessionStorage.setItem('sidebar_animate_in', '1');
+        }
+
         // Auto Scroll to Active Menu Item
         const activeItem = sidebar.querySelector('.nav-item.active');
         if (activeItem && menuContainer) {
@@ -375,6 +421,41 @@
             menuContainer.addEventListener('scroll', function() {
                 if (tooltip) tooltip.classList.remove('show');
             });
+        }
+
+        // Scroll Parallax Background (GPU-only, single CSS var per frame)
+        if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+            let targetY = 0, currentY = 0, rafId = null;
+
+            // Konten ter-scroll di dalam .content (bukan window) — ambil nilai terbesar
+            const scrollEl = document.querySelector('.content');
+
+            function getScrollTop() {
+                const c = scrollEl ? scrollEl.scrollTop || 0 : 0;
+                const w = window.pageYOffset || document.documentElement.scrollTop || 0;
+                return Math.max(c, w);
+            }
+
+            function parallaxFrame() {
+                currentY += (targetY - currentY) * 0.08;
+                sidebar.style.setProperty('--py', Math.round(currentY * 10) / 10 + 'px');
+                rafId = null;
+                if (Math.abs(targetY - currentY) > 0.5) {
+                    rafId = requestAnimationFrame(parallaxFrame);
+                }
+            }
+
+            function parallaxScroll() {
+                targetY = getScrollTop();
+                if (rafId === null) {
+                    rafId = requestAnimationFrame(parallaxFrame);
+                }
+            }
+
+            document.addEventListener('scroll', parallaxScroll, { passive: true, capture: true });
+            window.addEventListener('scroll', parallaxScroll, { passive: true });
+            window.addEventListener('resize', parallaxScroll);
+            parallaxScroll();
         }
     });
 </script>

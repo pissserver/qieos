@@ -401,6 +401,37 @@ PREMIUM NAVBAR V3
     50% { opacity: 1; transform: scale(1.08); }
 }
 
+/* TWINKLING STARS */
+.premium-navbar-stars {
+    position: absolute;
+    inset: 0;
+    border-radius: 24px;
+    overflow: hidden;
+    pointer-events: none;
+    z-index: 0;
+}
+
+.premium-navbar-stars .star {
+    position: absolute;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 0 6px rgba(180, 200, 255, 0.9);
+    opacity: 0.12;
+    animation: starTwinkle 2.6s ease-in-out infinite;
+    animation-delay: var(--d, 0s);
+}
+
+@keyframes starTwinkle {
+    0%, 100% { opacity: 0.12; transform: scale(0.75); }
+    50% { opacity: 1; transform: scale(1.2); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .premium-navbar-stars .star {
+        animation: none !important;
+    }
+}
+
 .premium-brand,
 .premium-actions {
     position: relative;
