@@ -446,6 +446,11 @@
             }
 
             function parallaxScroll() {
+                // Sidebar tersembunyi di mobile → tidak perlu hitung parallax
+                if (window.innerWidth < 992 && !sidebar.classList.contains('show')) {
+                    currentY = 0;
+                    return;
+                }
                 targetY = getScrollTop();
                 if (rafId === null) {
                     rafId = requestAnimationFrame(parallaxFrame);

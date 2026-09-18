@@ -3,9 +3,6 @@ if (!defined('BASE_URL')) {
     require_once __DIR__ . '/../../script/connection.php';
 }
 ?>
-<script>
-    const BASE_URL = '<?php echo BASE_URL; ?>';
-</script>
 <link rel="stylesheet" href="<?php echo BASE_URL; ?>/css/pages/navbar.css?v=<?php echo filemtime(__DIR__ . '/../../css/pages/navbar.css'); ?>">
 
 <nav class="premium-navbar">
@@ -17,8 +14,8 @@ if (!defined('BASE_URL')) {
                 $t = 5 + ($i * 7) % 82;
                 $l = 5 + ($i * 13) % 88;
                 $s = 2 + ($i % 3);
-                $d = ($i % 10) * 0.3 + (($i * 5) % 9) * 0.08;
-                echo '<span class="star" style="top:' . $t . '%;left:' . $l . '%;width:' . $s . 'px;height:' . $s . 'px;--d:' . round($d, 2) . 's;"></span>';
+                $starDelay = ($i % 10) * 0.3 + (($i * 5) % 9) * 0.08;
+                echo '<span class="star" style="top:' . $t . '%;left:' . $l . '%;width:' . $s . 'px;height:' . $s . 'px;--d:' . round($starDelay, 2) . 's;"></span>';
             }
         ?>
     </div>
@@ -466,8 +463,8 @@ if (!defined('BASE_URL')) {
 <div class="modal fade" id="cartModal" tabindex="-1">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
-            <div class="modal-header" style="background: linear-gradient(45deg,#6366f1,#8b5cf6); color:white;">
-                <h5 class="mb-0 text-white"><i class="fas fa-shopping-cart"></i>&nbsp; Keranjang</h5>
+            <div class="modal-header cart-modal-header">
+                <h5 class="mb-0 cart-modal-title"><i class="fas fa-shopping-cart"></i> Keranjang</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
 
@@ -832,8 +829,8 @@ if (!defined('BASE_URL')) {
             });
     }
 
-    // jalan tiap 1 detik
-    setInterval(updateOmzet, 3000);
+    // jalan tiap 30 detik (ringan untuk mobile)
+    setInterval(updateOmzet, 30000);
 
     // pertama kali load
     updateOmzet();
@@ -872,6 +869,9 @@ if (!defined('BASE_URL')) {
 
 <script>
 (function(){
+    // Screensaver di-nonaktifkan di HP kecil (hemat baterai & GPU)
+    if (window.innerWidth < 768 && window.matchMedia('(hover: none)').matches) { return; }
+
     var userName = '<?php echo addslashes($user["fullname"] ? $user["fullname"] : $user["username"]); ?>';
 
     var ss = document.createElement('div');

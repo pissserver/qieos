@@ -152,7 +152,7 @@ $hid = $isAdditional ? ' style="display:none"' : '';
             <button type="button" class="act-btn act-edit" id="btnToggleEdit">
                 <i class="fas fa-pen"></i> Edit Produk
             </button>
-            <button type="button" class="act-btn act-delete" id="btnDeleteProduct" data-id="<?= $d['id'] ?>">
+            <button type="button" class="act-btn act-delete" id="btnDeleteProduct" data-id="<?= (int)$d['id'] ?>">
                 <i class="fas fa-trash"></i> Hapus
             </button>
         </div>
@@ -245,7 +245,7 @@ $hid = $isAdditional ? ' style="display:none"' : '';
             </div>
 
         <form id="editProductForm" enctype="multipart/form-data">
-            <input type="hidden" name="id" value="<?= $d['id'] ?>">
+            <input type="hidden" name="id" value="<?= (int)$d['id'] ?>">
 
             <div class="row">
                 <div class="col-md-6 mb-3">
@@ -770,7 +770,7 @@ document.getElementById('editProductForm').addEventListener('submit', function(e
 
 // Delete action
 document.getElementById('btnDeleteProduct').addEventListener('click', function(){
-    var id = this.getAttribute('data-id') || <?= $d['id'] ?>;
+    var id = this.getAttribute('data-id') || <?= (int)$d['id'] ?>;
     var nameEl = document.getElementById('heroName');
     var name = nameEl ? nameEl.textContent : 'produk ini';
 

@@ -86,7 +86,7 @@
     align-items: center;
     gap: 5px;
     line-height: 1;
-    backdrop-filter: blur(12px);
+    backdrop-filter: blur(8px);
     border: 1px solid rgba(255, 255, 255, .15);
     background: rgba(0, 0, 0, .35);
     color: #fff;
@@ -640,7 +640,7 @@
     padding: 12px 14px;
     border-radius: 20px;
     background: rgba(255, 255, 255, .8);
-    backdrop-filter: blur(18px);
+    backdrop-filter: blur(12px);
     border: 1px solid rgba(255, 255, 255, .5);
     box-shadow: 0 8px 28px rgba(15, 23, 42, .06), inset 0 1px 0 rgba(255, 255, 255, .9);
 }

@@ -75,8 +75,8 @@ body{font-family:'Inter',system-ui,-apple-system,sans-serif}
 .sc.sc-am{background:linear-gradient(135deg,rgba(245,158,11,.1) 0%,rgba(245,158,11,.03) 50%,var(--q-bg-card) 100%);border-color:rgba(245,158,11,.15);box-shadow:0 8px 32px rgba(245,158,11,.08)}
 .sc.sc-am:hover{box-shadow:0 20px 60px rgba(245,158,11,.18),0 0 0 1px rgba(245,158,11,.25);border-color:rgba(245,158,11,.3)}
 
-.sc .sc-glow{position:absolute;width:150px;height:150px;border-radius:50%;filter:blur(65px);opacity:.1;transition:all .5s;pointer-events:none;animation:glowPulse 3s ease infinite}
-.sc:hover .sc-glow{opacity:.25;width:180px;height:180px}
+.sc .sc-glow{position:absolute;width:150px;height:150px;border-radius:50%;background:radial-gradient(circle,rgba(129,140,248,.55),rgba(129,140,248,0) 70%);opacity:.12;transition:opacity .5s,transform .5s;pointer-events:none;animation:glowPulse 3s ease infinite}
+.sc:hover .sc-glow{opacity:.25;transform:scale(1.2)}
 
 .sc .sc-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px}
 .sc .sc-ic{width:56px;height:56px;border-radius:18px;display:flex;align-items:center;justify-content:center;transition:all .35s;position:relative}

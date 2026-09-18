@@ -16,7 +16,7 @@
         border-radius:24px;
 
         background:rgba(255,255,255,.8);
-        backdrop-filter:blur(18px);
+        backdrop-filter:blur(10px);
 
         border:1px solid rgba(255,255,255,.5);
 
@@ -241,7 +241,7 @@
 
         overflow:hidden;
 
-        backdrop-filter:blur(25px);
+        backdrop-filter:blur(14px);
 
         background:
             linear-gradient(
@@ -267,11 +267,13 @@
 
         border-radius:50%;
 
-        filter:blur(60px);
-
         opacity:.18;
 
         pointer-events:none;
+
+        background:radial-gradient(circle,currentColor,transparent 70%);
+
+
     }
 
     .circle-1{
@@ -279,7 +281,7 @@
         width:220px;
         height:220px;
 
-        background:#6366f1;
+        color:#6366f1;
 
         top:-80px;
         left:-80px;
@@ -290,7 +292,7 @@
         width:250px;
         height:250px;
 
-        background:#ec4899;
+        color:#ec4899;
 
         right:-100px;
         bottom:-100px;
