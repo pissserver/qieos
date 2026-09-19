@@ -46,7 +46,19 @@ if (!defined('BASE_URL')) {
             </span>
 
         </div>
-        
+
+        <!-- CHAT -->
+        <a
+            class="premium-action-btn chat-nav-btn"
+            href="<?php echo BASE_URL; ?>/pages/chat/chat.php"
+            id="chatNavBtn"
+            aria-label="Chat">
+
+            <i class="fas fa-comments"></i>
+
+            <span class="cart-badge chat-unread-badge d-none" id="chatBadge">0</span>
+        </a>
+
         <?php if ($user['role'] == 'developer' || $user['role'] == 'staff kasir') { ?>
         
         <!-- CART -->

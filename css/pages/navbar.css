@@ -751,6 +751,12 @@ PREMIUM NAVBAR V3
         justify-content:center;
     }
 
+    /* Ikon chat tidak dipakai lagi di navbar saat mobile */
+    .chat-nav-btn,
+    #chatNavBtn{
+        display: none !important;
+    }
+
 }
 
 @media (max-width:576px){

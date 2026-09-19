@@ -617,6 +617,11 @@
     border-bottom: 1px solid rgba(99, 102, 241, 0.3);
     padding: 0.75rem 1rem;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+
+    /* Selalu di atas konten agar tombol (chat, horn, dll) bisa diklik */
+    position: sticky;
+    top: 0;
+    z-index: 1030;
 }
 
 .mobile-user-card {

@@ -39,6 +39,10 @@
             <i class="fas fa-bullhorn"></i>
             <span style="position:absolute;top:-3px;right:-3px;background:#ef4444;color:#fff;font-size:7px;font-weight:700;padding:2px 4px;border-radius:4px;">NEW</span>
         </button>
+        <a href="<?php echo BASE_URL; ?>/pages/chat/chat.php" id="chatNavBtnMobile" class="mobile-nav-btn" aria-label="Chat" style="width:38px;height:38px;border-radius:10px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.1);color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:14px;position:relative;text-decoration:none;">
+            <i class="fas fa-comments"></i>
+            <span class="cart-badge chat-unread-badge d-none" style="min-width:16px;height:16px;font-size:9px;padding:2px 4px;top:-4px;right:-4px;">0</span>
+        </a>
         <button
             class="navbar-toggler"
             type="button"
