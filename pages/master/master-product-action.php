@@ -79,12 +79,14 @@ if($action === 'store'){
     $code         = mysqli_real_escape_string($conn, trim(isset($_POST['code']) ? $_POST['code'] : ''));
     $name         = mysqli_real_escape_string($conn, trim(isset($_POST['name']) ? $_POST['name'] : ''));
     $category     = mysqli_real_escape_string($conn, trim(isset($_POST['category']) ? $_POST['category'] : ''));
-    $price        = isset($_POST['price']) ? (int)$_POST['price'] : 0;
+    $priceRaw     = isset($_POST['price']) ? $_POST['price'] : '';
+    $price        = $priceRaw === '' ? -1 : (int)$priceRaw;
     $unit         = mysqli_real_escape_string($conn, trim(isset($_POST['unit']) ? $_POST['unit'] : ''));
     $lowStock     = isset($_POST['low_stock']) && $_POST['low_stock'] !== '' ? max(0, (int)$_POST['low_stock']) : get_low_stock_default($conn);
     $supplierIds  = normalizeSupplierIds(isset($_POST['supplier_id']) ? $_POST['supplier_id'] : '');
 
-    if($code === '' || $name === '' || $category === '' || $price <= 0){
+    // Harga 0 rupiah diperbolehkan (produk gratisan); hanya nilai negatif yang ditolak
+    if($code === '' || $name === '' || $category === '' || $price < 0){
         echo json_encode(['status'=>'error', 'message'=>'Semua field wajib diisi']);
         exit;
     }
@@ -135,13 +137,15 @@ if($action === 'update'){
     $code         = mysqli_real_escape_string($conn, trim(isset($_POST['code']) ? $_POST['code'] : ''));
     $name         = mysqli_real_escape_string($conn, trim(isset($_POST['name']) ? $_POST['name'] : ''));
     $category     = mysqli_real_escape_string($conn, trim(isset($_POST['category']) ? $_POST['category'] : ''));
-    $price        = isset($_POST['price']) ? (int)$_POST['price'] : 0;
+    $priceRaw     = isset($_POST['price']) ? $_POST['price'] : '';
+    $price        = $priceRaw === '' ? -1 : (int)$priceRaw;
     $unit         = mysqli_real_escape_string($conn, trim(isset($_POST['unit']) ? $_POST['unit'] : ''));
     $lowStock     = isset($_POST['low_stock']) && $_POST['low_stock'] !== '' ? max(0, (int)$_POST['low_stock']) : get_low_stock_default($conn);
     $oldPhoto     = isset($_POST['old_photo']) ? $_POST['old_photo'] : '';
     $supplierIds  = normalizeSupplierIds(isset($_POST['supplier_id']) ? $_POST['supplier_id'] : '');
 
-    if($id <= 0 || $code === '' || $name === '' || $category === '' || $price <= 0){
+    // Harga 0 rupiah diperbolehkan (produk gratisan); hanya nilai negatif yang ditolak
+    if($id <= 0 || $code === '' || $name === '' || $category === '' || $price < 0){
         echo json_encode(['status'=>'error', 'message'=>'Semua field wajib diisi']);
         exit;
     }

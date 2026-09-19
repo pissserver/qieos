@@ -73,6 +73,23 @@
     transform: scale(1.05)
 }
 
+/* NO PHOTO (produk tanpa foto / racikan) */
+.product-img-empty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+    color: #fbbf24;
+    font-size: 52px;
+}
+.product-img-empty i {
+    filter: drop-shadow(0 6px 12px rgba(0, 0, 0, .45));
+    transition: transform .3s ease;
+}
+.product-card:hover .product-img-empty i {
+    transform: scale(1.12);
+}
+
 /* BADGES - IDENTICAL DESIGN */
 .stock-badge,
 .price-floating {
@@ -419,11 +436,23 @@
         width: 100%;
         gap: 6px;
         padding: 5px 8px;
+        min-height: 32px;
         border-radius: 8px;
-        background: rgba(0, 0, 0, .55);
-        backdrop-filter: blur(14px);
-        -webkit-backdrop-filter: blur(14px);
+        background: rgba(2, 6, 23, .82);
         border: 1px solid rgba(255, 255, 255, .1);
+    }
+
+    /* Mobile: matikan backdrop-filter biar scroll nggak patah-patah */
+    .card-name-glass,
+    .stock-badge,
+    .price-floating {
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+    }
+
+    .stock-badge,
+    .price-floating {
+        background: rgba(2, 6, 23, .78);
     }
 
     .card-name-text {

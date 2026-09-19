@@ -12,6 +12,7 @@ include __DIR__ . '/../components/data/stock-status.php';
 
     <link rel="stylesheet" href="<?php echo BASE_URL; ?>/css/pages/master-product.css?v=<?= filemtime(__DIR__ . '/../../css/pages/master-product.css') ?>">
     <link rel="stylesheet" href="<?php echo BASE_URL; ?>/css/pages/master-product-detail.css?v=<?= filemtime(__DIR__ . '/../../css/pages/master-product-detail.css') ?>">
+    <link rel="stylesheet" href="<?php echo BASE_URL; ?>/css/pages/master-combine.css?v=<?= filemtime(__DIR__ . '/../../css/pages/master-combine.css') ?>">
 </head>
 
 <body>
@@ -73,6 +74,44 @@ include __DIR__ . '/../components/data/stock-status.php';
         </div>
     </div>
 
+    <!-- RACIKAN / COMBINE PRODUK -->
+    <div class="row">
+        <div class="col-md-12 mb-5">
+            <div class="section-card mb-4 combine-panel">
+                <div class="panel-header panel-primary combine-header">
+                    <div class="panel-left">
+                        <div class="panel-icon">
+                            <i class="fas fa-blender"></i>
+                        </div>
+
+                        <div>
+                            <div class="panel-title">
+                                Racikan / Combine Produk
+                            </div>
+                            <div class="panel-subtitle">
+                                Gabungkan beberapa produk jadi satu paket, harga total dihitung otomatis dari tiap produk
+                            </div>
+                        </div>
+                    </div>
+
+                    <button
+                        type="button"
+                        class="btn btn-stock-global js-add-combine"
+                        id="btnAddCombine">
+                        <i class="fas fa-blender me-2"></i>
+                        Tambah Racikan
+                    </button>
+                </div>
+
+                <div class="mt-4 px-4 combine-body" id="combineContent">
+                    <div class="text-center py-4 text-secondary">
+                        <i class="fas fa-spinner fa-spin"></i> Memuat racikan...
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Add MODAL -->
     <div class="modal fade" id="addProductModal" tabindex="-1">
         <div class="modal-dialog modal-xl modal-dialog-centered">
@@ -98,6 +137,35 @@ include __DIR__ . '/../components/data/stock-status.php';
                 </div>
 
                 <div class="mt-2 px-5" id="addProductContent"></div>
+            </div>
+        </div>
+    </div>
+
+<!-- COMBINE MODAL -->
+    <div class="modal fade" id="combineModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content stock-panel border-0">
+
+                <div class="panel-header panel-primary my-3 mx-3">
+                    <div class="panel-left">
+                        <div class="panel-icon">
+                            <i class="fas fa-blender"></i>
+                        </div>
+
+                        <div>
+                            <div class="panel-title" id="combineModalTitle">
+                                Tambah Racikan
+                            </div>
+                            <div class="panel-subtitle">
+                                Nama paket + pilih produk bahan, total harga dihitung otomatis
+                            </div>
+                        </div>
+                    </div>
+
+                    <button class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Tutup"></button>
+                </div>
+
+                <div class="mt-2 px-5" id="combineFormContent"></div>
             </div>
         </div>
     </div>
@@ -221,6 +289,7 @@ include __DIR__ . '/../components/data/stock-status.php';
 
     $(document).ready(function(){
         loadProductTable();
+        loadCombineContent();
     });
 </script>
 
@@ -438,6 +507,177 @@ include __DIR__ . '/../components/data/stock-status.php';
             QToast('Error', 'Gagal menyimpan pengaturan', 'error');
         });
     });
+</script>
+
+<script>
+// ===== RACIKAN / COMBINE PRODUK =====
+function escHtml(s){
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function rupiahN(n){ return 'Rp ' + (Number(n) || 0).toLocaleString('id-ID'); }
+
+function loadCombineContent(){
+    fetch('master-combine-content.php')
+    .then(res => res.text())
+    .then(html => {
+        document.getElementById('combineContent').innerHTML = html;
+    })
+    .catch(() => {});
+}
+
+var COMBINE = { products: [], items: null, totalEl: null };
+
+function priceOf(pid){
+    for(var i = 0; i < COMBINE.products.length; i++){
+        if(String(COMBINE.products[i].id) === String(pid)) return Number(COMBINE.products[i].sell_price) || 0;
+    }
+    return 0;
+}
+
+function combineRowHtml(selectedId){
+    var opts = '<option value="">Pilih produk...</option>';
+    for(var i = 0; i < COMBINE.products.length; i++){
+        var p = COMBINE.products[i];
+        var sel = String(p.id) === String(selectedId) ? ' selected' : '';
+        var label = p.name + (p.code ? ' (' + p.code + ')' : '') + ' \u2014 ' + rupiahN(p.sell_price) + (p.unit ? ' / ' + p.unit : '');
+        opts += '<option value="' + p.id + '"' + sel + '>' + escHtml(label) + '</option>';
+    }
+    return '<div class="combine-item-row">' +
+        '<select name="product_id[]" class="form-input" required>' + opts + '</select>' +
+        '<span class="cb-row-price">' + rupiahN(0) + '</span>' +
+        '<button type="button" class="cb-row-remove" title="Hapus bahan" aria-label="Hapus bahan"><i class="fas fa-times"></i></button>' +
+    '</div>';
+}
+
+function addCombineRow(selectedId){
+    if(!COMBINE.items) return;
+    var wrap = document.createElement('div');
+    wrap.innerHTML = combineRowHtml(selectedId);
+    COMBINE.items.appendChild(wrap.firstChild);
+    recomputeCombineTotal();
+}
+
+function recomputeCombineTotal(){
+    if(!COMBINE.items) return;
+    var rows = COMBINE.items.querySelectorAll('.combine-item-row');
+    var total = 0;
+    rows.forEach(function(r){
+        var sel = r.querySelector('select');
+        var unit = priceOf(sel.value);
+        total += unit;
+        var pe = r.querySelector('.cb-row-price');
+        if(pe) pe.textContent = rupiahN(unit);
+    });
+    if(COMBINE.totalEl) COMBINE.totalEl.textContent = rupiahN(total);
+    var cnt = document.getElementById('combineCount');
+    if(cnt) cnt.textContent = rows.length + ' bahan';
+}
+
+function initCombineForm(){
+    var dataEl = document.getElementById('combineProductData');
+    if(!dataEl) return;
+    COMBINE.products = JSON.parse(dataEl.getAttribute('data-products') || '[]');
+    COMBINE.items = document.getElementById('combineItems');
+    COMBINE.totalEl = document.getElementById('combineTotalVal');
+    var nameIn = document.getElementById('combineNameInput');
+    if(nameIn) nameIn.value = '';
+    if(COMBINE.items) COMBINE.items.innerHTML = '';
+
+    // Mode edit: prefill nama + bahan yang sudah dipilih
+    var comboJson = JSON.parse(dataEl.getAttribute('data-combo') || 'null');
+    if(comboJson){
+        if(nameIn) nameIn.value = comboJson.name;
+        var pids = comboJson.items || [];
+        if(COMBINE.items && pids.length > 0){
+            pids.forEach(function(pid){ addCombineRow(String(pid)); });
+        } else {
+            addCombineRow('');
+        }
+    } else {
+        addCombineRow('');
+    }
+}
+
+function openCombineModal(id){
+    var url = 'master-combine-form.php';
+    if(id) url += '?id=' + encodeURIComponent(id);
+
+    var titleEl = document.getElementById('combineModalTitle');
+    if(titleEl) titleEl.textContent = id ? 'Edit Racikan' : 'Tambah Racikan';
+
+    $('#combineModal').modal('show');
+    document.getElementById('combineFormContent').innerHTML =
+        '<div class="text-center py-5"><i class="fas fa-spinner fa-spin fa-2x text-secondary"></i></div>';
+    fetch(url)
+    .then(res => res.text())
+    .then(html => {
+        document.getElementById('combineFormContent').innerHTML = html;
+        initCombineForm();
+    });
+}
+
+$(document).on('click', '.js-add-combine', function(){ openCombineModal(); });
+$(document).on('click', '.combine-edit', function(){ openCombineModal(this.getAttribute('data-id')); });
+$(document).on('click', '#combineItems .cb-row-remove', function(){
+    this.closest('.combine-item-row').remove();
+    recomputeCombineTotal();
+});
+$(document).on('click', '#btnCombineAdd', function(){ addCombineRow(''); });
+$(document).on('change', '#combineItems select', function(){
+    recomputeCombineTotal();
+});
+
+$(document).on('submit', '#combineForm', function(e){
+    e.preventDefault();
+    var formData = new FormData(this);
+    var idIn = document.getElementById('combineIdInput');
+    var action = idIn ? 'edit' : 'store';
+    var titleEl = document.getElementById('combineModalTitle');
+    if(titleEl) titleEl.textContent = idIn ? 'Edit Racikan' : 'Tambah Racikan';
+    fetch('master-combine-action.php?action=' + action, {
+        method: 'POST',
+        body: formData
+    })
+    .then(res => res.json())
+    .then(res => {
+        if(res.status === 'success'){
+            QToast('Berhasil', res.message, 'success');
+            $('#combineModal').modal('hide');
+            loadCombineContent();
+        } else {
+            QToast('Gagal', res.message || 'Terjadi kesalahan', 'error');
+        }
+    })
+    .catch(() => { QToast('Error', 'Gagal menyimpan racikan', 'error'); });
+});
+
+$(document).on('click', '.combine-delete', function(){
+    var id = this.getAttribute('data-id');
+    var card = document.getElementById('combineCard' + id);
+    var name = card ? card.querySelector('.combine-card-name').textContent : 'racikan ini';
+    QConfirm('Hapus Racikan?', 'Racikan "' + name + '" akan dihapus.', {
+        confirmText: 'Hapus',
+        icon: 'fa-trash-can',
+        confirmClass: 'q-confirm-btn-danger',
+        iconClass: 'q-confirm-icon-danger'
+    }).then(function(ok){
+        if(!ok) return;
+        fetch('master-combine-action.php?action=destroy', {
+            method: 'POST',
+            body: new URLSearchParams({ id: id })
+        })
+        .then(res => res.json())
+        .then(res => {
+            if(res.status === 'success'){
+                QToast('Terhapus', 'Racikan berhasil dihapus', 'success');
+                loadCombineContent();
+            } else {
+                QToast('Gagal', res.message || 'Terjadi kesalahan', 'error');
+            }
+        });
+    });
+});
 </script>
 
 </body>

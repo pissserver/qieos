@@ -254,9 +254,14 @@ include '../../sessions/session.php';
                         items.forEach((item) => {
                             const subtotal = item.qty * item.price;
                             total += subtotal;
+
+                            const thumb = item.photo
+                                ? `<img src="../../assets/img/products/${item.photo}" alt="${item.product_name}">`
+                                : `<div class="order-item-img order-item-img-empty"><i class="fas fa-box-open"></i></div>`;
+
                             html += `
                     <div class="order-item">
-                    <img src="../../assets/img/products/${item.photo}" alt="${item.product_name}">
+                    ${thumb}
                     <div class="order-item-info">
                         <strong class="text-capitalize">${item.product_name}</strong>
                         <div class="order-item-badges">

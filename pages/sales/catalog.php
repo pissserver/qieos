@@ -5,6 +5,37 @@ $query = mysqli_query($conn,
             WHERE (p.catalog = 'active' OR p.category = 'additional') AND p.deleted_at IS NULL
             GROUP BY p.id ORDER BY p.starred DESC, p.name ASC"
         );
+
+$items = [];
+if($query){
+    while($row = mysqli_fetch_assoc($query)){
+        $items[] = $row;
+    }
+}
+
+// Gabungkan Racikan / Combine ke katalog (bukan produk fisik: tanpa foto & tanpa stok)
+$cq = mysqli_query($conn,
+    "SELECT c.id, c.name, COALESCE(SUM(ci.price * ci.qty), 0) AS total
+     FROM product_combos c
+     LEFT JOIN product_combo_items ci ON ci.combo_id = c.id
+     WHERE c.deleted_at IS NULL
+     GROUP BY c.id
+     ORDER BY c.id DESC"
+);
+if($cq){
+    while($row = mysqli_fetch_assoc($cq)){
+        $items[] = [
+            'id'         => 'c' . $row['id'],
+            'name'       => $row['name'],
+            'sell_price' => $row['total'],
+            'category'   => 'racikan',
+            'photo'      => '',
+            'starred'    => 0,
+            'stock'      => 0,
+            'is_combo'   => true,
+        ];
+    }
+}
 ?>
 
 <!doctype html>
@@ -65,7 +96,8 @@ $query = mysqli_query($conn,
                             <option value="minuman">🧋 Minuman</option>
                             <option value="jajanan">🍪 Jajanan</option>
                             <option value="pelengkap">🥄 Pelengkap</option>
-                            <option value="additional">➕ Tambahan</option>
+                            <option value="racikan">🍱 Racikan</option>
+                            <option value="additional">➕ Additional</option>
 
                         </select>
 
@@ -98,8 +130,8 @@ $query = mysqli_query($conn,
 
             <div id="product-list" class="product-grid">
 
-                <?php $index = 0; ?>
-                <?php while ($row = mysqli_fetch_assoc($query)): ?>
+                <?php $index = 0; $isCombo = false; $catName = ''; ?>
+                <?php foreach($items as $row): $isCombo = !empty($row['is_combo']); $catName = strtolower($row['category']); ?>
 
                 <div class="product-item"
                     data-index="<?php echo $index++; ?>"
@@ -107,19 +139,32 @@ $query = mysqli_query($conn,
                     data-id="<?php echo $row['id']; ?>"
                     data-category="<?php echo $row['category']; ?>"
                     data-price="<?php echo $row['sell_price']; ?>"
-                    data-star="<?php echo $row['starred']; ?>">
+                    data-star="<?php echo isset($row['starred']) ? $row['starred'] : 0; ?>">
 
                     <div class="product-card">
 
                         <div class="product-image-wrap">
 
-                            <img src="../../assets/img/products/<?php echo $row['photo']; ?>"
-                                class="product-img">
+                            <?php if(!empty($row['photo'])): ?>
+                                <img src="../../assets/img/products/<?php echo $row['photo']; ?>"
+                                    class="product-img" loading="lazy" decoding="async">
+                            <?php else: ?>
+                                <div class="product-img product-img-empty">
+                                    <i class="fas fa-box-open"></i>
+                                </div>
+                            <?php endif; ?>
 
+                            <?php if(!$isCombo): ?>
                             <div class="stock-badge" id="stock-<?php echo $row['id']; ?>">
                                 <i class="fas fa-cube"></i>
-                                <?php echo strtolower($row['category']) !== 'additional' ? $row['stock'] : 'Tanpa' ; ?> Stok
+                                <?php echo $catName !== 'additional' ? $row['stock'] : 'Tanpa' ; ?> Stok
                             </div>
+                            <?php else: ?>
+                            <div class="stock-badge">
+                                <i class="fas fa-cube"></i>
+                                Tanpa Stok
+                            </div>
+                            <?php endif; ?>
 
                             <div class="price-floating">
                                 Rp <?php echo number_format($row['sell_price'],0,',','.'); ?>
@@ -129,20 +174,24 @@ $query = mysqli_query($conn,
                             <div class="card-name-wrap">
                                 <div class="card-name-glass">
                                     <span class="card-name-text"><?php echo ucwords(strtolower($row['name'])); ?></span>
+                                    <?php if(!$isCombo): ?>
                                     <button
                                         class="card-name-star <?= $row['starred'] ? 'active' : '' ?>"
                                         onclick="event.stopPropagation();toggleStar(<?= $row['id'] ?>,this)">
                                         <i class="<?= $row['starred'] ? 'fas' : 'far' ?> fa-star"></i>
                                     </button>
+                                    <?php endif; ?>
                                 </div>
                             </div>
 
+                            <?php if(!$isCombo): ?>
                             <!-- DESKTOP: star on image -->
                             <button
                                 class="star-btn <?= $row['starred'] ? 'active' : '' ?>"
                                 onclick="toggleStar(<?= $row['id'] ?>,this)">
                                 <i class="<?= $row['starred'] ? 'fas' : 'far' ?> fa-star"></i>
                             </button>
+                            <?php endif; ?>
 
                         </div>
 
@@ -160,7 +209,7 @@ $query = mysqli_query($conn,
                             </h4>
 
                             <p class="product-desc">
-                                <?php if(strtolower($row['category']) === 'additional'): ?>
+                                <?php if($isCombo || $catName === 'additional'): ?>
                                     <i class="fas fa-circle text-secondary"></i>
                                     Tersedia
                                 <?php elseif($row['stock'] > 0): ?>
@@ -175,9 +224,9 @@ $query = mysqli_query($conn,
                             <!-- ACTION ROW: QTY + BUTTON -->
                             <div class="action-row">
 
-                                <?php if($row['stock'] > 0 || strtolower($row['category']) === 'additional'): ?>
+                                <?php if($isCombo || $row['stock'] > 0 || $catName === 'additional'): ?>
 
-                                    <?php if(strtolower($row['category']) !== 'additional'): ?>
+                                    <?php if($catName !== 'additional'): ?>
                                     <div class="qty-mini">
                                         <button class="qty-mini-btn"
                                             onclick="decreaseQty('<?php echo $row['id']; ?>')">
@@ -189,7 +238,7 @@ $query = mysqli_query($conn,
                                             id="qty-<?php echo $row['id']; ?>"
                                             value="0"
                                             class="qty-mini-input"
-                                            data-stock="<?php echo $row['stock']; ?>"
+                                            data-stock="<?php echo $isCombo ? 9999 : $row['stock']; ?>"
                                             readonly>
 
                                         <button class="qty-mini-btn qty-mini-plus"
@@ -239,15 +288,15 @@ $query = mysqli_query($conn,
                             </div>
 
                             <div class="mobile-act-row">
-                                <?php if($row['stock'] > 0 || strtolower($row['category']) === 'additional'): ?>
+                                <?php if($isCombo || $row['stock'] > 0 || $catName === 'additional'): ?>
 
-                                    <?php if(strtolower($row['category']) !== 'additional'): ?>
+                                    <?php if($catName !== 'additional'): ?>
                                     <div class="mobile-qty">
                                         <button class="mobile-qty-btn" onclick="decreaseQty('<?php echo $row['id']; ?>')">
                                             <i class="fas fa-minus"></i>
                                         </button>
                                         <input type="text" id="mqty-<?php echo $row['id']; ?>" value="0"
-                                            class="mobile-qty-val" data-stock="<?php echo $row['stock']; ?>" readonly>
+                                            class="mobile-qty-val" data-stock="<?php echo $isCombo ? 9999 : $row['stock']; ?>" readonly>
                                         <button class="mobile-qty-btn mobile-qty-plus" onclick="increaseQtyMobile('<?php echo $row['id']; ?>')">
                                             <i class="fas fa-plus"></i>
                                         </button>
@@ -279,7 +328,7 @@ $query = mysqli_query($conn,
 
                 </div>
 
-                <?php endwhile; ?>
+                <?php endforeach; ?>
 
                 <div id="empty-search" class="empty-search" style="display:none;">
                     <div class="empty-icon">
@@ -511,6 +560,9 @@ $query = mysqli_query($conn,
 
         function syncStock() {
 
+            // skip polling saat tab tidak terlihat (hemat baterai & GPU di mobile)
+            if (document.hidden) return;
+
             fetch('../components/data/get-stock.php')
                 .then(res => res.json())
                 .then(data => {
@@ -518,17 +570,17 @@ $query = mysqli_query($conn,
                     Object.keys(data).forEach(id => {
 
                         let stock = parseInt(data[id]);
-                        let card = document.querySelector(`.product-item[data-id="${id}"]`);
-
+                        let card = productCardMap.get(id);
                         if (!card) return;
 
                         let category = card.dataset.category;
                         let isAdditional = category.toLowerCase() === 'additional';
 
-                        // STOCK BADGE - skip for additional (stays "Tanpa Stok")
+                        // STOCK BADGE - hanya ditulis ulang kalau angkanya berubah
                         if (!isAdditional) {
                             let el = document.getElementById('stock-' + id);
-                            if (el) {
+                            if (el && el.dataset.v !== String(stock)) {
+                                el.dataset.v = String(stock);
                                 el.innerHTML = `
                                     <i class="fas fa-cube"></i>
                                     ${stock} Stok
@@ -536,43 +588,46 @@ $query = mysqli_query($conn,
                             }
                         }
 
-                        // CLASS STOCK - skip for additional
+                        // CLASS HABIS - hanya diputar balik kalau berubah
                         if (!isAdditional) {
                             if (stock <= 0) {
-                                card.classList.add('out-of-stock');
+                                if (!card.classList.contains('out-of-stock')) card.classList.add('out-of-stock');
                             } else {
-                                card.classList.remove('out-of-stock');
+                                if (card.classList.contains('out-of-stock')) card.classList.remove('out-of-stock');
                             }
                         }
 
-                        // STATUS TEXT
+                        // STATUS TEXT - hanya ditulis ulang kalau berubah
                         let desc = card.querySelector('.product-desc');
                         if (desc) {
-                            if (isAdditional) {
-                                // Additional: always show "Tersedia"
-                                desc.innerHTML = `
-                                    <i class="fas fa-circle text-secondary"></i>
-                                    Tersedia
-                                `;
-                            } else if (stock <= 0) {
-                                desc.innerHTML = `
-                                    <i class="fas fa-circle text-danger"></i>
-                                    Stok habis
-                                `;
-                            } else {
-                                desc.innerHTML = `
-                                    <i class="fas fa-circle text-success"></i>
-                                    Stok tersedia
-                                `;
+                            let key = isAdditional ? 'add' : (stock <= 0 ? 'out' : 'ok');
+                            if (desc.dataset.v !== key) {
+                                desc.dataset.v = key;
+                                if (isAdditional) {
+                                    desc.innerHTML = `
+                                        <i class="fas fa-circle text-secondary"></i>
+                                        Tersedia
+                                    `;
+                                } else if (stock <= 0) {
+                                    desc.innerHTML = `
+                                        <i class="fas fa-circle text-danger"></i>
+                                        Stok habis
+                                    `;
+                                } else {
+                                    desc.innerHTML = `
+                                        <i class="fas fa-circle text-success"></i>
+                                        Stok tersedia
+                                    `;
+                                }
                             }
                         }
 
-                        // UPDATE DATA STOCK INPUT - skip for additional
+                        // qty input stock
                         if (!isAdditional) {
                             let input = document.getElementById('qty-' + id);
                             if (input) {
                                 input.dataset.stock = stock;
-                                if (stock <= 0) {
+                                if (stock <= 0 && parseInt(input.value || 0) > 0) {
                                     input.value = 0;
                                 }
                             }
@@ -580,18 +635,21 @@ $query = mysqli_query($conn,
 
                     });
 
-                })
-                .catch(err => {
-                    console.error('Gagal sync stock:', err);
                 });
 
         }
 
+        // Map cepat: id -> kartu (sekali saja, bukan querySelector tiap polling)
+        const productCardMap = new Map();
+        document.querySelectorAll('.product-item').forEach(card => {
+            productCardMap.set(card.dataset.id, card);
+        });
+
         // pertama kali load
         syncStock();
 
-        // refresh tiap 3 detik
-        setInterval(syncStock, 3000);
+        // refresh lebih jarang + skip saat tab disembunyikan
+        setInterval(syncStock, 5000);
 
         // === HIGHLIGHT FROM GLOBAL SEARCH ===
         (function(){

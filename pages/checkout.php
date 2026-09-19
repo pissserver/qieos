@@ -49,23 +49,41 @@
 
     // 2️⃣ insert ke order_details
     $stmt_detail = $conn->prepare("
-        INSERT INTO order_details (order_id, product_id, qty, price, subtotal)
-        VALUES (?, ?, ?, ?, ?)
+        INSERT INTO order_details (order_id, product_id, product_combo_id, name, qty, price, subtotal)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
     ");
 
     foreach($data['cart'] as $item){
+        $isCombo  = !empty($item['type']) && $item['type'] === 'combo';
         $subtotal = $item['price'] * $item['qty'];
 
+        if($isCombo){
+            // Racikan: simpan id combo + nama, product_id NULL
+            $comboId = (int)ltrim((string)$item['id'], 'c');
+            $prodId  = null;
+            $name    = $item['name'];
+        }else{
+            // Produk biasa: product_id dipakai, product_combo_id & name NULL
+            $comboId = null;
+            $prodId  = (int)$item['id'];
+            $name    = null;
+        }
+
         $stmt_detail->bind_param(
-            "iiiii",
+            "iiisiii",
             $order_id,
-            $item['id'],
+            $prodId,
+            $comboId,
+            $name,
             $item['qty'],
             $item['price'],
             $subtotal
         );
 
         $stmt_detail->execute();
+
+        // Racikan bukan produk fisik: tidak ada pengurangan stok
+        if($isCombo) continue;
 
         $bal = mysqli_fetch_assoc(mysqli_query($conn, "
             SELECT COALESCE(SUM(qty),0) v

@@ -586,6 +586,15 @@ if (!defined('BASE_URL')) {
     // Load cart from localStorage
     let cart = JSON.parse(localStorage.getItem('cart')) || [];
 
+    // Bersihkan item lama yang photo-nya masih data-URI (ikon SVG versi lama).
+    // Foto produk asli adalah nama file, bukan data URI, sehingga aman dikosongkan
+    // agar template render memakai ikon open-box yang sama dengan katalog.
+    cart.forEach(item => {
+        if (item.photo && /^data:/.test(item.photo)) {
+            item.photo = '';
+        }
+    });
+
     let cartModalInstance = null;
 
     function openCart() {
@@ -600,6 +609,7 @@ if (!defined('BASE_URL')) {
         let qty = 1;
         let input = null;
         let isAdditional = category.toLowerCase() === 'additional';
+        let isCombo = category.toLowerCase() === 'racikan';
 
         if (!isAdditional) {
             input = document.getElementById('qty-' + id);
@@ -611,8 +621,9 @@ if (!defined('BASE_URL')) {
             }
         }
 
-        let img = btn.closest('.product-item')
-                    .querySelector('.product-img').src;
+        let imgEl = btn.closest('.product-item')
+                        .querySelector('.product-img');
+        let img = (imgEl && imgEl.tagName === 'IMG') ? imgEl.src : '';
 
         let existing = cart.find(item => item.id == id);
 
@@ -630,7 +641,8 @@ if (!defined('BASE_URL')) {
                 price,
                 qty,
                 photo: img,
-                category
+                category,
+                type: isCombo ? 'combo' : 'product'
             });
         }
 
@@ -688,12 +700,16 @@ if (!defined('BASE_URL')) {
 
             total += subtotal;
 
+            const thumb = item.photo
+                ? `<img src="${item.photo}" class="cart-img">`
+                : `<div class="cart-img cart-img-empty"><i class="fas fa-box-open"></i></div>`;
+
             html += `
                 <div class="cart-card">
 
                     <!-- LEFT -->
                     <div class="cart-left">
-                        <img src="${item.photo}" class="cart-img">
+                        ${thumb}
 
                         <div>
                             <div class="cart-title text-capitalize">${item.name}</div>
