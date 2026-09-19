@@ -257,7 +257,29 @@ switch ($action) {
         $q->execute();
         $total = (int)$q->get_result()->fetch_assoc()['total'];
 
-        echo json_encode(['total' => $total]);
+        // Pesan belum dibaca terbaru → untuk isi notifikasi device
+        $latest = null;
+        if ($total > 0) {
+            $q2 = $conn->prepare("SELECT m.id, m.sender_id, m.message, m.created_at, u.fullname AS sender_name
+                                  FROM chat_messages m
+                                  JOIN users u ON u.id = m.sender_id
+                                  WHERE m.receiver_id = ? AND m.read_at IS NULL AND m.deleted_at IS NULL
+                                  ORDER BY m.id DESC LIMIT 1");
+            $q2->bind_param('i', $me);
+            $q2->execute();
+            $row2 = $q2->get_result()->fetch_assoc();
+            if ($row2) {
+                $latest = [
+                    'id'          => (int)$row2['id'],
+                    'sender_id'   => (int)$row2['sender_id'],
+                    'sender_name' => $row2['sender_name'],
+                    'message'     => $row2['message'],
+                    'created_at'  => $row2['created_at'],
+                ];
+            }
+        }
+
+        echo json_encode(['total' => $total, 'latest' => $latest]);
         break;
     }
 

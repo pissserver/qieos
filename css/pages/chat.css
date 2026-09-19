@@ -545,6 +545,13 @@
     display: flex;
 }
 
+/* Sebelum ada kontak dipilih: tampilkan empty state penuh,
+   tanpa header percakapan dan tanpa kotak tulis */
+.chat-shell:not(.chat-open) .chat-conv-header,
+.chat-shell:not(.chat-open) .chat-composer{
+    display: none;
+}
+
 /* ---------- COMPOSER ---------- */
 .chat-composer{
     display: flex;

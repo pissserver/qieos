@@ -60,7 +60,11 @@ $current_page = 'chat.php';
             <div class="chat-body">
                 <div class="chat-messages" id="chatMessages"></div>
 
-                <div class="chat-empty" id="chatEmpty"></div>
+                <div class="chat-empty" id="chatEmpty">
+                    <div class="chat-empty-icon"><i class="fas fa-comments"></i></div>
+                    <div class="chat-empty-title">Pilih kontak untuk memulai obrolan</div>
+                    <div class="chat-empty-sub">Pilih salah satu kontak di samping untuk mulai mengirim pesan.</div>
+                </div>
             </div>
 
             <form class="chat-composer" id="chatComposer">
@@ -527,6 +531,10 @@ $current_page = 'chat.php';
         closeConvMenu();
         closeBubbleMenus();
 
+        // Respons instan: header + kontak aktif + buka panel, tanpa nunggu poll
+        setConvHeader();
+        renderContacts();
+
         // Restore dari cache → pesan langsung tampil tanpa nunggu server
         var cached = convCache[id];
         if (cached) {
@@ -536,9 +544,6 @@ $current_page = 'chat.php';
             lastId = 0;
             msgEl.innerHTML = '<div class="chat-loading"><span class="chat-loading-spin"></span><span>Memuat pesan...</span></div>';
         }
-
-        var c = contactMap[id];
-        convName.textContent = c ? c.fullname : '...';
 
         // Perbarui URL tanpa reload (deep link)
         try { history.replaceState(null, '', BASE_URL + '/pages/chat/chat.php?with=' + id); } catch (e) {}

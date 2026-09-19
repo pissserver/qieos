@@ -385,7 +385,7 @@ if (!defined('BASE_URL')) {
 })();
 </script>
 
-<!-- Chat: badge unread + notifikasi suara (polling ringan) -->
+<!-- Chat: badge unread + notifikasi device + notifikasi suara (polling ringan) -->
 <script>
 (function () {
     if (window.__chatActive) return;
@@ -394,7 +394,17 @@ if (!defined('BASE_URL')) {
     if (!badges.length) return;
 
     var lastTotal = -1;
+    var lastNotifId = 0;
     var audioCtx = null;
+    var swReg = null;
+
+    // Notifikasi butuh konteks aman (HTTPS / localhost). Lewat IP LAN tidak didukung browser.
+    var notifSupported = ('Notification' in window) && window.isSecureContext;
+
+    // Ambil service worker aktif (untuk showNotification + klik notifikasi)
+    if ('serviceWorker' in navigator && window.isSecureContext) {
+        navigator.serviceWorker.ready.then(function (reg) { swReg = reg; }).catch(function () {});
+    }
 
     function updateBadges(total) {
         for (var i = 0; i < badges.length; i++) {
@@ -413,7 +423,78 @@ if (!defined('BASE_URL')) {
         }
         if (audioCtx.state === 'suspended') audioCtx.resume();
     }
-    document.addEventListener('pointerdown', ensureAudio, { passive: true });
+
+    function askNotifyPermission() {
+        if (!notifSupported) { renderNotifyUI(); return; }
+        if (Notification.permission !== 'default') { renderNotifyUI(); return; }
+        try {
+            var p = Notification.requestPermission(function () { renderNotifyUI(); });
+            if (p && p.then) p.then(renderNotifyUI);
+        } catch (e) {}
+    }
+
+    // ---- Tombol/diagnosa notifikasi ----
+    var notifBtn = null;
+
+    function notifPillDismissed() {
+        try { return localStorage.getItem('qieos_notif_pill_dismissed') === '1'; } catch (e) { return false; }
+    }
+    function dismissNotifPill() {
+        try { localStorage.setItem('qieos_notif_pill_dismissed', '1'); } catch (e) {}
+        if (notifBtn) { notifBtn.remove(); notifBtn = null; }
+    }
+    function hideNotifPill() {
+        if (notifBtn) { notifBtn.remove(); notifBtn = null; }
+    }
+
+    function renderNotifyUI() {
+        // Lewat IP / non-secure: notifikasi memang tidak didukung, jangan tampilkan peringatan.
+        if (!notifSupported || Notification.permission === 'granted') { hideNotifPill(); return; }
+        if (notifPillDismissed()) return;
+        if (Notification.permission === 'denied') {
+            showNotifPill('Notifikasi diblokir \u2014 izinkan lewat setelan situs browser', true);
+            return;
+        }
+        showNotifPill('Aktifkan notifikasi pesan', false);
+    }
+
+    function showNotifPill(text, disabled) {
+        if (!notifBtn) {
+            notifBtn = document.createElement('div');
+            notifBtn.style.cssText = 'position:fixed;right:16px;bottom:16px;z-index:2147483000;display:flex;align-items:center;gap:8px;border-radius:999px;padding:9px 8px 9px 16px;font-family:inherit;font-size:12.5px;font-weight:700;line-height:1;color:#fff;background:linear-gradient(135deg,#6366f1,#8b5cf6);box-shadow:0 10px 24px rgba(99,102,241,.4);';
+
+            var lbl = document.createElement('span');
+            lbl.id = '__notifPillLabel';
+            var x = document.createElement('button');
+            x.type = 'button';
+            x.setAttribute('aria-label', 'Tutup');
+            x.textContent = '\u00d7';
+            x.style.cssText = 'border:0;background:transparent;color:#fff;font-size:17px;line-height:1;cursor:pointer;padding:0 4px;opacity:.85;';
+            x.onclick = dismissNotifPill;
+
+            notifBtn.appendChild(lbl);
+            notifBtn.appendChild(x);
+            document.body.appendChild(notifBtn);
+        }
+
+        var lbl = document.getElementById('__notifPillLabel');
+        lbl.textContent = text;
+        if (disabled) {
+            lbl.style.cursor = 'default';
+            lbl.onclick = null;
+            notifBtn.style.background = 'rgba(30,41,59,.94)';
+        } else {
+            lbl.style.cursor = 'pointer';
+            lbl.onclick = function () { ensureAudio(); askNotifyPermission(); };
+            notifBtn.style.background = 'linear-gradient(135deg,#6366f1,#8b5cf6)';
+        }
+    }
+
+    // Minta izin notifikasi saat interaksi pertama (harus dari user gesture)
+    document.addEventListener('pointerdown', function () {
+        ensureAudio();
+        askNotifyPermission();
+    }, { passive: true });
 
     function beep() {
         ensureAudio();
@@ -436,12 +517,53 @@ if (!defined('BASE_URL')) {
         }
     }
 
+    function notify(latest) {
+        if (!latest) return;
+        if (!notifSupported || Notification.permission !== 'granted') return;
+        if (latest.id <= lastNotifId) return;
+        lastNotifId = latest.id;
+
+        var title = 'Pesan baru dari ' + (latest.sender_name || 'Pengguna');
+        var body = latest.message || '';
+        if (body.length > 120) body = body.slice(0, 120) + '\u2026';
+
+        var url = BASE_URL + '/pages/chat/chat.php?with=' + latest.sender_id;
+        var opts = {
+            body: body,
+            icon: BASE_URL + '/assets/img/brand/qieos2.png',
+            badge: BASE_URL + '/assets/img/brand/qieos2.png',
+            tag: 'chat-' + latest.sender_id,
+            renotify: true,
+            data: { url: url }
+        };
+
+        if (swReg && swReg.showNotification) {
+            try { swReg.showNotification(title, opts).catch(function () {}); } catch (e) {}
+        } else {
+            try {
+                var n = new Notification(title, opts);
+                n.onclick = function () {
+                    window.focus();
+                    location.href = url;
+                    n.close();
+                };
+            } catch (e) {}
+        }
+    }
+
     function poll() {
         fetch(BASE_URL + '/pages/chat/chat-api.php?action=unread&_=' + Date.now())
             .then(function (r) { return r.json(); })
             .then(function (data) {
                 var total = data.total || 0;
-                if (lastTotal >= 0 && total > lastTotal && document.visibilityState !== 'hidden') beep();
+                var increased = (lastTotal >= 0 && total > lastTotal);
+                if (increased) {
+                    if (document.visibilityState !== 'hidden') beep();
+                    notify(data.latest);
+                } else if (lastNotifId === 0 && data.latest) {
+                    // Baseline awal: jangan munculkan notif untuk pesan lama
+                    lastNotifId = data.latest.id;
+                }
                 lastTotal = total;
                 updateBadges(total);
             })
@@ -449,9 +571,10 @@ if (!defined('BASE_URL')) {
     }
 
     poll();
+    renderNotifyUI();
     var timer = setInterval(poll, 3000);
     document.addEventListener('visibilitychange', function () {
-        if (document.visibilityState === 'visible') poll();
+        if (document.visibilityState === 'visible') { poll(); renderNotifyUI(); }
     });
     window.addEventListener('pagehide', function () { clearInterval(timer); });
 })();

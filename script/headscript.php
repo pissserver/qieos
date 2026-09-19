@@ -125,7 +125,7 @@ if (!defined('BASE_URL')) {
     const BASE_URL = '<?php echo BASE_URL; ?>';
     if ("serviceWorker" in navigator) {
         window.addEventListener("load", function () {
-            navigator.serviceWorker.register(BASE_URL + "/sw.js?v=4").catch(function (err) {
+            navigator.serviceWorker.register(BASE_URL + "/sw.js?v=5").catch(function (err) {
                 console.warn("SW registration failed:", err);
             });
             // Unregister old service workers
