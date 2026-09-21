@@ -119,13 +119,24 @@ if (!defined('BASE_URL')) {
             user-select:text;
         }
     }
+
+    /* ===== Warna dasar halaman — seragam di semua halaman ===== */
+    :root{
+        --q-page-bg:#DFE0E2;
+        --bs-body-bg:#DFE0E2;
+        --bs-body-bg-rgb:223, 224, 226;
+    }
+
+    html, body{
+        background-color:#DFE0E2 !important;
+    }
 </style>
 
 <script>
     const BASE_URL = '<?php echo BASE_URL; ?>';
     if ("serviceWorker" in navigator) {
         window.addEventListener("load", function () {
-            navigator.serviceWorker.register(BASE_URL + "/sw.js?v=5").catch(function (err) {
+            navigator.serviceWorker.register(BASE_URL + "/sw.js?v=6").catch(function (err) {
                 console.warn("SW registration failed:", err);
             });
             // Unregister old service workers
