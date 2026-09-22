@@ -900,9 +900,11 @@
     .catalog-hero .ch-seg{overflow-x:auto;scrollbar-width:none;-ms-overflow-style:none}
     .catalog-hero .ch-seg::-webkit-scrollbar{display:none}
     .catalog-hero .ch-seg-btn{flex-shrink:0}
-    .cat-bar{flex-wrap:nowrap;overflow-x:auto;padding-bottom:6px;margin-right:-4px;scrollbar-width:none;-ms-overflow-style:none}
+    .cat-bar{flex-wrap:nowrap;overflow-x:auto;padding-bottom:16px;margin-right:-4px;margin-bottom:.5rem;scrollbar-width:none;-ms-overflow-style:none}
     .cat-bar::-webkit-scrollbar{display:none}
     .cat-badge{flex-shrink:0;padding:8px 13px}
+    .cat-badge.active{box-shadow:0 2px 8px rgba(99,102,241,.3)}
+    .cat-badge.active:hover{box-shadow:0 3px 10px rgba(99,102,241,.35)}
 }
 
 /* ====================================

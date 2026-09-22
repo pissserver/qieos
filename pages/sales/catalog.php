@@ -113,7 +113,7 @@ if($cq){
             </div>
 
             <!-- ===== CATEGORY BADGES (premium pills) ===== -->
-            <div class="cat-bar mb-5">
+            <div class="cat-bar mb-3">
                 <?php foreach($catDefs as $cd): ?>
                 <button
                     class="cat-badge<?= $cd[0] === 'all' ? ' active' : '' ?>"
