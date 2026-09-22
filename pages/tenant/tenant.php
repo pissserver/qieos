@@ -56,15 +56,14 @@ $query = mysqli_query($conn,
 
         /* ===== CARD ACTION BUTTONS ===== */
         .card-actions{
-            position:absolute;top:12px;right:12px;z-index:20;
+            position:absolute;top:10px;right:10px;z-index:20;
             display:flex;gap:6px;opacity:0;transition:opacity 0.25s;
         }
         .product-card:hover .card-actions{opacity:1}
         .card-act{
-            width:34px;height:34px;border:none;border-radius:10px;
+            width:30px;height:30px;border:none;border-radius:9px;
             display:flex;align-items:center;justify-content:center;
-            font-size:13px;cursor:pointer;transition:all 0.25s;
-            backdrop-filter:blur(6px);
+            font-size:12px;cursor:pointer;transition:all 0.25s;
         }
         .card-act-edit{background:rgba(99,102,241,.85);color:#fff}
         .card-act-edit:hover{background:#6366f1;transform:scale(1.1);box-shadow:0 4px 14px rgba(99,102,241,.4)}
@@ -74,7 +73,7 @@ $query = mysqli_query($conn,
         /* Mobile: always show */
         @media(max-width:575px){
             .card-actions{opacity:1}
-            .card-act{width:30px;height:30px;font-size:11px;border-radius:8px}
+            .card-act{width:28px;height:28px;font-size:10.5px;border-radius:8px}
         }
 
         /* ===== EDIT MODAL ===== */
@@ -142,12 +141,12 @@ $query = mysqli_query($conn,
 <body>
     <?php include '../components/sidebar.php'; ?>
 
-    <main class="content" style="height:100vh;overflow:auto;">
+    <main class="content" style="height:100vh;overflow-y:auto;overflow-x:hidden;">
         <?php include '../components/navbar.php'; ?>
 
         <div class="container-fluid px-0 mt-5 mb-5">
 
-            <!-- FORM PENDAFTARAN -->
+            <!-- FORM PENDAFTARAN + SEARCH di header -->
             <div class="section-card mb-5">
                 <div class="panel-header panel-primary">
                     <div class="panel-left">
@@ -159,6 +158,11 @@ $query = mysqli_query($conn,
                             <div class="panel-title" id="formTitle">Pendaftaran Tenant Baru</div>
                             <div class="panel-subtitle" id="formSubtitle">Tambahkan tenant baru ke dalam ekosistem Qieos</div>
                         </div>
+                    </div>
+
+                    <div class="panel-search">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="search" placeholder="Cari tenant...">
                     </div>
                 </div>
 
@@ -195,14 +199,6 @@ $query = mysqli_query($conn,
                 </div>
             </div>
 
-            <!-- SEARCH -->
-            <div class="catalog-toolbar mb-5">
-                <div class="search-modern">
-                    <div class="search-icon"><i class="fas fa-search"></i></div>
-                    <input type="text" id="search" placeholder="Cari tenant...">
-                </div>
-            </div>
-
             <!-- GRID -->
             <div id="product-list" class="product-grid">
 
@@ -217,7 +213,7 @@ $query = mysqli_query($conn,
                 <div class="product-item" data-search="<?php echo htmlspecialchars($search); ?>">
                     <div class="product-card">
                         <div class="product-image-wrap">
-                            <img src="../../assets/img/tenant-img.jpg" class="product-img">
+                            <img src="../../assets/img/tenant-img.jpg" class="product-img" loading="lazy" decoding="async">
 
                             <!-- CARD ACTIONS -->
                             <div class="card-actions">
@@ -244,14 +240,12 @@ $query = mysqli_query($conn,
                             <h4 class="product-title">
                                 <?php echo ucwords(strtolower($row['tenant_name'])); ?>
                             </h4>
-                            <p class="product-desc mb-4">
-                                <i class="fas fa-calendar text-success"></i>&nbsp;
+                            <p class="product-desc">
+                                <i class="fas fa-calendar text-success"></i>
                                 <?php echo $tanggal . ' ' . $bulanText . ' ' . $tahun; ?>
                             </p>
                             <a href="tenant-detail.php?id=<?php echo $row['id']; ?>" class="btn-detail">
-                                <i></i>
-                                <span>Detail Tenant &nbsp;&nbsp;<i class="fas fa-arrow-right"></i></span>
-                                <i></i>
+                                <span>Detail Tenant <i class="fas fa-arrow-right"></i></span>
                             </a>
                         </div>
                     </div>

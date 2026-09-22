@@ -680,3 +680,9 @@
             color:#22c55e;
             background:#dcfce7;
         }
+
+        /* Dropdown tenant: jangan dipotong oleh panel-header
+           (volt.css global memakai overflow:hidden di .panel-header) */
+        .panel-header{
+            overflow:visible;
+        }
