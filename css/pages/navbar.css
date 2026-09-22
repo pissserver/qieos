@@ -60,28 +60,29 @@
 
 /* ===== CART MODAL PREMIUM ===== */
 #cartModal .modal-content {
-    border-radius: 26px;
-    border: 1px solid rgba(255, 255, 255, .14);
-    background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
-    box-shadow: 0 40px 90px rgba(2, 6, 23, .45);
+    border-radius: 24px;
+    border: 1px solid rgba(99, 102, 241, .15);
+    background: linear-gradient(180deg, #ffffff 0%, #f6f7fb 100%);
+    box-shadow: 0 40px 90px rgba(2, 6, 23, .3);
     overflow: hidden;
 }
 
 #cartModal .cart-modal-header {
-    border-radius: 26px 26px 0 0;
+    border-radius: 24px 24px 0 0;
 }
 
 #cartModal .modal-body {
     padding: 18px 20px;
     background:
-        radial-gradient(120% 90% at 100% 0%, rgba(99, 102, 241, .06) 0%, transparent 50%),
-        radial-gradient(120% 90% at 0% 100%, rgba(139, 92, 246, .05) 0%, transparent 50%);
+        radial-gradient(120% 90% at 100% 0%, rgba(99, 102, 241, .05) 0%, transparent 50%),
+        radial-gradient(120% 90% at 0% 100%, rgba(139, 92, 246, .04) 0%, transparent 50%),
+        linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
 }
 
 #cartModal .cart-footer {
     border-top: 1px solid rgba(99, 102, 241, .12);
-    background: rgba(255, 255, 255, .72);
-    border-radius: 0 0 26px 26px;
+    background: rgba(255, 255, 255, .8);
+    border-radius: 0 0 24px 24px;
     padding: 14px 16px;
 }
 
@@ -91,8 +92,8 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 15px 16px;
-    border-radius: 20px;
+    padding: 13px 16px;
+    border-radius: 18px;
     background: linear-gradient(180deg, #ffffff 0%, #fdfdfe 100%);
     border: 1px solid rgba(99, 102, 241, .14);
     box-shadow: 0 8px 24px rgba(2, 6, 23, .06);
@@ -108,11 +109,11 @@
     bottom: 0;
     width: 4px;
     background: linear-gradient(180deg, #6366f1, #8b5cf6);
-    opacity: .85;
+    opacity: .9;
 }
 
 .cart-card:hover {
-    transform: translateY(-3px);
+    transform: translateY(-2px);
     border-color: rgba(99, 102, 241, .32);
     box-shadow: 0 14px 34px rgba(99, 102, 241, .14);
 }
@@ -126,8 +127,8 @@
 }
 
 .cart-img {
-    width: 62px;
-    height: 62px;
+    width: 58px;
+    height: 58px;
     border-radius: 14px;
     object-fit: cover;
     border: 1px solid rgba(0, 0, 0, .05);
@@ -135,14 +136,16 @@
     flex-shrink: 0;
 }
 
-/* Sama dengan placeholder di katalog: ikon open-box di atas gradien gelap */
+/* Placeholder: ikon box di atas gradien gelap */
 .cart-img-empty {
     display: flex;
     align-items: center;
     justify-content: center;
     background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+    border: 1px solid rgba(0, 0, 0, .05);
     color: #fbbf24;
-    font-size: 26px;
+    font-size: 22px;
+    box-shadow: 0 6px 14px rgba(2, 6, 23, .14);
 }
 
 .cart-img-empty i {
@@ -151,8 +154,9 @@
 
 /* TEXT */
 .cart-title {
-    font-weight: 600;
+    font-weight: 700;
     font-size: 15px;
+    color: #0f172a;
 }
 
 .cart-meta {
@@ -163,20 +167,22 @@
 
 /* BADGES */
 .badge-price {
-    background: linear-gradient(135deg, #eef2ff, #e0e7ff);
-    color: #4f46e5;
-    padding: 4px 10px;
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    color: #fff;
+    padding: 3px 10px;
     border-radius: 999px;
-    font-size: 12px;
-    font-weight: 600;
+    font-size: 11.5px;
+    font-weight: 700;
+    box-shadow: 0 4px 12px rgba(99, 102, 241, .25);
 }
 
 .badge-qty {
-    background: linear-gradient(135deg, #ecfeff, #cffafe);
-    color: #0891b2;
-    padding: 4px 10px;
+    background: #f1f5f9;
+    border: 1px solid #e2e8f0;
+    color: #475569;
+    padding: 3px 10px;
     border-radius: 999px;
-    font-size: 12px;
+    font-size: 11.5px;
     font-weight: 600;
 }
 
@@ -221,9 +227,10 @@
 }
 
 .cart-subtotal {
-    font-weight: bold;
+    font-weight: 800;
     font-size: 15px;
     margin-bottom: 5px;
+    color: #4f46e5;
 }
 
 .remove-btn {
@@ -255,30 +262,30 @@
     background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
     color: white;
     padding: 12px 18px;
-    border-radius: 16px;
+    border-radius: 14px;
     flex: 1;
     box-shadow: 0 12px 28px rgba(99, 102, 241, .35);
 }
 
 .total-label {
-    font-size: 12px;
-    opacity: 0.85;
+    font-size: 11px;
+    opacity: .85;
 }
 
 .total-value {
     font-size: 16px;
-    font-weight: bold;
+    font-weight: 800;
 }
 
 /* BUTTON */
 .btn-checkout {
     background: linear-gradient(135deg, #111827 0%, #1e293b 100%);
     color: white;
+    border: 1px solid rgba(255, 255, 255, .1);
     border-radius: 14px;
     padding: 12px 24px;
-    border: 1px solid rgba(255, 255, 255, .1);
-    font-weight: 600;
-    transition: 0.3s;
+    font-weight: 700;
+    transition: all .3s;
     white-space: nowrap;
     box-shadow: 0 10px 26px rgba(2, 6, 23, .3);
 }
@@ -289,13 +296,17 @@
     box-shadow: 0 14px 30px rgba(2, 6, 23, .4);
 }
 
+.btn-checkout:active {
+    transform: scale(.97);
+}
+
 .empty-cart {
     text-align: center;
     padding: 40px 20px;
     color: #6b7280;
 }
 
-.empty-icon {
+.empty-cart .empty-icon {
     font-size: 60px;
     color: #6366f1;
     margin-bottom: 15px;
@@ -391,40 +402,125 @@
     animation: pulseGlow 0.6s ease;
 }
 
-/* MOBILE FIX */
+/* MOBILE FIX - item compact biar ga makan space */
 @media (max-width: 576px) {
 
+    .cart-container {
+        gap: 8px;
+    }
+
+    #cartModal .modal-body {
+        padding: 12px;
+    }
+
+    /* kartu tetap row, kiri-kanan, bukan stack vertikal */
     .cart-card {
-        flex-direction: column;
-        align-items: stretch;
-        gap: 12px;
+        padding: 9px 10px;
+        border-radius: 16px;
+        gap: 8px;
     }
 
-    /* TOP: image + title */
     .cart-left {
-        width: 100%;
+        gap: 10px;
     }
 
-    /* MIDDLE: qty */
+    /* gambar kecil */
+    .cart-img {
+        width: 44px;
+        height: 44px;
+        border-radius: 10px;
+    }
+
+    .cart-img-empty {
+        font-size: 17px;
+    }
+
+    .cart-title {
+        font-size: 13px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .cart-meta {
+        margin-top: 3px;
+        gap: 4px;
+    }
+
+    .badge-price,
+    .badge-qty {
+        padding: 2px 7px;
+        font-size: 10.5px;
+    }
+
     .cart-qty {
-        justify-content: center;
-        width: 100%;
+        gap: 4px;
+        min-width: 0;
     }
 
-    /* BOTTOM: subtotal + delete */
+    .cart-qty button {
+        width: 26px;
+        height: 26px;
+        border-radius: 8px;
+        font-size: 13px;
+    }
+
+    .cart-qty span {
+        width: 22px;
+        font-size: 13px;
+    }
+
     .cart-right {
+        min-width: 0;
         display: flex;
-        justify-content: space-between;
-        align-items: center;
-        width: 100%;
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 1px;
     }
 
     .cart-subtotal {
-        font-size: 16px;
+        font-size: 13px;
+        margin-bottom: 0;
     }
 
     .remove-btn {
-        font-size: 20px;
+        width: 28px;
+        height: 28px;
+        font-size: 13px;
+    }
+
+    /* footer ringkas */
+    #cartModal .cart-footer {
+        padding: 10px 12px;
+        gap: 8px;
+        border-radius: 0 0 20px 20px;
+    }
+
+    .cart-total-box {
+        padding: 8px 12px;
+        border-radius: 12px;
+    }
+
+    .total-label {
+        font-size: 10px;
+    }
+
+    .total-value {
+        font-size: 13px;
+    }
+
+    .btn-checkout {
+        padding: 9px 14px;
+        border-radius: 11px;
+        font-size: 12.5px;
+    }
+
+    .empty-cart {
+        padding: 24px 16px;
+    }
+
+    .empty-cart .empty-icon {
+        font-size: 44px;
     }
 }
 
