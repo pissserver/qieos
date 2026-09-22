@@ -55,77 +55,74 @@ if($cq){
     <main class="content">
         <?php include '../components/navbar.php'; ?>
 
-        <?php $blue_strip_icon='fa-book-open'; $blue_strip_title='Katalog Produk'; $blue_strip_subtitle='Kelola menu produk yang siap dijual'; ?>
+        <?php $catDefs = [
+            ['all',        '📦', 'Semua Kategori'],
+            ['makanan',    '🍜', 'Makanan'],
+            ['minuman',    '🧋', 'Minuman'],
+            ['jajanan',    '🍪', 'Jajanan'],
+            ['pelengkap',  '🥄', 'Pelengkap'],
+            ['racikan',    '🍱', 'Racikan'],
+            ['additional', '➕', 'Additional'],
+        ]; ?>
 
         <div class="container-fluid px-0 mt-5 mb-5">
 
-            <?php include '../components/blue-strip.php'; ?>
+            <!-- ===== HERO: TITLE + SEARCH + SORT (satu panel premium) ===== -->
+            <div class="catalog-hero mb-4">
+                <div class="ch-glow"></div>
+                <div class="ch-glow ch-glow-2"></div>
 
-            <div class="catalog-toolbar mb-5">
+                <div class="ch-main">
+                    <div class="ch-icon">
+                        <i class="fas fa-book-open"></i>
+                    </div>
+                    <div class="ch-text">
+                        <div class="ch-title">Katalog Produk</div>
+                        <div class="ch-sub">Kelola menu produk yang siap dijual</div>
+                    </div>
+                </div>
 
-                <div class="search-modern">
-
-                    <div class="search-icon">
+                <div class="ch-tools">
+                    <div class="ch-search">
                         <i class="fas fa-search"></i>
+                        <input
+                            type="text"
+                            id="search"
+                            placeholder="Cari produk..."
+                            onkeyup="applyFilters()">
                     </div>
 
-                    <input
-                        type="text"
-                        id="search"
-                        placeholder="Cari produk..."
-                        onkeyup="applyFilters()">
-
+                    <div class="ch-sort">
+                        <span class="ch-sort-lbl"><i class="fas fa-arrow-up-wide-short"></i> Urutkan</span>
+                        <div class="ch-seg">
+                            <button class="ch-seg-btn active" data-sort="name" onclick="sortProduct('name',this)">
+                                <i class="fas fa-text-width"></i><span>Nama</span>
+                            </button>
+                            <button class="ch-seg-btn" data-sort="latest" onclick="sortProduct('latest',this)">
+                                <i class="fas fa-clock"></i><span>Terbaru</span>
+                            </button>
+                            <button class="ch-seg-btn" data-sort="low" onclick="sortProduct('low',this)">
+                                <i class="fas fa-arrow-down"></i><span>Harga</span>
+                            </button>
+                            <button class="ch-seg-btn" data-sort="high" onclick="sortProduct('high',this)">
+                                <i class="fas fa-arrow-up"></i><span>Tertinggi</span>
+                            </button>
+                        </div>
+                    </div>
                 </div>
+            </div>
 
-                <div class="toolbar-actions">
-
-                    <!-- FILTER KATEGORI -->
-                    <div class="premium-filter">
-
-                        <button class="toolbar-btn">
-                            <i class="fas fa-layer-group"></i>
-                        </button>
-
-                        <select
-                            id="category-filter"
-                            class="hidden-select"
-                            onchange="applyFilters()">
-
-                            <option value="all">📦 Semua Kategori</option>
-                            <option value="makanan">🍜 Makanan</option>
-                            <option value="minuman">🧋 Minuman</option>
-                            <option value="jajanan">🍪 Jajanan</option>
-                            <option value="pelengkap">🥄 Pelengkap</option>
-                            <option value="racikan">🍱 Racikan</option>
-                            <option value="additional">➕ Additional</option>
-
-                        </select>
-
-                    </div>
-
-                    <!-- SORT HARGA -->
-                    <div class="premium-filter">
-
-                        <button class="toolbar-btn">
-                            <i class="fas fa-arrow-up-wide-short"></i>
-                        </button>
-
-                        <select
-                            id="sort-filter"
-                            class="hidden-select"
-                            onchange="sortProduct(this.value)">
-
-                            <option value="name">🔥 Nama</option>
-                            <option value="latest">✨ Terbaru</option>
-                            <option value="low">⬇ Harga Terendah</option>
-                            <option value="high">⬆ Harga Tertinggi</option>
-
-                        </select>
-
-                    </div>
-
-                </div>
-
+            <!-- ===== CATEGORY BADGES (premium pills) ===== -->
+            <div class="cat-bar mb-5">
+                <?php foreach($catDefs as $cd): ?>
+                <button
+                    class="cat-badge<?= $cd[0] === 'all' ? ' active' : '' ?>"
+                    data-cat="<?= $cd[0] ?>"
+                    onclick="setCategory('<?= $cd[0] ?>',this)">
+                    <span class="cb-ico"><?= $cd[1] ?></span>
+                    <span class="cb-lbl"><?= $cd[2] ?></span>
+                </button>
+                <?php endforeach; ?>
             </div>
 
             <div id="product-list" class="product-grid">
@@ -443,9 +440,17 @@ if($cq){
             if (mInput) mInput.value = 0;
         }
 
+        let activeCategory = 'all';
+
+        function setCategory(cat, btn){
+            activeCategory = cat;
+            document.querySelectorAll('.cat-badge').forEach(b => b.classList.toggle('active', b === btn));
+            applyFilters();
+        }
+
         function applyFilters() {
             let keyword = document.getElementById('search').value.toLowerCase();
-            let category = document.getElementById('category-filter').value.toLowerCase();
+            let category = activeCategory;
             let items = document.querySelectorAll('.product-item');
             let found = false;
 
@@ -522,7 +527,11 @@ if($cq){
 
         setInitialIndex();
 
-        function sortProduct(type) {
+        function sortProduct(type, btn) {
+
+            if(btn){
+                document.querySelectorAll('.ch-seg-btn').forEach(b => b.classList.toggle('active', b === btn));
+            }
 
             let container = document.getElementById('product-list');
             let items = Array.from(document.querySelectorAll('.product-item'));
