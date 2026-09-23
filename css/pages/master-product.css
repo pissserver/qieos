@@ -40,51 +40,153 @@
     overflow: hidden;
 }
 
-.section-card::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 3px;
-    background: linear-gradient(90deg, #4f46e5, #6366f1, #818cf8, #a78bfa, #6366f1, #4f46e5);
-    background-size: 200% 100%;
-    animation: premiumShimmer 3s linear infinite;
-}
-
 @keyframes premiumShimmer {
-    0% { background-position: -200% 0; }
+    0% { background-position: 0% 0; }
     100% { background-position: 200% 0; }
 }
 
-/* PANEL */
+/* PANEL — MASTER HERO HEADER */
 
 .panel-header {
+    position: relative;
+    overflow: hidden;
     display: flex;
     justify-content: space-between;
     align-items: center;
     padding: 18px 22px;
-    border-radius: 18px;
+    border-radius: 16px;
 }
 
-.panel-left { display: flex; align-items: center; gap: 16px; }
+.panel-left {
+    position: relative;
+    z-index: 2;
+    display: flex; align-items: center; gap: 16px;
+}
 
 .panel-icon {
-    width: 58px; height: 58px; border-radius: 16px;
+    width: 56px; height: 56px; border-radius: 16px;
     background: rgba(255, 255, 255, .12);
+    border: 1px solid rgba(255, 255, 255, .15);
     display: flex; align-items: center; justify-content: center;
-    font-size: 22px;
+    font-size: 21px;
 }
 
 .panel-title { font-size: 17px; font-weight: 700; }
 .panel-subtitle { font-size: 13px; opacity: .85; }
 
 .panel-primary {
-    background:linear-gradient(135deg, #0f172a, #1e293b, #334155);
+    background: linear-gradient(135deg, #0f172a, #1e293b, #334155);
     color: #fff;
+    border: 1px solid rgba(99, 102, 241, .22);
+    box-shadow: 0 10px 26px rgba(15, 23, 42, .28),
+                inset 0 1px 0 rgba(255, 255, 255, .06);
 }
 
 .panel-dark {
     background: linear-gradient(135deg, #334155, #0f172a);
     color: #fff;
+}
+
+/* HERO HEADER panel utama halaman master
+   Full-bleed sampai tepi card agar terlihat premium */
+.section-card > .panel-header.panel-primary {
+    margin: -24px -24px 0;
+    padding: 26px 24px;
+    border-radius: 24px 24px 0 0;
+}
+
+/* Strip gradient biru bergerak di tepi atas */
+.section-card > .panel-header.panel-primary::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 4px;
+    background: linear-gradient(90deg,
+        #6366f1, #818cf8, #a78bfa, #e879f9,
+        #a78bfa, #818cf8, #6366f1);
+    background-size: 250% 100%;
+    animation: premiumShimmer 5s linear infinite;
+    z-index: 3;
+}
+
+/* Glow dekoratif di dalam panel */
+.section-card > .panel-header.panel-primary::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+        radial-gradient(620px 220px at 8% -30%, rgba(99, 102, 241, .38), transparent 60%),
+        radial-gradient(520px 220px at 96% 145%, rgba(168, 85, 247, .26), transparent 60%);
+    pointer-events: none;
+    animation: masterGlow 9s ease-in-out infinite;
+}
+
+@keyframes masterGlow {
+    0%, 100% { opacity: .7; }
+    50% { opacity: 1; }
+}
+
+/* Icon hero: gradient violet + glow */
+.section-card > .panel-primary .panel-icon {
+    background: linear-gradient(135deg, #6366f1, #8b5cf6, #a855f7);
+    color: #fff;
+    border: 1px solid rgba(255, 255, 255, .28);
+    box-shadow: 0 10px 22px rgba(139, 92, 246, .4),
+                inset 0 1px 0 rgba(255, 255, 255, .35);
+}
+
+/* Title + badge MASTER */
+.section-card > .panel-primary .panel-title {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+    font-size: 18px;
+    font-weight: 800;
+}
+
+.section-card > .panel-primary .panel-title::before {
+    content: 'MASTER';
+    order: -1;
+    display: inline-flex;
+    align-items: center;
+    font-size: 9.5px;
+    line-height: 1;
+    font-weight: 800;
+    letter-spacing: .28em;
+    color: #cdd4fe;
+    background: rgba(129, 140, 248, .14);
+    border: 1px solid rgba(129, 140, 248, .38);
+    padding: 5px 11px;
+    border-radius: 999px;
+}
+
+.section-card > .panel-primary .panel-subtitle {
+    color: rgba(226, 232, 240, .78);
+}
+
+/* Tombol kanan header hero di atas lapisan glow */
+.section-card > .panel-primary > .btn-stock-global,
+.section-card > .panel-primary > .btn {
+    position: relative;
+    z-index: 2;
+}
+
+/* Responsive full-bleed header */
+@media (max-width: 991.98px) {
+    .section-card > .panel-header.panel-primary {
+        margin: -18px -18px 0;
+        padding: 22px 18px;
+        border-radius: 18px 18px 0 0;
+    }
+}
+
+@media (max-width: 575.98px) {
+    .section-card > .panel-header.panel-primary {
+        margin: -14px -14px 0;
+        padding: 20px 14px;
+    }
+    .section-card > .panel-primary .panel-title { font-size: 16px; }
 }
 
 /* DATATABLE */
@@ -388,10 +490,30 @@ textarea.form-control { height: 65px; }
 .table-action-wrapper #stockTable_filter label { margin: 0; display: flex; align-items: center; }
 .table-action-wrapper #stockTable_filter input { height: 42px; margin: 0; }
 
-#btnAddProduct {
-    height: 42px; display: flex; align-items: center; justify-content: center;
-    white-space: nowrap; margin: 0;
+/* ADD BUTTON — sama seperti Master User */
+.mu-add-btn {
+    height: 46px;
+    border: none;
+    border-radius: 13px;
+    padding: 0 22px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #4f46e5, #7c3aed);
+    color: #fff;
+    font-weight: 600;
+    font-size: 13.5px;
+    white-space: nowrap;
+    margin: 0;
+    box-shadow: 0 8px 18px rgba(79, 70, 229, .3);
+    transition: .25s ease;
 }
+.mu-add-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 24px rgba(79, 70, 229, .4);
+    color: #fff;
+}
+.mu-add-btn:active { transform: translateY(0); }
 
 /* LAYOUT FIX + RESPONSIVE */
 .panel-header { gap: 16px; flex-wrap: wrap; }
@@ -440,8 +562,7 @@ textarea.form-control { height: 65px; }
     .stock-badge, .unit-badge, .price-badge { padding: 6px 10px; font-size: 12px; white-space: nowrap; }
     .action-btn { width: 34px; height: 34px; margin: 2px; }
     .table-action-wrapper #stockTable_filter input { width: 100% !important; }
-    #btnAddProduct { width: 100%; justify-content: center; }
-    .btn-stock-global { width: 100%; justify-content: center; }
+    .mu-add-btn, .btn-stock-global { width: 100%; justify-content: center; }
     .photo-upload-box { flex-direction: column; align-items: flex-start; gap: 12px; padding: 14px; }
     .photo-preview { width: 60px; height: 60px; }
 }

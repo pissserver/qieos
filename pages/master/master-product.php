@@ -58,7 +58,7 @@ include __DIR__ . '/../components/data/stock-status.php';
                     <div id="btnContainer" style="display:none;">
                         <button
                             type="button"
-                            class="btn btn-primary"
+                            class="btn mu-add-btn"
                             id="btnAddProduct">
                             <i class="fas fa-plus me-2"></i>
                             Tambah Produk

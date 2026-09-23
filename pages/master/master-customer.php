@@ -27,7 +27,7 @@
                 </div>
                 <div class="mt-4 px-4">
                     <div id="btnContainer" style="display:none;">
-                        <button type="button" class="btn btn-primary" id="btnAddCustomer">
+                        <button type="button" class="btn mu-add-btn" id="btnAddCustomer">
                             <i class="fas fa-plus me-2"></i>Tambah Customer
                         </button>
                     </div>

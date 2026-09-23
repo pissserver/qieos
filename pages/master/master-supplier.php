@@ -38,7 +38,7 @@ include '../../sessions/session.php';
 
                 <div class="mt-4 px-4">
                     <div id="btnContainer" style="display:none;">
-                        <button type="button" class="btn btn-primary" id="btnAddSupplier">
+                        <button type="button" class="btn mu-add-btn" id="btnAddSupplier">
                             <i class="fas fa-plus me-2"></i>
                             Tambah Supplier
                         </button>

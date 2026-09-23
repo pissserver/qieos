@@ -109,6 +109,107 @@
     50% { opacity: 1; transform: scale(1.05); }
 }
 
+/* ===== HERO HEADER (sama seperti halaman master lain) ===== */
+.section-card > .panel-header.panel-primary {
+    margin: -24px -24px 0;
+    padding: 26px 24px;
+    border-radius: 24px 24px 0 0;
+}
+
+/* Strip gradient biru bergerak di tepi atas */
+.section-card > .panel-header.panel-primary::before {
+    content: '';
+    position: absolute;
+    inset: auto;
+    top: 0; left: 0; right: 0;
+    height: 4px;
+    background: linear-gradient(90deg,
+        #6366f1, #818cf8, #a78bfa, #e879f9,
+        #a78bfa, #818cf8, #6366f1);
+    background-size: 250% 100%;
+    animation: muShimmer 5s linear infinite;
+    pointer-events: none;
+    z-index: 3;
+}
+
+/* Glow dekoratif di dalam panel */
+.section-card > .panel-header.panel-primary::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+        radial-gradient(620px 220px at 8% -30%, rgba(99, 102, 241, .38), transparent 60%),
+        radial-gradient(520px 220px at 96% 145%, rgba(168, 85, 247, .26), transparent 60%);
+    pointer-events: none;
+    animation: muGlow 9s ease-in-out infinite;
+}
+
+@keyframes muShimmer {
+    0% { background-position: 0% 0; }
+    100% { background-position: 200% 0; }
+}
+
+@keyframes muGlow {
+    0%, 100% { opacity: .7; }
+    50% { opacity: 1; }
+}
+
+/* Icon hero: gradient violet + glow */
+.section-card > .panel-primary .panel-icon {
+    background: linear-gradient(135deg, #6366f1, #8b5cf6, #a855f7);
+    color: #fff;
+    border: 1px solid rgba(255, 255, 255, .28);
+    box-shadow: 0 10px 22px rgba(139, 92, 246, .4),
+                inset 0 1px 0 rgba(255, 255, 255, .35);
+}
+
+/* Title + badge MASTER */
+.section-card > .panel-primary .panel-title {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+    font-size: 18px;
+    font-weight: 800;
+}
+
+.section-card > .panel-primary .panel-title::before {
+    content: 'MASTER';
+    order: -1;
+    display: inline-flex;
+    align-items: center;
+    font-size: 9.5px;
+    line-height: 1;
+    font-weight: 800;
+    letter-spacing: .28em;
+    color: #cdd4fe;
+    background: rgba(129, 140, 248, .14);
+    border: 1px solid rgba(129, 140, 248, .38);
+    padding: 5px 11px;
+    border-radius: 999px;
+}
+
+.section-card > .panel-primary .panel-subtitle {
+    color: rgba(226, 232, 240, .78);
+}
+
+/* Responsive full-bleed header */
+@media (max-width: 991.98px) {
+    .section-card > .panel-header.panel-primary {
+        margin: -18px -18px 0;
+        padding: 22px 18px;
+        border-radius: 18px 18px 0 0;
+    }
+}
+
+@media (max-width: 575.98px) {
+    .section-card > .panel-header.panel-primary {
+        margin: -14px -14px 0;
+        padding: 20px 14px;
+    }
+    .section-card > .panel-primary .panel-title { font-size: 16px; }
+}
+
 /* TOOLBAR + TABS */
 .mu-toolbar {
     display: flex;
