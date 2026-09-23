@@ -170,6 +170,13 @@
                     </a>
                 </li>
 
+                <li class="nav-item <?= ($current_page == 'master-user.php') ? 'active' : ''; ?>">
+                    <a href="<?php echo BASE_URL; ?>/pages/master/master-user.php" class="nav-link" data-tooltip="Master User">
+                        <span class="sidebar-icon"><i class="fas fa-users-cog"></i></span>
+                        <span class="sidebar-text">Master User</span>
+                    </a>
+                </li>
+
                 <!-- PEMBELIAN STOK -->
                 <li class="nav-title">PURCHASING</li>
 
@@ -235,23 +242,6 @@
                     <a href="<?php echo BASE_URL; ?>/pages/report/report-tenant.php" class="nav-link" data-tooltip="Laporan Tenant">
                         <span class="sidebar-icon"><i class="fas fa-chart-line"></i></span>
                         <span class="sidebar-text">Laporan Tenant</span>
-                    </a>
-                </li>
-
-                <!-- MANAJEMEN STAFF -->
-                <li class="nav-title">MANAJEMEN USER</li>
-
-                <li class="nav-item <?= ($current_page == 'administrator.php' || ($current_page == 'administrator.php' && $menu == 'administrator')) ? 'active' : ''; ?>">
-                    <a href="<?php echo BASE_URL; ?>/pages/management/administrator.php" class="nav-link" data-tooltip="Administrator">
-                        <span class="sidebar-icon"><i class="fas fa-users"></i></span>
-                        <span class="sidebar-text">Administrator</span>
-                    </a>
-                </li>
-
-                <li class="nav-item <?= ($current_page == 'cashier.php' || ($current_page == 'cashier.php' && $menu == 'cashier')) ? 'active' : ''; ?>">
-                    <a href="<?php echo BASE_URL; ?>/pages/management/cashier.php" class="nav-link" data-tooltip="Staff Kasir">
-                        <span class="sidebar-icon"><i class="fas fa-users"></i></span>
-                        <span class="sidebar-text">Staff Kasir</span>
                     </a>
                 </li>
 

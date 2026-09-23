@@ -377,6 +377,7 @@
 .sidebar-icon i.fa-rocket { color: #ef4444; }
 .sidebar-icon i.fa-book-open { color: #eab308; }
 .sidebar-icon i.fa-receipt { color: #84cc16; }
+.sidebar-icon i.fa-users-cog { color: #818cf8; }
 
 /* Active state icon putih */
 .nav-item.active .sidebar-icon { color: #ffffff !important; }

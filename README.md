@@ -168,7 +168,7 @@ qieos/
 │   └── pages/
 ├── pages/                   # Modul & halaman utama sistem
 │   ├── components/          # Navigation (sidebar, navbar) & AJAX data endpoints
-│   ├── management/          # Pengelolaan user (administrator & staff kasir)
+│   ├── master/              # Master data (produk, supplier, customer) & master user
 │   ├── other/               # Modul update & changelog
 │   ├── profile/             # Pengelolaan profil user
 │   ├── purchasing/          # Modul daftar belanja & input pembelian

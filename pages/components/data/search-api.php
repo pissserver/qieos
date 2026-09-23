@@ -41,8 +41,7 @@ if ($role === 'developer') {
         $badge('Rekap Penjualan & Tenant', BASE_URL . '/pages/recap/recap.php', 'fas fa-clipboard-list', 'Rekap'),
         $badge('Laporan Penjualan', BASE_URL . '/pages/report/report-sales.php', 'fas fa-chart-bar', 'Laporan'),
         $badge('Laporan Tenant', BASE_URL . '/pages/report/report-tenant.php', 'fas fa-file-invoice-dollar', 'Laporan'),
-        $badge('Administrator', BASE_URL . '/pages/management/administrator.php', 'fas fa-user-shield', 'Management'),
-        $badge('Staff Kasir', BASE_URL . '/pages/management/cashier.php', 'fas fa-cash-register', 'Management'),
+        $badge('Master User', BASE_URL . '/pages/master/master-user.php', 'fas fa-users-cog', 'Management'),
         $badge('Update', BASE_URL . '/pages/other/update.php', 'fas fa-rocket', 'Sistem'),
     ]);
 } elseif ($role === 'administrator') {
@@ -58,8 +57,7 @@ if ($role === 'developer') {
         $badge('Tenant', BASE_URL . '/pages/tenant/tenant.php', 'fas fa-store', 'Tenant'),
         $badge('Laporan Penjualan', $cs . 'report-sales', 'fas fa-chart-bar', 'Laporan'),
         $badge('Laporan Tenant', BASE_URL . '/pages/report/report-tenant.php', 'fas fa-file-invoice-dollar', 'Laporan'),
-        $badge('Administrator', BASE_URL . '/pages/management/administrator.php', 'fas fa-user-shield', 'Management'),
-        $badge('Staff Kasir', BASE_URL . '/pages/management/cashier.php', 'fas fa-cash-register', 'Management'),
+        $badge('Master User', BASE_URL . '/pages/master/master-user.php', 'fas fa-users-cog', 'Management'),
         $badge('Update', BASE_URL . '/pages/other/update.php', 'fas fa-rocket', 'Sistem'),
     ]);
 } else {
