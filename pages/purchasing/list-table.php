@@ -3,21 +3,25 @@ include '../../sessions/session.php';
 
 $q = mysqli_query($conn,"
     SELECT
-        lp.*,
-        COUNT(lpi.id) AS total_items,
-        SUM(lpi.price) AS total_price
-    FROM list_purchases lp
-    LEFT JOIN list_purchase_items lpi
-        ON lp.id = lpi.list_purchase_id
-    WHERE lp.deleted_at IS NULL
-    GROUP BY lp.id
-    ORDER BY lp.date_list DESC
+        p.id,
+        p.form,
+        p.date,
+        COUNT(pi.id) AS total_items,
+        COALESCE(SUM(pi.price_buy), 0) AS total_price,
+        MAX(CASE WHEN pi.qty IS NOT NULL THEN 1 ELSE 0 END) AS used_flag
+    FROM purchases p
+    LEFT JOIN purchase_items pi
+        ON p.id = pi.purchase_id
+        AND pi.deleted_at IS NULL
+    WHERE p.deleted_at IS NULL
+      AND pi.qty_buy IS NOT NULL
+    GROUP BY p.id, p.form, p.date
+    HAVING COUNT(pi.id) > 0
+    ORDER BY p.date DESC, p.id DESC
 ");
-
-$totalPrice = 0;
 ?>
 
-<link rel="stylesheet" href="<?php echo BASE_URL; ?>/css/pages/list-table.css">
+<link rel="stylesheet" href="<?php echo BASE_URL; ?>/css/pages/list-table.css?v=<?php echo filemtime(__DIR__ . '/../../css/pages/list-table.css'); ?>">
 
 <table id="purchaseTable" class="table table-hover align-middle">
 <thead>
@@ -44,7 +48,7 @@ $totalPrice = 0;
             </div>
 
             <div>
-                <div class="fw-bold">BELANJA-000<?= $d['id'] ?></div>
+                <div class="fw-bold"><?= htmlspecialchars($d['form']) ?></div>
                 <small class="text-muted">
                     <i class="fas fa-receipt me-1"></i>Daftar Belanja
                 </small>
@@ -56,11 +60,11 @@ $totalPrice = 0;
     <td class="text-center">
         <span class="date-badge">
             <i class="fas fa-calendar-alt"></i>
-            <?= date('d F Y', strtotime($d['date_list'])) ?>
+            <?= date('d F Y', strtotime($d['date'])) ?>
         </span>
     </td>
 
-    <!-- TOTAL PRICE -->
+    <!-- TOTAL ITEM -->
     <td class="text-center">
         <span class="note-badge">
             <i class="fas fa-box"></i>
@@ -83,15 +87,17 @@ $totalPrice = 0;
             <i class="fas fa-edit"></i>
         </button>
 
+        <?php if((int)$d['used_flag'] === 0): ?>
         <button class="action-btn btn-delete deletePurchaseBtn"
             data-id="<?= $d['id'] ?>"
-            data-date="<?= $d['date_list'] ?>">
+            data-date="<?= $d['date'] ?>">
             <i class="fas fa-trash"></i>
         </button>
+        <?php endif; ?>
 
         <button class="action-btn btn-print printPurchaseBtn"
             data-id="<?= $d['id'] ?>"
-            data-date="<?= $d['date_list'] ?>">
+            data-date="<?= $d['date'] ?>">
             <i class="fas fa-print"></i>
         </button>
         

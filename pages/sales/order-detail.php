@@ -24,11 +24,12 @@ if(!$orderResult || $orderResult->num_rows === 0){
 $order = $orderResult->fetch_assoc();
 $order['tanggal'] = date('d M Y', strtotime($order['tanggal']));
 
-// Ambil item order sekaligus data produk (photo dll)
+// Ambil item order sekaligus data produk (photo dll) & data racikan
 $itemQuery = $conn->prepare("
-    SELECT oi.*, p.photo, p.name as product_name
+    SELECT oi.*, p.photo, COALESCE(oi.name, p.name, pc.name, 'Barang') AS product_name
     FROM order_details oi
     LEFT JOIN products p ON oi.product_id = p.id
+    LEFT JOIN product_combos pc ON oi.product_combo_id = pc.id
     WHERE oi.order_id=?
 ");
 $itemQuery->bind_param("i", $id);

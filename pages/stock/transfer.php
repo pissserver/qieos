@@ -6,8 +6,8 @@
         <title>Transfer Gudang - Qieos</title>
         <?php include '../../script/headscript.php'; ?>
 
-        <link rel="stylesheet" href="<?php echo BASE_URL; ?>/css/pages/transfer.css">
-        <link rel="stylesheet" href="<?php echo BASE_URL; ?>/css/pages/transfer-table.css">
+        <link rel="stylesheet" href="<?php echo BASE_URL; ?>/css/pages/transfer.css?v=<?php echo filemtime(__DIR__ . '/../../css/pages/transfer.css'); ?>">
+        <link rel="stylesheet" href="<?php echo BASE_URL; ?>/css/pages/transfer-table.css?v=<?php echo filemtime(__DIR__ . '/../../css/pages/transfer-table.css'); ?>">
     </head>
 
     <body>
@@ -33,7 +33,7 @@
 
                 <!-- REQUEST PENDING -->
                 <div class="section-card mb-4 mt-5">
-                    <div class="panel-header panel-warning">
+                    <div class="panel-header panel-primary">
                         <div class="panel-left">
                             <div class="panel-icon">
                                 <i class="fas fa-clock"></i>
@@ -57,7 +57,7 @@
 
                 <!-- HISTORY -->
                 <div class="section-card mb-5">
-                    <div class="panel-header panel-dark">
+                    <div class="panel-header panel-primary">
                         <div class="panel-left">
                             <div class="panel-icon">
                                 <i class="fas fa-history"></i>
@@ -122,7 +122,7 @@
             }
 
             function loadHistory(){
-                fetch('../components/tables/history-request-table.php')
+                fetch('../components/tables/history-request-table.php?view=transfer')
                 .then(res=>res.text())
                 .then(html=>{
                     document.getElementById("history-table").innerHTML = html;
@@ -135,10 +135,9 @@
                         }
 
                         // 🔥 INIT ULANG
-                        $('#requestHistory').DataTable({
+                        let ht = $('#requestHistory').DataTable({
                             pageLength: 5,
                             lengthMenu:[[5,10,25,50],[5,10,25,50]],
-                            responsive: true,
                             autoWidth: false,
                             language:{
                                 search:"",
@@ -169,8 +168,101 @@
                             order: [] 
                         });
 
+                        ht.columns.adjust();
+
+                        // 🔥 EXPAND / COLLAPSE DETAIL ITEM
+                        attachHistoryExpand();
+
                     }, 100);
                 });
+            }
+
+            function attachHistoryExpand(){
+                const table = document.getElementById('requestHistory');
+
+                if(!table) return;
+
+                table.querySelectorAll('.btn-expand').forEach(function(btn){
+                    if(btn.dataset.bound) return;
+                    btn.dataset.bound = '1';
+
+                    btn.addEventListener('click', function(){
+                        const tr = this.closest('tr');
+                        const row = $('#requestHistory').DataTable().row(tr);
+
+                        if(tr.classList.contains('shown')){
+                            row.child.hide();
+                            tr.classList.remove('shown');
+                            this.querySelector('i').className = 'fas fa-chevron-right';
+                            return;
+                        }
+
+                        row.child(detailHtml(tr.dataset.items || '[]')).show();
+
+                        tr.classList.add('shown');
+                        this.querySelector('i').className = 'fas fa-chevron-down';
+                    });
+                });
+            }
+
+            function detailHtml(itemsJson){
+                let items;
+                try {
+                    items = JSON.parse(itemsJson);
+                } catch(e){
+                    items = [];
+                }
+
+                if(!items.length){
+                    return '<div class="history-detail">Tidak ada item</div>';
+                }
+
+                const rows = items.map(function(it){
+                    const img = it.photo
+                        ? `<img class="product-img" src="${escapeHtml(it.photo)}" alt="">`
+                        : `<div class="product-icon"><i class="fas fa-box-open"></i></div>`;
+
+                    return `
+                        <div class="detail-item">
+                            <div class="detail-prod">
+                                ${img}
+                                <div>
+                                    <div class="detail-name">${escapeHtml(it.name)}</div>
+                                    <div class="detail-code">${escapeHtml(it.code)}</div>
+                                </div>
+                            </div>
+                            <div class="detail-qty">
+                                <i class="fas fa-cubes me-1"></i>
+                                ${fmt(it.qty)} pcs
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+
+                return `
+                    <div class="history-detail">
+                        <div class="detail-head">Detail Item</div>
+                        ${rows}
+                    </div>
+                `;
+            }
+
+            function escapeHtml(s){
+                return String(s == null ? '' : s)
+                    .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+                    .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+            }
+
+            function fmt(n){
+                return String(n || 0).replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+            }
+
+            // PRINT
+            function printRequest(btn){
+                const tr = btn.closest('tr');
+                const id = parseInt(tr.dataset.id);
+                if(!id) return;
+                window.open('transfer-print-pdf.php?id=' + id, '_blank');
             }
 
             loadTable(true);

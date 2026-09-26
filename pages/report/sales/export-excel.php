@@ -55,7 +55,7 @@ switch ($tab) {
 
     case 'summary':
         $omzet = (float) mysqli_fetch_assoc(mysqli_query($conn, "SELECT COALESCE(SUM(total),0) AS v FROM orders WHERE status_payment='paid' AND $where"))['v'];
-        $expense = (float) mysqli_fetch_assoc(mysqli_query($conn, "SELECT COALESCE(SUM(lpi.price),0) AS v FROM list_purchase_items lpi JOIN list_purchases lp ON lpi.list_purchase_id=lp.id WHERE lp.deleted_at IS NULL AND DATE(lp.date_list) BETWEEN '$escFirst' AND '$escLast'"))['v'];
+        $expense = (float) mysqli_fetch_assoc(mysqli_query($conn, "SELECT COALESCE(SUM(pi.price_buy),0) AS v FROM purchase_items pi JOIN purchases p ON pi.purchase_id=p.id WHERE p.deleted_at IS NULL AND pi.deleted_at IS NULL AND DATE(p.date) BETWEEN '$escFirst' AND '$escLast'"))['v'];
         $orderCount = (int) mysqli_fetch_assoc(mysqli_query($conn, "SELECT COUNT(*) AS v FROM orders WHERE status_payment='paid' AND $where"))['v'];
         $profit = $omzet - $expense;
         $total = $profit;
@@ -68,18 +68,18 @@ switch ($tab) {
         break;
 
     case 'expense':
-        $q = mysqli_query($conn, "SELECT lp.id, lp.date_list, COUNT(lpi.id) AS total_items, COALESCE(SUM(lpi.price),0) AS total_price FROM list_purchases lp LEFT JOIN list_purchase_items lpi ON lp.id=lpi.list_purchase_id WHERE lp.deleted_at IS NULL AND DATE(lp.date_list) BETWEEN '$escFirst' AND '$escLast' GROUP BY lp.id, lp.date_list ORDER BY lp.date_list DESC, lp.id DESC");
+        $q = mysqli_query($conn, "SELECT p.id, p.form, p.date, COUNT(pi.id) AS total_items, COALESCE(SUM(pi.price_buy),0) AS total_price FROM purchases p LEFT JOIN purchase_items pi ON p.id=pi.purchase_id AND pi.deleted_at IS NULL WHERE p.deleted_at IS NULL AND DATE(p.date) BETWEEN '$escFirst' AND '$escLast' AND EXISTS (SELECT 1 FROM purchase_items pi2 WHERE pi2.purchase_id=p.id AND pi2.deleted_at IS NULL AND pi2.qty_buy IS NOT NULL) GROUP BY p.id, p.form, p.date ORDER BY p.date DESC, p.id DESC");
         if ($q) while ($r = mysqli_fetch_assoc($q)) { $rows[] = $r; $total += (float) $r['total_price']; }
         break;
 
     case 'profit':
-        $q = mysqli_query($conn, "SELECT d.dt, COALESCE(o.omzet,0) AS omzet, COALESCE(e.expense,0) AS expense FROM (SELECT DATE(tanggal) AS dt FROM orders WHERE $where UNION SELECT DATE(date_list) AS dt FROM list_purchases WHERE deleted_at IS NULL AND DATE(date_list) BETWEEN '$escFirst' AND '$escLast') d LEFT JOIN (SELECT DATE(tanggal) AS dt, COALESCE(SUM(total),0) AS omzet FROM orders WHERE status_payment='paid' AND $where GROUP BY DATE(tanggal)) o ON o.dt=d.dt LEFT JOIN (SELECT DATE(lp.date_list) AS dt, COALESCE(SUM(lpi.price),0) AS expense FROM list_purchases lp JOIN list_purchase_items lpi ON lp.id=lpi.list_purchase_id WHERE lp.deleted_at IS NULL AND DATE(lp.date_list) BETWEEN '$escFirst' AND '$escLast' GROUP BY DATE(lp.date_list)) e ON e.dt=d.dt ORDER BY d.dt DESC");
+        $q = mysqli_query($conn, "SELECT d.dt, COALESCE(o.omzet,0) AS omzet, COALESCE(e.expense,0) AS expense FROM (SELECT DATE(tanggal) AS dt FROM orders WHERE $where UNION SELECT DATE(date) AS dt FROM purchases WHERE deleted_at IS NULL AND DATE(date) BETWEEN '$escFirst' AND '$escLast') d LEFT JOIN (SELECT DATE(tanggal) AS dt, COALESCE(SUM(total),0) AS omzet FROM orders WHERE status_payment='paid' AND $where GROUP BY DATE(tanggal)) o ON o.dt=d.dt LEFT JOIN (SELECT DATE(p.date) AS dt, COALESCE(SUM(pi.price_buy),0) AS expense FROM purchases p JOIN purchase_items pi ON p.id=pi.purchase_id WHERE p.deleted_at IS NULL AND pi.deleted_at IS NULL AND DATE(p.date) BETWEEN '$escFirst' AND '$escLast' GROUP BY DATE(p.date)) e ON e.dt=d.dt ORDER BY d.dt DESC");
         if ($q) while ($r = mysqli_fetch_assoc($q)) { $r['profit'] = (float)$r['omzet'] - (float)$r['expense']; $rows[] = $r; $total += $r['profit']; }
         break;
 
     case 'margin':
-        $q = mysqli_query($conn, "SELECT p.name, COALESCE(SUM(od.qty),0) AS qty_sold, COALESCE(AVG(od.price),0) AS sell_price, COALESCE((SELECT AVG(pi.buy_price) FROM purchase_items pi WHERE pi.product_id=p.id AND pi.deleted_at IS NULL AND pi.buy_price>0),0) AS buy_price, COALESCE(SUM(od.subtotal),0) AS revenue FROM order_details od JOIN orders o ON od.order_id=o.id JOIN products p ON od.product_id=p.id WHERE o.status_payment='paid' AND $where GROUP BY p.id, p.name ORDER BY revenue DESC, p.name ASC");
-        if ($q) while ($r = mysqli_fetch_assoc($q)) { $qty=(int)$r['qty_sold']; $sell=(float)$r['sell_price']; $buy=(float)$r['buy_price']; $r['margin_pct']=$sell>0?(($sell-$buy)/$sell)*100:0; $r['profit']=($sell-$buy)*$qty; $rows[]=$r; $total+=$r['profit']; }
+        $q = mysqli_query($conn, "SELECT p.name, COALESCE(SUM(od.qty),0) AS qty_sold, COALESCE(AVG(od.price),0) AS sell_price, COALESCE((SELECT AVG(pi.price) FROM purchase_items pi WHERE pi.product_id=p.id AND pi.deleted_at IS NULL AND pi.price>0),0) AS price, COALESCE(SUM(od.subtotal),0) AS revenue FROM order_details od JOIN orders o ON od.order_id=o.id JOIN products p ON od.product_id=p.id WHERE o.status_payment='paid' AND $where GROUP BY p.id, p.name ORDER BY revenue DESC, p.name ASC");
+        if ($q) while ($r = mysqli_fetch_assoc($q)) { $qty=(int)$r['qty_sold']; $sell=(float)$r['sell_price']; $buy=(float)$r['price']; $r['margin_pct']=$sell>0?(($sell-$buy)/$sell)*100:0; $r['profit']=($sell-$buy)*$qty; $rows[]=$r; $total+=$r['profit']; }
         break;
 
     case 'all':
@@ -235,8 +235,8 @@ for ($idx = 0; $idx < $count; $idx++) {
 
         case 'expense':
             $sheet->setCellValue("A$row", $no);
-            $sheet->setCellValue("B$row", date('d M Y', strtotime($r['date_list'])));
-            $sheet->setCellValue("C$row", 'BELANJA-' . str_pad($r['id'], 7, '0', STR_PAD_LEFT));
+            $sheet->setCellValue("B$row", date('d M Y', strtotime($r['date'])));
+            $sheet->setCellValue("C$row", $r['form']);
             $sheet->setCellValue("D$row", (int) $r['total_items']);
             $sheet->setCellValue("E$row", (float) $r['total_price']);
             break;
@@ -253,7 +253,7 @@ for ($idx = 0; $idx < $count; $idx++) {
         case 'margin':
             $qty = (int) $r['qty_sold'];
             $sell = (float) $r['sell_price'];
-            $buy = (float) $r['buy_price'];
+            $buy = (float) $r['price'];
             $sheet->setCellValue("A$row", $no);
             $sheet->setCellValue("B$row", $r['name']);
             $sheet->setCellValue("C$row", $qty);

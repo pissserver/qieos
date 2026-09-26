@@ -17,7 +17,7 @@
     }
 ?>
 
-<link rel="stylesheet" href="<?php echo BASE_URL; ?>/css/pages/sidebar.css">
+<link rel="stylesheet" href="<?php echo BASE_URL; ?>/css/pages/sidebar.css?v=<?php echo filemtime(__DIR__ . '/../../css/pages/sidebar.css'); ?>">
 
 <!-- Mobile Overlay Backdrop -->
 <div class="sidebar-overlay" id="sidebarOverlay"></div>
@@ -39,6 +39,10 @@
             <i class="fas fa-bullhorn"></i>
             <span style="position:absolute;top:-3px;right:-3px;background:#ef4444;color:#fff;font-size:7px;font-weight:700;padding:2px 4px;border-radius:4px;">NEW</span>
         </button>
+        <a href="<?php echo BASE_URL; ?>/pages/chat/chat.php" id="chatNavBtnMobile" class="mobile-nav-btn" aria-label="Chat" style="width:38px;height:38px;border-radius:10px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.1);color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:14px;position:relative;text-decoration:none;">
+            <i class="fas fa-comments"></i>
+            <span class="cart-badge chat-unread-badge d-none" style="min-width:16px;height:16px;font-size:9px;padding:2px 4px;top:-4px;right:-4px;">0</span>
+        </a>
         <button
             class="navbar-toggler"
             type="button"
@@ -51,6 +55,43 @@
 
 <!-- Main Collapsible Sidebar -->
 <div class="sidebar" id="sidebarMenu">
+    <!-- Meteor Shower Background -->
+    <div class="sidebar-meteors" aria-hidden="true">
+        <span class="meteor"></span>
+        <span class="meteor"></span>
+        <span class="meteor"></span>
+        <span class="meteor"></span>
+        <span class="meteor"></span>
+    </div>
+
+    <!-- Scroll Parallax Layers -->
+    <div class="sidebar-parallax" aria-hidden="true">
+        <div class="plx-depth plx-far">
+            <span class="plx-glow"></span>
+            <span class="pstar" style="top:16%;left:12%;--s:1.5px;--d:.2s"></span>
+            <span class="pstar" style="top:26%;left:78%;--s:2px;--d:1.1s"></span>
+            <span class="pstar" style="top:44%;left:20%;--s:1.5px;--d:1.8s"></span>
+            <span class="pstar" style="top:56%;left:85%;--s:2px;--d:.6s"></span>
+            <span class="pstar" style="top:72%;left:38%;--s:1.5px;--d:2.3s"></span>
+        </div>
+        <div class="plx-depth plx-mid">
+            <span class="plx-moon" style="top:30%;left:58%"></span>
+            <span class="pstar" style="top:12%;left:34%;--s:2.5px;--d:0s"></span>
+            <span class="pstar" style="top:22%;left:90%;--s:2px;--d:1.4s"></span>
+            <span class="pstar" style="top:38%;left:8%;--s:2.5px;--d:2.1s"></span>
+            <span class="pstar" style="top:52%;left:64%;--s:2px;--d:.8s"></span>
+            <span class="pstar" style="top:68%;left:26%;--s:2.5px;--d:1.7s"></span>
+            <span class="pstar" style="top:82%;left:72%;--s:2px;--d:2.6s"></span>
+        </div>
+        <div class="plx-depth plx-near">
+            <span class="pstar" style="top:20%;left:48%;--s:4px;--d:0s"></span>
+            <span class="pstar" style="top:34%;left:14%;--s:3px;--d:1.2s"></span>
+            <span class="pstar" style="top:50%;left:80%;--s:4px;--d:2s"></span>
+            <span class="pstar" style="top:62%;left:40%;--s:3px;--d:.5s"></span>
+            <span class="pstar" style="top:76%;left:88%;--s:3.5px;--d:1.6s"></span>
+        </div>
+    </div>
+
     <!-- Header -->
     <div class="sidebar-header">
         <a href="<?php echo BASE_URL; ?>/pages/dashboard.php" class="sidebar-logo">
@@ -108,24 +149,31 @@
                 <!-- MASTER DATA -->
                 <li class="nav-title">MASTER</li>
 
-                <li class="nav-item <?= ($current_page == 'master-product.php' || $current_page == 'master-product-detail.php') ? 'active' : ''; ?>">
-                    <a href="<?php echo BASE_URL; ?>/pages/master/master-product.php" class="nav-link" data-tooltip="Master Produk">
+                <li class="nav-item <?= ($current_page == 'coming-soon.php' && $menu == 'master-product') ? 'active' : ''; ?>">
+                    <a href="<?php echo BASE_URL; ?>/pages/coming-soon.php?menu=master-product" class="nav-link" data-tooltip="Master Produk">
                         <span class="sidebar-icon"><i class="fas fa-boxes-stacked"></i></span>
                         <span class="sidebar-text">Master Produk</span>
                     </a>
                 </li>
 
-                <li class="nav-item <?= ($current_page == 'master-supplier.php') ? 'active' : ''; ?>">
-                    <a href="<?php echo BASE_URL; ?>/pages/master/master-supplier.php" class="nav-link" data-tooltip="Master Supplier">
+                <li class="nav-item <?= ($current_page == 'coming-soon.php' && $menu == 'master-supplier') ? 'active' : ''; ?>">
+                    <a href="<?php echo BASE_URL; ?>/pages/coming-soon.php?menu=master-supplier" class="nav-link" data-tooltip="Master Supplier">
                         <span class="sidebar-icon"><i class="fas fa-truck"></i></span>
                         <span class="sidebar-text">Master Supplier</span>
                     </a>
                 </li>
 
-                <li class="nav-item <?= ($current_page == 'master-customer.php') ? 'active' : ''; ?>">
-                    <a href="<?php echo BASE_URL; ?>/pages/master/master-customer.php" class="nav-link" data-tooltip="Master Customer">
+                <li class="nav-item <?= ($current_page == 'coming-soon.php' && $menu == 'master-customer') ? 'active' : ''; ?>">
+                    <a href="<?php echo BASE_URL; ?>/pages/coming-soon.php?menu=master-customer" class="nav-link" data-tooltip="Master Customer">
                         <span class="sidebar-icon"><i class="fas fa-users"></i></span>
                         <span class="sidebar-text">Master Customer</span>
+                    </a>
+                </li>
+
+                <li class="nav-item <?= ($current_page == 'master-user.php') ? 'active' : ''; ?>">
+                    <a href="<?php echo BASE_URL; ?>/pages/master/master-user.php" class="nav-link" data-tooltip="Master User">
+                        <span class="sidebar-icon"><i class="fas fa-users-cog"></i></span>
+                        <span class="sidebar-text">Master User</span>
                     </a>
                 </li>
 
@@ -143,13 +191,6 @@
                     <a href="<?php echo BASE_URL; ?>/pages/coming-soon.php?menu=purchase" class="nav-link" data-tooltip="Input Pembelian">
                         <span class="sidebar-icon"><i class="fas fa-cart-plus"></i></span>
                         <span class="sidebar-text">Input Pembelian</span>
-                    </a>
-                </li>
-
-                <li class="nav-item <?= ($current_page == 'additional.php' || ($current_page == 'coming-soon.php' && $menu == 'additional')) ? 'active' : ''; ?>">
-                    <a href="<?php echo BASE_URL; ?>/pages/coming-soon.php?menu=additional" class="nav-link" data-tooltip="Produk Tambahan">
-                        <span class="sidebar-icon"><i class="fas fa-box-open"></i></span>
-                        <span class="sidebar-text">Produk Tambahan</span>
                     </a>
                 </li>
 
@@ -201,23 +242,6 @@
                     <a href="<?php echo BASE_URL; ?>/pages/report/report-tenant.php" class="nav-link" data-tooltip="Laporan Tenant">
                         <span class="sidebar-icon"><i class="fas fa-chart-line"></i></span>
                         <span class="sidebar-text">Laporan Tenant</span>
-                    </a>
-                </li>
-
-                <!-- MANAJEMEN STAFF -->
-                <li class="nav-title">MANAJEMEN USER</li>
-
-                <li class="nav-item <?= ($current_page == 'administrator.php' || ($current_page == 'administrator.php' && $menu == 'administrator')) ? 'active' : ''; ?>">
-                    <a href="<?php echo BASE_URL; ?>/pages/management/administrator.php" class="nav-link" data-tooltip="Administrator">
-                        <span class="sidebar-icon"><i class="fas fa-users"></i></span>
-                        <span class="sidebar-text">Administrator</span>
-                    </a>
-                </li>
-
-                <li class="nav-item <?= ($current_page == 'cashier.php' || ($current_page == 'cashier.php' && $menu == 'cashier')) ? 'active' : ''; ?>">
-                    <a href="<?php echo BASE_URL; ?>/pages/management/cashier.php" class="nav-link" data-tooltip="Staff Kasir">
-                        <span class="sidebar-icon"><i class="fas fa-users"></i></span>
-                        <span class="sidebar-text">Staff Kasir</span>
                     </a>
                 </li>
 
@@ -320,6 +344,15 @@
             }
         }
 
+        // Staggered entrance animation (first load only, once per session)
+        if (menuContainer && sessionStorage.getItem('sidebar_animate_in') !== '1') {
+            menuContainer.querySelectorAll(':scope > ul > li').forEach(function(item, index) {
+                item.style.setProperty('--i', index);
+            });
+            sidebar.classList.add('animate-in');
+            sessionStorage.setItem('sidebar_animate_in', '1');
+        }
+
         // Auto Scroll to Active Menu Item
         const activeItem = sidebar.querySelector('.nav-item.active');
         if (activeItem && menuContainer) {
@@ -382,6 +415,46 @@
             menuContainer.addEventListener('scroll', function() {
                 if (tooltip) tooltip.classList.remove('show');
             });
+        }
+
+        // Scroll Parallax Background (GPU-only, single CSS var per frame)
+        if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+            let targetY = 0, currentY = 0, rafId = null;
+
+            // Konten ter-scroll di dalam .content (bukan window) — ambil nilai terbesar
+            const scrollEl = document.querySelector('.content');
+
+            function getScrollTop() {
+                const c = scrollEl ? scrollEl.scrollTop || 0 : 0;
+                const w = window.pageYOffset || document.documentElement.scrollTop || 0;
+                return Math.max(c, w);
+            }
+
+            function parallaxFrame() {
+                currentY += (targetY - currentY) * 0.08;
+                sidebar.style.setProperty('--py', Math.round(currentY * 10) / 10 + 'px');
+                rafId = null;
+                if (Math.abs(targetY - currentY) > 0.5) {
+                    rafId = requestAnimationFrame(parallaxFrame);
+                }
+            }
+
+            function parallaxScroll() {
+                // Sidebar tersembunyi di mobile → tidak perlu hitung parallax
+                if (window.innerWidth < 992 && !sidebar.classList.contains('show')) {
+                    currentY = 0;
+                    return;
+                }
+                targetY = getScrollTop();
+                if (rafId === null) {
+                    rafId = requestAnimationFrame(parallaxFrame);
+                }
+            }
+
+            document.addEventListener('scroll', parallaxScroll, { passive: true, capture: true });
+            window.addEventListener('scroll', parallaxScroll, { passive: true });
+            window.addEventListener('resize', parallaxScroll);
+            parallaxScroll();
         }
     });
 </script>

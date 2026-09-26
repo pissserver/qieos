@@ -17,9 +17,9 @@ $order = mysqli_query($conn, "
 $details = mysqli_query($conn, "
     SELECT od.*, p.name AS product_name 
     FROM order_details od
-    JOIN products p ON od.product_id = p.id
+    LEFT JOIN products p ON od.product_id = p.id
     WHERE od.order_id = $order_id
-    ORDER BY p.name ASC
+    ORDER BY COALESCE(od.name, p.name) ASC
 ");
 ?>
 
@@ -34,7 +34,7 @@ $details = mysqli_query($conn, "
         sizes="120x120"
         href="../assets/img/brand/qieos2.png" />
 
-    <link rel="stylesheet" href="<?php echo BASE_URL; ?>/css/pages/receipt.css">
+    <link rel="stylesheet" href="<?php echo BASE_URL; ?>/css/pages/receipt.css?v=<?php echo filemtime(__DIR__ . '/../css/pages/receipt.css'); ?>">
 
 </head>
 
@@ -75,7 +75,7 @@ $details = mysqli_query($conn, "
             <div class="item">
 
                 <div class="item-name">
-                    <?= ucwords(strtolower($d['product_name'])) ?>
+                    <?= htmlspecialchars(ucwords(strtolower($d['name'] ? $d['name'] : ($d['product_name'] ? $d['product_name'] : 'Barang')))) ?>
                 </div>
 
                 <div class="item-detail">

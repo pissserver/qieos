@@ -3,7 +3,8 @@ include '../../../sessions/session.php';
 
 // AMBIL PARAMETER
 $search = isset($_GET['search']) ? mysqli_real_escape_string($conn, $_GET['search']) : '';
-$date   = isset($_GET['date']) ? $_GET['date'] : '';
+$date_start = isset($_GET['date_start']) ? $_GET['date_start'] : '';
+$date_end   = isset($_GET['date_end']) ? $_GET['date_end'] : '';
 
 $limit = 5;
 $page  = isset($_GET['page']) ? (int)$_GET['page'] : 1;
@@ -12,8 +13,12 @@ $start = ($page - 1) * $limit;
 // FILTER
 $where = "WHERE status_payment != 'cancelled'";
 
-if (!empty($date)) {
-    $where .= " AND DATE(tanggal) = '$date'";
+if (!empty($date_start) && !empty($date_end)) {
+    $where .= " AND DATE(tanggal) BETWEEN '$date_start' AND '$date_end'";
+} elseif (!empty($date_start)) {
+    $where .= " AND DATE(tanggal) >= '$date_start'";
+} elseif (!empty($date_end)) {
+    $where .= " AND DATE(tanggal) <= '$date_end'";
 }
 
 if (!empty($search)) {
@@ -58,39 +63,43 @@ function tanggalIndo($date)
 <div id="order-list">
     <?php while ($row = mysqli_fetch_assoc($query)): ?>
         <div class="order-card">
+            <div class="oc-glow"></div>
+
             <div class="order-header">
-                <div>
-                    <div class="order-id">
-                        <i class="fas fa-file-invoice"></i> <?= $row['code']; ?>
-                    </div>
-                    <div class="order-date">
-                        <i class="fas fa-calendar-alt"></i> <?= tanggalIndo($row['tanggal']); ?>
+                <div class="oc-id">
+                    <i class="fas fa-file-invoice"></i>
+                    <div>
+                        <span class="oc-code"><?= $row['code']; ?></span>
+                        <div class="order-date">
+                            <i class="fas fa-calendar-alt"></i> <?= tanggalIndo($row['tanggal']); ?>
+                        </div>
                     </div>
                 </div>
-                <div class="<?= $row['status_payment'] === 'paid' ? 'badge-success' : 'badge-warning'; ?>">
-                    <i class="fas <?= $row['status_payment'] === 'paid' ? 'fa-check-circle' : 'fa-spinner'; ?>"></i>
+                <div class="oc-status <?= $row['status_payment'] === 'paid' ? 's-paid' : 's-wait'; ?>">
+                    <i class="fas <?= $row['status_payment'] === 'paid' ? 'fa-check-circle' : 'fa-spinner fa-spin'; ?>"></i>
                     <?= $row['status_payment'] == 'paid' ? 'Terbayar' : 'Waiting'; ?>
                 </div>
             </div>
 
-            <div class="order-body">
-                <div class="badge-price">
-                    <i class="fas fa-money-bill-wave"></i> Rp <?= number_format($row['total']); ?>
+            <div class="oc-body">
+                <div class="oc-price">
+                    <span class="oc-price-lbl"><i class="fas fa-money-bill-wave"></i> Total</span>
+                    <span class="oc-amount">Rp <?= number_format($row['total']); ?></span>
                 </div>
-                <div>
+                <div class="oc-actions">
                     <button class="btn-soft btn-detail" onclick="showDetail(<?= $row['id']; ?>)">
-                        Lihat
+                        <i class="fas fa-eye"></i> Lihat
                     </button>
 
                     <?php if ($row['status_payment'] !== 'paid'): ?>
                         <?php if ($user['role'] === 'developer'): ?>
                         <button class="btn-soft btn-cancel" onclick="cancelOrder(<?= $row['id']; ?>, '<?= $row['code']; ?>')">
-                            Cancel
+                            <i class="fas fa-ban"></i> Cancel
                         </button>
                         <?php endif; ?>
 
                         <button class="btn-soft btn-pay" onclick="payOrder(<?= $row['id']; ?>, '<?= $row['code']; ?>')">
-                            Bayar
+                            <i class="fas fa-money-bill-wave"></i> Bayar
                         </button>
                     <?php endif; ?>
                 </div>

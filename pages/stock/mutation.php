@@ -9,7 +9,7 @@ include '../../sessions/session.php';
     <title>Mutasi Stok - Qieos</title>
     <?php include '../../script/headscript.php'; ?>
 
-    <link rel="stylesheet" href="<?php echo BASE_URL; ?>/css/pages/mutation.css">
+    <link rel="stylesheet" href="<?php echo BASE_URL; ?>/css/pages/mutation.css?v=<?php echo filemtime(__DIR__ . '/../../css/pages/mutation.css'); ?>">
 </head>
 
 <body>
@@ -72,16 +72,11 @@ include '../../sessions/session.php';
                                 p.id,
                                 p.name,
                                 p.code,
-                                COALESCE(SUM(pi.remaining_qty),0) stock,
-                                ss.qty as sales_qty
+                                p.photo,
+                                COALESCE((SELECT SUM(pi.remaining_qty) FROM purchase_items pi WHERE pi.product_id = p.id AND pi.deleted_at IS NULL),0) stock,
+                                COALESCE((SELECT SUM(ss.qty) FROM sales_stock ss WHERE ss.product_id = p.id),0) sales_qty
                             FROM products p
-                            LEFT JOIN purchase_items pi
-                                ON pi.product_id=p.id
-                                AND pi.deleted_at IS NULL
-                            LEFT JOIN sales_stock ss
-                                ON ss.product_id=p.id
                             WHERE p.category != 'additional'
-                            GROUP BY p.id
                             ORDER BY p.name ASC
                             ");
                             while($d=mysqli_fetch_assoc($q)): ?>
@@ -92,9 +87,15 @@ include '../../sessions/session.php';
                                 <td>
                                     <div class="product-wrap">
 
+                                        <?php if(!empty($d['photo'])): ?>
+                                        <img class="product-img"
+                                            src="<?= BASE_URL ?>/assets/img/products/<?= htmlspecialchars($d['photo']) ?>"
+                                            alt="<?= htmlspecialchars($d['name']) ?>">
+                                        <?php else: ?>
                                         <div class="product-icon">
                                             <i class="fas fa-box-open"></i>
                                         </div>
+                                        <?php endif; ?>
 
                                         <div>
                                             <div class="fw-bold">
@@ -200,8 +201,8 @@ include '../../sessions/session.php';
                     paginate: {
                         first: "Awal",
                         last: "Akhir",
-                        next: "õ",
-                        previous: "ã"
+                        next: "‚Üí",
+                        previous: "‚Üê"
                     }
                 }
             });

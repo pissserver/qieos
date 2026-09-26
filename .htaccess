@@ -13,3 +13,10 @@
 # RewriteCond %{REQUEST_FILENAME} !-f
 # RewriteCond %{REQUEST_FILENAME}.php -f
 # RewriteRule ^(.+)$ $1.php [L]
+
+# Mencegah aset statis tersaji versi lama dari cache browser
+<IfModule mod_headers.c>
+    <FilesMatch "\.(css|js|png|jpe?g|gif|ico|svg|woff2?|ttf|eot)$">
+        Header set Cache-Control "no-cache"
+    </FilesMatch>
+</IfModule>

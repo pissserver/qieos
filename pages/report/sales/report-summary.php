@@ -13,11 +13,12 @@ $omzet = report_scalar($conn, "
 ");
 
 $expense = report_scalar($conn, "
-    SELECT COALESCE(SUM(lpi.price), 0) AS v
-    FROM list_purchase_items lpi
-    JOIN list_purchases lp ON lpi.list_purchase_id = lp.id
-    WHERE lp.deleted_at IS NULL
-      AND DATE(lp.date_list) BETWEEN '$first' AND '$last'
+    SELECT COALESCE(SUM(pi.price_buy), 0) AS v
+    FROM purchase_items pi
+    JOIN purchases p ON pi.purchase_id = p.id
+    WHERE p.deleted_at IS NULL
+      AND pi.deleted_at IS NULL
+      AND DATE(p.date) BETWEEN '$first' AND '$last'
 ");
 
 $orderCount = report_scalar($conn, "

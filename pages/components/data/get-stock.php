@@ -1,7 +1,7 @@
 <?php
     include '../../../script/connection.php';
 
-    $res = mysqli_query($conn, "SELECT product_id, qty FROM sales_stock");
+    $res = mysqli_query($conn, "SELECT product_id, COALESCE(SUM(qty),0) qty FROM sales_stock GROUP BY product_id");
 
     $data = [];
 

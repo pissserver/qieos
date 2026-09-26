@@ -8,18 +8,12 @@
         
         <?php include "../script/headscript.php"; ?>
         
-        <link rel="stylesheet" href="../assets/css/auth-premium.css">
+        <link rel="stylesheet" href="../assets/css/auth-premium.css?v=<?php echo filemtime('../assets/css/auth-premium.css'); ?>">
     </head>
 
     <body class="auth-container">
-        <!-- Ambient floating shapes -->
-        <div class="auth-shapes">
-            <div class="shape"></div>
-            <div class="shape"></div>
-            <div class="shape"></div>
-            <div class="shape"></div>
-            <div class="shape"></div>
-        </div>
+        <!-- One universe, everywhere -->
+        <?php include 'components/space-bg.php'; ?>
 
         <main class="auth-card-wrapper">
             <div class="auth-card">

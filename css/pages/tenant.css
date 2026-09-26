@@ -1,4 +1,66 @@
 /* ====================================
+   PANEL (sesuai model list.php / halaman lain)
+   ==================================== */
+
+.section-card {
+    background: #fff;
+    border-radius: 24px;
+    padding: 24px;
+    box-shadow: 0 8px 24px rgba(15, 23, 42, .05);
+}
+
+.panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+    padding: 18px 22px;
+    border-radius: 18px;
+}
+
+.panel-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    min-width: 0;
+    flex: 1 1 auto;
+}
+
+.panel-left > div { min-width: 0; }
+
+.panel-icon {
+    width: 58px;
+    height: 58px;
+    border-radius: 16px;
+    background: rgba(255, 255, 255, .12);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+}
+
+.panel-title { font-size: 17px; font-weight: 700; }
+.panel-subtitle { font-size: 13px; opacity: .85; }
+
+.panel-primary {
+    background:linear-gradient(135deg, #0f172a, #1e293b, #334155);
+    color: #fff;
+}
+
+@media (max-width: 991.98px) {
+    .panel-header { flex-direction: column; align-items: flex-start; gap: 14px; padding: 16px 18px; }
+    .panel-left { width: 100%; }
+}
+
+@media (max-width: 575.98px) {
+    .section-card { padding: 14px; }
+    .panel-icon { width: 48px; height: 48px; font-size: 18px; border-radius: 14px; }
+    .panel-title { font-size: 15px; }
+    .panel-subtitle { font-size: 12px; }
+}
+
+/* ====================================
    PREMIUM TENANT REGISTRATION CARD
    ==================================== */
 
@@ -228,30 +290,36 @@
 }
 
     /* ==========================
-    LUXURY PRODUCT CARD
+    PREMIUM TENANT CARD (compact)
     ========================== */
 
     .product-card{
-        background:linear-gradient(
-            180deg,
-            #0f172a,
-            #020617
-        );
-
-        border-radius:35px;
-        overflow:hidden;
-
         position:relative;
+        background:linear-gradient(165deg,#0f172a 0%,#020617 100%);
+        border-radius:18px;
+        overflow:hidden;
+        border:1px solid rgba(255,255,255,.07);
+        transition:transform .3s, border-color .3s, box-shadow .3s;
+    }
 
-        box-shadow:
-            0 25px 60px rgba(2,6,23,.35);
-
-        transition:.4s;
+    .product-card::before{
+        content:'';
+        position:absolute;
+        top:0;left:0;right:0;
+        height:2px;
+        background:linear-gradient(90deg,#6366f1,#8b5cf6,#f59e0b);
+        opacity:.55;
+        transition:opacity .3s;
+        z-index:5;
     }
 
     .product-card:hover{
-        transform:translateY(-10px);
+        transform:translateY(-4px);
+        border-color:rgba(99,102,241,.32);
+        box-shadow:0 16px 36px rgba(2,6,23,.45);
     }
+
+    .product-card:hover::before{opacity:1}
 
     .product-image-wrap{
         position:relative;
@@ -259,7 +327,7 @@
 
     .product-img{
         width:100%;
-        height:320px;
+        height:130px;
         object-fit:cover;
         transition:.5s;
     }
@@ -268,114 +336,118 @@
         transform:scale(1.06);
     }
 
+    .product-image-wrap::after{
+        content:'';
+        position:absolute;
+        left:0;right:0;bottom:0;
+        height:65%;
+        background:linear-gradient(180deg,transparent,rgba(2,6,23,.92));
+        pointer-events:none;
+    }
+
     /* CONTENT */
 
     .product-content{
-
-        margin-top:-40px;
-
         position:relative;
-
-        z-index:10;
-
-        background:
-            linear-gradient(
-                180deg,
-                rgba(15,23,42,.98),
-                rgba(2,6,23,1)
-            );
-
-        border-radius:30px 30px 0 0;
-
-        padding:25px;
+        padding:14px 16px 16px;
     }
 
-    /* CATEGORY */
-
+    /* OWNER */
     .product-meta{
         display:flex;
-        justify-content:space-between;
-        align-items:center;
-        margin-bottom:15px;
+        flex-direction:column;
+        align-items:flex-start;
+        margin-bottom:8px;
     }
 
     .category-pill{
         display:inline-flex;
         align-items:center;
-        gap:8px;
-        padding:8px 15px;
+        gap:6px;
+        max-width:100%;
+        padding:4px 10px;
         border-radius:999px;
-        background:
-            rgba(251,191,36,.1);
+        background:rgba(245,158,11,.12);
         color:#fbbf24;
-        font-size:13px;
+        font-size:11px;
         font-weight:700;
-        margin-bottom:15px;
+        white-space:nowrap;
+        overflow:hidden;
+        text-overflow:ellipsis;
+    }
+
+    .category-pill i{
+        font-size:9px;
+        flex-shrink:0;
     }
 
     /* TITLE */
 
     .product-title{
         color:#fff;
-        font-size:30px;
+        font-size:16px;
         font-weight:800;
-        line-height:1.2;
-        margin-bottom:12px;
+        line-height:1.25;
+        margin-bottom:6px;
+        white-space:nowrap;
+        overflow:hidden;
+        text-overflow:ellipsis;
     }
 
     /* DESC */
 
     .product-desc{
+        display:flex;
+        align-items:center;
+        gap:6px;
         color:#94a3b8;
-        line-height:1.8;
-        margin-bottom:20px;
+        font-size:12px;
+        line-height:1.6;
+        margin-bottom:14px;
+    }
+
+    .product-desc i{
+        font-size:11px;
     }
 
     /* BUTTON */
 
     .btn-detail{
-
         width:100%;
-        height:74px;
-
+        height:42px;
         border:none;
-
-        border-radius:999px;
-
-        background:
-            linear-gradient(
-                135deg,
-                #fcd34d,
-                #f59e0b
-            );
-
+        border-radius:12px;
+        background:linear-gradient(135deg,#fbbf24,#f59e0b);
         color:#111827;
-
-        font-size:20px;
+        font-size:13px;
         font-weight:800;
-
         display:flex;
-        justify-content:space-between;
+        justify-content:center;
         align-items:center;
-
-        padding:0 25px;
-
-        box-shadow:
-            0 0 25px rgba(245,158,11,.4);
-
+        text-decoration:none;
+        box-shadow:0 8px 20px rgba(245,158,11,.3);
         transition:.3s;
     }
 
-    .btn-detail:hover{
-        transform:translateY(-3px);
-        box-shadow:
-            0 0 35px rgba(245,158,11,.6);
+    .btn-detail span{
+        display:inline-flex;
+        align-items:center;
+        gap:8px;
     }
 
-    /* ICON */
-
     .btn-detail i{
-        font-size:18px;
+        font-size:12px;
+        transition:transform .3s;
+    }
+
+    .btn-detail:hover{
+        transform:translateY(-2px);
+        box-shadow:0 12px 28px rgba(245,158,11,.45);
+        color:#111827;
+    }
+
+    .btn-detail:hover i{
+        transform:translateX(3px);
     }
 
     /* =========================
@@ -433,369 +505,119 @@
     }
 
     /* ====================================
-    MOBILE
+    MOBILE - compact
     ==================================== */
 
     @media (max-width:575px){
 
         .product-card{
-            border-radius:16px;
+            border-radius:14px;
         }
 
         .product-img{
-            height:105px;
+            height:80px;
         }
 
         .product-content{
-            padding:10px;
-            margin-top:-18px;
-            border-radius:18px 18px 0 0;
+            padding:12px;
         }
 
         .category-pill{
-            font-size:8px;
-            padding:3px 7px;
-            margin-bottom:6px;
-        }
-
-        .star-btn{
-            margin-top:0;
-            width:28px;
-            height:28px;
-            border:none;
-            border-radius:50%;
-            background:rgba(255,255,255,.06);
-            color:#64748b;
-            transition:.3s;
-            display:flex;
-            align-items:center;
-            justify-content:center;
+            font-size:9px;
+            padding:3px 8px;
         }
 
         .product-title{
-            font-size:11px;
-            line-height:1.4;
-            min-height:20px;
-            display:-webkit-box;
-            -webkit-line-clamp:2;
-            -webkit-box-orient:vertical;
-            overflow:hidden;
+            font-size:13px;
+            margin-bottom:4px;
         }
-
-        /* TAMPILKAN STATUS STOK */
 
         .product-desc{
-            display:block;
-            font-size:9px;
-            margin-bottom:8px;
-            color:#94a3b8;
-            text-align:center;
-        }
-
-        .stock-badge,
-        .price-floating{
-            font-size:8px;
-            padding:4px 7px;
-            border-radius:10px;
-        }
-
-        .qty-box{
-            padding:6px;
-            margin-bottom:8px;
-        }
-
-        /* POSISI TENGAH */
-
-        .qty-control{
-            display:flex;
-            justify-content:center;
-            align-items:center;
-            gap:10px;
-            width:100%;
-        }
-
-        .qty-btn{
-            width:26px;
-            height:26px;
-            min-width:26px;
-            min-height:26px;
-            font-size:12px;
-        }
-
-        .qty-input{
-            width:24px;
-            text-align:center;
-            font-size:13px;
-            font-weight:700;
-            border:none;
-            background:transparent;
-            color:#fff;
-        }
-
-        /* ==========================
-        OUT OF STOCK
-        ========================== */
-
-        .out-stock-box{
-            height:25px;
             font-size:10px;
-        }
-
-        .out-stock-box i{
-            font-size:10px;
-        }
-
-        /* ==========================
-        BUTTON DISABLED
-        ========================== */
-
-        .btn-disabled{
-
-            background:
-                linear-gradient(
-                    135deg,
-                    #334155,
-                    #1e293b
-                ) !important;
-
-            color:#94a3b8 !important;
-
-            cursor:not-allowed;
-
-            box-shadow:none !important;
-        }
-
-        .btn-disabled:hover{
-            transform:none !important;
+            margin-bottom:10px;
         }
 
         .btn-detail{
-            height:36px;
-            padding:0 8px;
-            font-size:9px;
-            border-radius:999px;
-
-            display:flex;
-            align-items:center;
-            justify-content:center;
-            gap:5px;
+            height:34px;
+            font-size:10.5px;
+            border-radius:10px;
         }
 
         .btn-detail i{
-            font-size:9px;
+            font-size:10px;
         }
 
     }
 
     /* ==========================
-    PREMIUM TOOLBAR
+    SEARCH DI HEADER PANEL
     ========================== */
 
-    .catalog-toolbar{
-        display:flex;
-        align-items:center;
-        gap:12px;
-
-        padding:14px;
-        border-radius:24px;
-
-        background:rgba(255,255,255,.8);
-        backdrop-filter:blur(18px);
-
-        border:1px solid rgba(255,255,255,.5);
-
-        box-shadow:
-            0 10px 35px rgba(15,23,42,.08),
-            inset 0 1px 0 rgba(255,255,255,.9);
-    }
-
-    /* ==========================
-    SEARCH
-    ========================== */
-
-    .search-modern{
-        flex:1;
+    .panel-search{
         position:relative;
+        flex:1 1 220px;
+        max-width:340px;
+        min-width:200px;
     }
 
-    .search-modern input{
-        width:100%;
-        height:54px;
-
-        border:none;
-        outline:none;
-
-        background:#f8fafc;
-
-        border-radius:18px;
-
-        padding-left:52px;
-        padding-right:18px;
-
-        font-size:14px;
-        font-weight:500;
-
-        transition:.35s;
-    }
-
-    .search-modern input:focus{
-        background:#fff;
-
-        box-shadow:
-            0 0 0 4px rgba(99,102,241,.10),
-            0 8px 25px rgba(99,102,241,.12);
-    }
-
-    .search-icon{
+    .panel-search i{
         position:absolute;
-        left:18px;
+        left:16px;
         top:50%;
         transform:translateY(-50%);
-        color:#64748b;
-        z-index:2;
+        color:#94a3b8;
+        font-size:14px;
+        pointer-events:none;
+        transition:color .25s;
     }
 
-    /* ==========================
-    FILTER AREA
-    ========================== */
+    .panel-search:focus-within i{color:#818cf8}
 
-    .toolbar-actions{
-        display:flex;
-        gap:10px;
-    }
-
-    /* ==========================
-    PREMIUM FILTER
-    ========================== */
-
-    .premium-filter{
-        position:relative;
-        border-radius:18px;
-        overflow:hidden;
-        box-shadow:
-        0 0 20px rgba(99,102,241,.15),
-        0 0 35px rgba(236,72,153,.10);
-    }
-
-    .premium-filter::before{
-        content:"";
-
-        position:absolute;
-        inset:-4px;
-
-        background:linear-gradient(
-            135deg,
-            #6366f1,
-            #8b5cf6,
-            #ec4899,
-            #06b6d4,
-            #6366f1
-        );
-
-        background-size:300% 300%;
-
-        animation:borderMove 5s linear infinite;
-
-        z-index:0;
-    }
-
-    @keyframes borderMove{
-
-        0%{
-            background-position:0% 50%;
-        }
-
-        100%{
-            background-position:100% 50%;
-        }
-
-    }
-
-    .toolbar-btn{
-        position:relative;
-        z-index:2;
-
-        width:54px;
-        height:54px;
-
-        border:none;
-
-        border-radius:16px;
-
-        background:#fff;
-
-        color:#475569;
-
-        cursor:pointer;
-
-        display:flex;
-        align-items:center;
-        justify-content:center;
-
-        font-size:16px;
-
-        transition:.35s;
-    }
-
-    .toolbar-btn:hover{
-
-        color:#6366f1;
-
-        transform:translateY(-2px);
-
-        box-shadow:
-            0 10px 25px rgba(99,102,241,.20);
-    }
-
-    .toolbar-btn i{
-        transition:.35s;
-    }
-
-    .toolbar-btn:hover i{
-        transform:rotate(10deg) scale(1.1);
-    }
-
-    /* ==========================
-    HIDDEN SELECT
-    ========================== */
-
-    .hidden-select{
-        position:absolute;
-        inset:0;
+    .panel-search input{
         width:100%;
-        height:100%;
-        opacity:0;
-        cursor:pointer;
-        z-index:5;
+        height:46px;
+        border:1px solid rgba(255,255,255,.14);
+        outline:none;
+        background:rgba(255,255,255,.07);
+        color:#fff;
+        border-radius:14px;
+        padding:0 16px 0 44px;
+        font-size:14px;
+        font-weight:500;
+        font-family:inherit;
+        transition:all .3s;
+    }
+
+    .panel-search input::placeholder{color:#64748b}
+
+    .panel-search input:focus{
+        background:rgba(255,255,255,.1);
+        border-color:rgba(99,102,241,.65);
+        box-shadow:0 0 0 4px rgba(99,102,241,.18);
     }
 
     /* ==========================
-    MOBILE
+    PANEL SEARCH RESPONSIVE
     ========================== */
 
-    @media(max-width:768px){
-
-        .catalog-toolbar{
-            flex-direction:row;
-            align-items:center;
-            gap:8px;
-            padding:10px;
+    @media(max-width:991px){
+        .panel-search{
+            max-width:none;
+            width:100%;
+            flex-basis:100%;
         }
+    }
 
-        .search-modern{
-            flex:1;
+    @media(max-width:575px){
+        .panel-search input{
+            height:42px;
+            font-size:13px;
+            border-radius:12px;
         }
-
-        .search-modern input{
-            height:48px;
+        .panel-search i{
+            left:14px;
             font-size:13px;
         }
-
-        .toolbar-btn{
-            width:48px;
-            height:48px;
-        }
-
     }
 
     /* Empty Search */

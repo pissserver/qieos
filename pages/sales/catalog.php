@@ -5,9 +5,38 @@ $query = mysqli_query($conn,
             WHERE (p.catalog = 'active' OR p.category = 'additional') AND p.deleted_at IS NULL
             GROUP BY p.id ORDER BY p.starred DESC, p.name ASC"
         );
-?>
 
-<link rel="stylesheet" href="<?php echo BASE_URL; ?>/css/pages/catalog.css">
+$items = [];
+if($query){
+    while($row = mysqli_fetch_assoc($query)){
+        $items[] = $row;
+    }
+}
+
+// Gabungkan Racikan / Combine ke katalog (bukan produk fisik: tanpa foto & tanpa stok)
+$cq = mysqli_query($conn,
+    "SELECT c.id, c.name, COALESCE(SUM(ci.price * ci.qty), 0) AS total
+     FROM product_combos c
+     LEFT JOIN product_combo_items ci ON ci.combo_id = c.id
+     WHERE c.deleted_at IS NULL
+     GROUP BY c.id
+     ORDER BY c.id DESC"
+);
+if($cq){
+    while($row = mysqli_fetch_assoc($cq)){
+        $items[] = [
+            'id'         => 'c' . $row['id'],
+            'name'       => $row['name'],
+            'sell_price' => $row['total'],
+            'category'   => 'racikan',
+            'photo'      => '',
+            'starred'    => 0,
+            'stock'      => 0,
+            'is_combo'   => true,
+        ];
+    }
+}
+?>
 
 <!doctype html>
 <html lang="en">
@@ -17,6 +46,7 @@ $query = mysqli_query($conn,
     <title>Katalog Produk - Qieos</title>
 
     <?php include '../../script/headscript.php'; ?>
+    <link rel="stylesheet" href="<?php echo BASE_URL; ?>/css/pages/catalog.css?v=<?php echo filemtime(__DIR__ . '/../../css/pages/catalog.css'); ?>">
 </head>
 
 <body>
@@ -25,78 +55,80 @@ $query = mysqli_query($conn,
     <main class="content">
         <?php include '../components/navbar.php'; ?>
 
+        <?php $catDefs = [
+            ['all',        '📦', 'Semua Kategori'],
+            ['makanan',    '🍜', 'Makanan'],
+            ['minuman',    '🧋', 'Minuman'],
+            ['jajanan',    '🍪', 'Jajanan'],
+            ['pelengkap',  '🥄', 'Pelengkap'],
+            ['racikan',    '🍱', 'Racikan'],
+            ['additional', '➕', 'Additional'],
+        ]; ?>
+
         <div class="container-fluid px-0 mt-5 mb-5">
 
-            <div class="catalog-toolbar mb-5">
+            <!-- ===== HERO: TITLE + SEARCH + SORT (satu panel premium) ===== -->
+            <div class="catalog-hero mb-4">
+                <div class="ch-glow"></div>
+                <div class="ch-glow ch-glow-2"></div>
 
-                <div class="search-modern">
+                <div class="ch-main">
+                    <div class="ch-icon">
+                        <i class="fas fa-book-open"></i>
+                    </div>
+                    <div class="ch-text">
+                        <div class="ch-title">Katalog Produk</div>
+                        <div class="ch-sub">Kelola menu produk yang siap dijual</div>
+                    </div>
+                </div>
 
-                    <div class="search-icon">
+                <div class="ch-tools">
+                    <div class="ch-search">
                         <i class="fas fa-search"></i>
+                        <input
+                            type="text"
+                            id="search"
+                            placeholder="Cari produk..."
+                            onkeyup="applyFilters()">
                     </div>
 
-                    <input
-                        type="text"
-                        id="search"
-                        placeholder="Cari produk..."
-                        onkeyup="applyFilters()">
-
+                    <div class="ch-sort">
+                        <span class="ch-sort-lbl"><i class="fas fa-arrow-up-wide-short"></i> Urutkan</span>
+                        <div class="ch-seg">
+                            <button class="ch-seg-btn active" data-sort="name" onclick="sortProduct('name',this)">
+                                <i class="fas fa-text-width"></i><span>Nama</span>
+                            </button>
+                            <button class="ch-seg-btn" data-sort="latest" onclick="sortProduct('latest',this)">
+                                <i class="fas fa-clock"></i><span>Terbaru</span>
+                            </button>
+                            <button class="ch-seg-btn" data-sort="low" onclick="sortProduct('low',this)">
+                                <i class="fas fa-arrow-down"></i><span>Harga</span>
+                            </button>
+                            <button class="ch-seg-btn" data-sort="high" onclick="sortProduct('high',this)">
+                                <i class="fas fa-arrow-up"></i><span>Tertinggi</span>
+                            </button>
+                        </div>
+                    </div>
                 </div>
+            </div>
 
-                <div class="toolbar-actions">
-
-                    <!-- FILTER KATEGORI -->
-                    <div class="premium-filter">
-
-                        <button class="toolbar-btn">
-                            <i class="fas fa-layer-group"></i>
-                        </button>
-
-                        <select
-                            id="category-filter"
-                            class="hidden-select"
-                            onchange="applyFilters()">
-
-                            <option value="all">📦 Semua Kategori</option>
-                            <option value="makanan">🍜 Makanan</option>
-                            <option value="minuman">🧋 Minuman</option>
-                            <option value="jajanan">🍪 Jajanan</option>
-                            <option value="pelengkap">🥄 Pelengkap</option>
-                            <option value="additional">➕ Tambahan</option>
-
-                        </select>
-
-                    </div>
-
-                    <!-- SORT HARGA -->
-                    <div class="premium-filter">
-
-                        <button class="toolbar-btn">
-                            <i class="fas fa-arrow-up-wide-short"></i>
-                        </button>
-
-                        <select
-                            id="sort-filter"
-                            class="hidden-select"
-                            onchange="sortProduct(this.value)">
-
-                            <option value="name">🔥 Nama</option>
-                            <option value="latest">✨ Terbaru</option>
-                            <option value="low">⬇ Harga Terendah</option>
-                            <option value="high">⬆ Harga Tertinggi</option>
-
-                        </select>
-
-                    </div>
-
-                </div>
-
+            <!-- ===== CATEGORY BADGES (premium pills) ===== -->
+            <div class="cat-bar mb-3">
+                <?php foreach($catDefs as $cd): ?>
+                <button
+                    class="cat-badge<?= $cd[0] === 'all' ? ' active' : '' ?>"
+                    data-cat="<?= $cd[0] ?>"
+                    onclick="setCategory('<?= $cd[0] ?>',this)">
+                    <span class="cb-ico"><?= $cd[1] ?></span>
+                    <span class="cb-lbl"><?= $cd[2] ?></span>
+                </button>
+                <?php endforeach; ?>
             </div>
 
             <div id="product-list" class="product-grid">
 
-                <?php $index = 0; ?>
-                <?php while ($row = mysqli_fetch_assoc($query)): ?>
+                <?php $index = 0; $isCombo = false; $catName = ''; ?>
+                <?php foreach($items as $row): $isCombo = !empty($row['is_combo']); $catName = strtolower($row['category']); ?>
 
                 <div class="product-item"
                     data-index="<?php echo $index++; ?>"
@@ -104,19 +136,32 @@ $query = mysqli_query($conn,
                     data-id="<?php echo $row['id']; ?>"
                     data-category="<?php echo $row['category']; ?>"
                     data-price="<?php echo $row['sell_price']; ?>"
-                    data-star="<?php echo $row['starred']; ?>">
+                    data-star="<?php echo isset($row['starred']) ? $row['starred'] : 0; ?>">
 
                     <div class="product-card">
 
                         <div class="product-image-wrap">
 
-                            <img src="../../assets/img/products/<?php echo $row['photo']; ?>"
-                                class="product-img">
+                            <?php if(!empty($row['photo'])): ?>
+                                <img src="../../assets/img/products/<?php echo $row['photo']; ?>"
+                                    class="product-img" loading="lazy" decoding="async">
+                            <?php else: ?>
+                                <div class="product-img product-img-empty">
+                                    <i class="fas fa-box-open"></i>
+                                </div>
+                            <?php endif; ?>
 
+                            <?php if(!$isCombo): ?>
                             <div class="stock-badge" id="stock-<?php echo $row['id']; ?>">
                                 <i class="fas fa-cube"></i>
-                                <?php echo strtolower($row['category']) !== 'additional' ? $row['stock'] : 'Tanpa' ; ?> Stok
+                                <?php echo $catName !== 'additional' ? $row['stock'] : 'Tanpa' ; ?> Stok
                             </div>
+                            <?php else: ?>
+                            <div class="stock-badge">
+                                <i class="fas fa-cube"></i>
+                                Tanpa Stok
+                            </div>
+                            <?php endif; ?>
 
                             <div class="price-floating">
                                 Rp <?php echo number_format($row['sell_price'],0,',','.'); ?>
@@ -126,20 +171,24 @@ $query = mysqli_query($conn,
                             <div class="card-name-wrap">
                                 <div class="card-name-glass">
                                     <span class="card-name-text"><?php echo ucwords(strtolower($row['name'])); ?></span>
+                                    <?php if(!$isCombo): ?>
                                     <button
                                         class="card-name-star <?= $row['starred'] ? 'active' : '' ?>"
                                         onclick="event.stopPropagation();toggleStar(<?= $row['id'] ?>,this)">
                                         <i class="<?= $row['starred'] ? 'fas' : 'far' ?> fa-star"></i>
                                     </button>
+                                    <?php endif; ?>
                                 </div>
                             </div>
 
+                            <?php if(!$isCombo): ?>
                             <!-- DESKTOP: star on image -->
                             <button
                                 class="star-btn <?= $row['starred'] ? 'active' : '' ?>"
                                 onclick="toggleStar(<?= $row['id'] ?>,this)">
                                 <i class="<?= $row['starred'] ? 'fas' : 'far' ?> fa-star"></i>
                             </button>
+                            <?php endif; ?>
 
                         </div>
 
@@ -157,7 +206,7 @@ $query = mysqli_query($conn,
                             </h4>
 
                             <p class="product-desc">
-                                <?php if(strtolower($row['category']) === 'additional'): ?>
+                                <?php if($isCombo || $catName === 'additional'): ?>
                                     <i class="fas fa-circle text-secondary"></i>
                                     Tersedia
                                 <?php elseif($row['stock'] > 0): ?>
@@ -172,9 +221,9 @@ $query = mysqli_query($conn,
                             <!-- ACTION ROW: QTY + BUTTON -->
                             <div class="action-row">
 
-                                <?php if($row['stock'] > 0 || strtolower($row['category']) === 'additional'): ?>
+                                <?php if($isCombo || $row['stock'] > 0 || $catName === 'additional'): ?>
 
-                                    <?php if(strtolower($row['category']) !== 'additional'): ?>
+                                    <?php if($catName !== 'additional'): ?>
                                     <div class="qty-mini">
                                         <button class="qty-mini-btn"
                                             onclick="decreaseQty('<?php echo $row['id']; ?>')">
@@ -186,7 +235,7 @@ $query = mysqli_query($conn,
                                             id="qty-<?php echo $row['id']; ?>"
                                             value="0"
                                             class="qty-mini-input"
-                                            data-stock="<?php echo $row['stock']; ?>"
+                                            data-stock="<?php echo $isCombo ? 9999 : $row['stock']; ?>"
                                             readonly>
 
                                         <button class="qty-mini-btn qty-mini-plus"
@@ -236,15 +285,15 @@ $query = mysqli_query($conn,
                             </div>
 
                             <div class="mobile-act-row">
-                                <?php if($row['stock'] > 0 || strtolower($row['category']) === 'additional'): ?>
+                                <?php if($isCombo || $row['stock'] > 0 || $catName === 'additional'): ?>
 
-                                    <?php if(strtolower($row['category']) !== 'additional'): ?>
+                                    <?php if($catName !== 'additional'): ?>
                                     <div class="mobile-qty">
                                         <button class="mobile-qty-btn" onclick="decreaseQty('<?php echo $row['id']; ?>')">
                                             <i class="fas fa-minus"></i>
                                         </button>
                                         <input type="text" id="mqty-<?php echo $row['id']; ?>" value="0"
-                                            class="mobile-qty-val" data-stock="<?php echo $row['stock']; ?>" readonly>
+                                            class="mobile-qty-val" data-stock="<?php echo $isCombo ? 9999 : $row['stock']; ?>" readonly>
                                         <button class="mobile-qty-btn mobile-qty-plus" onclick="increaseQtyMobile('<?php echo $row['id']; ?>')">
                                             <i class="fas fa-plus"></i>
                                         </button>
@@ -276,7 +325,7 @@ $query = mysqli_query($conn,
 
                 </div>
 
-                <?php endwhile; ?>
+                <?php endforeach; ?>
 
                 <div id="empty-search" class="empty-search" style="display:none;">
                     <div class="empty-icon">
@@ -391,9 +440,17 @@ $query = mysqli_query($conn,
             if (mInput) mInput.value = 0;
         }
 
+        let activeCategory = 'all';
+
+        function setCategory(cat, btn){
+            activeCategory = cat;
+            document.querySelectorAll('.cat-badge').forEach(b => b.classList.toggle('active', b === btn));
+            applyFilters();
+        }
+
         function applyFilters() {
             let keyword = document.getElementById('search').value.toLowerCase();
-            let category = document.getElementById('category-filter').value.toLowerCase();
+            let category = activeCategory;
             let items = document.querySelectorAll('.product-item');
             let found = false;
 
@@ -470,7 +527,11 @@ $query = mysqli_query($conn,
 
         setInitialIndex();
 
-        function sortProduct(type) {
+        function sortProduct(type, btn) {
+
+            if(btn){
+                document.querySelectorAll('.ch-seg-btn').forEach(b => b.classList.toggle('active', b === btn));
+            }
 
             let container = document.getElementById('product-list');
             let items = Array.from(document.querySelectorAll('.product-item'));
@@ -508,6 +569,9 @@ $query = mysqli_query($conn,
 
         function syncStock() {
 
+            // skip polling saat tab tidak terlihat (hemat baterai & GPU di mobile)
+            if (document.hidden) return;
+
             fetch('../components/data/get-stock.php')
                 .then(res => res.json())
                 .then(data => {
@@ -515,17 +579,17 @@ $query = mysqli_query($conn,
                     Object.keys(data).forEach(id => {
 
                         let stock = parseInt(data[id]);
-                        let card = document.querySelector(`.product-item[data-id="${id}"]`);
-
+                        let card = productCardMap.get(id);
                         if (!card) return;
 
                         let category = card.dataset.category;
                         let isAdditional = category.toLowerCase() === 'additional';
 
-                        // STOCK BADGE - skip for additional (stays "Tanpa Stok")
+                        // STOCK BADGE - hanya ditulis ulang kalau angkanya berubah
                         if (!isAdditional) {
                             let el = document.getElementById('stock-' + id);
-                            if (el) {
+                            if (el && el.dataset.v !== String(stock)) {
+                                el.dataset.v = String(stock);
                                 el.innerHTML = `
                                     <i class="fas fa-cube"></i>
                                     ${stock} Stok
@@ -533,43 +597,46 @@ $query = mysqli_query($conn,
                             }
                         }
 
-                        // CLASS STOCK - skip for additional
+                        // CLASS HABIS - hanya diputar balik kalau berubah
                         if (!isAdditional) {
                             if (stock <= 0) {
-                                card.classList.add('out-of-stock');
+                                if (!card.classList.contains('out-of-stock')) card.classList.add('out-of-stock');
                             } else {
-                                card.classList.remove('out-of-stock');
+                                if (card.classList.contains('out-of-stock')) card.classList.remove('out-of-stock');
                             }
                         }
 
-                        // STATUS TEXT
+                        // STATUS TEXT - hanya ditulis ulang kalau berubah
                         let desc = card.querySelector('.product-desc');
                         if (desc) {
-                            if (isAdditional) {
-                                // Additional: always show "Tersedia"
-                                desc.innerHTML = `
-                                    <i class="fas fa-circle text-secondary"></i>
-                                    Tersedia
-                                `;
-                            } else if (stock <= 0) {
-                                desc.innerHTML = `
-                                    <i class="fas fa-circle text-danger"></i>
-                                    Stok habis
-                                `;
-                            } else {
-                                desc.innerHTML = `
-                                    <i class="fas fa-circle text-success"></i>
-                                    Stok tersedia
-                                `;
+                            let key = isAdditional ? 'add' : (stock <= 0 ? 'out' : 'ok');
+                            if (desc.dataset.v !== key) {
+                                desc.dataset.v = key;
+                                if (isAdditional) {
+                                    desc.innerHTML = `
+                                        <i class="fas fa-circle text-secondary"></i>
+                                        Tersedia
+                                    `;
+                                } else if (stock <= 0) {
+                                    desc.innerHTML = `
+                                        <i class="fas fa-circle text-danger"></i>
+                                        Stok habis
+                                    `;
+                                } else {
+                                    desc.innerHTML = `
+                                        <i class="fas fa-circle text-success"></i>
+                                        Stok tersedia
+                                    `;
+                                }
                             }
                         }
 
-                        // UPDATE DATA STOCK INPUT - skip for additional
+                        // qty input stock
                         if (!isAdditional) {
                             let input = document.getElementById('qty-' + id);
                             if (input) {
                                 input.dataset.stock = stock;
-                                if (stock <= 0) {
+                                if (stock <= 0 && parseInt(input.value || 0) > 0) {
                                     input.value = 0;
                                 }
                             }
@@ -577,18 +644,21 @@ $query = mysqli_query($conn,
 
                     });
 
-                })
-                .catch(err => {
-                    console.error('Gagal sync stock:', err);
                 });
 
         }
 
+        // Map cepat: id -> kartu (sekali saja, bukan querySelector tiap polling)
+        const productCardMap = new Map();
+        document.querySelectorAll('.product-item').forEach(card => {
+            productCardMap.set(card.dataset.id, card);
+        });
+
         // pertama kali load
         syncStock();
 
-        // refresh tiap 3 detik
-        setInterval(syncStock, 3000);
+        // refresh lebih jarang + skip saat tab disembunyikan
+        setInterval(syncStock, 5000);
 
         // === HIGHLIGHT FROM GLOBAL SEARCH ===
         (function(){

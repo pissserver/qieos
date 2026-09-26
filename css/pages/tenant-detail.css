@@ -88,11 +88,7 @@
         }
 
         .panel-primary{
-            background:linear-gradient(
-                135deg,
-                #4f46e5,
-                #4338ca
-            );
+            background:linear-gradient(135deg, #0f172a, #1e293b, #334155);
             color:#fff;
         }
 
@@ -300,11 +296,7 @@
         }
 
         .panel-primary{
-            background:linear-gradient(
-                135deg,
-                #4f46e5,
-                #4338ca
-            );
+            background:linear-gradient(135deg, #0f172a, #1e293b, #334155);
             color:#fff;
         }
 
@@ -687,4 +679,10 @@
         .tenant-item:not(.active) .fa-check{
             color:#22c55e;
             background:#dcfce7;
+        }
+
+        /* Dropdown tenant: jangan dipotong oleh panel-header
+           (volt.css global memakai overflow:hidden di .panel-header) */
+        .panel-header{
+            overflow:visible;
         }

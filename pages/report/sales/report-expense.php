@@ -7,16 +7,26 @@ list($first, $last) = report_dates($conn);
 
 $query = mysqli_query($conn, "
     SELECT
-        lp.id,
-        lp.date_list,
-        COUNT(lpi.id) AS total_items,
-        COALESCE(SUM(lpi.price), 0) AS total_price
-    FROM list_purchases lp
-    LEFT JOIN list_purchase_items lpi ON lp.id = lpi.list_purchase_id
-    WHERE lp.deleted_at IS NULL
-      AND DATE(lp.date_list) BETWEEN '$first' AND '$last'
-    GROUP BY lp.id, lp.date_list
-    ORDER BY lp.date_list DESC, lp.id DESC
+        p.id,
+        p.form,
+        p.date,
+        COUNT(pi.id) AS total_items,
+        COALESCE(SUM(pi.price_buy), 0) AS total_price
+    FROM purchases p
+    LEFT JOIN purchase_items pi
+        ON p.id = pi.purchase_id
+        AND pi.deleted_at IS NULL
+    WHERE p.deleted_at IS NULL
+      AND DATE(p.date) BETWEEN '$first' AND '$last'
+      AND EXISTS (
+          SELECT 1
+          FROM purchase_items pi2
+          WHERE pi2.purchase_id = p.id
+            AND pi2.deleted_at IS NULL
+            AND pi2.qty_buy IS NOT NULL
+      )
+    GROUP BY p.id, p.form, p.date
+    ORDER BY p.date DESC, p.id DESC
 ");
 
 $no = 1;
@@ -26,11 +36,11 @@ $hasData = $query && mysqli_num_rows($query) > 0;
 if ($hasData) {
     while ($row = mysqli_fetch_assoc($query)) {
         $total += (float) $row['total_price'];
-        $form = 'BELANJA-' . str_pad($row['id'], 7, '0', STR_PAD_LEFT);
+        $form = $row['form'];
         ?>
         <tr>
             <td class="text-center"><?= $no++ ?></td>
-            <td class="text-center"><?= report_date_id($row['date_list']) ?></td>
+            <td class="text-center"><?= report_date_id($row['date']) ?></td>
             <td class="text-center fw-bold"><?= htmlspecialchars($form) ?></td>
             <td class="text-center"><?= (int) $row['total_items'] ?></td>
             <td class="text-center fw-semibold"><?= report_rp($row['total_price']) ?></td>

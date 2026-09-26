@@ -1,4 +1,6 @@
-<?php include '../../sessions/session.php'; ?>
+<?php include '../../sessions/session.php';
+include __DIR__ . '/../components/data/stock-status.php';
+?>
 <table class="table table-hover align-middle" id="stockTable">
     <thead>
         <tr style="font-size:13px;color:#64748b;">
@@ -6,7 +8,6 @@
             <th class="text-center">Stok</th>
             <th class="text-center">Satuan</th>
             <th class="text-center">Status</th>
-            <th class="text-center">Aksi</th>
         </tr>
     </thead>
     <tbody>
@@ -17,8 +18,9 @@
         p.id,
         p.name,
         p.code,
-        COALESCE(SUM(pi.remaining_qty),0) stock,
-        GROUP_CONCAT(DISTINCT pi.unit) unit
+        p.unit,
+        p.photo,
+        COALESCE(SUM(pi.remaining_qty),0) stock
     FROM products p
     LEFT JOIN purchase_items pi
         ON pi.product_id=p.id
@@ -31,11 +33,9 @@
 
     <?php
     $stock = (int)$d['stock'];
-
-    $statusClass =
-        $stock < 10
-        ? 'stock-danger'
-        : 'stock-success';
+    $lowStock = resolve_product_low_stock($conn, $d);
+    $unit = !empty($d['unit']) ? strtoupper($d['unit']) : '-';
+    $status = product_status_view($stock, $lowStock);
     ?>
 
     <tr class="stock-row"
@@ -44,9 +44,15 @@
         <td>
             <div class="product-wrap">
 
-                <div class="product-icon">
-                    <i class="fas fa-box-open"></i>
-                </div>
+                    <?php if(!empty($d['photo'])): ?>
+                    <img class="product-img"
+                        src="<?= BASE_URL ?>/assets/img/products/<?= htmlspecialchars($d['photo']) ?>"
+                        alt="<?= htmlspecialchars($d['name']) ?>">
+                    <?php else: ?>
+                    <div class="product-icon">
+                        <i class="fas fa-box-open"></i>
+                    </div>
+                    <?php endif; ?>
 
                 <div>
                     <div class="fw-bold">
@@ -63,7 +69,7 @@
 
         <td class="text-center">
 
-            <span class="stock-badge <?= $statusClass ?>">
+            <span class="st-badge <?= $status['css'] ?>">
                 <i class="fas fa-cubes me-1"></i>
                 <?= number_format($stock) ?>
             </span>
@@ -74,40 +80,16 @@
 
             <span class="unit-badge">
                 <i class="fas fa-balance-scale me-1"></i>
-                <?= strtoupper($d['unit']) ?>
+                <?= $unit ?>
             </span>
 
         </td>
 
         <td class="text-center">
-            <?php if($stock == 0): ?>
-
-                <span class="stock-badge stock-empty">
-                    <i class="fas fa-triangle-exclamation me-1"></i>
-                    Habis
-                </span>
-
-            <?php elseif($stock <= 50): ?>
-
-                <span class="stock-badge stock-danger">
-                    <i class="fas fa-triangle-exclamation me-1"></i>
-                    Menipis
-                </span>
-
-            <?php else: ?>
-
-                <span class="stock-badge stock-success">
-                    <i class="fas fa-check-circle me-1"></i>
-                    Aman
-                </span>
-
-            <?php endif; ?>
-        </td>
-
-        <td class="text-center">
-            <button class="action-btn btn-edit editStockBtn" data-id="<?= $d['id'] ?>">
-                <i class="fas fa-edit"></i>
-            </button>
+            <span class="st-badge <?= $status['css'] ?>">
+                <i class="fas <?= $status['icon'] ?>"></i>
+                <?= $status['label'] ?>
+            </span>
         </td>
     </tr>
 

@@ -1,4 +1,4 @@
-const CACHE_VERSION = "qieos-v4";
+const CACHE_VERSION = "qieos-v6";
 const APP_SHELL_CACHE = `${CACHE_VERSION}-shell`;
 const RUNTIME_CACHE = `${CACHE_VERSION}-runtime`;
 
@@ -70,4 +70,26 @@ self.addEventListener("fetch", event => {
         );
     }
     // Semua request lain → biarkan browser handle (tidak intercept)
+});
+
+// Klik notifikasi chat → fokus tab yang ada atau buka tab baru ke percakapan
+self.addEventListener("notificationclick", event => {
+    event.notification.close();
+
+    const data = event.notification.data || {};
+    const target = data.url || `${BASE}/pages/chat/chat.php`;
+
+    event.waitUntil(
+        self.clients.matchAll({ type: "window", includeUncontrolled: true }).then(clientsArr => {
+            for (const client of clientsArr) {
+                if (client.url.indexOf(self.location.origin) === 0 && "focus" in client) {
+                    if ("navigate" in client) {
+                        client.navigate(target).catch(() => {});
+                    }
+                    return client.focus();
+                }
+            }
+            if (self.clients.openWindow) return self.clients.openWindow(target);
+        })
+    );
 });

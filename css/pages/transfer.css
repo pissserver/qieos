@@ -1,4 +1,4 @@
-﻿/* HERO HEADER */
+/* HERO HEADER */
             .transfer-header{
                 background:linear-gradient(135deg,#334155,#0f172a);
                 color:#fff;
@@ -87,6 +87,15 @@
             }
 
             /* REQUEST PANEL */
+
+            .panel-primary{
+                background:linear-gradient(135deg, #0f172a, #1e293b, #334155);
+                color:#fff;
+            }
+
+            .panel-primary .panel-icon{
+                background:rgba(255,255,255,.12);
+            }
 
             .panel-warning{
                 background:linear-gradient(

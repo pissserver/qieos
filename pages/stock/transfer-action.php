@@ -5,7 +5,7 @@
 
     $action = isset($_GET['action']) ? $_GET['action'] : '';
 
-    if($_GET['action'] === 'approve'){
+    if($action === 'approve'){
         try {
 
             $id = (int)$_POST['id'];
@@ -16,8 +16,8 @@
 
             /* 🔥 1. AMBIL REQUEST + LOCK */
             $req = mysqli_query($conn,"
-                SELECT * FROM stock_requests 
-                WHERE id = $id 
+                SELECT * FROM stock_requests
+                WHERE id = $id
                 AND status = 'pending'
                 LIMIT 1
                 FOR UPDATE
@@ -27,91 +27,92 @@
                 throw new Exception("Request tidak ditemukan / sudah diproses");
             }
 
-            $data = mysqli_fetch_assoc($req);
-            $product_id = $data['product_id'];
-            $qty = $data['qty'];
-
-            /* 🔥 2. CEK TOTAL STOK */
-            $stok = mysqli_fetch_assoc(mysqli_query($conn,"
-                SELECT COALESCE(SUM(remaining_qty),0) as total
-                FROM purchase_items
-                WHERE product_id = $product_id
-            "))['total'];
-
-            if($stok < $qty){
-                throw new Exception("Stok gudang tidak cukup (sisa: $stok)");
-            }
-
-            /* 🔥 3. FIFO */
-            $remaining = $qty;
-
-            $fifo = mysqli_query($conn,"
-                SELECT id, remaining_qty, date
-                FROM purchase_items
-                WHERE product_id = $product_id
-                AND remaining_qty > 0
-                ORDER BY date ASC
+            /* 🔥 2. AMBIL SEMUA ITEM */
+            $items = mysqli_query($conn,"
+                SELECT product_id, qty
+                FROM stock_request_items
+                WHERE request_id = $id
+                ORDER BY id ASC
                 FOR UPDATE
             ");
 
-            while($row = mysqli_fetch_assoc($fifo)){
+            if(mysqli_num_rows($items) == 0){
+                throw new Exception("Request tidak memiliki item");
+            }
 
-                if($remaining <= 0) break;
+            /* 🔥 3. PROSES SETIAP ITEM (FIFO) */
+            while($it = mysqli_fetch_assoc($items)){
 
-                $take = min($remaining, $row['remaining_qty']);
+                $product_id = (int)$it['product_id'];
+                $qty = (int)$it['qty'];
 
-                $update = mysqli_query($conn,"
-                    UPDATE purchase_items
-                    SET remaining_qty = remaining_qty - $take
-                    WHERE id = {$row['id']}
-                ");
+                /* CEK TOTAL STOK GUDANG */
+                $stok = mysqli_fetch_assoc(mysqli_query($conn,"
+                    SELECT COALESCE(SUM(remaining_qty),0) as total
+                    FROM purchase_items
+                    WHERE product_id = $product_id
+                    AND deleted_at IS NULL
+                "))['total'];
 
-                if(!$update){
-                    throw new Exception(mysqli_error($conn));
+                if($stok < $qty){
+                    $p = mysqli_fetch_assoc(mysqli_query($conn,"
+                        SELECT name FROM products WHERE id = $product_id
+                    "));
+
+                    throw new Exception("Stok " . (isset($p['name']) && $p['name'] ? $p['name'] : "produk") . " tidak cukup (sisa: $stok)");
                 }
 
-                $remaining -= $take;
-            }
+                /* FIFO */
+                $remaining = $qty;
 
-            /* 🔥 4. UPDATE SALES STOCK */
-            $cekSales = mysqli_query($conn,"
-                SELECT id, qty 
-                FROM sales_stock
-                WHERE product_id = $product_id
-                LIMIT 1
-                FOR UPDATE
-            ");
-
-            if(mysqli_num_rows($cekSales) > 0){
-
-                $s = mysqli_fetch_assoc($cekSales);
-                $newQty = $s['qty'] + $qty;
-
-                mysqli_query($conn,"
-                    UPDATE sales_stock
-                    SET qty = $newQty
-                    WHERE id = {$s['id']}
+                $fifo = mysqli_query($conn,"
+                    SELECT pi.id, pi.remaining_qty, p.date
+                    FROM purchase_items pi
+                    JOIN purchases p ON p.id = pi.purchase_id
+                    WHERE pi.product_id = $product_id
+                    AND pi.remaining_qty > 0
+                    AND pi.deleted_at IS NULL
+                    ORDER BY p.date ASC
+                    FOR UPDATE
                 ");
 
-            } else {
+                while($row = mysqli_fetch_assoc($fifo)){
 
-                mysqli_query($conn,"
-                    INSERT INTO sales_stock (product_id, qty)
-                    VALUES ($product_id, $qty)
+                    if($remaining <= 0) break;
+
+                    $take = min($remaining, $row['remaining_qty']);
+
+                    $update = mysqli_query($conn,"
+                        UPDATE purchase_items
+                        SET remaining_qty = remaining_qty - $take
+                        WHERE id = {$row['id']}
+                    ");
+
+                    if(!$update){
+                        throw new Exception(mysqli_error($conn));
+                    }
+
+                    $remaining -= $take;
+                }
+
+                /* CATAT MOVEMENT KE SALES STOCK (ledger) */
+                $log = mysqli_query($conn,"
+                    INSERT INTO sales_stock (product_id, qty, type)
+                    VALUES ($product_id, $qty, 'transfer')
                 ");
+
+                if(!$log){
+                    throw new Exception(mysqli_error($conn));
+                }
             }
 
-            /* 🔥 5. UPDATE STATUS REQUEST */
+            /* 🔥 4. UPDATE STATUS REQUEST */
             mysqli_query($conn,"
                 UPDATE stock_requests
-                SET status = 'approved'
+                SET status = 'approved',
+                    approved_by = ".(int)$_SESSION['user_id'].",
+                    approved_at = NOW()
                 WHERE id = $id
-            ");
-
-            /* 🔥 6. LOG */
-            mysqli_query($conn,"
-                INSERT INTO stock_transfers (product_id, qty)
-                VALUES ($product_id, $qty)
             ");
 
             mysqli_commit($conn);
@@ -150,7 +151,7 @@
 
             /* 🔥 cek dulu datanya */
             $cek = mysqli_query($conn,"
-                SELECT id FROM stock_requests 
+                SELECT id FROM stock_requests
                 WHERE id=$id AND status='pending'
             ");
 
@@ -165,7 +166,9 @@
             /* 🔥 update */
             $update = mysqli_query($conn,"
                 UPDATE stock_requests
-                SET status = 'rejected'
+                SET status = 'rejected',
+                    approved_by = ".(int)$_SESSION['user_id'].",
+                    approved_at = NOW()
                 WHERE id=$id
             ");
 
@@ -182,8 +185,8 @@
         } catch (Exception $e){
 
             echo json_encode([
-                "status"=>"error",
-                "msg"=>$e->getMessage()
+                "status" => "error",
+                "msg" => $e->getMessage()
             ]);
             exit;
         }

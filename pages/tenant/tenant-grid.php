@@ -18,7 +18,7 @@ while ($row = mysqli_fetch_assoc($query)):
 <div class="product-item" data-search="<?php echo htmlspecialchars($search); ?>">
     <div class="product-card">
         <div class="product-image-wrap">
-            <img src="../../assets/img/tenant-img.jpg" class="product-img">
+            <img src="../../assets/img/tenant-img.jpg" class="product-img" loading="lazy" decoding="async">
 
             <div class="card-actions">
                 <button type="button" class="card-act card-act-edit"
@@ -44,14 +44,12 @@ while ($row = mysqli_fetch_assoc($query)):
             <h4 class="product-title">
                 <?php echo ucwords(strtolower($row['tenant_name'])); ?>
             </h4>
-            <p class="product-desc mb-4">
-                <i class="fas fa-calendar text-success"></i>&nbsp;
+            <p class="product-desc">
+                <i class="fas fa-calendar text-success"></i>
                 <?php echo $tanggal . ' ' . $bulanText . ' ' . $tahun; ?>
             </p>
             <a href="tenant-detail.php?id=<?php echo $row['id']; ?>" class="btn-detail">
-                <i></i>
-                <span>Detail Tenant &nbsp;&nbsp;<i class="fas fa-arrow-right"></i></span>
-                <i></i>
+                <span>Detail Tenant <i class="fas fa-arrow-right"></i></span>
             </a>
         </div>
     </div>

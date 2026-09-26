@@ -32,7 +32,7 @@ $details = mysqli_query($conn, "
         sizes="120x120"
         href="../assets/img/brand/qieos2.png" />
 
-    <link rel="stylesheet" href="<?php echo BASE_URL; ?>/css/pages/receipt-tenant.css">
+    <link rel="stylesheet" href="<?php echo BASE_URL; ?>/css/pages/receipt-tenant.css?v=<?php echo filemtime(__DIR__ . '/../css/pages/receipt-tenant.css'); ?>">
 
 </head>
 

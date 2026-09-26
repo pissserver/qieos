@@ -13,7 +13,6 @@
         $unit       = $_POST['unit'];
         $buy_price  = (float)$_POST['buy_price'];
         $sell_price = (float)$_POST['sell_price'];
-        $note       = $_POST['note'] ?: '-';
         $date       = date('Y-m-d');
 
         /* cek produk & ambil foto lama */
@@ -48,18 +47,71 @@
         }
 
         /* header */
-        mysqli_query($conn, "INSERT INTO purchases (form,date,note) VALUES ('$formNumber','$date','$note')");
+        mysqli_query($conn, "INSERT INTO purchases (form,date) VALUES ('$formNumber','$date')");
         $purchase_id = mysqli_insert_id($conn);
 
         /* FIFO layer */
         mysqli_query($conn, "INSERT INTO purchase_items
-        (purchase_id,product_id,qty,unit,remaining_qty,buy_price,date)
-        VALUES ($purchase_id,$product_id,$qty,'$unit',$qty,$buy_price,'$date')");
+        (purchase_id,product_id,qty,unit,remaining_qty,price)
+        VALUES ($purchase_id,$product_id,$qty,'$unit',$qty,$buy_price)");
 
         echo json_encode([
             "status"=>"success",
             "msg"=>"Stok berhasil ditambahkan"
         ]);
+    }
+
+    // simpan qty & harga beli dari daftar belanja (convert ke pembelian)
+    if ($_GET['action'] === 'save_items') {
+
+        $purchase_id = (int)$_POST['purchase_id'];
+        $item_ids    = isset($_POST['item_id']) ? $_POST['item_id'] : [];
+        $qtys        = isset($_POST['qty']) ? $_POST['qty'] : [];
+        $prices      = isset($_POST['price']) ? $_POST['price'] : [];
+
+        $cek = mysqli_query($conn, "SELECT id FROM purchases WHERE id='$purchase_id' AND deleted_at IS NULL");
+        if (mysqli_num_rows($cek) == 0) {
+            echo json_encode([
+                "status" => "error",
+                "msg" => "Form pembelian tidak ditemukan"
+            ]);
+            exit;
+        }
+
+        $saved = 0;
+
+        foreach ($item_ids as $key => $item_id) {
+            $item_id = (int)$item_id;
+
+            if (!isset($qtys[$key]) || !isset($prices[$key])) continue;
+            if ($qtys[$key] === '' || $prices[$key] === '') continue;
+
+            $qty   = (int)$qtys[$key];
+            $price = (float)$prices[$key];
+
+            if ($qty <= 0) continue;
+
+            $update = mysqli_query($conn,"
+                UPDATE purchase_items pi
+                JOIN products pr ON pr.id = pi.product_id
+                SET pi.qty = '$qty',
+                    pi.unit = pr.unit,
+                    pi.remaining_qty = '$qty',
+                    pi.price = '$price'
+                WHERE pi.id = '$item_id'
+                  AND pi.purchase_id = '$purchase_id'
+                  AND pi.deleted_at IS NULL
+            ");
+
+            if ($update) $saved++;
+        }
+
+        echo json_encode([
+            "status" => "success",
+            "msg" => "$saved item pembelian berhasil disimpan",
+            "form_id" => $purchase_id
+        ]);
+        exit;
     }
 
     // form navigation next
@@ -110,7 +162,6 @@
         $unit         = $_POST['unit'];
         $buy_price    = $_POST['buy_price'];
         $sell_price   = $_POST['sell_price'];
-        $note         = $_POST['note'];
 
         /* cek produk & ambil foto lama */
         $cek = mysqli_query($conn, "SELECT * FROM products WHERE code='$code' LIMIT 1");
@@ -150,7 +201,7 @@
                     qty='$qty',
                     remaining_qty='$qty',
                     unit='$unit',
-                    buy_price='$buy_price'
+                    price='$buy_price'
                 WHERE purchase_id='$id'
             ");
         } else {
@@ -168,16 +219,10 @@
                     qty='$qty',
                     remaining_qty='$qty',
                     unit='$unit',
-                    buy_price='$buy_price'
+                    price='$buy_price'
                 WHERE purchase_id='$id'
             ");
         }
-
-        mysqli_query($conn,"
-            UPDATE purchases
-            SET note='$note'
-            WHERE id='$id'
-        ");
 
         echo json_encode([
             'status'=>'success'

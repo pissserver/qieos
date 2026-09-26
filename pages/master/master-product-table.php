@@ -15,12 +15,12 @@ include '../../sessions/session.php';
 
     <?php
     $q = mysqli_query($conn,"
-    SELECT *
-    FROM products
+    SELECT * FROM products
     WHERE deleted_at IS NULL
     ORDER BY name ASC
     ");
-    while($d=mysqli_fetch_assoc($q)): ?>
+    while($d=mysqli_fetch_assoc($q)):
+    ?>
 
     <tr class="stock-row">
 
@@ -33,7 +33,7 @@ include '../../sessions/session.php';
                         alt="<?= htmlspecialchars($d['name']) ?>">
                 <?php else: ?>
                     <div class="product-img-placeholder">
-                        <i class="fas fa-box"></i>
+                        <i class="fas fa-box-open"></i>
                     </div>
                 <?php endif; ?>
 

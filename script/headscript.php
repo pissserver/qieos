@@ -50,7 +50,7 @@ if (!defined('BASE_URL')) {
 <link type="text/css" href="<?php echo BASE_URL; ?>/vendor/notyf/notyf.min.css" rel="stylesheet" />
 
 <!-- Volt CSS -->
-<link type="text/css" href="<?php echo BASE_URL; ?>/css/volt.css" rel="stylesheet" />
+<link type="text/css" href="<?php echo BASE_URL; ?>/css/volt.css?v=<?php echo filemtime(__DIR__ . '/../css/volt.css'); ?>" rel="stylesheet" />
 
 <!-- Qieos Toast -->
 <link type="text/css" href="<?php echo BASE_URL; ?>/css/components/toast.css?v=<?php echo filemtime(__DIR__ . '/../css/components/toast.css'); ?>" rel="stylesheet" />
@@ -68,17 +68,12 @@ if (!defined('BASE_URL')) {
     rel="stylesheet"
     href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" />
 <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
 <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
 
-<!-- Datepicker -->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-
 <!-- PWA -->
 <link rel="manifest" href="<?php echo BASE_URL; ?>/manifest.php">
-<meta name="theme-color" content="#4f46e5">
+<meta name="theme-color" content="#0f172a">
 
 <!-- PWA: iOS / iPadOS standalone support -->
 <meta name="mobile-web-app-capable" content="yes">
@@ -102,15 +97,20 @@ if (!defined('BASE_URL')) {
     @media (display-mode: standalone), (display-mode: fullscreen), (display-mode: window-controls-overlay){
         html, body{
             overscroll-behavior-y:none;
+            background:#0f172a;
         }
 
         body{
-            padding-top:var(--safe-top);
             padding-bottom:var(--safe-bottom);
             padding-left:var(--safe-left);
             padding-right:var(--safe-right);
             -webkit-user-select:none;
             user-select:none;
+        }
+
+        /* Area status bar ditutup navbar mobile (hindari strip putih di atas) */
+        .navbar-theme-primary{
+            padding-top:calc(.75rem + var(--safe-top, 0px));
         }
 
         /* Izinkan seleksi teks di area input/konten */
@@ -119,13 +119,24 @@ if (!defined('BASE_URL')) {
             user-select:text;
         }
     }
+
+    /* ===== Warna dasar halaman — seragam di semua halaman ===== */
+    :root{
+        --q-page-bg:#DFE0E2;
+        --bs-body-bg:#DFE0E2;
+        --bs-body-bg-rgb:223, 224, 226;
+    }
+
+    html, body{
+        background-color:#DFE0E2 !important;
+    }
 </style>
 
 <script>
     const BASE_URL = '<?php echo BASE_URL; ?>';
     if ("serviceWorker" in navigator) {
         window.addEventListener("load", function () {
-            navigator.serviceWorker.register(BASE_URL + "/sw.js?v=4").catch(function (err) {
+            navigator.serviceWorker.register(BASE_URL + "/sw.js?v=6").catch(function (err) {
                 console.warn("SW registration failed:", err);
             });
             // Unregister old service workers
@@ -140,40 +151,3 @@ if (!defined('BASE_URL')) {
     }
 </script>
 
-<!-- Date Range Picker -->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
-<script src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
-
-
-<!-- Simplebar Autoscroll Sidebar -->
-<script>
-    document.addEventListener("DOMContentLoaded", function () {
-
-        setTimeout(() => {
-
-            const active = document.querySelector("#sidebarMenu .nav-item.active");
-
-            if (!active) return;
-
-            // Cari elemen scroll milik SimpleBar
-            const scrollContent = document.querySelector(
-                "#sidebarMenu .simplebar-content-wrapper"
-            );
-
-            if (!scrollContent) return;
-
-            const top =
-                active.offsetTop -
-                scrollContent.clientHeight / 2 +
-                active.clientHeight / 2;
-
-            scrollContent.scrollTo({
-                top: top,
-                behavior: "auto" // bisa diganti "smooth"
-            });
-
-        }, 100);
-
-    });
-</script>

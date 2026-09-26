@@ -1,7 +1,17 @@
 <?php
 include '../../sessions/session.php';
+
+$role = isset($_GET['role']) ? $_GET['role'] : 'administrator';
+
+// Hitung jumlah untuk badge tab
+$q_admin = mysqli_query($conn, "SELECT COUNT(*) c FROM users WHERE role IN ('administrator','developer')");
+$q_cashier = mysqli_query($conn, "SELECT COUNT(*) c FROM users WHERE role = 'staff kasir'");
+$count_admin = $q_admin ? (int)mysqli_fetch_assoc($q_admin)['c'] : 0;
+$count_cashier = $q_cashier ? (int)mysqli_fetch_assoc($q_cashier)['c'] : 0;
 ?>
-<table class="table table-hover align-middle" id="stockTable">
+<table class="table table-hover align-middle" id="userTable"
+    data-count-admin="<?= $count_admin ?>"
+    data-count-cashier="<?= $count_cashier ?>">
     <thead>
         <tr style="font-size:13px;color:#64748b;">
             <th>Nama</th>
@@ -13,13 +23,22 @@ include '../../sessions/session.php';
     <tbody>
 
     <?php
-    $q = mysqli_query($conn,"
-    SELECT
-        *
-    FROM users
-    WHERE role IN ('administrator', 'developer')
-    ORDER BY fullname ASC
-    ");
+    if ($role === 'cashier'):
+        $q = mysqli_query($conn,"
+        SELECT *
+        FROM users
+        WHERE role = 'staff kasir'
+        ORDER BY fullname ASC
+        ");
+    else:
+        $q = mysqli_query($conn,"
+        SELECT *
+        FROM users
+        WHERE role IN ('administrator', 'developer')
+        ORDER BY fullname ASC
+        ");
+    endif;
+
     while($d=mysqli_fetch_assoc($q)): ?>
 
     <tr class="stock-row">
@@ -32,7 +51,7 @@ include '../../sessions/session.php';
                         src="<?php echo BASE_URL; ?>/assets/img/uploads/<?= htmlspecialchars($d['photo']) ?>"
                         alt="<?= htmlspecialchars($d['fullname']) ?>">
                 <?php else: ?>
-                    <div class="avatar">
+                    <div class="avatar avatar-<?= $role === 'cashier' ? 'cashier' : 'admin' ?>">
                         <i class="fas fa-user"></i>
                     </div>
                 <?php endif; ?>
@@ -52,14 +71,22 @@ include '../../sessions/session.php';
 
         <td class="text-center">
 
-            <span class="stock-badge <?php echo $d['role'] === 'developer' ? 'dev-badge' : 'unit-badge'; ?> text-capitalize">
-                <?php if($d['role'] === 'developer'): ?>
+            <?php if($d['role'] === 'developer'): ?>
+                <span class="stock-badge dev-badge text-capitalize">
                     <i class="fas fa-crown me-1"></i>
-                <?php else: ?>
+                    <?= htmlspecialchars($d['role']) ?>
+                </span>
+            <?php elseif($d['role'] === 'administrator'): ?>
+                <span class="stock-badge adm-badge text-capitalize">
                     <i class="fas fa-user-shield me-1"></i>
-                <?php endif; ?>
-                <?= htmlspecialchars($d['role']) ?>
-            </span>
+                    <?= htmlspecialchars($d['role']) ?>
+                </span>
+            <?php else: ?>
+                <span class="stock-badge csr-badge text-capitalize">
+                    <i class="fas fa-user-tie me-1"></i>
+                    <?= htmlspecialchars($d['role']) ?>
+                </span>
+            <?php endif; ?>
 
         </td>
 
@@ -92,11 +119,11 @@ include '../../sessions/session.php';
                     Anda
                 </span>
             <?php else: ?>
-                <button class="action-btn btn-edit editAdministratorBtn" data-id="<?= $d['id'] ?>">
+                <button class="action-btn btn-edit editUserBtn" data-id="<?= $d['id'] ?>">
                     <i class="fas fa-edit"></i>
                 </button>
 
-                <button class="action-btn btn-delete deleteAdministratorBtn"
+                <button class="action-btn btn-delete deleteUserBtn"
                     data-id="<?= $d['id'] ?>"
                     data-fullname="<?= $d['fullname'] ?>">
                     <i class="fas fa-trash"></i>

@@ -50,9 +50,8 @@
         while ($row = mysqli_fetch_assoc($detail)) {
 
             mysqli_query($conn, "
-                UPDATE sales_stock
-                SET qty = qty + {$row['qty']}
-                WHERE product_id = {$row['product_id']}
+                INSERT INTO sales_stock (product_id, qty, type)
+                VALUES ({$row['product_id']}, {$row['qty']}, 'return')
             ");
         }
 

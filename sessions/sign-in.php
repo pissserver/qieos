@@ -8,18 +8,12 @@
         
         <?php include '../script/headscript.php'; ?>
         
-        <link rel="stylesheet" href="../assets/css/auth-premium.css">
+        <link rel="stylesheet" href="../assets/css/auth-premium.css?v=<?php echo filemtime('../assets/css/auth-premium.css'); ?>">
     </head>
 
     <body class="auth-container">
-        <!-- Ambient floating shapes -->
-        <div class="auth-shapes">
-            <div class="shape"></div>
-            <div class="shape"></div>
-            <div class="shape"></div>
-            <div class="shape"></div>
-            <div class="shape"></div>
-        </div>
+        <!-- One universe, everywhere -->
+        <?php include 'components/space-bg.php'; ?>
 
         <main class="auth-card-wrapper">
             <div class="auth-card">
@@ -133,45 +127,55 @@
 
         <?php include '../script/footscript.php'; ?>
 
-        <!-- Login Success Overlay -->
+        <?php
+            // Warp starfield: full-speed light streaks radiating from the center (POV travel)
+            $warpStars = '';
+            for ($i = 0; $i < 46; $i++) {
+                $ang  = $i * 2.39996;                                    // golden angle
+                $dist = ((($i % 4) + 1) * (90 + (($i % 6) + 1) * 22));   // px reach
+                $ox   = round(cos($ang) * 16, 1);
+                $oy   = round(sin($ang) * 16, 1);
+                $tx   = round(cos($ang) * $dist, 1);
+                $ty   = round(sin($ang) * $dist * 1.25, 1);
+                $rot  = round(fmod($i * 137.5, 360), 1);
+                $len  = round(26 + ($i % 4) * 12, 0);
+                $dur  = round(0.3 + ($i % 5) * 0.09, 2);
+                $dly  = round(($i % 7) * 0.06, 2);
+                $cols = array('rgba(255,255,255,0.95)', 'rgba(165,180,252,0.9)', 'rgba(103,232,249,0.85)');
+                $c    = $cols[$i % 3];
+                $warpStars .= '<i class="ws" style="--ox:' . $ox . 'px;--oy:' . $oy . 'px;--tx:' . $tx . 'px;--ty:' . $ty . 'px;--rot:' . $rot . 'deg;--len:' . $len . 'px;--dur:' . $dur . 's;--d:' . $dly . 's;--c:' . $c . ';"></i>';
+            }
+        ?>
+
+        <!-- Login Success Overlay — transparent, reuses the sign-in sky -->
         <div class="login-success-overlay" id="loginSuccessOverlay">
-            <div class="login-success-ripple"></div>
-            <div class="login-success-ripple"></div>
-            <div class="login-success-ripple"></div>
-
-            <div class="login-success-circle">
-                <svg width="44" height="44" viewBox="0 0 48 48">
-                    <polyline class="login-success-check" points="14 24 22 32 36 16"></polyline>
-                </svg>
+            <div class="login-warp-stars" aria-hidden="true"><?php echo $warpStars; ?></div>
+            <div class="login-result">
+                <span class="login-result-icon is-success" aria-hidden="true">
+                    <svg width="40" height="40" viewBox="0 0 48 48">
+                        <polyline class="login-result-check" points="14 24 22 32 36 16"></polyline>
+                    </svg>
+                </span>
+                <div class="login-welcome-name" id="loginWelcomeName">Selamat Datang!</div>
+                <div class="login-welcome-sub" id="loginWelcomeSub">Anda berhasil masuk ke sistem</div>
+                <div class="login-preparing">Mempersiapkan ruang kerja Anda<span class="preparing-dots"><i></i><i></i><i></i></span></div>
             </div>
-
-            <div class="login-welcome-name" id="loginWelcomeName">Selamat Datang!</div>
-            <div class="login-welcome-sub" id="loginWelcomeSub">Anda berhasil masuk ke sistem</div>
-
-            <div class="login-loading-dots">
-                <span></span><span></span><span></span>
-            </div>
-
-            <div class="login-progress-bar"></div>
         </div>
 
-        <!-- Login Failed Overlay -->
+        <!-- Login Failed Overlay — same sky, cross icon, no red wash -->
         <div class="login-fail-overlay" id="loginFailOverlay">
-            <div class="login-fail-ripple"></div>
-            <div class="login-fail-ripple"></div>
-            <div class="login-fail-ripple"></div>
-
-            <div class="login-fail-circle" id="failCircle">
-                <svg width="44" height="44" viewBox="0 0 48 48">
-                    <line class="login-fail-x" x1="16" y1="16" x2="32" y2="32"></line>
-                    <line class="login-fail-x x2" x1="32" y1="16" x2="16" y2="32"></line>
-                </svg>
+            <div class="login-warp-stars" aria-hidden="true"><?php echo $warpStars; ?></div>
+            <div class="login-result">
+                <span class="login-result-icon is-fail" aria-hidden="true">
+                    <svg width="40" height="40" viewBox="0 0 48 48">
+                        <line class="login-result-x" x1="15" y1="15" x2="33" y2="33"></line>
+                        <line class="login-result-x x2" x1="33" y1="15" x2="15" y2="33"></line>
+                    </svg>
+                </span>
+                <div class="login-fail-name" id="failName">Login Gagal!</div>
+                <div class="login-fail-sub" id="failSub">Silakan login kembali</div>
+                <div class="login-fail-dismiss" id="failDismiss">Menutup dalam 3 detik...</div>
             </div>
-
-            <div class="login-fail-name" id="failName">Login Gagal!</div>
-            <div class="login-fail-sub" id="failSub">Username atau password salah</div>
-
-            <div class="login-fail-dismiss" id="failDismiss">Menutup dalam 3 detik...</div>
         </div>
 
         <script>
@@ -241,28 +245,29 @@
                         .then(function(res) {
                             if (res.status === 'success') {
                                 // SUCCESS — tampilkan animasi sukses lalu redirect
-                                var displayName = res.fullname || username;
+                                function toTitleCase(str) {
+                                    return String(str || '').toLowerCase().replace(/(^|\s)./g, function(m) {
+                                        return m.toUpperCase();
+                                    });
+                                }
+                                var displayName = toTitleCase(res.fullname || username);
                                 if (welcomeName) welcomeName.textContent = 'Selamat Datang, ' + displayName + '!';
                                 if (welcomeSub) welcomeSub.textContent = 'Anda berhasil masuk ke sistem';
                                 if (cardWrapper) cardWrapper.classList.add('login-exit');
-                                setTimeout(function() { overlay.classList.add('active'); }, 200);
-                                setTimeout(function() { window.location.href = res.redirect; }, 3200);
+                                setTimeout(function() { overlay.classList.add('active'); }, 180);
+                                setTimeout(function() { window.location.href = res.redirect; }, 6000);
                             } else {
                                 // FAIL — tampilkan animasi gagal langsung
                                 resetBtn();
                                 if (failName) failName.textContent = res.message || 'Login Gagal!';
-                                if (failSub) {
-                                    if (res.error === 'username') failSub.textContent = 'Akun dengan username tersebut tidak terdaftar';
-                                    else if (res.error === 'password') failSub.textContent = 'Password yang dimasukkan tidak sesuai';
-                                    else if (res.error === 'empty') failSub.textContent = 'Username dan password harus diisi';
-                                    else failSub.textContent = 'Terjadi kesalahan, coba lagi';
-                                }
+                                if (failSub) failSub.textContent = 'Silakan login kembali';
 
-                                // Shake card + show fail overlay
-                                if (cardWrapper) cardWrapper.style.animation = 'failShake .6s ease';
-                                setTimeout(function() { failOverlay.classList.add('active'); }, 400);
+                                // Same transition as success: the card flies away,
+                                // then the cross result shows over the sign-in sky.
+                                if (cardWrapper) cardWrapper.classList.add('login-exit');
+                                setTimeout(function() { failOverlay.classList.add('active'); }, 180);
 
-                                // Auto dismiss 3 detik
+                                // Auto dismiss 3 detik, lalu form kembali
                                 var cd = 3;
                                 var ci = setInterval(function() {
                                     cd--;
@@ -270,7 +275,7 @@
                                     if (cd <= 0) {
                                         clearInterval(ci);
                                         failOverlay.classList.remove('active');
-                                        if (cardWrapper) cardWrapper.style.animation = '';
+                                        if (cardWrapper) cardWrapper.classList.remove('login-exit');
                                     }
                                 }, 1000);
                             }

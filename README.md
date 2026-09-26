@@ -75,24 +75,21 @@ _Catatan:_ Akun **Developer** bersifat terproteksi dan tidak dapat diubah/dihapu
 
 Nama Database: **`db_kantin`** (MySQL)
 
-### Daftar Tabel (16 Tabel)
+### Daftar Tabel (13 Tabel)
 
 1. **`users`**: Data akun pengguna (username, password bcrypt, fullname, role, photo).
 2. **`products`**: Master data produk (nama, kode, kategori, harga jual, foto, status katalog, starred).
-3. **`purchases`**: Header transaksi pembelian barang (nomor form, tanggal, catatan).
-4. **`purchase_items`**: Detail item pembelian dengan tracking stok FIFO (`qty`, `remaining_qty`, `buy_price`).
-5. **`list_purchases`**: Header daftar rencana belanja.
-6. **`list_purchase_items`**: Detail item rencana belanja.
-7. **`sales_stock`**: Stok produk yang siap dijual di kasir.
-8. **`stock_requests`**: Permintaan transfer stok dari kasir ke gudang (`pending`, `approved`, `rejected`).
-9. **`stock_transfers`**: Log riwayat persetujuan transfer stok.
-10. **`orders`**: Header transaksi penjualan (kode transaksi, staff_id, total, status_payment).
-11. **`order_details`**: Detail item penjualan (order_id, product_id, qty, price, subtotal).
-12. **`tenants`**: Data penyewa / tenant (nama tenant, pemikir/owner, status).
-13. **`tenant_payments`**: Transaksi pembayaran uang sewa tenant.
-14. **`utility_payments`**: Transaksi pembayaran biaya air & listrik tenant.
-15. **`updates`**: Header changelog versi aplikasi.
-16. **`update_details`**: Detail uraian pembaruan versi.
+3. **`purchases`**: Header transaksi pembelian & daftar belanja (nomor form, tanggal).
+4. **`purchase_items`**: Detail item pembelian dengan tracking stok FIFO (`qty`, `remaining_qty`, `price`) serta data rencana belanja (`qty_buy`, `unit_buy`, `price_buy`).
+5. **`sales_stock`**: Tabel pergerakan stok kantin (ledger). Setiap baris mencatat satu pergerakan (`type`: `balance`, `transfer`, `sale`, `return`) dengan qty positif/negatif; saldo saat ini = `SUM(qty)` per produk.
+6. **`stock_requests`**: Permintaan transfer stok dari kasir ke gudang (`pending`, `approved`, `rejected`).
+7. **`orders`**: Header transaksi penjualan (kode transaksi, staff_id, total, status_payment).
+8. **`order_details`**: Detail item penjualan (order_id, product_id, qty, price, subtotal).
+9. **`tenants`**: Data penyewa / tenant (nama tenant, pemikir/owner, status).
+10. **`tenant_payments`**: Transaksi pembayaran uang sewa tenant.
+11. **`utility_payments`**: Transaksi pembayaran biaya air & listrik tenant.
+12. **`updates`**: Header changelog versi aplikasi.
+13. **`update_details`**: Detail uraian pembaruan versi.
 
 ### Diagram Relasi Sederhana
 
@@ -103,10 +100,8 @@ users ──(staff_id)──> orders ──(order_id)──> order_details ─�
   └──(staff_id)──> utility_payments <──(tenant_id)──┘                            │
                                                                                    │
 purchases ──(purchase_id)──> purchase_items ──────(product_id)─────────────────────┤
-                                                                                   ├─> sales_stock
-list_purchases ────> list_purchase_items ─────────(product_id)─────────────────────┤
-                                                                                   ├─> stock_requests
-updates ────> update_details                                                       └─> stock_transfers
+                                                                                     ├─> sales_stock
+updates ────> update_details                                                       └─> stock_requests
 ```
 
 ---
@@ -173,7 +168,7 @@ qieos/
 │   └── pages/
 ├── pages/                   # Modul & halaman utama sistem
 │   ├── components/          # Navigation (sidebar, navbar) & AJAX data endpoints
-│   ├── management/          # Pengelolaan user (administrator & staff kasir)
+│   ├── master/              # Master data (produk, supplier, customer) & master user
 │   ├── other/               # Modul update & changelog
 │   ├── profile/             # Pengelolaan profil user
 │   ├── purchasing/          # Modul daftar belanja & input pembelian

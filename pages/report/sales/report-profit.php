@@ -15,10 +15,10 @@ $query = mysqli_query($conn, "
         FROM orders
         WHERE DATE(tanggal) BETWEEN '$first' AND '$last'
         UNION
-        SELECT DATE(date_list) AS dt
-        FROM list_purchases
+        SELECT DATE(date) AS dt
+        FROM purchases
         WHERE deleted_at IS NULL
-          AND DATE(date_list) BETWEEN '$first' AND '$last'
+          AND DATE(date) BETWEEN '$first' AND '$last'
     ) d
     LEFT JOIN (
         SELECT DATE(tanggal) AS dt, COALESCE(SUM(total), 0) AS omzet
@@ -28,12 +28,13 @@ $query = mysqli_query($conn, "
         GROUP BY DATE(tanggal)
     ) o ON o.dt = d.dt
     LEFT JOIN (
-        SELECT DATE(lp.date_list) AS dt, COALESCE(SUM(lpi.price), 0) AS expense
-        FROM list_purchases lp
-        JOIN list_purchase_items lpi ON lp.id = lpi.list_purchase_id
-        WHERE lp.deleted_at IS NULL
-          AND DATE(lp.date_list) BETWEEN '$first' AND '$last'
-        GROUP BY DATE(lp.date_list)
+        SELECT DATE(p.date) AS dt, COALESCE(SUM(pi.price_buy), 0) AS expense
+        FROM purchases p
+        JOIN purchase_items pi ON p.id = pi.purchase_id
+        WHERE p.deleted_at IS NULL
+          AND pi.deleted_at IS NULL
+          AND DATE(p.date) BETWEEN '$first' AND '$last'
+        GROUP BY DATE(p.date)
     ) e ON e.dt = d.dt
     ORDER BY d.dt DESC
 ");

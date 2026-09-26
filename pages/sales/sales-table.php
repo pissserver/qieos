@@ -3,30 +3,33 @@
 
     $q = mysqli_query($conn,"
     SELECT
-        s.qty,
         p.id,
         p.name,
         p.code,
-        p.catalog
+        p.unit,
+        p.photo,
+        p.catalog,
+        COALESCE(SUM(s.qty),0) AS qty
     FROM sales_stock s
     JOIN products p
         ON p.id = s.product_id
+    GROUP BY p.id
     ORDER BY p.name ASC
     ");
 ?>
 
-<link rel="stylesheet" href="<?php echo BASE_URL; ?>/css/pages/sales-table.css">
+<link rel="stylesheet" href="<?php echo BASE_URL; ?>/css/pages/stock.css?v=<?php echo filemtime(__DIR__ . '/../../css/pages/stock.css'); ?>">
+<link rel="stylesheet" href="<?php echo BASE_URL; ?>/css/pages/sales-table.css?v=<?php echo filemtime(__DIR__ . '/../../css/pages/sales-table.css'); ?>">
 
-<table id="salesTable">
+<table class="table table-hover align-middle" id="stockTable">
     <thead>
-        <tr>
+        <tr style="font-size:13px;color:#64748b;">
             <th>Produk</th>
             <th class="text-center">Stok</th>
             <th class="text-center">Status</th>
             <th class="text-center">Katalog</th>
         </tr>
     </thead>
-
     <tbody>
 
     <?php while($d=mysqli_fetch_assoc($q)): ?>
@@ -36,66 +39,69 @@
 
         if($stock <= 0){
             $statusText='Habis';
-            $statusClass='stock-empty';
+            $statusClass='st-habis';
             $statusIcon='fa-circle-xmark';
         }elseif($stock <= 50){
             $statusText='Menipis';
-            $statusClass='stock-low';
+            $statusClass='st-menipis';
             $statusIcon='fa-triangle-exclamation';
         }else{
             $statusText='Ready';
-            $statusClass='stock-success';
+            $statusClass='st-ready';
             $statusIcon='fa-circle-check';
         }
 
+        $unit = !empty($d['unit']) ? strtoupper($d['unit']) : '-';
         $isActive = ($d['catalog'] === 'active');
     ?>
 
-    <tr class="sales-row <?= $isActive ? 'catalog-active' : '' ?>" id="row-<?= $d['id'] ?>">
+    <tr class="stock-row <?= $isActive ? 'catalog-active' : '' ?>" id="row-<?= $d['id'] ?>">
         <td>
             <div class="product-wrap">
+                <?php if(!empty($d['photo'])): ?>
+                <img class="product-img"
+                    src="<?= BASE_URL ?>/assets/img/products/<?= htmlspecialchars($d['photo']) ?>"
+                    alt="<?= htmlspecialchars($d['name']) ?>">
+                <?php else: ?>
                 <div class="product-icon">
-                    <i class="fas fa-box"></i>
+                    <i class="fas fa-box-open"></i>
                 </div>
+                <?php endif; ?>
+
                 <div>
-                    <div class="product-name">
+                    <div class="fw-bold">
                         <?= htmlspecialchars($d['name']) ?>
                     </div>
-                    <div class="product-code">
+                    <small class="text-muted">
                         <?= htmlspecialchars($d['code']) ?>
-                    </div>
+                    </small>
                 </div>
             </div>
         </td>
 
         <td class="text-center">
-            <span class="stock-badge <?= $statusClass ?>">
-                <i class="fas fa-cubes"></i>
-                <?= number_format($stock) ?>
+            <span class="st-badge <?= $statusClass ?>">
+                <i class="fas fa-cubes me-1"></i>
+                <?= number_format($stock) ?><?= $unit !== '-' ? ' ' . $unit : '' ?>
             </span>
         </td>
 
         <td class="text-center">
-            <span class="stock-badge <?= $statusClass ?>">
+            <span class="st-badge <?= $statusClass ?>">
                 <i class="fas <?= $statusIcon ?>"></i>
                 <?= $statusText ?>
             </span>
         </td>
 
         <td class="text-center">
-            <label class="neo-switch">
-
+            <label class="toggle-switch" title="Klik untuk ubah status katalog">
                 <input
                     type="checkbox"
                     <?= $isActive ? 'checked' : '' ?>
                     onchange="toggleCatalog(<?= $d['id'] ?>, this)">
-
-                <span class="neo-track">
-                    <span class="neo-thumb">
-                        <span class="neo-text">OFF</span>
-                    </span>
+                <span class="toggle-track">
+                    <span class="toggle-thumb"></span>
                 </span>
-
             </label>
         </td>
     </tr>

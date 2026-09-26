@@ -6,13 +6,13 @@ SELECT
     purchases.id,
     purchases.form,
     purchases.date,
-    purchases.note,
     purchases.created_at,
     purchase_items.qty,
     purchase_items.remaining_qty,
     purchase_items.unit,
 
-    GROUP_CONCAT(products.name SEPARATOR ', ') as products
+    GROUP_CONCAT(products.name SEPARATOR ', ') as products,
+    COUNT(CASE WHEN purchase_items.qty IS NOT NULL AND purchase_items.deleted_at IS NULL THEN 1 END) as total_item
 
 FROM purchases
 
@@ -23,21 +23,27 @@ LEFT JOIN products
     ON products.id = purchase_items.product_id
 
 WHERE purchases.deleted_at IS NULL
+  AND EXISTS (
+      SELECT 1
+      FROM purchase_items pi2
+      WHERE pi2.purchase_id = purchases.id
+        AND pi2.deleted_at IS NULL
+        AND pi2.qty IS NOT NULL
+  )
 
 GROUP BY purchases.id
 ORDER BY purchases.id DESC
 ");
 ?>
 
-<link rel="stylesheet" href="<?php echo BASE_URL; ?>/css/pages/purchase-table.css">
+<link rel="stylesheet" href="<?php echo BASE_URL; ?>/css/pages/purchase-table.css?v=<?php echo filemtime(__DIR__ . '/../../css/pages/purchase-table.css'); ?>">
 
 <table id="purchaseTable" class="table table-hover align-middle">
 <thead>
 <tr>
     <th>ID FORM</th>
     <th class="text-center">TANGGAL PEMBELIAN</th>
-    <th class="text-center">CATATAN</th>
-    <th class="text-center">PEMBUATAN FORM</th>
+    <th class="text-center">TOTAL ITEM</th>
     <th class="text-center">AKSI</th>
 </tr>
 </thead>
@@ -70,19 +76,11 @@ ORDER BY purchases.id DESC
         </span>
     </td>
 
-    <!-- NOTE -->
-    <td class="text-center">
-        <span class="note-badge">
-            <i class="fas fa-sticky-note"></i>
-            <?= $d['note'] ?: 'Tidak ada catatan' ?>
-        </span>
-    </td>
-
-    <!-- CREATED -->
+    <!-- TOTAL ITEM -->
     <td class="text-center">
         <span class="created-badge">
-            <i class="fas fa-clock"></i>
-            <?= date('d F Y', strtotime($d['created_at'])) ?>
+            <i class="fas fa-boxes-stacked"></i>
+            <?= (int)$d['total_item'] ?> item
         </span>
     </td>
 
@@ -93,15 +91,6 @@ ORDER BY purchases.id DESC
 
         <button class="action-btn btn-edit editPurchaseBtn" data-id="<?= $d['id'] ?>">
             <i class="fas fa-edit"></i>
-        </button>
-
-       <button class="action-btn btn-delete deletePurchaseBtn"
-            data-id="<?= $d['id'] ?>"
-            data-form="<?= $d['form'] ?>"
-            data-products="<?= htmlspecialchars($d['products']) ?>"
-            data-qty="<?= $d['qty'] ?>"
-            data-unit="<?= $d['unit'] ?>">
-            <i class="fas fa-trash"></i>
         </button>
 
         <?php else: ?>

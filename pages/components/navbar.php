@@ -3,12 +3,22 @@ if (!defined('BASE_URL')) {
     require_once __DIR__ . '/../../script/connection.php';
 }
 ?>
-<script>
-    const BASE_URL = '<?php echo BASE_URL; ?>';
-</script>
-<link rel="stylesheet" href="<?php echo BASE_URL; ?>/css/pages/navbar.css">
+<link rel="stylesheet" href="<?php echo BASE_URL; ?>/css/pages/navbar.css?v=<?php echo filemtime(__DIR__ . '/../../css/pages/navbar.css'); ?>">
 
 <nav class="premium-navbar">
+
+    <!-- Twinkling Stars Background -->
+    <div class="premium-navbar-stars" aria-hidden="true">
+        <?php
+            for ($i = 0; $i < 28; $i++) {
+                $t = 5 + ($i * 7) % 82;
+                $l = 5 + ($i * 13) % 88;
+                $s = 2 + ($i % 3);
+                $starDelay = ($i % 10) * 0.3 + (($i * 5) % 9) * 0.08;
+                echo '<span class="star" style="top:' . $t . '%;left:' . $l . '%;width:' . $s . 'px;height:' . $s . 'px;--d:' . round($starDelay, 2) . 's;"></span>';
+            }
+        ?>
+    </div>
 
     <div class="premium-brand">
         <div class="brand-content">
@@ -36,7 +46,19 @@ if (!defined('BASE_URL')) {
             </span>
 
         </div>
-        
+
+        <!-- CHAT -->
+        <a
+            class="premium-action-btn chat-nav-btn"
+            href="<?php echo BASE_URL; ?>/pages/chat/chat.php"
+            id="chatNavBtn"
+            aria-label="Chat">
+
+            <i class="fas fa-comments"></i>
+
+            <span class="cart-badge chat-unread-badge d-none" id="chatBadge">0</span>
+        </a>
+
         <?php if ($user['role'] == 'developer' || $user['role'] == 'staff kasir') { ?>
         
         <!-- CART -->
@@ -227,6 +249,34 @@ if (!defined('BASE_URL')) {
                 });
             }
 
+            if(r.suppliers && r.suppliers.length){
+                html += '<div class="search-section-label"><i class="fas fa-truck"></i> Supplier</div>';
+                r.suppliers.forEach(function(s){
+                    var idx = allItems.length;
+                    allItems.push(s.url);
+                    html += '<div class="search-item" data-idx="'+idx+'" onclick="window._goSearchItem('+idx+')">';
+                    html += '<div class="search-item-icon supplier-icon"><i class="'+s.icon+'"></i></div>';
+                    html += '<div class="search-item-info"><div class="search-item-name">'+escapeHtml(s.name)+'</div><div class="search-item-meta">'+escapeHtml(s.phone)+' &middot; '+escapeHtml(s.address)+'</div></div>';
+                    html += '<span class="search-item-badge badge-supplier">Supplier</span>';
+                    html += '</div>';
+                    total++;
+                });
+            }
+
+            if(r.customers && r.customers.length){
+                html += '<div class="search-section-label"><i class="fas fa-users"></i> Customer</div>';
+                r.customers.forEach(function(c){
+                    var idx = allItems.length;
+                    allItems.push(c.url);
+                    html += '<div class="search-item" data-idx="'+idx+'" onclick="window._goSearchItem('+idx+')">';
+                    html += '<div class="search-item-icon customer-icon"><i class="'+c.icon+'"></i></div>';
+                    html += '<div class="search-item-info"><div class="search-item-name">'+escapeHtml(c.name)+'</div><div class="search-item-meta">'+escapeHtml(c.phone)+'</div></div>';
+                    html += '<span class="search-item-badge badge-customer">Customer</span>';
+                    html += '</div>';
+                    total++;
+                });
+            }
+
             if(r.orders && r.orders.length){
                 html += '<div class="search-section-label"><i class="fas fa-receipt"></i> Pesanan</div>';
                 r.orders.forEach(function(o){
@@ -366,11 +416,12 @@ if (!defined('BASE_URL')) {
 </script>
 
         <!-- PROFILE -->
-        <div class="dropdown">
+        <div class="dropdown" style="position: relative; z-index: 1050;">
 
             <a href="#"
                 class="text-decoration-none"
-                data-bs-toggle="dropdown">
+                data-bs-toggle="dropdown"
+                data-bs-auto-close="true">
 
                 <div class="premium-profile">
 
@@ -424,8 +475,8 @@ if (!defined('BASE_URL')) {
 <div class="modal fade" id="cartModal" tabindex="-1">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
-            <div class="modal-header" style="background: linear-gradient(45deg,#6366f1,#8b5cf6); color:white;">
-                <h5 class="mb-0 text-white"><i class="fas fa-shopping-cart"></i>&nbsp; Keranjang</h5>
+            <div class="modal-header cart-modal-header">
+                <h5 class="mb-0 cart-modal-title"><i class="fas fa-shopping-cart"></i> Keranjang</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
 
@@ -535,6 +586,15 @@ if (!defined('BASE_URL')) {
     // Load cart from localStorage
     let cart = JSON.parse(localStorage.getItem('cart')) || [];
 
+    // Bersihkan item lama yang photo-nya masih data-URI (ikon SVG versi lama).
+    // Foto produk asli adalah nama file, bukan data URI, sehingga aman dikosongkan
+    // agar template render memakai ikon open-box yang sama dengan katalog.
+    cart.forEach(item => {
+        if (item.photo && /^data:/.test(item.photo)) {
+            item.photo = '';
+        }
+    });
+
     let cartModalInstance = null;
 
     function openCart() {
@@ -549,6 +609,7 @@ if (!defined('BASE_URL')) {
         let qty = 1;
         let input = null;
         let isAdditional = category.toLowerCase() === 'additional';
+        let isCombo = category.toLowerCase() === 'racikan';
 
         if (!isAdditional) {
             input = document.getElementById('qty-' + id);
@@ -560,8 +621,9 @@ if (!defined('BASE_URL')) {
             }
         }
 
-        let img = btn.closest('.product-item')
-                    .querySelector('.product-img').src;
+        let imgEl = btn.closest('.product-item')
+                        .querySelector('.product-img');
+        let img = (imgEl && imgEl.tagName === 'IMG') ? imgEl.src : '';
 
         let existing = cart.find(item => item.id == id);
 
@@ -579,7 +641,8 @@ if (!defined('BASE_URL')) {
                 price,
                 qty,
                 photo: img,
-                category
+                category,
+                type: isCombo ? 'combo' : 'product'
             });
         }
 
@@ -637,12 +700,16 @@ if (!defined('BASE_URL')) {
 
             total += subtotal;
 
+            const thumb = item.photo
+                ? `<img src="${item.photo}" class="cart-img">`
+                : `<div class="cart-img cart-img-empty"><i class="fas fa-box-open"></i></div>`;
+
             html += `
                 <div class="cart-card">
 
                     <!-- LEFT -->
                     <div class="cart-left">
-                        <img src="${item.photo}" class="cart-img">
+                        ${thumb}
 
                         <div>
                             <div class="cart-title text-capitalize">${item.name}</div>
@@ -790,8 +857,8 @@ if (!defined('BASE_URL')) {
             });
     }
 
-    // jalan tiap 1 detik
-    setInterval(updateOmzet, 3000);
+    // jalan tiap 30 detik (ringan untuk mobile)
+    setInterval(updateOmzet, 30000);
 
     // pertama kali load
     updateOmzet();
@@ -830,6 +897,9 @@ if (!defined('BASE_URL')) {
 
 <script>
 (function(){
+    // Screensaver di-nonaktifkan di HP kecil (hemat baterai & GPU)
+    if (window.innerWidth < 768 && window.matchMedia('(hover: none)').matches) { return; }
+
     var userName = '<?php echo addslashes($user["fullname"] ? $user["fullname"] : $user["username"]); ?>';
 
     var ss = document.createElement('div');

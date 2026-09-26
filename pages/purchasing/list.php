@@ -1,22 +1,17 @@
 <?php
 include '../../sessions/session.php';
 
-$qLast = mysqli_query($conn,"SELECT form FROM purchases ORDER BY id DESC LIMIT 1");
+$qLast = mysqli_query($conn,"SELECT MAX(CAST(REPLACE(form, 'FORM-', '') AS UNSIGNED)) AS last_num FROM purchases");
 $dLast = mysqli_fetch_assoc($qLast);
+$nextNum = ($dLast && $dLast['last_num'] ? (int)$dLast['last_num'] : 0) + 1;
+$formNumber = 'FORM-' . str_pad($nextNum,7,'0',STR_PAD_LEFT);
 
-$lastNum = 0;
-if ($dLast && !empty($dLast['form'])) {
-    $lastNum = (int) preg_replace('/[^0-9]/', '', $dLast['form']);
+// Produk untuk dropdown (semua kategori kecuali Additional)
+$qProd = mysqli_query($conn, "SELECT id, name, unit FROM products WHERE deleted_at IS NULL AND category <> 'Additional' ORDER BY name ASC");
+$products = [];
+while($p = mysqli_fetch_assoc($qProd)){
+    $products[] = ['id' => (int)$p['id'], 'name' => $p['name'], 'unit' => $p['unit']];
 }
-
-if(!isset($_SESSION['current_form_id'])){
-    $_SESSION['current_form_id'] = $lastNum > 0 ? $lastNum : 1;
-}
-
-$currentFormId = $_SESSION['current_form_id'];
-$formNumber = 'FORM-' . str_pad($currentFormId,7,'0',STR_PAD_LEFT);
-
-$hasPrevious = $currentFormId > 1;
 ?>
 
 <!doctype html>
@@ -26,7 +21,9 @@ $hasPrevious = $currentFormId > 1;
 <title>Pembelian Stok - Qieos</title>
 <?php include '../../script/headscript.php'; ?>
 
-<link rel="stylesheet" href="<?php echo BASE_URL; ?>/css/pages/list.css">
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet">
+<link rel="stylesheet" href="<?php echo BASE_URL; ?>/css/pages/list.css?v=<?= filemtime(__DIR__ . '/../../css/pages/list.css') ?>">
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
 </head>
 
@@ -40,7 +37,7 @@ $hasPrevious = $currentFormId > 1;
 <div class="container-fluid px-0 mt-5">
     <!-- FORM -->
     <div class="section-card mb-5">
-        <div class="panel-header panel-dark">
+        <div class="panel-header panel-primary">
             <div class="panel-left">
                 <div class="panel-icon">
                     <i class="fas fas fa-file-alt"></i>
@@ -72,36 +69,51 @@ $hasPrevious = $currentFormId > 1;
             <div class="stock-body">
 
                 <div id="formMode" class="panel-mode active">
-                    <form id="form-stock"
-                        action="list-action.php?action=store"
-                        method="POST">
+<form id="form-stock"
+                            action="list-action.php?action=store"
+                            method="POST">
+
+                        <input type="hidden" name="form_number" value="<?= $formNumber ?>">
 
                         <div id="itemsContainer">
 
                             <div class="item-row row mb-3">
 
                                 <div class="col-md-4">
-                                    <input type="text"
-                                        name="product_name[]"
-                                        class="form-control"
+                                    <select
+                                        name="product_id[]"
+                                        class="form-control product-select"
                                         placeholder="Nama Produk"
                                         required>
+                                        <option value=""></option>
+                                        <?php foreach($products as $p): ?>
+                                        <option value="<?= $p['id'] ?>" data-name="<?= htmlspecialchars($p['name']) ?>" data-unit="<?= htmlspecialchars($p['unit']) ?>"><?= htmlspecialchars($p['name']) ?></option>
+                                        <?php endforeach; ?>
+                                    </select>
                                 </div>
 
-                                <div class="col-md-4">
+                                <div class="col-md-2">
                                     <input type="number"
-                                        name="qty[]"
+                                        name="qty_buy[]"
                                         class="form-control"
                                         placeholder="Qty"
                                         required>
                                 </div>
 
-                                <div class="col-md-4">
+                                <div class="col-md-2">
                                     <input type="text"
-                                        name="unit[]"
+                                        name="unit_buy[]"
                                         class="form-control"
                                         placeholder="Satuan"
                                         required>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <input type="number"
+                                        name="price_buy[]"
+                                        class="form-control"
+                                        placeholder="Total Harga (Rp)"
+                                        min="0">
                                 </div>
 
                             </div>
@@ -176,6 +188,31 @@ $hasPrevious = $currentFormId > 1;
     document.getElementById("form-stock").addEventListener("submit", function(e){
         e.preventDefault();
 
+        // Validasi manual (required Select2 tidak tervalidasi otomatis)
+        let rows = document.querySelectorAll('#itemsContainer .item-row');
+        let valid = true;
+        rows.forEach(function(r){
+            let sel = r.querySelector('select[name="product_id[]"]');
+            let qty = r.querySelector('input[name="qty_buy[]"]');
+            let unit = r.querySelector('input[name="unit_buy[]"]');
+            if(!sel || !sel.value){
+                QToast('Error', 'Nama produk wajib dipilih', 'error');
+                valid = false;
+                return;
+            }
+            if(!qty || !qty.value.trim()){
+                QToast('Error', 'Qty wajib diisi', 'error');
+                valid = false;
+                return;
+            }
+            if(!unit || !unit.value.trim()){
+                QToast('Error', 'Satuan wajib diisi', 'error');
+                valid = false;
+                return;
+            }
+        });
+        if(!valid) return;
+
         let formData = new FormData(this);
 
         fetch(this.action,{
@@ -186,11 +223,95 @@ $hasPrevious = $currentFormId > 1;
         .then(res=>{
             if(res.status==="success"){
                 QToast("Berhasil", res.msg, "success");
-                this.reset();
+                resetItemRows();
             }else{
                 QToast("Error", res.msg, "error");
             }
         });
+    });
+
+    // Reset form item ke kondisi awal (satu baris kosong seperti halaman baru)
+    function resetItemRows(){
+        let container = document.getElementById('itemsContainer');
+        container.querySelectorAll('.product-select').forEach(function(sel){
+            let $s = $(sel);
+            if($s.hasClass('select2-hidden-accessible')) $s.select2('destroy');
+        });
+        container.innerHTML = '';
+
+        let row = document.createElement('div');
+        row.className = 'item-row row mb-3';
+        row.innerHTML = `
+            <div class="col-md-4">
+                <select name="product_id[]" class="form-control product-select" placeholder="Nama Produk" required>
+                    ${buildProductOptions('')}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <input type="number" name="qty_buy[]" class="form-control" placeholder="Qty" required>
+            </div>
+            <div class="col-md-2">
+                <input type="text" name="unit_buy[]" class="form-control" placeholder="Satuan" required>
+            </div>
+            <div class="col-md-4">
+                <input type="number" name="price_buy[]" class="form-control" placeholder="Harga" min="0">
+            </div>
+        `;
+        container.appendChild(row);
+        initProductSelect(row.querySelector('.product-select'));
+    }
+
+    // Daftar produk untuk dropdown dinamis (semua kecuali Additional)
+    var PRODUCT_LIST = <?= json_encode(array_values($products), JSON_UNESCAPED_UNICODE) ?>;
+
+    function escAttr(s){
+        return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+    function buildProductOptions(selected){
+        let html = '<option value=""></option>';
+        PRODUCT_LIST.forEach(function(p){
+            let sel = (selected !== '' && String(selected) === String(p.id)) ? ' selected' : '';
+            html += '<option value="' + p.id + '" data-name="' + escAttr(p.name) + '" data-unit="' + escAttr(p.unit || '') + '"' + sel + '>' + escAttr(p.name) + '</option>';
+        });
+        return html;
+    }
+
+    function applyItemSelect2($sel){
+        if(!$sel || !$sel.length) return;
+        if($sel.hasClass('select2-hidden-accessible')) $sel.select2('destroy');
+        let opts = {
+            width: '100%',
+            placeholder: 'Cari / Pilih Produk...',
+            allowClear: true
+        };
+        if($sel.closest('#editPurchaseModal').length){
+            opts.dropdownParent = $('#editPurchaseModal');
+        }
+        $sel.select2(opts);
+        $sel.on('change', function(){
+            let unitInput = $(this).closest('.item-row').find('input[name="unit_buy[]"]');
+            if(unitInput.length){
+                let opt = this.options[this.selectedIndex];
+                let u = opt ? opt.getAttribute('data-unit') : '';
+                if(u) unitInput.val(u);
+            }
+        });
+    }
+
+    function initProductSelect(sel){
+        if(!sel || typeof $ === 'undefined') return;
+        applyItemSelect2($(sel));
+    }
+
+    function initEditSelects(){
+        document.querySelectorAll('#itemsContainerEdit .product-select').forEach(function(sel){
+            applyItemSelect2($(sel));
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', function(){
+        document.querySelectorAll('#itemsContainer .product-select').forEach(initProductSelect);
     });
 
     const panelToggle = document.getElementById('panelToggle');
@@ -282,35 +403,45 @@ $hasPrevious = $currentFormId > 1;
             <div class="item-row row mb-3">
 
                 <div class="col-md-4">
-                    <input type="text"
-                        name="product_name[]"
-                        class="form-control"
+                    <select
+                        name="product_id[]"
+                        class="form-control product-select"
                         placeholder="Nama Produk"
                         required>
+                        ${buildProductOptions('')}
+                    </select>
                 </div>
 
-                <div class="col-md-4">
+                <div class="col-md-2">
                     <input type="number"
-                        name="qty[]"
+                        name="qty_buy[]"
                         class="form-control"
                         placeholder="Qty"
                         required>
                 </div>
 
-                <div class="col-md-4 d-flex">
-
+                <div class="col-md-2">
                     <input type="text"
-                        name="unit[]"
+                        name="unit_buy[]"
                         class="form-control"
                         placeholder="Satuan"
                         required>
+                </div>
 
+                <div class="col-md-3">
+                    <input type="number"
+                        name="price_buy[]"
+                        class="form-control"
+                        placeholder="Harga"
+                        min="0">
+                </div>
+
+                <div class="col-md-1">
                     <button type="button"
-                            class="btn btn-danger ms-2"
+                            class="btn btn-danger w-100"
                             onclick="removeItem(this)">
                         <i class="fas fa-trash"></i>
                     </button>
-
                 </div>
 
             </div>
@@ -319,6 +450,9 @@ $hasPrevious = $currentFormId > 1;
         document
             .getElementById('itemsContainer')
             .insertAdjacentHTML('beforeend', html);
+
+        let last = document.querySelector('#itemsContainer .item-row:last-child select.product-select');
+        initProductSelect(last);
     }
 
     function addItemEdit()
@@ -331,16 +465,18 @@ $hasPrevious = $currentFormId > 1;
                     value="">
 
                 <div class="col-md-4">
-                    <input type="text"
-                        name="product_name[]"
-                        class="form-control"
+                    <select
+                        name="product_id[]"
+                        class="form-control product-select"
                         placeholder="Nama Produk"
                         required>
+                        ${buildProductOptions('')}
+                    </select>
                 </div>
 
                 <div class="col-md-2">
                     <input type="number"
-                        name="qty[]"
+                        name="qty_buy[]"
                         class="form-control"
                         placeholder="Qty"
                         min="0"
@@ -349,7 +485,7 @@ $hasPrevious = $currentFormId > 1;
 
                 <div class="col-md-2">
                     <input type="text"
-                        name="unit[]"
+                        name="unit_buy[]"
                         class="form-control"
                         placeholder="Satuan"
                         required>
@@ -357,7 +493,7 @@ $hasPrevious = $currentFormId > 1;
 
                 <div class="col-md-3">
                     <input type="number"
-                        name="price[]"
+                        name="price_buy[]"
                         class="form-control"
                         placeholder="Harga"
                         min="0"
@@ -378,6 +514,9 @@ $hasPrevious = $currentFormId > 1;
         document
             .querySelector('#itemsContainerEdit')
             .insertAdjacentHTML('beforeend', html);
+
+        let last = document.querySelector('#itemsContainerEdit .item-row:last-child select.product-select');
+        applyItemSelect2($(last));
     }
 
     function removeItem(button)
@@ -405,6 +544,7 @@ $hasPrevious = $currentFormId > 1;
         .then(res => res.text())
         .then(html => {
             document.getElementById('editPurchaseContent').innerHTML = html;
+            initEditSelects();
         });
 
     });

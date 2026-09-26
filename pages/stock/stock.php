@@ -9,7 +9,7 @@ include '../../sessions/session.php';
     <title>Stok Gudang - Qieos</title>
     <?php include '../../script/headscript.php'; ?>
 
-    <link rel="stylesheet" href="<?php echo BASE_URL; ?>/css/pages/stock.css">
+    <link rel="stylesheet" href="<?php echo BASE_URL; ?>/css/pages/stock.css?v=<?php echo filemtime(__DIR__ . '/../../css/pages/stock.css'); ?>">
 </head>
 
 <body>
@@ -53,35 +53,6 @@ include '../../sessions/session.php';
             <!-- TABLE -->
             <div class="table-responsive-wrap" id="stockTableContainer">
                 <!-- Loaded via AJAX -->
-            </div>
-        </div>
-    </div>
-
-    <!-- EDIT MODAL -->
-    <div class="modal fade" id="editStockModal" tabindex="-1">
-        <div class="modal-dialog modal-xl modal-dialog-centered">
-            <div class="modal-content stock-panel border-0">
-
-                <div class="panel-header panel-dark my-3 mx-3">
-                    <div class="panel-left">
-                        <div class="panel-icon">
-                            <i class="fas fas fa-box-open"></i>
-                        </div>
-
-                        <div>
-                            <div class="panel-title">
-                                Edit Stock Gudang 
-                            </div>
-                            <div class="panel-subtitle">
-                                Edit nama, harga jual, dan foto produk
-                            </div>
-                        </div>
-                    </div>
-
-                    <button class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                </div>
-
-                <div class="mt-2 px-5" id="editStockContent"></div>
             </div>
         </div>
     </div>
@@ -184,8 +155,8 @@ include '../../sessions/session.php';
                     paginate: {
                         first: "Awal",
                         last: "Akhir",
-                        next: "õ",
-                        previous: "ã"
+                        next: "‚Üí",
+                        previous: "‚Üê"
                     }
                 }
             });
@@ -193,76 +164,6 @@ include '../../sessions/session.php';
         });
 
     }
-</script>
-
-<!-- Script Edit -->
-<script>
-    // OPEN EDIT MODAL
-    $(document).on('click','.editStockBtn',function(){
-
-        let id = $(this).data('id');
-
-        $('#editStockModal').modal('show');
-
-        document.getElementById('editStockContent').innerHTML = `
-            <div class="text-center py-5">
-                <i class="fas fa-spinner fa-spin fa-2x text-secondary"></i>
-            </div>
-        `;
-
-        fetch('stock-edit.php?id=' + id)
-        .then(res => res.text())
-        .then(html => {
-            document.getElementById('editStockContent').innerHTML = html;
-        });
-
-    });
-
-    // Edit Action
-    $(document).on('submit','#editStockForm',function(e){
-        e.preventDefault();
-
-        let formData = new FormData(this);
-        let id = formData.get('id');
-
-        fetch('stock-action.php?action=update&id='+id,{
-            method:'POST',
-            body:formData
-        })
-        .then(res => res.json())
-        .then(res => {
-
-            if(res.status === 'success'){
-
-                QToast({
-                    title:'Berhasil',
-                    message:'Data berhasil diperbarui',
-                    type:'success'
-                });
-
-                $('#editStockModal').modal('hide');
-
-                loadStockTable();
-
-            }else{
-
-                QToast({
-                    title:'Gagal',
-                    message:res.msg || 'Terjadi kesalahan',
-                    type:'error'
-                });
-
-            }
-
-        })
-        .catch(() => {
-            QToast(
-                'Error',
-                'Gagal memproses update',
-                'error'
-            );
-        });
-    });
 </script>
 
 </body>

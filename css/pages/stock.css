@@ -1,4 +1,4 @@
-﻿:root{
+:root{
             --primary:#4f46e5;
             --dark:#0f172a;
             --muted:#64748b;
@@ -88,11 +88,7 @@
         }
 
         .panel-primary{
-            background:linear-gradient(
-                135deg,
-                #4f46e5,
-                #4338ca
-            );
+            background:linear-gradient(135deg, #0f172a, #1e293b, #334155);
             color:#fff;
         }
 
@@ -171,6 +167,15 @@
             justify-content:center;
         }
 
+        .product-img{
+            width:50px;
+            height:50px;
+            border-radius:14px;
+            object-fit:cover;
+            display:block;
+            border:2px solid #e2e8f0;
+        }
+
         .stock-badge{
             padding:8px 14px;
             border-radius:10px;
@@ -198,6 +203,45 @@
             background:#f8fafc;
             border:1px solid #e2e8f0;
             font-weight:600;
+        }
+
+        /* BADGE STATUS (sama dengan detail produk) */
+        .st-badge{
+            display:inline-flex;
+            align-items:center;
+            gap:7px;
+            padding:7px 14px;
+            border-radius:999px;
+            font-size:12px;
+            font-weight:800;
+            letter-spacing:.02em;
+            border:1px solid transparent;
+            white-space:nowrap;
+        }
+
+        .st-badge i{
+            font-size:11px;
+        }
+
+        .st-ready{
+            background:linear-gradient(135deg,#dcfce7,#bbf7d0);
+            color:#15803d;
+            border-color:rgba(21,128,61,.18);
+            box-shadow:0 4px 14px rgba(22,163,74,.15);
+        }
+
+        .st-menipis{
+            background:linear-gradient(135deg,#fef3c7,#fde68a);
+            color:#b45309;
+            border-color:rgba(180,83,9,.18);
+            box-shadow:0 4px 14px rgba(245,158,11,.18);
+        }
+
+        .st-habis{
+            background:linear-gradient(135deg,#fee2e2,#fecaca);
+            color:#b91c1c;
+            border-color:rgba(185,28,28,.18);
+            box-shadow:0 4px 14px rgba(239,68,68,.16);
         }
 
         .table-card{
@@ -300,11 +344,7 @@
         }
 
         .panel-primary{
-            background:linear-gradient(
-                135deg,
-                #4f46e5,
-                #4338ca
-            );
+            background:linear-gradient(135deg, #0f172a, #1e293b, #334155);
             color:#fff;
         }
 
@@ -522,6 +562,48 @@
             }
         }
 
+        @media (max-width:991.98px){
+            #stockTable{
+                table-layout:fixed;
+                width:100% !important;
+            }
+
+            #stockTable thead th:nth-child(1),
+            #stockTable tbody td:nth-child(1){
+                width:52%;
+            }
+
+            #stockTable thead th:nth-child(2),
+            #stockTable tbody td:nth-child(2){
+                width:15%;
+            }
+
+            #stockTable thead th:nth-child(3),
+            #stockTable tbody td:nth-child(3){
+                width:15%;
+            }
+
+            #stockTable thead th:nth-child(4),
+            #stockTable tbody td:nth-child(4){
+                width:18%;
+            }
+
+            .product-wrap{
+                min-width:0;
+            }
+
+            .product-wrap > div{
+                min-width:0;
+                flex:1 1 auto;
+            }
+
+            .product-wrap .fw-bold{
+                white-space:normal;
+                overflow-wrap:break-word;
+                word-break:break-word;
+            }
+        }
+
         @media (max-width:575.98px){
             .section-card{
                 padding:14px;
@@ -549,6 +631,27 @@
 
             #stockTable{
                 border-spacing:0 10px;
+                min-width:520px;
+            }
+
+            #stockTable thead th:nth-child(1),
+            #stockTable tbody td:nth-child(1){
+                width:50%;
+            }
+
+            #stockTable thead th:nth-child(2),
+            #stockTable tbody td:nth-child(2){
+                width:18%;
+            }
+
+            #stockTable thead th:nth-child(3),
+            #stockTable tbody td:nth-child(3){
+                width:16%;
+            }
+
+            #stockTable thead th:nth-child(4),
+            #stockTable tbody td:nth-child(4){
+                width:16%;
             }
 
             #stockTable thead th{
@@ -571,7 +674,8 @@
             }
 
             .stock-badge,
-            .unit-badge{
+            .unit-badge,
+            .st-badge{
                 padding:6px 10px;
                 font-size:12px;
                 white-space:nowrap;

@@ -7,9 +7,9 @@ $q = mysqli_query($conn, "
     SELECT 
         pi.qty,
         pi.remaining_qty,
-        pi.date,
+        p.date,
         pi.unit,
-        pi.buy_price,
+        pi.price,
         p.form
     FROM purchase_items pi
     LEFT JOIN purchases p ON p.id = pi.purchase_id
@@ -27,7 +27,7 @@ $bulan = [
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
-<link rel="stylesheet" href="<?php echo BASE_URL; ?>/css/pages/stock-detail.css">
+<link rel="stylesheet" href="<?php echo BASE_URL; ?>/css/pages/stock-detail.css?v=<?php echo filemtime(__DIR__ . '/../../css/pages/stock-detail.css'); ?>">
 
 <div class="stock-wrapper">
 
@@ -101,7 +101,7 @@ $bulan = [
                             <!-- PRICE -->
                             <td>
                                 <span class="badge-price">
-                                    Rp <?= number_format($d['buy_price'], 0, ',', '.') ?>
+                                    Rp <?= number_format($d['price'], 0, ',', '.') ?>
                                 </span>
                             </td>
 
