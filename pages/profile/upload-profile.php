@@ -17,7 +17,14 @@
         $ext = strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
         $allowedExt = ['jpg','jpeg','png','gif'];
 
-        if (in_array($file['type'], $allowedTypes) && in_array($ext, $allowedExt) && $file['size'] <= 2000000) {
+        if ($file['size'] > 2000000) {
+            $sizeMB = number_format($file['size'] / 1048576, 2);
+            $_SESSION['flash'] = "Gagal: ukuran file {$sizeMB} MB melebihi batas maksimal 2 MB. Silakan pilih gambar yang lebih kecil.";
+            error_log("[UPLOAD] Rejected: size {$sizeMB}MB > 2MB");
+        } elseif (!in_array($file['type'], $allowedTypes) || !in_array($ext, $allowedExt)) {
+            $_SESSION['flash'] = "Gagal: format file tidak didukung. Gunakan JPG, PNG, atau GIF.";
+            error_log("[UPLOAD] Rejected: type={$file['type']} ext={$ext}");
+        } else {
             
             // --- Cek foto lama ---
             $sqlOld = "SELECT photo FROM users WHERE username=?";
@@ -29,8 +36,12 @@
             mysqli_stmt_close($stmtOld);
 
             // Hapus file lama jika ada dan bukan default
-            if ($oldPhoto && file_exists(__DIR__ . "../../" . $oldPhoto) && strpos($oldPhoto, "default-avatar.png") === false) {
-                unlink(__DIR__ . "../../" . $oldPhoto);
+            $oldFilePath = __DIR__ . "/../../assets/img/uploads/" . $oldPhoto;
+            if ($oldPhoto
+                && strpos($oldPhoto, "default-avatar") === false
+                && strpos($oldPhoto, "profile-default") === false
+                && file_exists($oldFilePath)) {
+                unlink($oldFilePath);
             }
 
             // --- Simpan file baru ---
@@ -43,11 +54,11 @@
                 mysqli_stmt_execute($stmt);
 
                 $_SESSION['flash'] = "Foto profil berhasil diperbarui.";
+                error_log("[UPLOAD] OK: {$fileName} size=" . number_format($file['size']/1048576, 2) . "MB user={$_SESSION['username']}");
             } else {
                 $_SESSION['flash'] = "Gagal upload file.";
+                error_log("[UPLOAD] move_uploaded_file FAILED: tmp={$file['tmp_name']} err=" . json_encode(error_get_last()));
             }
-        } else {
-            $_SESSION['flash'] = "Format/ukuran file tidak valid.";
         }
 
         header("Location: profile.php");

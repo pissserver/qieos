@@ -35,7 +35,12 @@ $count_cashier = $q_cashier ? (int)mysqli_fetch_assoc($q_cashier)['c'] : 0;
         SELECT *
         FROM users
         WHERE role IN ('administrator', 'developer')
-        ORDER BY fullname ASC
+        ORDER BY 
+            CASE 
+                WHEN role = 'developer' THEN 0 
+                ELSE 1 
+            END,
+            fullname ASC
         ");
     endif;
 

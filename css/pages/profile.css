@@ -237,6 +237,42 @@
 
     }
 
+    .delete-photo-form{
+        position:absolute;
+        left:50%;
+        bottom:-72px;
+        transform:translateX(-50%);
+        margin-left:53px;
+        margin-bottom:102px;
+        z-index:10;
+    }
+
+    .delete-photo-btn{
+        width:38px;
+        height:38px;
+        border-radius:50%;
+        border:3px solid #ffffff;
+        background:#ef4444;
+        color:#ffffff;
+        font-size:15px;
+        cursor:pointer;
+        transition:all .2s;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        box-shadow:0 6px 16px rgba(239,68,68,.35);
+    }
+
+    .delete-photo-btn:hover{
+        background:#dc2626;
+        transform:scale(1.05);
+        box-shadow:0 12px 28px rgba(239,68,68,.4);
+    }
+
+    .delete-photo-btn:active{
+        transform:scale(.95);
+    }
+
     .profile-content{
 
         padding:95px 35px 35px;

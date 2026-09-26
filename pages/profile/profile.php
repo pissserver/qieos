@@ -45,7 +45,8 @@ include '../../sessions/session.php';
 
                     <?php
                     if (isset($_SESSION['flash'])) {
-                        echo '<div class="success-box">' . $_SESSION['flash'] . '</div>';
+                        $flashType = (strpos($_SESSION['flash'], 'Gagal') === 0) ? 'error' : 'success';
+                        $flashMsg = $_SESSION['flash'];
                         unset($_SESSION['flash']);
                     }
                     ?>
@@ -132,6 +133,14 @@ include '../../sessions/session.php';
                             src="<?php echo $user['photo'] ? BASE_URL . '/assets/img/uploads/' . $user['photo'] : BASE_URL . '/assets/img/default-avatar.jpg'; ?>"
                             class="profile-avatar">
 
+                        <?php if (!empty($user['photo'])): ?>
+                        <form action="delete-photo.php" method="POST" class="delete-photo-form" id="deletePhotoForm">
+                            <button type="submit" class="delete-photo-btn" title="Hapus foto profil">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </form>
+                        <?php endif; ?>
+
                     </div>
 
                     <div class="profile-content">
@@ -175,6 +184,10 @@ include '../../sessions/session.php';
                     <div class="upload-title">
                         <h3>Gambar Profil</h3>
                         <span>Upload gambar profil baru</span>
+                        <div style="margin-top:8px;padding:8px 12px;background:#fef3c7;border-left:3px solid #f59e0b;border-radius:6px;font-size:12px;color:#92400e;">
+                            <i class="fas fa-info-circle" style="margin-right:6px;"></i>
+                            <strong>Maksimal ukuran:</strong> 2 MB · Format: JPG, PNG, GIF
+                        </div>
                     </div>
 
                     <form action="upload-profile.php" method="POST" enctype="multipart/form-data">
@@ -229,9 +242,63 @@ include '../../sessions/session.php';
     <?php include '../../script/footscript.php'; ?>
 
     <script>
+        // Flash message -> QToast (warna otomatis sesuai tipe)
+        <?php if (isset($flashMsg)): ?>
+        document.addEventListener('DOMContentLoaded', function () {
+            QToast({
+                type: '<?= $flashType ?>',
+                title: '<?= $flashType === 'error' ? 'Gagal' : 'Berhasil' ?>',
+                message: '<?= addslashes($flashMsg) ?>',
+            });
+        });
+        <?php endif; ?>
+    </script>
+
+    <script>
+        // Konfirmasi hapus foto profil
+        const deleteForm = document.getElementById('deletePhotoForm');
+        if (deleteForm) {
+            deleteForm.addEventListener('submit', function (e) {
+                e.preventDefault();
+
+                QConfirm('Hapus Foto Profil?', 'Foto akan dihapus permanen dan diganti dengan avatar default.', {
+                    confirmText: 'Hapus',
+                    icon: 'fa-trash-can',
+                    confirmClass: 'q-confirm-btn-danger',
+                    iconClass: 'q-confirm-icon-danger'
+                }).then(function (ok) {
+                    if (ok) {
+                        deleteForm.submit();
+                    }
+                });
+            });
+        }
+    </script>
+
+    <script>
+        const MAX_SIZE = 2 * 1024 * 1024; // 2 MB
+
         function previewImage(event) {
             const file = event.target.files[0];
+            const input = event.target;
+
             if (file) {
+                if (file.size > MAX_SIZE) {
+                    const sizeMB = (file.size / (1024 * 1024)).toFixed(2);
+                    QToast({
+                        type: 'error',
+                        title: 'File Terlalu Besar!',
+                        message: `Ukuran file ${sizeMB} MB melebihi batas maksimal 2 MB.`,
+                    });
+
+                    // reset input supaya user bisa pilih file lain
+                    input.value = '';
+                    document.getElementById("preview").style.display = "none";
+                    document.getElementById("uploadText").style.display = "block";
+                    document.getElementById("saveBtn").style.display = "none";
+                    return;
+                }
+
                 const preview = document.getElementById("preview");
                 preview.src = URL.createObjectURL(file); // langsung pakai object URL
                 preview.style.display = "block";
