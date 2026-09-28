@@ -62,6 +62,7 @@ if ($role === 'developer') {
     ]);
 } else {
     $pages = array_merge($pages, [
+        $badge('Master Customer', $cs . 'master-customer', 'fas fa-users', 'Master Data'),
         $badge('Stok Kantin', $cs . 'sales-stock', 'fas fa-store', 'Penjualan'),
         $badge('Katalog Produk', $cs . 'catalog', 'fas fa-book-open', 'Penjualan'),
         $badge('Pesanan', $cs . 'order', 'fas fa-receipt', 'Penjualan'),
@@ -104,7 +105,7 @@ if ($prod_q) {
 
 $matched_suppliers = [];
 $matched_customers = [];
-if ($is_dev || $is_admin) {
+if ($is_dev || $is_admin) {   // suppliers stay restricted; customers below include staff kasir
     $sup_q = $conn->query("SELECT id, name, phone, address FROM suppliers WHERE deleted_at IS NULL AND (name LIKE '$like' OR phone LIKE '$like' OR address LIKE '$like') ORDER BY name ASC LIMIT 8");
     if ($sup_q) {
         while ($row = $sup_q->fetch_assoc()) {
@@ -121,21 +122,22 @@ if ($is_dev || $is_admin) {
             ];
         }
     }
+}
 
-    $cus_q = $conn->query("SELECT id, name, phone FROM customers WHERE deleted_at IS NULL AND (name LIKE '$like' OR phone LIKE '$like') ORDER BY name ASC LIMIT 8");
-    if ($cus_q) {
-        while ($row = $cus_q->fetch_assoc()) {
-            $matched_customers[] = [
-                'id' => $row['id'],
-                'name' => $row['name'],
-                'phone' => $row['phone'] ?: '-',
-                'url' => $is_dev
-                    ? BASE_URL . '/pages/master/master-customer.php'
-                    : $cs . 'master-customer',
-                'icon' => 'fas fa-user',
-                'category_label' => 'Customer'
-            ];
-        }
+// customers are searchable by every role that can reach Master Customer
+$cus_q = $conn->query("SELECT id, name, phone FROM customers WHERE deleted_at IS NULL AND (name LIKE '$like' OR phone LIKE '$like') ORDER BY name ASC LIMIT 8");
+if ($cus_q) {
+    while ($row = $cus_q->fetch_assoc()) {
+        $matched_customers[] = [
+            'id' => $row['id'],
+            'name' => $row['name'],
+            'phone' => $row['phone'] ?: '-',
+            'url' => $is_dev
+                ? BASE_URL . '/pages/master/master-customer.php'
+                : $cs . 'master-customer',
+            'icon' => 'fas fa-user',
+            'category_label' => 'Customer'
+        ];
     }
 }
 
