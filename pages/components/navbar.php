@@ -517,9 +517,9 @@ if (!defined('BASE_URL')) {
                 </div>
                 <h4 id="updateTitle"></h4>
                 <div class="update-meta">
-                    <span id="updateVersion"></span>
-                    <span id="updateType" style="color: #000;"></span>
-                    <span id="updateDate"></span>
+                    <span id="updateVersion" class="update-chip"></span>
+                    <span id="updateType"></span>
+                    <span id="updateDate" class="update-chip"></span>
                 </div>
             </div>
             <button class="closeUpdate">
@@ -556,7 +556,7 @@ if (!defined('BASE_URL')) {
             }
 
             $("#updateTitle").text(res.update_name);
-            $("#updateVersion").html(`<span class="stock-badge">${res.update_version}</span>`);
+            $("#updateVersion").text(res.update_version);
             $("#updateType").html(res.badge);
             $("#updateDate").text(res.update_date);
 

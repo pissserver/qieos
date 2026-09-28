@@ -58,7 +58,7 @@ include '../../sessions/session.php';
                     <div id="btnContainer" style="display:none;">
                         <button
                             type="button"
-                            class="btn btn-primary"
+                            class="btn mu-add-btn"
                             id="btnAddUpdate">
                             <i class="fas fa-plus me-2"></i>
                             Tambah Log Update

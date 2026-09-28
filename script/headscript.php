@@ -55,6 +55,9 @@ if (!defined('BASE_URL')) {
 <!-- Qieos Toast -->
 <link type="text/css" href="<?php echo BASE_URL; ?>/css/components/toast.css?v=<?php echo filemtime(__DIR__ . '/../css/components/toast.css'); ?>" rel="stylesheet" />
 
+<!-- Qieos Shared Buttons -->
+<link type="text/css" href="<?php echo BASE_URL; ?>/css/components/buttons.css?v=<?php echo filemtime(__DIR__ . '/../css/components/buttons.css'); ?>" rel="stylesheet" />
+
 <!-- Font Awesome -->
 <link
     rel="stylesheet"

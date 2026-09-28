@@ -257,6 +257,16 @@
             <?php } ?>
 
             <?php if ($user['role'] == 'staff kasir') { ?>
+                <!-- MASTER DATA -->
+                <li class="nav-title">MASTER</li>
+
+                <li class="nav-item <?= ($current_page == 'coming-soon.php' && $menu == 'master-customer') ? 'active' : ''; ?>">
+                    <a href="<?php echo BASE_URL; ?>/pages/coming-soon.php?menu=master-customer" class="nav-link" data-tooltip="Master Customer">
+                        <span class="sidebar-icon"><i class="fas fa-users"></i></span>
+                        <span class="sidebar-text">Master Customer</span>
+                    </a>
+                </li>
+
                 <!-- GUDANG KANTIN -->
                 <li class="nav-title">KANTIN</li>
 

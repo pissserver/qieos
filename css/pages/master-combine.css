@@ -429,6 +429,9 @@
 
 /* --- Responsive --- */
 @media (max-width: 767.98px) {
+    /* breathing room under the last panel on phones */
+    .master-product-last-row { margin-bottom: 28px; }
+
     .combine-grid { grid-template-columns: 1fr; gap: 14px; }
     .combine-card { padding: 15px; border-radius: 18px; }
     .combine-total-price { font-size: 15.5px; }

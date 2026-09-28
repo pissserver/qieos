@@ -75,7 +75,7 @@ include __DIR__ . '/../components/data/stock-status.php';
     </div>
 
     <!-- RACIKAN / COMBINE PRODUK -->
-    <div class="row">
+    <div class="row master-product-last-row">
         <div class="col-md-12 mb-5">
             <div class="section-card mb-4 combine-panel">
                 <div class="panel-header panel-primary combine-header">

@@ -1,0 +1,41 @@
+/* ============================================
+   QIEOS SHARED BUTTONS
+   Used across pages — keep in sync with the
+   per-page copies until those are removed.
+   ============================================ */
+
+/* Primary "add" button (Tambah Produk / Log Update / User / ...) */
+.mu-add-btn {
+    height: 46px;
+    border: none;
+    border-radius: 13px;
+    padding: 0 22px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #4f46e5, #7c3aed);
+    color: #fff;
+    font-weight: 600;
+    font-size: 13.5px;
+    white-space: nowrap;
+    margin: 0;
+    box-shadow: 0 8px 18px rgba(79, 70, 229, .3);
+    transition: .25s ease;
+}
+
+.mu-add-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 24px rgba(79, 70, 229, .4);
+    color: #fff;
+}
+
+.mu-add-btn:active { transform: translateY(0); }
+
+.mu-add-btn:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, .35);
+}
+
+@media (max-width: 575.98px) {
+    .mu-add-btn { width: 100%; justify-content: center; }
+}
