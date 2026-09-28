@@ -46,3 +46,4 @@ dijalankan di server tersebut.
 | `005_stock_request_multi_item.sql` | Request stok multi-produk |
 | `006_purchases_list_migration.sql` | Gabung daftar belanja ke `purchases` |
 | `007_stock_ledger_sales.sql` | Ledger pergerakan stok (balance/transfer/sale/return) |
+| `008_order_details_customer.sql` | Relasi `order_details.customer_id` ke `customers` (sebelum `qty`) |

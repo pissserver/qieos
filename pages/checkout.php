@@ -8,6 +8,18 @@
         exit;
     }
 
+    header('Content-Type: application/json');
+
+    // Customer opsional. Null / kosong = pesanan tanpa nama customer.
+    $customerId = isset($data['customer_id']) && $data['customer_id'] !== '' && $data['customer_id'] !== null
+        ? (int)$data['customer_id']
+        : null;
+
+    if($customerId !== null){
+        $cek = mysqli_query($conn, "SELECT id FROM customers WHERE id = $customerId AND deleted_at IS NULL");
+        if(mysqli_num_rows($cek) === 0) $customerId = null;
+    }
+
     // hitung total
     $total = 0;
     foreach($data['cart'] as $item){
@@ -49,8 +61,8 @@
 
     // 2️⃣ insert ke order_details
     $stmt_detail = $conn->prepare("
-        INSERT INTO order_details (order_id, product_id, product_combo_id, name, qty, price, subtotal)
-        VALUES (?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO order_details (order_id, product_id, product_combo_id, name, customer_id, qty, price, subtotal)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
     ");
 
     foreach($data['cart'] as $item){
@@ -70,11 +82,12 @@
         }
 
         $stmt_detail->bind_param(
-            "iiisiii",
+            "iiisiiii",
             $order_id,
             $prodId,
             $comboId,
             $name,
+            $customerId,
             $item['qty'],
             $item['price'],
             $subtotal
@@ -88,15 +101,15 @@
         $bal = mysqli_fetch_assoc(mysqli_query($conn, "
             SELECT COALESCE(SUM(qty),0) v
             FROM sales_stock
-            WHERE product_id = {$item['id']}
-        "));
+            WHERE product_id = " . (int)$item['id']
+        ));
 
         $deduct = min((int)$item['qty'], (int)$bal['v']);
 
         if($deduct > 0){
             mysqli_query($conn, "
                 INSERT INTO sales_stock (product_id, qty, type)
-                VALUES ({$item['id']}, -$deduct, 'sale')
+                VALUES (" . (int)$item['id'] . ", -$deduct, 'sale')
             ");
         }
     }

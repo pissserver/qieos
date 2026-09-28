@@ -481,6 +481,39 @@ if (!defined('BASE_URL')) {
             </div>
 
             <div class="modal-body">
+                <!-- CUSTOMER (opsional, kalau kosong berarti null) -->
+                <div class="cart-customer" id="cartCustomerBox">
+                    <div class="cc-glow"></div>
+
+                    <div class="cc-head">
+                        <span class="cc-icon"><i class="fas fa-user"></i></span>
+                        <div class="cc-head-text">
+                            <div class="cc-title">Nama Customer</div>
+                            <div class="cc-sub">Opsional &mdash; kosongkan untuk pesanan tanpa nama</div>
+                        </div>
+                    </div>
+
+                    <div class="cc-body">
+                        <select id="cartCustomerSelect" class="cc-select" aria-label="Pilih customer">
+                            <option value=""></option>
+                        </select>
+                    </div>
+
+                    <div class="cc-selected" id="cartCustomerSelected" style="display:none;">
+                        <span class="cc-sel-avatar"><i class="fas fa-user-check"></i></span>
+                        <div class="cc-sel-text">
+                            <div class="cc-sel-name" id="cartCustomerName">&mdash;</div>
+                            <div class="cc-sel-phone" id="cartCustomerPhone"></div>
+                        </div>
+                    </div>
+
+                    <div class="cc-hint" id="cartCustomerEmpty">
+                        <i class="fas fa-circle-info"></i>
+                        Belum ada customer terdaftar.
+                        <a href="<?php echo BASE_URL; ?>/pages/master/master-customer.php" target="_blank" rel="noopener">Tambah di Master Customer</a>
+                    </div>
+                </div>
+
                 <div id="cart-items" class="cart-container"></div>
             </div>
 
@@ -586,6 +619,25 @@ if (!defined('BASE_URL')) {
     // Load cart from localStorage
     let cart = JSON.parse(localStorage.getItem('cart')) || [];
 
+    // Daftar customer untuk dropdown Select2 di keranjang
+    const CUSTOMER_LIST = <?php
+        $__cust = [];
+        $__cq = mysqli_query($conn, "SELECT id, name, phone FROM customers WHERE deleted_at IS NULL ORDER BY name ASC");
+        if ($__cq) {
+            while ($__c = mysqli_fetch_assoc($__cq)) {
+                $__cust[] = [
+                    'id'    => (int)$__c['id'],
+                    'name'  => $__c['name'],
+                    'phone' => $__c['phone'] ?: '',
+                ];
+            }
+        }
+        echo json_encode($__cust, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+    ?>;
+
+    // Customer terpilih (null = pesanan tanpa nama customer)
+    let cartCustomer = JSON.parse(localStorage.getItem('cartCustomer') || 'null');
+
     // Bersihkan item lama yang photo-nya masih data-URI (ikon SVG versi lama).
     // Foto produk asli adalah nama file, bukan data URI, sehingga aman dikosongkan
     // agar template render memakai ikon open-box yang sama dengan katalog.
@@ -602,6 +654,105 @@ if (!defined('BASE_URL')) {
             cartModalInstance = new bootstrap.Modal(document.getElementById('cartModal'));
         }
         cartModalInstance.show();
+    }
+
+    // ==========================================================
+    // CUSTOMER DI KERANJANG (opsional)
+    // ==========================================================
+
+    function escHtml(s) {
+        let d = document.createElement('div');
+        d.appendChild(document.createTextNode(String(s == null ? '' : s)));
+        return d.innerHTML;
+    }
+
+    // Bangun <option> dari CUSTOMER_LIST
+    function buildCustomerOptions(selectedId) {
+        let html = '<option value=""></option>';
+        (Array.isArray(CUSTOMER_LIST) ? CUSTOMER_LIST : []).forEach(function(c) {
+            let sel = (selectedId && String(selectedId) === String(c.id)) ? ' selected' : '';
+            html += '<option value="' + c.id + '" data-name="' + escHtml(c.name) +
+                    '" data-phone="' + escHtml(c.phone) + '"' + sel + '>' + escHtml(c.name) + '</option>';
+        });
+        return html;
+    }
+
+    // Guard: pastikan CUSTOMER_LIST selalu array valid
+    function custList() {
+        return Array.isArray(CUSTOMER_LIST) ? CUSTOMER_LIST : [];
+    }
+
+    // Tampilan kartu customer terpilih
+    function renderCartCustomer() {
+        let box     = document.getElementById('cartCustomerBox');
+        if (!box) return;
+        let picked  = document.getElementById('cartCustomerSelected');
+        let empty   = document.getElementById('cartCustomerEmpty');
+        let nameEl  = document.getElementById('cartCustomerName');
+        let phoneEl = document.getElementById('cartCustomerPhone');
+
+        if (cartCustomer) {
+            picked.style.display = 'flex';
+            nameEl.textContent = cartCustomer.name;
+            phoneEl.textContent = cartCustomer.phone || '';
+            phoneEl.style.display = cartCustomer.phone ? '' : 'none';
+        } else {
+            picked.style.display = 'none';
+            empty.style.display = (custList().length === 0) ? 'flex' : 'none';
+        }
+    }
+
+    function setCartCustomer(id) {
+        if (!id) {
+            cartCustomer = null;
+        } else {
+            let found = custList().find(c => String(c.id) === String(id));
+            cartCustomer = found ? { id: found.id, name: found.name, phone: found.phone } : null;
+        }
+
+        try {
+            if (cartCustomer) localStorage.setItem('cartCustomer', JSON.stringify(cartCustomer));
+            else localStorage.removeItem('cartCustomer');
+        } catch (e) {}
+
+        // sinkronkan tampilan select2 (mis. setelah checkout mengosongkan cart)
+        let el = document.getElementById('cartCustomerSelect');
+        if (el) {
+            if (typeof $ !== 'undefined' && $.fn && $.fn.select2 && $(el).hasClass('select2-hidden-accessible')) {
+                $(el).select2('val', cartCustomer ? String(cartCustomer.id) : '');
+            } else {
+                el.value = cartCustomer ? String(cartCustomer.id) : '';
+            }
+        }
+
+        renderCartCustomer();
+    }
+
+    function initCartCustomerSelect() {
+        let el = document.getElementById('cartCustomerSelect');
+        if (!el) return;
+
+        el.innerHTML = buildCustomerOptions(cartCustomer ? cartCustomer.id : '');
+
+        if (typeof $ === 'undefined' || !$.fn || !$.fn.select2) return;
+
+        let $el = $(el);
+        if ($el.hasClass('select2-hidden-accessible')) $el.select2('destroy');
+
+        $el.select2({
+            width: '100%',
+            placeholder: 'Cari / pilih nama customer...',
+            allowClear: true,
+            dropdownParent: $('#cartModal'),
+            language: {
+                noResults: function () { return 'Customer tidak ditemukan'; },
+                searching: function () { return 'Mencari...'; }
+            }
+        });
+
+        $el.on('change', function () {
+            setCartCustomer(this.value);
+        });
     }
 
     function addToCart(btn, id, name, price, category){
@@ -663,6 +814,10 @@ if (!defined('BASE_URL')) {
         let html = '';
 
         const cartBadge = document.getElementById('cart-count');
+
+        // form customer disembunyikan saat keranjang kosong
+        const ccBox = document.getElementById('cartCustomerBox');
+        if (ccBox) ccBox.style.display = (cart.length === 0) ? 'none' : '';
 
         // 👉 JIKA KOSONG
         if (cart.length === 0) {
@@ -796,6 +951,8 @@ if (!defined('BASE_URL')) {
     // Load cart on page load
     window.onload = function() {
         updateCart();
+        initCartCustomerSelect();
+        renderCartCustomer();
     };
 
     // Checkout
@@ -810,7 +967,11 @@ if (!defined('BASE_URL')) {
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ cart: cart })
+                // customer_id null = pesanan tanpa nama customer
+                body: JSON.stringify({
+                    cart: cart,
+                    customer_id: cartCustomer ? cartCustomer.id : null
+                })
             })
             .then(res => res.json())
             .then(res => {
@@ -831,8 +992,11 @@ if (!defined('BASE_URL')) {
 
                     // reset cart
                     cart = [];
+                    cartCustomer = null;
                     localStorage.removeItem('cart');
+                    localStorage.removeItem('cartCustomer');
                     updateCart();
+                    setCartCustomer('');
 
                     let modal = bootstrap.Modal.getInstance(document.getElementById('cartModal'));
                     modal.hide();

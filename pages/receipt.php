@@ -14,6 +14,18 @@ $order = mysqli_query($conn, "
     WHERE o.id = $order_id
 ")->fetch_assoc();
 
+// Nama customer (opsional, bisa NULL = pesanan tanpa nama)
+$customerName = mysqli_query($conn, "
+    SELECT c.name
+    FROM order_details od
+    JOIN customers c ON c.id = od.customer_id
+    WHERE od.order_id = $order_id
+      AND od.customer_id IS NOT NULL
+    LIMIT 1
+")->fetch_assoc();
+
+$customerName = $customerName ? $customerName['name'] : '-';
+
 $details = mysqli_query($conn, "
     SELECT od.*, p.name AS product_name 
     FROM order_details od
@@ -66,6 +78,11 @@ $details = mysqli_query($conn, "
         <div class="info row">
             <span>Kasir</span>
             <span><?= $order['fullname'] ?></span>
+        </div>
+
+        <div class="info row">
+            <span>Customer</span>
+            <span><?= htmlspecialchars($customerName) ?></span>
         </div>
 
         <hr>

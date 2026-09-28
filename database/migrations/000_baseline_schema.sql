@@ -60,6 +60,7 @@ CREATE TABLE IF NOT EXISTS `order_details` (
   `product_id` int(11) DEFAULT NULL,
   `product_combo_id` int(11) DEFAULT NULL,
   `name` varchar(255) DEFAULT NULL,
+  `customer_id` int(11) DEFAULT NULL,
   `qty` int(11) DEFAULT NULL,
   `price` int(11) DEFAULT NULL,
   `subtotal` int(11) DEFAULT NULL,

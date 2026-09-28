@@ -27,7 +27,20 @@ if (!empty($search)) {
 
 // QUERY DATA
 $query = mysqli_query($conn, "
-    SELECT * FROM (
+    SELECT sub.*,
+        (
+            SELECT c.id FROM order_details od
+            JOIN customers c ON c.id = od.customer_id
+            WHERE od.order_id = sub.id AND od.customer_id IS NOT NULL
+            LIMIT 1
+        ) AS customer_id,
+        (
+            SELECT c.name FROM order_details od
+            JOIN customers c ON c.id = od.customer_id
+            WHERE od.order_id = sub.id AND od.customer_id IS NOT NULL
+            LIMIT 1
+        ) AS customer_name
+    FROM (
         SELECT * FROM orders
         WHERE status_payment != 'cancelled'
         ORDER BY id DESC
@@ -76,9 +89,18 @@ function tanggalIndo($date)
                         </div>
                     </div>
                 </div>
-                <div class="oc-status <?= $row['status_payment'] === 'paid' ? 's-paid' : 's-wait'; ?>">
-                    <i class="fas <?= $row['status_payment'] === 'paid' ? 'fa-check-circle' : 'fa-spinner fa-spin'; ?>"></i>
-                    <?= $row['status_payment'] == 'paid' ? 'Terbayar' : 'Waiting'; ?>
+                <div class="oc-status-wrap">
+                    <?php if (!empty($row['customer_name'])): ?>
+                        <span class="oc-customer" title="Customer">
+                            <i class="fas fa-user"></i>
+                            <span class="oc-customer-name"><?= htmlspecialchars($row['customer_name']); ?></span>
+                        </span>
+                    <?php endif; ?>
+
+                    <div class="oc-status <?= $row['status_payment'] === 'paid' ? 's-paid' : 's-wait'; ?>">
+                        <i class="fas <?= $row['status_payment'] === 'paid' ? 'fa-check-circle' : 'fa-spinner fa-spin'; ?>"></i>
+                        <?= $row['status_payment'] == 'paid' ? 'Terbayar' : 'Waiting'; ?>
+                    </div>
                 </div>
             </div>
 
@@ -90,6 +112,10 @@ function tanggalIndo($date)
                 <div class="oc-actions">
                     <button class="btn-soft btn-detail" onclick="showDetail(<?= $row['id']; ?>)">
                         <i class="fas fa-eye"></i> Lihat
+                    </button>
+
+                    <button class="btn-soft btn-edit-cust" onclick="editCustomer(<?= $row['id']; ?>, '<?= htmlspecialchars($row['code']); ?>', <?= $row['customer_id'] ? (int)$row['customer_id'] : 'null'; ?>)">
+                        <i class="fas fa-user-pen"></i> Edit
                     </button>
 
                     <?php if ($row['status_payment'] !== 'paid'): ?>

@@ -110,6 +110,69 @@ include '../../sessions/session.php';
         </div>
     </div>
 
+    <!-- Modal Edit Customer Order -->
+    <div class="modal fade" id="orderEditModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+
+                <div class="ec-head">
+                    <div class="ec-head-top">
+                        <div class="ec-head-icon">
+                            <i class="fas fa-user-pen"></i>
+                        </div>
+                        <button type="button" class="ec-head-close" data-bs-dismiss="modal" aria-label="Tutup">
+                            <i class="fas fa-xmark"></i>
+                        </button>
+                    </div>
+
+                    <h5 class="ec-head-title">Edit Customer</h5>
+                    <p class="ec-head-sub">
+                        Pesanan <strong id="ecOrderCode">&mdash;</strong>
+                    </p>
+                </div>
+
+                <div class="modal-body">
+                    <div class="ec-field">
+                        <div class="ec-field-head">
+                            <label class="ec-label" for="ecSelect">Nama Customer</label>
+                            <span class="ec-optional">Opsional</span>
+                        </div>
+
+                        <select id="ecSelect" class="ec-select" aria-label="Pilih customer">
+                            <option value=""></option>
+                        </select>
+
+                        <p class="ec-note">
+                            <i class="fas fa-info-circle"></i>
+                            Boleh dikosongkan bila pesanan ini tidak punya nama customer.
+                        </p>
+                    </div>
+
+                    <div class="ec-current" id="ecCurrent">
+                        <div class="ec-current-avatar" id="ecAvatar">&mdash;</div>
+                        <div class="ec-current-text">
+                            <span class="ec-current-lbl">Customer saat ini</span>
+                            <span class="ec-current-val" id="ecCurrentVal">&mdash;</span>
+                        </div>
+                        <span class="ec-current-state" id="ecState">Belum ada</span>
+                    </div>
+                </div>
+
+                <div class="modal-footer ec-footer">
+                    <button type="button" class="ec-btn ec-btn-clear" id="ecClear">
+                        <i class="fas fa-eraser"></i> Hapus Nama
+                    </button>
+                    <div class="ec-footer-right">
+                        <button type="button" class="ec-btn ec-btn-cancel" data-bs-dismiss="modal">Batal</button>
+                        <button type="button" class="ec-btn ec-btn-save" id="ecSave">
+                            <i class="fas fa-check"></i> Simpan
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <?php include '../../script/footscript.php'; ?>
 
     <script>
@@ -331,6 +394,169 @@ include '../../sessions/session.php';
         }
 
         let orderDetailModalInstance = null;
+        let orderEditModalInstance = null;
+        let ecOrderId = null;
+
+        // ==========================================================
+        // EDIT CUSTOMER PESANAN (ganti / hapus nama)
+        // ==========================================================
+
+        const ORDER_CUSTOMER_LIST = <?php
+            $__ocList = [];
+            $__ocQ = mysqli_query($conn, "SELECT id, name, phone FROM customers WHERE deleted_at IS NULL ORDER BY name ASC");
+            if ($__ocQ) {
+                while ($__ocRow = mysqli_fetch_assoc($__ocQ)) {
+                    $__ocList[] = [
+                        'id'    => (int)$__ocRow['id'],
+                        'name'  => $__ocRow['name'],
+                        'phone' => $__ocRow['phone'] ?: '',
+                    ];
+                }
+            }
+            echo json_encode(array_values($__ocList), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        ?>;
+
+        function ecEsc(s) {
+            let d = document.createElement('div');
+            d.appendChild(document.createTextNode(String(s == null ? '' : s)));
+            return d.innerHTML;
+        }
+
+        function ecList() {
+            return Array.isArray(ORDER_CUSTOMER_LIST) ? ORDER_CUSTOMER_LIST : [];
+        }
+
+        function ecBuildOptions(selectedId) {
+            let html = '<option value=""></option>';
+            ecList().forEach(function(c) {
+                let sel = (selectedId && String(selectedId) === String(c.id)) ? ' selected' : '';
+                html += '<option value="' + c.id + '" data-name="' + ecEsc(c.name) +
+                        '" data-phone="' + ecEsc(c.phone) + '"' + sel + '>' + ecEsc(c.name) + '</option>';
+            });
+            return html;
+        }
+
+        // Terapkan tampilan "customer saat ini"
+        function ecRenderCurrent(customerId) {
+            let current  = document.getElementById('ecCurrent');
+            let currentVal = document.getElementById('ecCurrentVal');
+            let avatar   = document.getElementById('ecAvatar');
+            let state    = document.getElementById('ecState');
+
+            if (customerId) {
+                let found = ecList().find(c => String(c.id) === String(customerId));
+                let name = found ? found.name : 'Customer #' + customerId;
+                currentVal.textContent = name;
+                avatar.textContent = name.trim().charAt(0).toUpperCase();
+                state.textContent = 'Tersimpan';
+                current.classList.add('has-value');
+            } else {
+                currentVal.textContent = 'Belum ada nama';
+                avatar.textContent = '?';
+                state.textContent = 'Kosong';
+                current.classList.remove('has-value');
+            }
+        }
+
+        // Dipakai showDetail() untuk tahu apakah modal detail sedang dibuka
+        let ecReturnToDetail = false;
+
+        function editCustomer(id, code, customerId) {
+            ecOrderId = id;
+            ecReturnToDetail = false;
+
+            let openEdit = function() {
+                if (!orderEditModalInstance) {
+                    orderEditModalInstance = new bootstrap.Modal(document.getElementById('orderEditModal'));
+                }
+                orderEditModalInstance.show();
+
+                document.getElementById('ecOrderCode').textContent = code;
+
+                let sel = document.getElementById('ecSelect');
+                sel.innerHTML = ecBuildOptions(customerId);
+
+                ecRenderCurrent(customerId);
+
+                let $sel = $(sel);
+                if ($sel.hasClass('select2-hidden-accessible')) $sel.select2('destroy');
+                $sel.select2({
+                    width: '100%',
+                    placeholder: 'Cari atau pilih customer...',
+                    allowClear: true,
+                    dropdownParent: $('#orderEditModal'),
+                    language: {
+                        noResults: function () { return 'Customer tidak ditemukan'; },
+                        searching: function () { return 'Mencari...' }
+                    }
+                });
+            };
+
+            // Modal detail ditutup lebih dulu, agar tidak ada dua modal bertumpuk
+            let detailEl = document.getElementById('orderDetailModal');
+            let detailOpen = detailEl && detailEl.classList.contains('show');
+            ecReturnToDetail = !!detailOpen;
+
+            if (detailOpen) {
+                if (!orderDetailModalInstance) {
+                    orderDetailModalInstance = new bootstrap.Modal(detailEl);
+                }
+                orderDetailModalInstance.hide();
+                detailEl.addEventListener('hidden.bs.modal', openEdit, { once: true });
+            } else {
+                openEdit();
+            }
+        }
+
+        function ecSave(forceNull) {
+            // Select kosong = hapus nama customer, jadi tidak perlu konfirmasi tambahan
+            let value = forceNull ? null : ($('#ecSelect').val() || null);
+
+            let btn = document.getElementById('ecSave');
+            let old = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menyimpan...';
+
+            $.post('order-customer-edit.php', {
+                order_id: ecOrderId,
+                customer_id: value === null ? '' : value
+            }, function(res) {
+                btn.disabled = false;
+                btn.innerHTML = old;
+
+                if (res.status === 'success') {
+                    QToast('Berhasil!',
+                        res.customer_name ? 'Customer diubah menjadi ' + res.customer_name + '.' : 'Nama customer dihapus.',
+                        'success');
+
+                    refreshOrders();
+
+                    // Kalau dipanggil dari modal detail, tutup edit lalu buka lagi
+                    // supaya isi detail ikut terupdate.
+                    let reopen = function() {
+                        if (ecReturnToDetail) showDetail(ecOrderId);
+                        ecReturnToDetail = false;
+                    };
+
+                    let editEl = document.getElementById('orderEditModal');
+                    editEl.addEventListener('hidden.bs.modal', reopen, { once: true });
+                    orderEditModalInstance.hide();
+                } else {
+                    QToast('Gagal!', res.message || 'Terjadi kesalahan.', 'error');
+                }
+            }, 'json').fail(function() {
+                btn.disabled = false;
+                btn.innerHTML = old;
+                QToast('Gagal!', 'Tidak dapat terhubung ke server.', 'error');
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            let save = document.getElementById('ecSave');
+            let clear = document.getElementById('ecClear');
+            if (save) save.addEventListener('click', function() { ecSave(false); });
+            if (clear) clear.addEventListener('click', function() { ecSave(true); });
+        });
 
         function showDetail(id) {
             if (!orderDetailModalInstance) {
@@ -366,10 +592,21 @@ include '../../sessions/session.php';
                             <i class="fas ${order.status_payment === 'paid' ? 'fa-check-circle' : 'fa-spinner fa-spin'}"></i> 
                             ${order.status_payment === 'paid' ? 'Terbayar' : 'Menunggu Pembayaran'}
                         </span>
+
+                        ${data.customer ? `
+                        <span class="od-chip oc-chip-customer">
+                            <i class="fas fa-user"></i> ${data.customer.name}
+                        </span>` : `
+                        <span class="od-chip oc-chip-nocustomer" title="Pesanan tanpa nama customer">
+                            <i class="fas fa-user-slash"></i> Tanpa Nama
+                        </span>`}
                     </div>
 
                     <!-- RIGHT SIDE -->
-                    <div>
+                    <div class="d-flex align-items-center gap-2">
+                        <button class="ec-btn ec-btn-edit" onclick="editCustomer(${order.id}, '${order.code.replace(/'/g, "\\'")}', ${data.customer ? data.customer.id : 'null'})">
+                            <i class="fas fa-user-pen"></i> Edit Customer
+                        </button>
                         <button class="btn btn-print text-white" onclick="printReceipt(${order.id})">
                             <i class="fas fa-print text-white"></i> Print
                         </button>
