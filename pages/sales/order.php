@@ -117,6 +117,10 @@ include '../../sessions/session.php';
         let dateEnd = '';
         let currentSearch = '';
         let timeout = null;
+        let currentPage = 1;
+        let lastSignature = '';
+        let pollTimer = null;
+        let loading = false;
 
         const inputStart = document.getElementById("filterDateStart");
         const inputEnd = document.getElementById("filterDateEnd");
@@ -143,7 +147,7 @@ include '../../sessions/session.php';
             loadPage(1);
         });
 
-        function resetDateRange(){
+        function resetDateRange() {
             dateStart = '';
             dateEnd = '';
             inputStart.value = '';
@@ -151,9 +155,88 @@ include '../../sessions/session.php';
             loadPage(1);
         }
 
+        // ==========================================================
+        // REAL-TIME SYNC
+        // Daftar pesanan otomatis berubah begitu ada checkout baru,
+        // tanpa user harus refresh halaman.
+        // ==========================================================
+
+        // 1. Checkout di tab ini (navbar) langsung triggering
+        document.addEventListener('qieos:order-created', function(e) {
+            refreshOnNewOrder(e.detail && e.detail.order_id);
+        });
+
+        // 2. Checkout di tab LAIN (mis. kasir lain / device lain)
+        window.addEventListener('storage', function(e) {
+            if (e.key === 'qieos_order_ping') refreshOnNewOrder();
+        });
+
+        // 3. Polling:jianagu perubahan dari user/server lain
+        //    (aman dipakai bareng dengan 1 & 2, ada dedup signature)
+        function pollOrder() {
+            if (document.hidden) return;
+
+            fetch('../components/data/get-order-latest.php?_=' + Date.now())
+                .then(res => res.json())
+                .then(data => {
+                    const sig = data.latest_id + '|' + data.waiting + '|' + data.paid;
+
+                    if (lastSignature === '') {
+                        lastSignature = sig; // baseline, jangan trigger
+                        return;
+                    }
+                    if (sig === lastSignature) return;
+
+                    const isNew = data.latest_id > (lastSignature.split('|')[0] | 0);
+                    lastSignature = sig;
+
+                    refreshOnNewOrder(isNew ? data.latest_id : null, data);
+                })
+                .catch(() => {});
+        }
+
+        // Aksi saat terdeteksi perubahan
+        function refreshOnNewOrder(newId, data) {
+            // signature cuma di-update kalau datanya dari poll,
+            // kalau event dari tab lain cukup andalkan poll yang akan rekonsiliasi
+            if (newId && data) lastSignature = newId + '|' + data.waiting + '|' + data.paid;
+
+            if (typeof updateOmzet === 'function') updateOmzet();
+
+            // Kalau user sedang di halaman > 1, jangan dipaksa pindah halaman
+            if (currentPage > 1) {
+                QToast('Pesanan Baru!', 'Ada pesanan baru di halaman pertama.', 'info');
+                return;
+            }
+
+            loadPage(1, { highlightId: newId || null, silent: !newId });
+        }
+
+        // Poll 5 detik + langsung cek saat tab kembali aktif
+        function startLiveSync() {
+            pollOrder();
+            pollTimer = setInterval(pollOrder, 5000);
+
+            document.addEventListener('visibilitychange', function() {
+                if (!document.hidden) pollOrder();
+            });
+            window.addEventListener('pagehide', function() {
+                clearInterval(pollTimer);
+            });
+        }
+
+        // ==========================================================
         // AJAX Pagination
-        function loadPage(page) {
+        // ==========================================================
+        function loadPage(page, opts) {
             if (page < 1) return;
+            opts = opts || {};
+            if (loading) return;
+            loading = true;
+            currentPage = page;
+
+            const list = document.getElementById('order-list');
+            if (list && !opts.silent) list.style.opacity = '.55';
 
             let xhr = new XMLHttpRequest();
             xhr.open("GET", "../components/data/order-data.php?page=" + page +
@@ -162,8 +245,11 @@ include '../../sessions/session.php';
                 "&search=" + currentSearch, true);
 
             xhr.onload = function() {
+                loading = false;
                 if (this.status == 200) {
-                    document.getElementById('orders-container').innerHTML = this.responseText;
+                    const container = document.getElementById('orders-container');
+                    container.innerHTML = this.responseText;
+                    if (list) list.style.opacity = '';
 
                     const orders = document.querySelectorAll('.order-card');
                     const empty = document.getElementById('empty-search-order');
@@ -176,17 +262,37 @@ include '../../sessions/session.php';
                         empty.style.display = 'none';
                         if (pagination) pagination.style.display = 'flex';
                     }
+
+                    // tandai pesanan baru biar kelihatan "masuk"
+                    if (opts.highlightId) {
+                        const card = container.querySelector('.order-card[data-id="' + opts.highlightId + '"]');
+                        if (card) {
+                            card.classList.add('oc-fresh');
+                            setTimeout(() => card.classList.remove('oc-fresh'), 2600);
+                        }
+                    }
                 }
             }
+            xhr.onerror = function() {
+                loading = false;
+                if (list) list.style.opacity = '';
+            };
             xhr.send();
         }
 
         // pertama kali load
         loadPage(1);
+        startLiveSync();
     </script>
 
     <!-- Action -->
     <script>
+        // refresh list + re-baseline watcher real-time
+        function refreshOrders() {
+            lastSignature = ''; // biar poll berikutnya cuma ambil baseline, tidak reload lagi
+            loadPage(1);
+        }
+
         function payOrder(id, name) {
             QConfirm('Konfirmasi Pembayaran?', 'Pesanan ' + name + ' akan ditandai sebagai lunas.', {confirmText:'Bayar', icon:'fa-money-bill-wave', confirmClass:'q-confirm-btn-success', iconClass:'q-confirm-icon-success'}).then(function(ok){
                 if(ok){
@@ -196,8 +302,8 @@ include '../../sessions/session.php';
                         // pastikan response sudah di-parse JSON
                         if (response.status === 'success') {
                             QToast('Berhasil!', 'Pesanan telah terbayar.', 'success');
-                            loadPage(1); // reload halaman pertama
-                            updateOmzet(); // update omzet di navbar
+                            refreshOrders(); // update list
+                            if (typeof updateOmzet === 'function') updateOmzet(); // update omzet di navbar
                         } else {
                             QToast('Gagal!', response.message || 'Terjadi kesalahan saat memproses pembayaran.', 'error');
                         }
@@ -214,8 +320,8 @@ include '../../sessions/session.php';
                     }, function(response) {
                         if (response.status === 'success') {
                             QToast('Berhasil!', 'Pesanan telah dibatalkan.', 'success');
-                            loadPage(1); // reload halaman pertama
-                            updateOmzet(); // update omzet di navbar
+                            refreshOrders(); // update list
+                            if (typeof updateOmzet === 'function') updateOmzet(); // update omzet di navbar
                         } else {
                             QToast('Gagal!', response.message || 'Terjadi kesalahan saat membatalkan pesanan.', 'error');
                         }

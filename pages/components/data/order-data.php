@@ -62,8 +62,9 @@ function tanggalIndo($date)
 
 <div id="order-list">
     <?php while ($row = mysqli_fetch_assoc($query)): ?>
-        <div class="order-card">
+        <div class="order-card oc-<?= $row['status_payment'] === 'paid' ? 'paid' : 'wait'; ?>" data-id="<?= $row['id']; ?>">
             <div class="oc-glow"></div>
+            <div class="oc-glow oc-glow-2"></div>
 
             <div class="order-header">
                 <div class="oc-id">

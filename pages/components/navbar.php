@@ -836,8 +836,29 @@ if (!defined('BASE_URL')) {
 
                     let modal = bootstrap.Modal.getInstance(document.getElementById('cartModal'));
                     modal.hide();
+
+                    // kasih tahu halaman lain (mis. daftar pesanan) tanpa perlu refresh
+                    notifyOrderCreated(res.order_id);
+                    if (typeof syncStock === 'function') syncStock();
                 }
             })
+    }
+
+    // Broadcast "ada pesanan baru" ke tab ini + tab lain.
+    // Dipakai halaman order.php & catalog.php supaya data langsung sinkron.
+    function notifyOrderCreated(orderId) {
+        // 1. omzet di navbar
+        if (typeof updateOmzet === 'function') updateOmzet();
+
+        // 2. tab ini (CustomEvent, tidak perlu cek storage event)
+        document.dispatchEvent(new CustomEvent('qieos:order-created', {
+            detail: { order_id: orderId }
+        }));
+
+        // 3. tab lain (event 'storage' hanya kena di tab LAIN, itu yang kita mau)
+        try {
+            localStorage.setItem('qieos_order_ping', String(Date.now()));
+        } catch (e) {}
     }
 
     // Update Omzet
