@@ -306,8 +306,11 @@
 #combineModal .modal-content {
     background: #fff !important;
     border-radius: 18px !important;
-    overflow: hidden;
+    overflow: visible !important;
     box-shadow: 0 26px 60px rgba(15, 23, 42, .3);
+}
+#combineModal .modal-body {
+    overflow: visible !important;
 }
 #combineModal .panel-header { position: relative; }
 #combineModal .btn-close { filter: brightness(0) invert(1); opacity: .85; }

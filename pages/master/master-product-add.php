@@ -13,16 +13,29 @@ $lowStockDefault = get_low_stock_default($conn);
     <div class="row">
 
         <div class="col-md-6">
-            <div class="input-group-modern">
+            <div class="input-group-modern" id="addCodeInputWrap">
                 <div class="input-icon">
                     <i class="fas fa-barcode"></i>
                 </div>
                 <input
                     type="text"
                     name="code"
+                    id="addProductCode"
                     class="form-control"
                     placeholder="Kode Produk"
                     required>
+                <div class="validation-spinner d-none" id="addCodeSpinner">
+                    <i class="fas fa-spinner fa-spin"></i>
+                </div>
+            </div>
+            <div class="code-validation-alert d-none" id="addCodeError">
+                <div class="alert-icon">
+                    <i class="fas fa-exclamation-triangle"></i>
+                </div>
+                <div class="alert-content">
+                    <div class="alert-title">Kode Produk Sudah Digunakan</div>
+                    <div class="alert-message" id="addCodeErrorMsg">Gunakan kode lain untuk produk ini</div>
+                </div>
             </div>
         </div>
 

@@ -320,6 +320,7 @@ include __DIR__ . '/../components/data/stock-status.php';
             initAddProductSuppliers();
             bindAddPhotoBox();
             initAddCategoryToggle();
+            initAddCodeValidation();
         });
 
     });
@@ -340,6 +341,55 @@ include __DIR__ . '/../components/data/stock-status.php';
         };
         cat.addEventListener('change', toggle);
         toggle();
+    }
+
+    // Validasi realtime kode produk
+    let addCodeCheckTimeout = null;
+    function initAddCodeValidation(){
+        const input = document.getElementById('addProductCode');
+        const errorBox = document.getElementById('addCodeError');
+        const errorMsg = document.getElementById('addCodeErrorMsg');
+        const spinner = document.getElementById('addCodeSpinner');
+        if(!input || !errorBox || !errorMsg) return;
+
+        input.addEventListener('input', function(){
+            const code = this.value.trim();
+            
+            if(addCodeCheckTimeout) clearTimeout(addCodeCheckTimeout);
+            
+            if(!code){
+                errorBox.classList.add('d-none');
+                spinner.classList.add('d-none');
+                input.classList.remove('is-invalid');
+                return;
+            }
+
+            spinner.classList.remove('d-none');
+
+            addCodeCheckTimeout = setTimeout(function(){
+                fetch('master-product-action.php?action=check_code', {
+                    method: 'POST',
+                    body: new URLSearchParams({ code: code })
+                })
+                .then(res => res.json())
+                .then(res => {
+                    spinner.classList.add('d-none');
+                    if(res.exists){
+                        errorBox.classList.remove('d-none');
+                        errorMsg.textContent = 'Kode "' + code + '" sudah terdaftar untuk produk lain';
+                        input.classList.add('is-invalid');
+                    } else {
+                        errorBox.classList.add('d-none');
+                        input.classList.remove('is-invalid');
+                    }
+                })
+                .catch(() => {
+                    spinner.classList.add('d-none');
+                    errorBox.classList.add('d-none');
+                    input.classList.remove('is-invalid');
+                });
+            }, 500);
+        });
     }
 
     // ===== MULTI SUPPLIER (sama seperti halaman detail) =====
@@ -558,6 +608,13 @@ include __DIR__ . '/../components/data/stock-status.php';
     $(document).on('submit','#addProductForm',function(e){
         e.preventDefault();
 
+        const codeInput = document.getElementById('addProductCode');
+        if(codeInput && codeInput.classList.contains('is-invalid')){
+            QToast('Gagal', 'Kode produk sudah digunakan, gunakan kode lain', 'error');
+            codeInput.focus();
+            return;
+        }
+
         let formData = new FormData(this);
 
         fetch('master-product-action.php?action=store',{
@@ -670,7 +727,13 @@ function combineProductSelect2Config(){
     return {
         width: '100%',
         placeholder: 'Cari / pilih produk...',
-        dropdownParent: $('#combineModal'),
+        // dropdown di-append ke dalam #combineFormContent (ruat konten modal),
+        // BUKAN ke #combineModal. Kalau ke #combineModal, select2 menempelkan
+        // dropdown SEBELUM .modal-dialog (paling atas modal), lalu browser
+        // meng-scroll modal ke atas agar search field terlihat -> modal melompat
+        // ke atas setiap kali dropdown dibuka. Di dalam content, dropdown
+        // menempel tepat di bawah select & ikut scroll modal.
+        dropdownParent: $('#combineFormContent'),
         minimumResultsForSearch: 0,
         language: {
             noResults: function(){ return 'Produk tidak ditemukan'; },
@@ -821,16 +884,7 @@ $(document).on('click', '#combineItems .cb-row-remove', function(){
     recomputeCombineTotal();
 });
 $(document).on('click', '#btnCombineAdd', function(){
-    var row = addCombineRow('');
-    if(!row) return;
-    var sel = row.querySelector('select');
-    // dibuka di tick berikutnya, bukan di tengah handler click:
-    // select2.open() yang dipanggil tepat setelah init() bisa melempar
-    // error internal di 4.1.0-rc.0
-    setTimeout(function(){
-        if(!isCombineSelect2(sel)) return;
-        try{ $(sel).select2('open'); }catch(err){}
-    }, 0);
+    addCombineRow('');
 });
 $(document).on('change', '#combineItems select', function(){
     recomputeCombineTotal();

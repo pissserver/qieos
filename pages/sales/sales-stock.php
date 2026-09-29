@@ -314,8 +314,20 @@ while($prod = mysqli_fetch_assoc($pq)){
 
             function rowEvents(row){
                 const qty = row.querySelector(".item-qty");
+                const sel = row.querySelector(".item-select");
 
-                row.querySelector(".item-select").addEventListener("change", function(){
+                $(sel).select2({
+                    width: '100%',
+                    placeholder: 'Cari / pilih produk...',
+                    minimumResultsForSearch: 0,
+                    dropdownParent: $('.section-card').first(),
+                    language: {
+                        noResults: function(){ return 'Produk tidak ditemukan'; },
+                        searching: function(){ return 'Mencari...' }
+                    }
+                });
+
+                $(sel).on('change', function(){
                     this.closest(".req-item").querySelector(".item-qty").value = "";
                     refreshRow(this.closest(".req-item"));
                 });
@@ -326,6 +338,7 @@ while($prod = mysqli_fetch_assoc($pq)){
 
                 row.querySelector(".item-remove").addEventListener("click", function(){
                     const item = this.closest(".req-item");
+                    $(item.querySelector('.item-select')).select2('destroy');
                     item.style.height = item.offsetHeight + "px";
                     item.classList.add("removing");
 
@@ -341,7 +354,7 @@ while($prod = mysqli_fetch_assoc($pq)){
                 });
             }
 
-            function addItem(){
+            function addItem(openDropdown){
                 const container = document.getElementById("itemsContainer");
                 const tpl = document.createElement("div");
                 tpl.innerHTML = rowTemplate().trim();
@@ -353,7 +366,11 @@ while($prod = mysqli_fetch_assoc($pq)){
                 reindexItems();
                 updateSummary();
 
-                row.querySelector(".item-select").focus();
+                if(openDropdown){
+                    setTimeout(function(){
+                        $(row.querySelector(".item-select")).select2('open');
+                    }, 0);
+                }
 
                 return row;
             }
@@ -470,6 +487,9 @@ while($prod = mysqli_fetch_assoc($pq)){
                 editingRequestId = id;
 
                 const container = document.getElementById('itemsContainer');
+                container.querySelectorAll('.item-select').forEach(function(sel){
+                    if($(sel).hasClass('select2-hidden-accessible')) $(sel).select2('destroy');
+                });
                 container.innerHTML = '';
 
                 if(items.length === 0){
@@ -477,7 +497,9 @@ while($prod = mysqli_fetch_assoc($pq)){
                 } else {
                     items.forEach(function(it){
                         const row = addItem();
-                        row.querySelector('.item-select').value = it.product_id;
+                        const sel = row.querySelector('.item-select');
+                        sel.value = it.product_id;
+                        $(sel).trigger('change');
                         row.querySelector('.item-qty').value = it.qty;
                         refreshRow(row);
                     });
@@ -528,7 +550,9 @@ while($prod = mysqli_fetch_assoc($pq)){
             }
 
             /* ---------- init ---------- */
-            document.getElementById("addItemBtn").addEventListener("click", addItem);
+            document.getElementById("addItemBtn").addEventListener("click", function(){
+                addItem(true);
+            });
             addItem();
 
             /* 🔥 LOAD TABLE */

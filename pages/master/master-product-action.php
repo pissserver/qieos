@@ -10,6 +10,25 @@ mysqli_report(MYSQLI_REPORT_OFF);
 
 $action = isset($_GET['action']) ? $_GET['action'] : '';
 
+// Check kode produk exist
+if($action === 'check_code'){
+    $code = isset($_POST['code']) ? trim($_POST['code']) : '';
+    if($code === ''){
+        echo json_encode(['exists' => false]);
+        exit;
+    }
+    
+    $stmt = $conn->prepare("SELECT id FROM products WHERE code = ? AND deleted_at IS NULL");
+    $stmt->bind_param('s', $code);
+    $stmt->execute();
+    $stmt->store_result();
+    $exists = $stmt->num_rows > 0;
+    $stmt->close();
+    
+    echo json_encode(['exists' => $exists]);
+    exit;
+}
+
 // Upload helper
 function uploadPhoto($file){
     $allowed = ['image/jpeg','image/png','image/webp'];
