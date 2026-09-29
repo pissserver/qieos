@@ -702,7 +702,14 @@ if (!defined('BASE_URL')) {
         }
     }
 
+    // select2('val') mem-fired event 'change', yang memanggil setCartCustomer()
+    // lagi. Tanpa guard, pemanggilan dari kode (mis. reset setelah checkout)
+    // akan recursive sampai stack overflow sebelum renderCartCustomer() jalan.
+    let syncingCustomerSelect = false;
+
     function setCartCustomer(id) {
+        if (syncingCustomerSelect) return;
+
         if (!id) {
             cartCustomer = null;
         } else {
@@ -716,12 +723,23 @@ if (!defined('BASE_URL')) {
         } catch (e) {}
 
         // sinkronkan tampilan select2 (mis. setelah checkout mengosongkan cart)
+        // JANGAN pakai $(el).select2('val', ...): bridge jQuery Select2 memanggil
+        // instance[method].apply(instance, args) sehingga argumen jadi string
+        // (bukan array). Select2.prototype.val() lalu early-return saat
+        // args.length === 0, jadi nilai '' tidak pernah ter-set dan select tetap
+        // menampilkan customer lama setelah checkout. Pakai .val() jQuery biasa.
         let el = document.getElementById('cartCustomerSelect');
         if (el) {
-            if (typeof $ !== 'undefined' && $.fn && $.fn.select2 && $(el).hasClass('select2-hidden-accessible')) {
-                $(el).select2('val', cartCustomer ? String(cartCustomer.id) : '');
-            } else {
-                el.value = cartCustomer ? String(cartCustomer.id) : '';
+            let nextVal = cartCustomer ? String(cartCustomer.id) : '';
+            syncingCustomerSelect = true;
+            try {
+                if (typeof $ !== 'undefined' && $.fn) {
+                    $(el).val(nextVal).trigger('change');
+                } else {
+                    el.value = nextVal;
+                }
+            } finally {
+                syncingCustomerSelect = false;
             }
         }
 
@@ -829,7 +847,7 @@ if (!defined('BASE_URL')) {
 
                 <h5>Keranjang kosong</h5>
                 <p>Yuk tambahkan produk ke keranjang kamu</p>
-                <a href="../sales/catalog.php" class="btn btn-primary mt-2">
+                <a href="${BASE_URL}/pages/sales/catalog.php" class="btn btn-primary mt-2">
                     Mulai Belanja
                 </a>
             </div>
@@ -962,7 +980,7 @@ if (!defined('BASE_URL')) {
             return;
         }
 
-        fetch('../checkout.php', {
+        fetch(BASE_URL + '/pages/checkout.php', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -979,7 +997,7 @@ if (!defined('BASE_URL')) {
 
                     QToast('Berhasil!', 'Pesanan berhasil dibuat', 'success');
 
-                    const receiptUrl = `../receipt.php?id=${res.order_id}`;
+                    const receiptUrl = BASE_URL + `/pages/receipt.php?id=${res.order_id}`;
                     window.open(receiptUrl, '_blank');
 
                     if (navigator.share) {

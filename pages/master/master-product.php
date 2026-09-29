@@ -300,6 +300,13 @@ include __DIR__ . '/../components/data/stock-status.php';
 
         $('#addProductModal').modal('show');
 
+        // Hancurkan select2 supplier dari render sebelumnya DULU, sebelum
+        // #addProductContent di-replace. Dropdown-nya nempel ke modal
+        // (dropdownParent), bukan ke content, jadi kalau tidak dihancurkan
+        // dia akan nyangkut jadi node Animation di dalam modal.
+        destroyAddSupplierSelect2();
+        ADD_SUPPLIER_STATE.fields = null;
+
         document.getElementById('addProductContent').innerHTML = `
             <div class="text-center py-5">
                 <i class="fas fa-spinner fa-spin fa-2x text-secondary"></i>
@@ -338,6 +345,87 @@ include __DIR__ . '/../components/data/stock-status.php';
     // ===== MULTI SUPPLIER (sama seperti halaman detail) =====
     let ADD_SUPPLIER_STATE = { fields:null, template:null, list:[] };
 
+    // ===== SELECT2 UNTUK PICK SUPPLIER =====
+    // Opsi <select> asli tetap jadi sumber data (dibaca .value saat submit),
+    // select2 hanya mengganti tampilannya jadi bisa diketik & dicari.
+    function addSupplierSelect2Config(){
+        return {
+            width: '100%',
+            placeholder: 'Cari / pilih supplier...',
+            allowClear: true,
+            // dropdown tetap di dalam modal supaya tidak ketimpa modal lain
+            dropdownParent: $('#addProductModal'),
+            language: {
+                noResults: function(){ return 'Supplier tidak ditemukan'; },
+                searching: function(){ return 'Mencari...' },
+                inputTooShort: function(){ return 'Ketik nama supplier...' }
+            }
+        };
+    }
+
+    function isAddSupplierSelect2(sel){
+        return !!($.fn.select2) && $(sel).hasClass('select2-hidden-accessible');
+    }
+
+    // Hancurkan select2 di dalam scope (atau semua row kalau scope tidak diisi).
+    // Wajib sebelum sel.innerHTML diganti: select2 menyimpan hasil render-nya
+    // di sibling terpisah yang tidak ikut ter-update saat option di rebuild.
+    function destroyAddSupplierSelect2(scope){
+        let root = (scope && scope.querySelectorAll) ? scope : ADD_SUPPLIER_STATE.fields;
+        if(!root) return;
+        root.querySelectorAll('select').forEach(sel=>{
+            if(isAddSupplierSelect2(sel)) $(sel).select2('destroy');
+        });
+    }
+
+    function initAddSupplierSelect2(){
+        if(!$.fn.select2 || !ADD_SUPPLIER_STATE.fields) return;
+        ADD_SUPPLIER_STATE.fields.querySelectorAll('select').forEach(sel=>{
+            if(isAddSupplierSelect2(sel)) return;
+            $(sel).select2(addSupplierSelect2Config());
+        });
+    }
+
+    // Select2 kadang menyisakan container dropdown yatim: 0x0, tidak terlihat, tapi
+    // tetap menempel di modal. Contohnya saat tombol clear diklik, event
+    // mouseup/click berikutnya mendarat di container select2 yang baru dibuat lalu
+    // dropdown-nya dibuka, sementara instance yangDicetak sudah di-destroy.
+    // Node yatim begitu tidak bisa ditutup lagi karena instance pemiliknya sudah
+    // tidak ada, jadi harus dibersihkan manual.
+    function sweepAddSupplierSelect2Orphans(){
+        if(!$.fn.select2) return;
+        let host = document.getElementById('addProductModal');
+        if(!host) return;
+
+        // dropdown yang masih "hidup" = milik instance select2 yang aktif
+        let live = new Set();
+        document.querySelectorAll('select.select2-hidden-accessible').forEach(sel=>{
+            let box = window.qieosSelect2Container(sel);
+            if(box) live.add(box);
+        });
+
+        // cuma anak langsung dari modal; selection box (yang di-select sebelumnya) dilewati
+        Array.prototype.forEach.call(host.children, node=>{
+            if(!node.classList || !node.classList.contains('select2-container')) return;
+            if(live.has(node)) return;
+            node.remove();
+        });
+    }
+
+    $(document).on('click', sweepAddSupplierSelect2Orphans);
+
+    // Select2 bisa menyisakan dropdown yang keburu terbuka — mis. saat event
+    // "mousedown" tombol clear masih berjalan lalu select2 di-rebuild. Tutup
+    // semua dropdown supaya hasil refresh selalu deterministik: tertutup.
+    // Baris yang memang mau terbuka dibuka eksplisit di handler btnAddSupplier.
+    function closeAddSupplierSelect2Dropdowns(scope){
+        let root = (scope && scope.querySelectorAll) ? scope : ADD_SUPPLIER_STATE.fields;
+        if(!root || !$.fn.select2) return;
+        root.querySelectorAll('select').forEach(sel=>{
+            if(isAddSupplierSelect2(sel)) $(sel).select2('close');
+        });
+    }
+
     function initAddProductSuppliers(){
         const content = document.getElementById('addProductContent');
         const fields = content.querySelector('#supplierFields');
@@ -374,6 +462,9 @@ include __DIR__ . '/../components/data/stock-status.php';
 
     function refreshAddSupplierRows(){
         if(!ADD_SUPPLIER_STATE.fields) return;
+
+        destroyAddSupplierSelect2(ADD_SUPPLIER_STATE.fields);
+
         const rows = ADD_SUPPLIER_STATE.fields.querySelectorAll('.supplier-field-row');
         // Hilangkan duplikat nilai antar row
         const seen = {};
@@ -393,6 +484,10 @@ include __DIR__ . '/../components/data/stock-status.php';
             });
             sel.innerHTML = addSupplierOptionsHtml(selected, others);
         });
+
+        initAddSupplierSelect2();
+        closeAddSupplierSelect2Dropdowns(ADD_SUPPLIER_STATE.fields);
+        sweepAddSupplierSelect2Orphans();
     }
 
     $(document).on('click','#addProductContent #btnAddSupplier',function(){
@@ -403,18 +498,33 @@ include __DIR__ . '/../components/data/stock-status.php';
         const last = rows[rows.length - 1];
         if(last){
             const sel = last.querySelector('select');
-            if(sel) sel.focus();
+            if(isAddSupplierSelect2(sel)){
+                // dibuka di tick berikutnya, bukan di tengah handler click:
+                // select2.open() yang dipanggil tepat setelah init() bisa
+                // melempar error internal di 4.1.0-rc.0
+                setTimeout(function(){
+                    if(!isAddSupplierSelect2(sel)) return;
+                    try{ $(sel).select2('open'); }catch(err){}
+                }, 0);
+            }
+            else if(sel) sel.focus();
         }
     });
 
     $(document).on('click','#addProductContent [data-remove]',function(){
         const row = this.closest('.supplier-field-row');
-        if(row) row.parentNode.removeChild(row);
+        if(row){
+            destroyAddSupplierSelect2(row);
+            row.parentNode.removeChild(row);
+        }
         refreshAddSupplierRows();
     });
 
     $(document).on('change','#addProductContent #supplierFields select',function(){
-        refreshAddSupplierRows();
+        // Ditunda satu tick: 'change' dipancarkan select2 dari dalam handler
+        // mouseup miliknya sendiri, jadi destroy() di tengah dispatch itu
+        // menyisakan container dropdown yatim di dalam modal.
+        setTimeout(refreshAddSupplierRows, 0);
     });
 
     // Klik area upload foto membuka dialog file (sama seperti detail)
@@ -543,19 +653,87 @@ function combineRowHtml(selectedId){
         var label = p.name + (p.code ? ' (' + p.code + ')' : '') + ' \u2014 ' + rupiahN(p.sell_price) + (p.unit ? ' / ' + p.unit : '');
         opts += '<option value="' + p.id + '"' + sel + '>' + escHtml(label) + '</option>';
     }
+    // 'required' sengaja tidak dipakai: select2 menyembunyikan <select> asli
+    // jadi validasi HTML5 tidak bisa menunjuk field yang bermasalah.
+    // Kekosongan dicek manual di handler submit.
     return '<div class="combine-item-row">' +
-        '<select name="product_id[]" class="form-input" required>' + opts + '</select>' +
+        '<select name="product_id[]" class="form-input">' + opts + '</select>' +
         '<span class="cb-row-price">' + rupiahN(0) + '</span>' +
         '<button type="button" class="cb-row-remove" title="Hapus bahan" aria-label="Hapus bahan"><i class="fas fa-times"></i></button>' +
     '</div>';
 }
 
+// ===== SELECT2 UNTUK PILIH PRODUK BAHAN =====
+// Opsi <select> asli tetap jadi sumber data (dibaca .value saat submit),
+// select2 hanya mengganti tampilannya jadi bisa diketik & dicari.
+function combineProductSelect2Config(){
+    return {
+        width: '100%',
+        placeholder: 'Cari / pilih produk...',
+        dropdownParent: $('#combineModal'),
+        minimumResultsForSearch: 0,
+        language: {
+            noResults: function(){ return 'Produk tidak ditemukan'; },
+            searching: function(){ return 'Mencari...' },
+            inputTooShort: function(){ return 'Ketik nama produk...' }
+        }
+    };
+}
+
+function isCombineSelect2(sel){
+    return !!($.fn.select2) && $(sel).hasClass('select2-hidden-accessible');
+}
+
+// Hancurkan select2 di dalam scope. WAJIB sebelum node select-nya dilepas:
+// container select2 hidup di <body>, bukan di dalam row, jadi ikut yatim.
+function destroyCombineSelect2(scope){
+    let root = (scope && scope.querySelectorAll) ? scope : COMBINE.items;
+    if(!root) return;
+    root.querySelectorAll('select').forEach(sel=>{
+        if(isCombineSelect2(sel)) $(sel).select2('destroy');
+    });
+}
+
+function initCombineSelect2(scope){
+    if(!$.fn.select2) return;
+    let root = (scope && scope.querySelectorAll) ? scope : COMBINE.items;
+    if(!root) return;
+    root.querySelectorAll('select').forEach(sel=>{
+        if(isCombineSelect2(sel)) return;
+        $(sel).select2(combineProductSelect2Config());
+    });
+}
+
+// Select2 menyisakan container dropdown yatim: 0x0, tidak terlihat, tapi tetap
+// menempel di <body> (mis. clear diklik lalu dropdown-nya di-rebuild). Node
+// yatim tidak bisa ditutup lagi karena instance pemiliknya sudah tidak ada.
+function sweepCombineSelect2Orphans(){
+    if(!$.fn.select2) return;
+
+    let live = new Set();
+    document.querySelectorAll('select.select2-hidden-accessible').forEach(sel=>{
+        let box = window.qieosSelect2Container(sel);
+        if(box) live.add(box);
+    });
+
+    Array.prototype.forEach.call(document.body.children, node=>{
+        if(!node.classList || !node.classList.contains('select2-container')) return;
+        if(live.has(node)) return;
+        node.remove();
+    });
+}
+
+$(document).on('click', sweepCombineSelect2Orphans);
+
 function addCombineRow(selectedId){
-    if(!COMBINE.items) return;
+    if(!COMBINE.items) return null;
     var wrap = document.createElement('div');
     wrap.innerHTML = combineRowHtml(selectedId);
-    COMBINE.items.appendChild(wrap.firstChild);
+    var row = wrap.firstChild;
+    COMBINE.items.appendChild(row);
+    initCombineSelect2(row);
     recomputeCombineTotal();
+    return row;
 }
 
 function recomputeCombineTotal(){
@@ -582,7 +760,12 @@ function initCombineForm(){
     COMBINE.totalEl = document.getElementById('combineTotalVal');
     var nameIn = document.getElementById('combineNameInput');
     if(nameIn) nameIn.value = '';
-    if(COMBINE.items) COMBINE.items.innerHTML = '';
+    if(COMBINE.items){
+        // dropdown select2 menempel di <body>, jadi harus dihancurkan dulu
+        // sebelum isi modal diganti
+        destroyCombineSelect2(COMBINE.items);
+        COMBINE.items.innerHTML = '';
+    }
 
     // Mode edit: prefill nama + bahan yang sudah dipilih
     var comboJson = JSON.parse(dataEl.getAttribute('data-combo') || 'null');
@@ -606,6 +789,9 @@ function openCombineModal(id){
     var titleEl = document.getElementById('combineModalTitle');
     if(titleEl) titleEl.textContent = id ? 'Edit Racikan' : 'Tambah Racikan';
 
+    // form racikan sebelumnya masih punya select2 hidup di <body>
+    destroyCombineSelect2(document.getElementById('combineFormContent'));
+
     $('#combineModal').modal('show');
     document.getElementById('combineFormContent').innerHTML =
         '<div class="text-center py-5"><i class="fas fa-spinner fa-spin fa-2x text-secondary"></i></div>';
@@ -619,17 +805,54 @@ function openCombineModal(id){
 
 $(document).on('click', '.js-add-combine', function(){ openCombineModal(); });
 $(document).on('click', '.combine-edit', function(){ openCombineModal(this.getAttribute('data-id')); });
+
+// Dropdown select2 racikan menempel di <body>, jadi harus dibersihkan saat
+// modal ditutup - kalau tidak, dropdown-nya melayang di atas halaman.
+document.getElementById('combineModal').addEventListener('hidden.bs.modal', function(){
+    destroyCombineSelect2(document.getElementById('combineFormContent'));
+    sweepCombineSelect2Orphans();
+});
 $(document).on('click', '#combineItems .cb-row-remove', function(){
-    this.closest('.combine-item-row').remove();
+    var row = this.closest('.combine-item-row');
+    if(row){
+        destroyCombineSelect2(row);
+        row.remove();
+    }
     recomputeCombineTotal();
 });
-$(document).on('click', '#btnCombineAdd', function(){ addCombineRow(''); });
+$(document).on('click', '#btnCombineAdd', function(){
+    var row = addCombineRow('');
+    if(!row) return;
+    var sel = row.querySelector('select');
+    // dibuka di tick berikutnya, bukan di tengah handler click:
+    // select2.open() yang dipanggil tepat setelah init() bisa melempar
+    // error internal di 4.1.0-rc.0
+    setTimeout(function(){
+        if(!isCombineSelect2(sel)) return;
+        try{ $(sel).select2('open'); }catch(err){}
+    }, 0);
+});
 $(document).on('change', '#combineItems select', function(){
     recomputeCombineTotal();
 });
 
 $(document).on('submit', '#combineForm', function(e){
     e.preventDefault();
+
+    // validasi manual bahan racikan (lihat catatan di combineRowHtml)
+    var firstEmpty = null;
+    $('#combineItems select').each(function(){
+        if(!this.value && !firstEmpty) firstEmpty = this;
+    });
+    if(firstEmpty){
+        QToast('Gagal', 'Pilih produk untuk semua bahan racikan', 'error');
+        setTimeout(function(){
+            if(!isCombineSelect2(firstEmpty)) return;
+            try{ $(firstEmpty).select2('open'); }catch(err){}
+        }, 0);
+        return;
+    }
+
     var formData = new FormData(this);
     var idIn = document.getElementById('combineIdInput');
     var action = idIn ? 'edit' : 'store';

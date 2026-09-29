@@ -313,6 +313,11 @@
 #combineModal .btn-close { filter: brightness(0) invert(1); opacity: .85; }
 #combineModal .modal-content * { opacity: 1 !important; }
 
+/* Select2 dropdown z-index lebih tinggi dari modal backdrop */
+#combineModal .select2-container--open .select2-dropdown {
+    z-index: 1056 !important;
+}
+
 /* --- Form bahan --- */
 .combine-item-row {
     display: flex;
@@ -336,6 +341,55 @@
     to   { opacity: 1; transform: translateY(0); }
 }
 .combine-item-row select.form-input { flex: 1 1 200px; min-width: 0; }
+
+/* --- Select2 untuk pilih produk bahan ---
+   <select> asli disembunyikan select2, jadi container select2 yang ikut
+   flex row.Lebarnya dikendalikan flex (width: auto) bukan option width
+   select2, supaya baris tetap rapi di layar sempit. */
+.combine-item-row .select2-container {
+    flex: 1 1 200px;
+    min-width: 0;
+    width: auto !important;
+}
+.combine-item-row .select2-container--default .select2-selection--single {
+    height: 48px;
+    padding: 0 40px 0 18px;
+    border: 2px solid #e2e8f0;
+    border-radius: 14px;
+    background: linear-gradient(135deg, #f8fafc, #fff);
+    display: flex;
+    align-items: center;
+    transition: all .35s cubic-bezier(.4, 0, .2, 1);
+}
+.combine-item-row .select2-container--default .select2-selection--single .select2-selection__rendered {
+    padding: 0;
+    margin-left: 0;
+    line-height: 46px;
+    font-size: 14px;
+    color: #0f172a;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.combine-item-row .select2-container--default .select2-selection--single .select2-selection__placeholder {
+    color: #94a3b8;
+}
+.combine-item-row .select2-container--default.select2-container--open .select2-selection--single,
+.combine-item-row .select2-container--default.select2-container--focus .select2-selection--single,
+.combine-item-row .select2-container--default .select2-selection--single:hover {
+    border-color: #6366f1;
+    background: #fff;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, .12);
+}
+.combine-item-row .select2-container--default .select2-selection--single .select2-selection__arrow {
+    top: 50%;
+    right: 10px;
+    transform: translateY(-50%);
+    transition: transform .35s cubic-bezier(.4, 0, .2, 1);
+}
+.combine-item-row .select2-container--default.select2-container--open .select2-selection--single .select2-selection__arrow {
+    transform: translateY(-50%) rotate(180deg);
+}
 .cb-qty-input { width: 78px !important; flex-shrink: 0; text-align: center; }
 .cb-row-price {
     flex-shrink: 0;
@@ -439,6 +493,7 @@
     .combine-sticky-value { width: 100%; text-align: center; }
     .combine-item-row { padding: 10px 8px; }
     .combine-item-row select.form-input { flex: 1 1 100%; }
+    .combine-item-row .select2-container { flex: 1 1 100%; }
     .cb-qty-input { width: 100% !important; flex: 1; }
     .cb-row-price { flex: 0 1 auto; }
 }

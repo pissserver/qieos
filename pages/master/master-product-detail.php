@@ -552,7 +552,89 @@ function supplierOptionsHtml(selectedId, excludeIds){
     return html;
 }
 
+// ===== SELECT2 UNTUK PICK SUPPLIER =====
+// Opsi <select> asli tetap dipakai sebagai sumber data (dibaca via .value
+// saat submit), select2 hanya mengganti tampilannya jadi bisa diketik & dicari.
+function supplierSelect2Config(){
+    return {
+        width: '100%',
+        placeholder: 'Cari / pilih supplier...',
+        allowClear: true,
+        // dropdown di-append ke <body> supaya tidak terpotong .edit-card,
+        // z-index diatur lewat CSS
+        dropdownParent: document.body,
+        language: {
+            noResults: function(){ return 'Supplier tidak ditemukan'; },
+            searching: function(){ return 'Mencari...' },
+            inputTooShort: function(){ return 'Ketik nama supplier...'; }
+        }
+    };
+}
+
+function isSupplierSelect2(sel){
+    return !!($.fn.select2) && $(sel).hasClass('select2-hidden-accessible');
+}
+
+// Hancurkan select2 di dalam scope (atau semua row kalau scope tidak diisi).
+// Wajib dipanggil SEBELUM sel.innerHTML diganti, karena select2 menyimpan
+// tampilan hasil render di sibling terpisah yang tidak ikut ter-update.
+function destroySupplierSelect2(scope){
+    var root = (scope && scope.querySelectorAll) ? scope : supplierFields;
+    if(!root) return;
+    root.querySelectorAll('select').forEach(function(sel){
+        if(isSupplierSelect2(sel)) $(sel).select2('destroy');
+    });
+}
+
+function initSupplierSelect2(){
+    if(!$.fn.select2 || !supplierFields) return;
+    supplierFields.querySelectorAll('select').forEach(function(sel){
+        if(isSupplierSelect2(sel)) return;
+        $(sel).select2(supplierSelect2Config());
+    });
+}
+
+// Select2 bisa menyisakan dropdown yang keburu terbuka - misalnya saat event
+// "mousedown" tombol clear masih berjalan lalu select2 di-rebuild. Tutup
+// semua dropdown supaya hasil refresh selalu deterministik: tertutup.
+// Baris yang memang mau terbuka dibuka eksplisit di handler-nya.
+function closeSupplierSelect2Dropdowns(scope){
+    var root = (scope && scope.querySelectorAll) ? scope : supplierFields;
+    if(!root || !$.fn.select2) return;
+    root.querySelectorAll('select').forEach(function(sel){
+        if(isSupplierSelect2(sel)) $(sel).select2('close');
+    });
+}
+
+// Select2 kadang menyisakan container dropdown yatim: 0x0, tidak terlihat, tapi
+// tetap menempel di parent. Contohnya saat tombol clear diklik, event
+// mouseup/click berikutnya mendarat di container select2 yang baru dibuat lalu
+// dropdown-nya dibuka, sementara instance yangDicetak sudah di-destroy.
+// Node yatim begitu tidak bisa ditutup lagi karena instance pemiliknya sudah
+// tidak ada, jadi harus dibersihkan manual.
+function sweepSupplierSelect2Orphans(){
+    if(!$.fn.select2) return;
+
+    // dropdown yang masih "hidup" = milik instance select2 yang sedang aktif,
+    // termasuk select2 milik komponen lain di halaman ini (mis. navbar)
+    var live = new Set();
+    document.querySelectorAll('select.select2-hidden-accessible').forEach(function(sel){
+        var box = window.qieosSelect2Container(sel);
+        if(box) live.add(box);
+    });
+
+    Array.prototype.forEach.call(document.body.children, function(node){
+        if(!node.classList || !node.classList.contains('select2-container')) return;
+        if(live.has(node)) return;
+        node.remove();
+    });
+}
+
+$(document).on('click', sweepSupplierSelect2Orphans);
+
 function refreshAllSupplierRows(){
+    destroySupplierSelect2(supplierFields);
+
     var rows = supplierFields.querySelectorAll('.supplier-field-row');
     // Hilangkan duplikat nilai antar row
     var seen = {};
@@ -572,6 +654,10 @@ function refreshAllSupplierRows(){
         });
         sel.innerHTML = supplierOptionsHtml(selected, others);
     });
+
+    initSupplierSelect2();
+    closeSupplierSelect2Dropdowns(supplierFields);
+    sweepSupplierSelect2Orphans();
 }
 
 function getSelectedSupplierNames(){
@@ -624,6 +710,8 @@ function setSupplierRows(ids){
         if(i < need){
             rows[i].querySelector('select').value = ids[i] || '';
         } else {
+            // hapus select2-nya dulu supaya dropdown-nya tidak nyangkut di <body>
+            destroySupplierSelect2(rows[i]);
             rows[i].remove();
         }
     }
@@ -640,21 +728,39 @@ document.getElementById('btnAddSupplier').addEventListener('click', function(){
         try { row.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
         catch(e){}
         var sel = row.querySelector('select');
-        if(sel) sel.focus();
+        if(sel){
+            if(isSupplierSelect2(sel)){
+                // dibuka di tick berikutnya, bukan di tengah handler click:
+                // select2.open() yang dipanggil tepat setelah init() bisa
+                // melempar error internal di 4.1.0-rc.0
+                setTimeout(function(){
+                    if(!isSupplierSelect2(sel)) return;
+                    try{ $(sel).select2('open'); }catch(err){}
+                }, 0);
+            }
+            else {
+                sel.focus();
+            }
+        }
     }
 });
 
 supplierFields.addEventListener('change', function(e){
-    if(e.target.tagName === 'SELECT'){
-        refreshAllSupplierRows();
-    }
+    if(e.target.tagName !== 'SELECT') return;
+    // Ditunda satu tick: 'change' dipancarkan select2 dari dalam handler
+    // mouseup miliknya sendiri, jadi destroy() di tengah dispatch itu
+    // menyisakan container dropdown yatim di <body>.
+    setTimeout(refreshAllSupplierRows, 0);
 });
 
 supplierFields.addEventListener('click', function(e){
     var btn = e.target.closest('[data-remove]');
     if(!btn) return;
     var row = btn.closest('.supplier-field-row');
-    if(row) row.remove();
+    if(row){
+        destroySupplierSelect2(row);
+        row.remove();
+    }
     refreshAllSupplierRows();
 });
 

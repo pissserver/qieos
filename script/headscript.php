@@ -78,6 +78,157 @@ if (!defined('BASE_URL')) {
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" />
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
+<!-- Select2: halaman ini di-scroll lewat .content (overflow-y: auto), bukan <body>.
+     Bawaan select2 MEMBEKUKAN scroll semua ancestor yang bisa di-scroll selama
+     dropdown terbuka, sementara .content memakai scroll-behavior: smooth.
+     Akibatnya tiap putaran scroll lalu ditarik balik ke posisi awal -> halaman
+     bergetar. Patch di bawah melepas pembekuan itu, mengikuti posisi select
+     selama scroll, lalu menutup dropdown bila select-nya sudah keluar viewport. -->
+<script>
+    // select2 4.1.0-rc.0 menyimpan instance-nya di cache internal
+    // (Utils.__cache, dikunci lewat atribut data-select2-id), BUKAN di jQuery
+    // data. Jadi $(el).data('select2') selalu undefined -> dipakai Utils.GetData
+    // lewat escape hatch $.fn.select2.amd.require('select2/utils').
+    window.qieosSelect2Instance = function (el) {
+        if (!el || typeof jQuery === 'undefined' || !jQuery.fn.select2) return null;
+        var inst = null;
+        try {
+            var amd = jQuery.fn.select2.amd;
+            if (amd && typeof amd.require === 'function') {
+                var Utils = amd.require('select2/utils');
+                if (Utils && typeof Utils.GetData === 'function') inst = Utils.GetData(el, 'select2');
+            }
+        } catch (err) {}
+        if (!inst) inst = jQuery(el).data('select2') || null;
+        return inst;
+    };
+
+    // Container dropdown yang ditempel select2 ke dropdownParent (anak <body>
+    // atau modal). Dipakai untuk membersihkan dropdown yatim.
+    window.qieosSelect2Container = function (el) {
+        var inst = window.qieosSelect2Instance(el);
+        if (!inst) return null;
+        if (inst.dropdown && inst.dropdown.$dropdownContainer && inst.dropdown.$dropdownContainer[0]) {
+            return inst.dropdown.$dropdownContainer[0];
+        }
+        if (inst.$dropdown && inst.$dropdown[0]) return inst.$dropdown[0];
+        return null;
+    };
+
+    (function () {
+        if (typeof jQuery === 'undefined' || !jQuery.fn.select2) return;
+
+        var stopFollow = null;
+
+        // Jalan dari select ke <html>, lewati <html> (scroll utama halaman).
+        function walkAncestors(el, fn) {
+            while (el && el !== document.documentElement) {
+                fn(el);
+                el = el.parentElement;
+            }
+        }
+
+        jQuery(document).on('select2:open', function (e) {
+            var $sel = jQuery(e.target);
+            var inst = window.qieosSelect2Instance(e.target);
+            if (!inst || !inst.dropdown || typeof inst.dropdown._positionDropdown !== 'function') return;
+
+            // select2:open dipancarkan SEBELUM attachBody memasang pembekuan
+            // scroll-nya, jadi pemasangan patch-nya ditunda satu tiket.
+            setTimeout(function () {
+                if (stopFollow) { stopFollow(); stopFollow = null; }
+                if (window.qieosSelect2Instance(e.target) !== inst) return;
+                if (typeof inst.isOpen === 'function' && !inst.isOpen()) return;
+
+                var id = inst.id;
+                var host = inst.$container && inst.$container[0];
+                if (!host) return;
+
+                // lepas pembekuan bawaan di semua ancestor select-nya
+                walkAncestors(host, function (node) {
+                    jQuery(node).off('scroll.select2.' + id);
+                });
+
+                // ...tapi hanya pada ancestor yang benar-benar bisa di-scroll
+                // yang dipasang pengikut posisi dropdown-nya
+                var nodes = [];
+                walkAncestors(host, function (node) {
+                    var cs = window.getComputedStyle(node);
+                    if (cs.overflowY === 'auto' || cs.overflowY === 'scroll') nodes.push(node);
+                });
+                if (!nodes.length) return;
+
+                var raf = 0;
+
+                function position() {
+                    if (raf) return;
+                    raf = requestAnimationFrame(function () {
+                        raf = 0;
+                        if (!host.isConnected) { stop(); return; }
+
+                        var rect = host.getBoundingClientRect();
+                        var view = nodes[0].getBoundingClientRect();
+
+                        // select sudah keluar dari area yang terlihat: tutup
+                        // dropdown supaya tidak melayang sendirian di luar scroller
+                        if (rect.bottom < view.top + 4 || rect.top > view.bottom - 4) {
+                            closeQuietly(view);
+                            return;
+                        }
+
+                        try {
+                            inst.dropdown._positionDropdown();
+                            if (typeof inst.dropdown._resizeDropdown === 'function') inst.dropdown._resizeDropdown();
+                        } catch (err) {}
+                    });
+                }
+
+                // Menutup dropdown memindahkan fokus ke select-nya, dan browser
+                // langsung men-scroll select itu ke dalam layar — padahal select
+                // tadi sengaja keluar dari layar. Matikan smooth scroll sementara
+                // dan kembalikan posisinya, supaya halaman tidak ikut tertarik.
+                function closeQuietly(view) {
+                    var box = nodes[0];
+                    var y = box.scrollTop;
+                    var prev = box.style.scrollBehavior;
+
+                    box.style.scrollBehavior = 'auto';
+                    stop();
+                    if (document.activeElement && document.activeElement.blur) {
+                        document.activeElement.blur();
+                    }
+                    if (typeof inst.close === 'function') {
+                        try { inst.close(); } catch (err) {}
+                    }
+                    box.scrollTop = y;
+
+                    requestAnimationFrame(function () {
+                        if (box.scrollTop !== y) box.scrollTop = y;
+                        box.style.scrollBehavior = prev;
+                    });
+                }
+
+                function stop() {
+                    nodes.forEach(function (node) {
+                        jQuery(node).off('scroll.select2.' + id);
+                        node.removeEventListener('scroll', position);
+                    });
+                    raf = 0;
+                    if (stopFollow === stop) stopFollow = null;
+                }
+
+                nodes.forEach(function (node) {
+                    node.addEventListener('scroll', position, { passive: true });
+                });
+
+                $sel.off('select2:close.qieosScrollFollow')
+                    .on('select2:close.qieosScrollFollow', stop);
+                stopFollow = stop;
+            }, 0);
+        });
+    })();
+</script>
+
 <!-- PWA -->
 <link rel="manifest" href="<?php echo BASE_URL; ?>/manifest.php">
 <meta name="theme-color" content="#0f172a">
