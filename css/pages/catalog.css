@@ -905,6 +905,18 @@
     .cat-badge{flex-shrink:0;padding:8px 13px}
     .cat-badge.active{box-shadow:0 2px 8px rgba(99,102,241,.3)}
     .cat-badge.active:hover{box-shadow:0 3px 10px rgba(99,102,241,.35)}
+
+    /* MOBILE: badge kategori tidak lift ke atas (terpotong scroll container),
+       langsung kembali ke posisi awal; feedback-nya ditekan ke bawah */
+    .cat-bar{padding-top:2px}
+    .cat-badge:hover,
+    .cat-badge.active:hover{transform:none;box-shadow:0 2px 8px rgba(99,102,241,.3)}
+    .cat-badge:hover .cb-ico,
+    .cat-badge.active:hover .cb-ico{transform:none}
+    .cat-badge.active .cb-ico{transform:scale(1.12)}
+    .cat-badge:active,
+    .cat-badge.active:active{transform:scale(.96)}
+    .cat-badge:active .cb-ico{transform:scale(1.02)}
 }
 
 /* ====================================

@@ -1999,4 +1999,162 @@ PREMIUM NAVBAR V3
     #cartModal .cc-select,
     #cartModal .select2-container--default .select2-selection--single { height: 44px; }
     #cartModal .select2-container--default .select2-selection--single .select2-selection__rendered { line-height: 42px; }
+
+    /* ===== CART CARD MOBILE: FLEX 2 BARIS (tanpa display:contents) =====
+       baris 1: [thumb] [nama + harga satuan]
+       baris 2: [stepper qty]              [subtotal] [hapus]  */
+    #cartModal .cart-card {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 10px 12px;
+        padding: 12px;
+        border-radius: 18px;
+        background: linear-gradient(180deg, #ffffff 0%, #fbfcfe 100%);
+        border: 1px solid rgba(99, 102, 241, .16);
+        box-shadow: none;
+        overflow: visible;
+    }
+
+    #cartModal .cart-card::before { content: none; }
+
+    #cartModal .cart-card:hover {
+        transform: none;
+        border-color: rgba(99, 102, 241, .3);
+        box-shadow: none;
+    }
+
+    /* BARIS 1: thumb + nama/harga, satu baris flex (anti tumpang tindih) */
+    #cartModal .cart-left {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        flex: 1 0 100%;
+        min-width: 0;
+    }
+
+    /* thumbnail: img (ada foto) & div (hanya ikon) dikunci 46px, tidak pernah melar/menabrak */
+    #cartModal .cart-left > .cart-img {
+        flex: 0 0 46px;
+        width: 46px;
+        height: 46px;
+        border-radius: 13px;
+        box-shadow: 0 0 0 1px rgba(15, 23, 42, .07);
+    }
+
+    /* hanya blok teks nama + harga, bukan thumbnail */
+    #cartModal .cart-left > div:not(.cart-img) {
+        flex: 1 1 auto;
+        min-width: 0;
+    }
+
+    /* placeholder tanpa foto: gradasi warna, bukan kotak hitam */
+    #cartModal .cart-img-empty {
+        font-size: 19px;
+        background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+        border: 1px solid rgba(255, 255, 255, .35);
+        color: #fff;
+        box-shadow: 0 6px 14px rgba(99, 102, 241, .32);
+    }
+
+    #cartModal .cart-img-empty i { filter: none; }
+
+    #cartModal .cart-title {
+        font-size: 12.5px;
+        font-weight: 700;
+        line-height: 1.3;
+        color: #0f172a;
+        white-space: normal;
+        overflow: visible;
+        text-overflow: clip;
+        overflow-wrap: anywhere;
+    }
+
+    #cartModal .cart-meta {
+        margin-top: 4px;
+        gap: 6px;
+        flex-wrap: wrap;
+    }
+
+    /* badge harga satuan: colorful */
+    #cartModal .badge-price {
+        background: linear-gradient(135deg, #6366f1, #8b5cf6);
+        color: #fff;
+        padding: 3px 9px;
+        border-radius: 999px;
+        font-size: 11px;
+        font-weight: 700;
+        box-shadow: 0 4px 12px rgba(99, 102, 241, .3);
+    }
+
+    /* qty sudah tampil di stepper */
+    #cartModal .badge-qty { display: none; }
+
+    /* BARIS 2: stepper di kiri, subtotal + hapus di kanan */
+    #cartModal .cart-qty {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        min-width: 0;
+        margin-right: auto;
+    }
+
+    #cartModal .cart-qty button {
+        width: 28px;
+        height: 28px;
+        border-radius: 9px;
+        background: linear-gradient(135deg, #6366f1, #8b5cf6);
+        border: none;
+        color: #fff;
+        font-size: 13px;
+        font-weight: 700;
+        box-shadow: 0 4px 12px rgba(99, 102, 241, .32);
+    }
+
+    #cartModal .cart-qty button:hover {
+        transform: scale(1.08);
+        box-shadow: 0 6px 16px rgba(99, 102, 241, .45);
+    }
+
+    #cartModal .cart-qty span {
+        width: 26px;
+        text-align: center;
+        font-size: 12.5px;
+        font-weight: 800;
+        color: #4f46e5;
+    }
+
+    #cartModal .cart-right {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        min-width: 0;
+        margin-left: auto;
+    }
+
+    #cartModal .cart-subtotal {
+        font-size: 13.5px;
+        font-weight: 800;
+        letter-spacing: -.2px;
+        color: #4f46e5;
+        margin: 0;
+        white-space: nowrap;
+    }
+
+    #cartModal .remove-btn {
+        flex: 0 0 auto;
+        width: 28px;
+        height: 28px;
+        font-size: 12px;
+        color: #ef4444;
+        background: #fee2e2;
+    }
+
+    #cartModal .remove-btn:hover {
+        background: #fecaca;
+        color: #dc2626;
+        transform: scale(1.08);
+    }
+
+    #cartModal .cart-container { gap: 10px; }
 }
