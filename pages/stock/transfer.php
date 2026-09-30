@@ -81,8 +81,10 @@
             </div>
         </main>
 
+        <?php include '../components/modals/request-detail-modal.php'; ?>
 
         <?php include '../../script/footscript.php'; ?>
+
 
         <script>
             var lastPendingHtml = '';
@@ -170,81 +172,8 @@
 
                         ht.columns.adjust();
 
-                        // 🔥 EXPAND / COLLAPSE DETAIL ITEM
-                        attachHistoryExpand();
-
                     }, 100);
                 });
-            }
-
-            function attachHistoryExpand(){
-                const table = document.getElementById('requestHistory');
-
-                if(!table) return;
-
-                table.querySelectorAll('.btn-expand').forEach(function(btn){
-                    if(btn.dataset.bound) return;
-                    btn.dataset.bound = '1';
-
-                    btn.addEventListener('click', function(){
-                        const tr = this.closest('tr');
-                        const row = $('#requestHistory').DataTable().row(tr);
-
-                        if(tr.classList.contains('shown')){
-                            row.child.hide();
-                            tr.classList.remove('shown');
-                            this.querySelector('i').className = 'fas fa-chevron-right';
-                            return;
-                        }
-
-                        row.child(detailHtml(tr.dataset.items || '[]')).show();
-
-                        tr.classList.add('shown');
-                        this.querySelector('i').className = 'fas fa-chevron-down';
-                    });
-                });
-            }
-
-            function detailHtml(itemsJson){
-                let items;
-                try {
-                    items = JSON.parse(itemsJson);
-                } catch(e){
-                    items = [];
-                }
-
-                if(!items.length){
-                    return '<div class="history-detail">Tidak ada item</div>';
-                }
-
-                const rows = items.map(function(it){
-                    const img = it.photo
-                        ? `<img class="product-img" src="${escapeHtml(it.photo)}" alt="">`
-                        : `<div class="product-icon"><i class="fas fa-box-open"></i></div>`;
-
-                    return `
-                        <div class="detail-item">
-                            <div class="detail-prod">
-                                ${img}
-                                <div>
-                                    <div class="detail-name">${escapeHtml(it.name)}</div>
-                                    <div class="detail-code">${escapeHtml(it.code)}</div>
-                                </div>
-                            </div>
-                            <div class="detail-qty">
-                                <i class="fas fa-cubes me-1"></i>
-                                ${fmt(it.qty)} pcs
-                            </div>
-                        </div>
-                    `;
-                }).join('');
-
-                return `
-                    <div class="history-detail">
-                        <div class="detail-head">Detail Item</div>
-                        ${rows}
-                    </div>
-                `;
             }
 
             function escapeHtml(s){

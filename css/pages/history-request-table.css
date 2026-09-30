@@ -30,16 +30,7 @@
         border-radius:16px;
         box-shadow:0 6px 18px rgba(15,23,42,.05);
         transition:.25s;
-        cursor:pointer;
-    }
-
-    .history-row.shown{
-        box-shadow:0 10px 24px rgba(79,70,229,.12);
-        border:1px solid #e0e7ff;
-    }
-
-    .history-row.shown td:first-child{
-        border-bottom-left-radius:0;
+        cursor:default;
     }
 
     .history-row td{
@@ -60,33 +51,6 @@
         display:flex;
         align-items:center;
         gap:14px;
-    }
-
-    /* TOMBOL EXPAND */
-    .btn-expand{
-        flex:0 0 34px;
-        width:34px;
-        height:34px;
-        border:none;
-        border-radius:10px;
-        background:#eef2ff;
-        color:#4338ca;
-        display:flex;
-        align-items:center;
-        justify-content:center;
-        font-size:12px;
-        cursor:pointer;
-        transition:.25s;
-    }
-
-    .btn-expand:hover{
-        background:#4338ca;
-        color:#fff;
-    }
-
-    .history-row.shown .btn-expand{
-        background:#4338ca;
-        color:#fff;
     }
 
     /* BADGE NO. REQUEST */
@@ -140,6 +104,7 @@
     .product-code{
         color:#64748b;
         font-size:12px;
+        text-transform:capitalize;
     }
 
     .qty-badge{
@@ -253,11 +218,16 @@
         font-weight:400;
         color:#0f172a;
         font-size:14px;
+        text-transform:capitalize;
+        line-height:1.3;
+        overflow-wrap:anywhere;
     }
 
     .detail-code{
         color:#94a3b8;
         font-size:11px;
+        line-height:1.3;
+        overflow-wrap:anywhere;
     }
 
     .detail-qty{
@@ -339,12 +309,6 @@
             padding:7px 10px;
         }
 
-        .btn-expand{
-            flex-basis:30px;
-            width:30px;
-            height:30px;
-        }
-
         .detail-item{
             flex-direction:column;
             align-items:flex-start;
@@ -353,6 +317,254 @@
 
         .detail-qty{
             align-self:flex-end;
+        }
+    }
+
+    /* ===== MODAL DETAIL ITEM REQUEST ===== */
+    .rd-modal{
+        border:none;
+        border-radius:20px;
+        overflow:hidden;
+        box-shadow:0 30px 60px -22px rgba(15,23,42,.55);
+    }
+
+    .rd-head{
+        display:flex;
+        align-items:center;
+        gap:10px;
+        padding:14px 16px;
+        background:linear-gradient(135deg,#1e293b,#0f172a);
+    }
+
+    .rd-head-icon{
+        flex:0 0 38px;
+        width:38px;
+        height:38px;
+        border-radius:12px;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        background:rgba(255,255,255,.1);
+        color:#818cf8;
+        font-size:15px;
+    }
+
+    .rd-head-text{
+        flex:1 1 auto;
+        min-width:0;
+    }
+
+    .rd-head-title{
+        font-size:14px;
+        font-weight:800;
+        letter-spacing:.4px;
+        color:#fff;
+        line-height:1.3;
+        white-space:normal;
+        overflow-wrap:anywhere;
+    }
+
+    .rd-head-sub{
+        margin-top:2px;
+        font-size:10.5px;
+        color:#94a3b8;
+        line-height:1.3;
+        white-space:normal;
+        overflow-wrap:anywhere;
+    }
+
+    .rd-status{
+        flex:0 0 auto;
+        padding:5px 9px !important;
+        border-radius:8px !important;
+        font-size:10px !important;
+    }
+
+    .rd-body{
+        padding:10px 14px 12px !important;
+    }
+
+    .rd-list .history-detail{
+        padding:0;
+        margin:0;
+        border:none;
+        background:none;
+    }
+
+    /* item list ringkas: tanpa kartu, pakai pembatas tipis */
+    .rd-list .detail-item{
+        flex-direction:row;
+        align-items:center;
+        gap:9px;
+        padding:7px 0;
+        margin:0;
+        background:none;
+        border:none;
+        border-bottom:1px solid #f1f5f9;
+        border-radius:0;
+    }
+
+    .rd-list .detail-item:last-child{
+        border-bottom:none;
+    }
+
+    .rd-list .detail-item:hover{
+        background:none;
+        border-color:#f1f5f9;
+    }
+
+    .rd-list .detail-prod{
+        gap:9px;
+        min-width:0;
+        flex:1 1 auto;
+    }
+
+    .rd-list .detail-prod > div{
+        min-width:0;
+    }
+
+    .rd-list .detail-prod .product-icon,
+    .rd-list .detail-prod .product-img{
+        flex:0 0 30px;
+        width:30px;
+        height:30px;
+        border-radius:8px;
+        font-size:11px;
+        border-width:1px;
+    }
+
+    .rd-list .detail-name{
+        font-size:12px;
+        font-weight:600;
+        line-height:1.25;
+    }
+
+    .rd-list .detail-code{
+        font-size:9.5px;
+        line-height:1.2;
+    }
+
+    .rd-list .detail-qty{
+        flex:0 0 auto;
+        align-self:auto;
+        padding:4px 8px;
+        border-radius:7px;
+        font-size:11px;
+    }
+
+    .rd-empty{
+        text-align:center;
+        padding:22px 12px;
+        color:#94a3b8;
+        font-size:12px;
+    }
+
+    /* ===== MODAL DETAIL: LEBIH BESAR DI DESKTOP & TABLET ===== */
+    @media (min-width:576px){
+        #requestDetailModal .modal-dialog{
+            max-width:660px;
+        }
+
+        #requestDetailModal .rd-head{
+            gap:12px;
+            padding:18px 22px;
+        }
+
+        #requestDetailModal .rd-head-icon{
+            flex:0 0 46px;
+            width:46px;
+            height:46px;
+            border-radius:14px;
+            font-size:18px;
+        }
+
+        #requestDetailModal .rd-head-title{
+            font-size:17px;
+        }
+
+        #requestDetailModal .rd-head-sub{
+            margin-top:3px;
+            font-size:12px;
+        }
+
+        #requestDetailModal .rd-status{
+            padding:7px 12px !important;
+            border-radius:10px !important;
+            font-size:12px !important;
+        }
+
+        #requestDetailModal .rd-body{
+            padding:14px 20px 16px !important;
+        }
+
+        #requestDetailModal .rd-list .detail-item{
+            gap:12px;
+            padding:11px 0;
+        }
+
+        #requestDetailModal .rd-list .detail-prod{
+            gap:12px;
+        }
+
+        #requestDetailModal .rd-list .detail-prod .product-icon,
+        #requestDetailModal .rd-list .detail-prod .product-img{
+            flex:0 0 42px;
+            width:42px;
+            height:42px;
+            border-radius:11px;
+            font-size:15px;
+        }
+
+        #requestDetailModal .rd-list .detail-name{
+            font-size:14.5px;
+        }
+
+        #requestDetailModal .rd-list .detail-code{
+            font-size:11.5px;
+        }
+
+        #requestDetailModal .rd-list .detail-qty{
+            padding:7px 12px;
+            border-radius:9px;
+            font-size:13.5px;
+        }
+
+        #requestDetailModal .rd-empty{
+            padding:34px 16px;
+            font-size:14px;
+        }
+    }
+
+    @media (max-width:575.98px){
+        .rd-modal{
+            border-radius:18px;
+        }
+
+        .rd-head{
+            gap:9px;
+            padding:11px 12px;
+        }
+
+        .rd-head-icon{
+            flex:0 0 32px;
+            width:32px;
+            height:32px;
+            border-radius:10px;
+            font-size:13px;
+        }
+
+        .rd-head-title{
+            font-size:12.5px;
+        }
+
+        .rd-body{
+            padding:8px 12px 10px !important;
+        }
+
+        .rd-list .detail-item{
+            flex-direction:row;
+            align-items:center;
+            padding:6px 0;
         }
     }
 
@@ -375,6 +587,18 @@
         font-size:12px;
         cursor:pointer;
         transition:.2s;
+    }
+
+    .act-view{
+        background:#eff6ff;
+        color:#3b82f6;
+    }
+
+    .act-view:hover{
+        background:#2563eb;
+        color:#fff;
+        transform:translateY(-1px);
+        box-shadow:0 4px 10px rgba(37,99,235,.3);
     }
 
     .act-edit{

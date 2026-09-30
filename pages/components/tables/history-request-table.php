@@ -109,15 +109,15 @@ LIMIT 20
         data-id="<?= (int)$d['id'] ?>"
         data-code="<?= htmlspecialchars($d['code']) ?>"
         data-status="<?= htmlspecialchars($d['status']) ?>"
+        data-date="<?= htmlspecialchars(date('d M Y H:i', strtotime($d['created_at']))) ?>"
+        data-by="<?= htmlspecialchars($d['request_by'] ?: 'System') ?>"
+        data-total="<?= (int)$d['total_items'] ?>"
+        data-qty="<?= (int)$d['total_qty'] ?>"
         data-items="<?= $itemsAttr ?>">
 
         <td>
 
             <div class="product-wrap">
-
-                <button type="button" class="btn-expand" title="Lihat detail">
-                    <i class="fas fa-chevron-right"></i>
-                </button>
 
                 <div class="req-code-badge">
                     <i class="fas fa-file-invoice"></i>
@@ -126,11 +126,11 @@ LIMIT 20
 
                 <div>
                     <div class="product-name">
-                        <?= number_format($d['total_items']) ?> produk
+                        <?= number_format($d['total_items']) ?> Produk
                     </div>
 
                     <div class="product-code">
-                        oleh <?= htmlspecialchars($d['request_by'] ?: 'System') ?>
+                        Oleh <?= htmlspecialchars($d['request_by'] ?: 'System') ?>
                     </div>
                 </div>
 
@@ -173,11 +173,16 @@ LIMIT 20
 
         <td class="text-center">
 
-            <?php if($view === 'sales'): ?>
+            <div class="row-actions">
 
-                <?php if($d['status'] === 'pending'): ?>
+                <button class="act-btn act-view" type="button" title="Lihat detail item">
+                    <i class="fas fa-eye"></i>
+                </button>
 
-                <div class="row-actions">
+                <?php if($view === 'sales'): ?>
+
+                    <?php if($d['status'] === 'pending'): ?>
+
                     <button class="act-btn act-edit"
                         onclick="editRequest(this)"
                         title="Edit request">
@@ -189,25 +194,26 @@ LIMIT 20
                         title="Hapus request">
                         <i class="fas fa-trash-alt"></i>
                     </button>
-                </div>
 
-                <?php else: ?>
+                    <?php else: ?>
 
-                <span class="lock-hint" title="Tidak dapat diubah">
-                    <i class="fas fa-lock"></i>
-                </span>
+                    <span class="lock-hint" title="Tidak dapat diubah">
+                        <i class="fas fa-lock"></i>
+                    </span>
+
+                    <?php endif; ?>
+
+                <?php elseif($view === 'transfer'): ?>
+
+                    <button class="act-btn act-print"
+                        onclick="printRequest(this)"
+                        title="Print request">
+                        <i class="fas fa-print"></i>
+                    </button>
 
                 <?php endif; ?>
 
-            <?php elseif($view === 'transfer'): ?>
-
-                <button class="act-btn act-print"
-                    onclick="printRequest(this)"
-                    title="Print request">
-                    <i class="fas fa-print"></i>
-                </button>
-
-            <?php endif; ?>
+            </div>
 
         </td>
     </tr>

@@ -9,6 +9,11 @@
     cursor:default;
 }
 
+/* Badge status inline di samping kode — hanya untuk mobile */
+#stockTable .st-inline{
+    display:none;
+}
+
 /* ===== KATALOG TOGGLE (switch kompak) ===== */
 .toggle-switch{
     position:relative;

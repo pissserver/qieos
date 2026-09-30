@@ -24,7 +24,7 @@ include __DIR__ . '/../components/data/stock-status.php';
 <div class="container-fluid px-0 mt-4">
 
     <div class="row">
-        <div class="col-md-12 mb-5">
+        <div class="col-md-12 mb-3">
             <!-- Main Table -->
             <div class="section-card mb-4 mt-4">
                 <div class="panel-header panel-primary">

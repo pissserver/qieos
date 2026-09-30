@@ -50,7 +50,7 @@ while($prod = mysqli_fetch_assoc($pq)){
 
             <div class="container-fluid px-0 mt-4 mb-5">
                 <!-- REQUEST / HISTORY -->
-                <div class="section-card mb-4 mt-5">
+                <div class="section-card request-stock-card mb-4 mt-5">
                     <div class="panel-header panel-primary">
                         <div class="panel-left">
                             <div class="panel-icon">
@@ -148,7 +148,7 @@ while($prod = mysqli_fetch_assoc($pq)){
                 </div>
 
                 <!-- STOK Kantin -->
-                <div class="section-card mb-4">
+                <div class="section-card sales-stock-card mb-4">
                     <div class="panel-header panel-primary">
                         <div class="panel-left">
                             <div class="panel-icon">
@@ -164,6 +164,13 @@ while($prod = mysqli_fetch_assoc($pq)){
                                 </div>
                             </div>
                         </div>
+
+                        <div class="stock-head-meta">
+                            <span class="stock-count">
+                                <i class="fas fa-layer-group"></i>
+                                <b id="stockCount">0</b> produk
+                            </span>
+                        </div>
                     </div>
 
                     <div class="mt-4 px-4">
@@ -172,6 +179,8 @@ while($prod = mysqli_fetch_assoc($pq)){
                 </div>
             </div>
         </main>
+
+        <?php include '../components/modals/request-detail-modal.php'; ?>
 
         <?php include '../../script/footscript.php'; ?>
 
@@ -354,7 +363,7 @@ while($prod = mysqli_fetch_assoc($pq)){
                 });
             }
 
-            function addItem(openDropdown){
+            function addItem(){
                 const container = document.getElementById("itemsContainer");
                 const tpl = document.createElement("div");
                 tpl.innerHTML = rowTemplate().trim();
@@ -365,12 +374,6 @@ while($prod = mysqli_fetch_assoc($pq)){
                 rowEvents(row);
                 reindexItems();
                 updateSummary();
-
-                if(openDropdown){
-                    setTimeout(function(){
-                        $(row.querySelector(".item-select")).select2('open');
-                    }, 0);
-                }
 
                 return row;
             }
@@ -551,11 +554,75 @@ while($prod = mysqli_fetch_assoc($pq)){
 
             /* ---------- init ---------- */
             document.getElementById("addItemBtn").addEventListener("click", function(){
-                addItem(true);
+                addItem();
             });
             addItem();
 
             /* 🔥 LOAD TABLE */
+            const STOCK_MOBILE_BP = 575.98;
+
+            function isStockMobile(){
+                return window.innerWidth <= STOCK_MOBILE_BP;
+            }
+
+            let stockIsMobile = isStockMobile();
+
+            function updateStockCount(total){
+                const el = document.getElementById('stockCount');
+                if(el) el.textContent = total || 0;
+            }
+
+            function stockDataTable(){
+                const mobile = isStockMobile();
+
+                const lang = {
+                    search:"",
+                    searchPlaceholder:"Cari produk...",
+
+                    zeroRecords: `
+                        <div class="empty-search">
+                            <img src="../../assets/img/illustrations/empty-data.png" class="empty-img">
+                            <div class="empty-title">Produk tidak ditemukan</div>
+                            <div class="empty-sub">
+                                Coba gunakan kata kunci lain
+                            </div>
+                        </div>
+                    `,
+
+                    emptyTable: `
+                        <div class="empty-search">
+                            <img src="../../assets/img/illustrations/empty-data.png" class="empty-img">
+                            <div class="empty-title">Belum ada data produk</div>
+                            <div class="empty-sub">
+                                Silakan tambahkan stok terlebih dahulu
+                            </div>
+                        </div>
+                    `
+                };
+
+                /* pager disamakan dengan tabel riwayat (simple_numbers) */
+                const dt = $("#stockTable").DataTable({
+                    pageLength: mobile ? 4 : 5,
+                    lengthMenu: mobile
+                        ? [[4,5,10,25,50],[4,5,10,25,50]]
+                        : [[5,10,25,50],[5,10,25,50]],
+
+                    pagingType: mobile ? "simple_numbers" : "full_numbers",
+                    dom: mobile ? "ftp" : "lftip",
+                    searchDelay: 250,
+
+                    responsive: true,
+                    autoWidth: false,
+                    language: lang,
+                    order: [],
+                });
+
+                dt.columns.adjust();
+                updateStockCount(dt.page.info().recordsTotal);
+
+                return dt;
+            }
+
             function loadTable() {
                 fetch("sales-table.php")
                     .then((res) => res.text())
@@ -566,43 +633,27 @@ while($prod = mysqli_fetch_assoc($pq)){
                             $("#stockTable").DataTable().destroy();
                         }
 
-                        $("#stockTable").DataTable({
-                            pageLength: 5,
-                            lengthMenu:[[5,10,25,50],[5,10,25,50]],
-                            responsive: true,
-                            autoWidth: false,
-                            language:{
-                                search:"",
-                                searchPlaceholder:"Cari produk...",
-
-                                zeroRecords: `
-                                    <div class="empty-search">
-                                        <img src="../../assets/img/illustrations/empty-data.png" class="empty-img">
-                                        <div class="empty-title">Produk tidak ditemukan</div>
-                                        <div class="empty-sub">
-                                            Coba gunakan kata kunci lain
-                                        </div>
-                                    </div>
-                                `,
-
-                                emptyTable: `
-                                    <div class="empty-search">
-                                        <img src="../../assets/img/illustrations/empty-data.png" class="empty-img">
-                                        <div class="empty-title">Belum ada data produk</div>
-                                        <div class="empty-sub">
-                                            Silakan tambahkan stok terlebih dahulu
-                                        </div>
-                                    </div>
-                                `
-                            },
-                            order: [],
-                        });
-
-                        if ($.fn.DataTable.isDataTable('#stockTable')) {
-                            $('#stockTable').DataTable().columns.adjust();
-                        }
+                        stockIsMobile = isStockMobile();
+                        stockDataTable();
                     });
             }
+
+            /* 🔥 REBUILD TABLE KETIKA GANTI MOBILE / DESKTOP */
+            let stockResizeTimer;
+            window.addEventListener("resize", function(){
+                clearTimeout(stockResizeTimer);
+                stockResizeTimer = setTimeout(function(){
+                    if(isStockMobile() === stockIsMobile) return;
+                    if(!$.fn.DataTable.isDataTable("#stockTable")) return;
+
+                    const page = $("#stockTable").DataTable().page();
+                    $("#stockTable").DataTable().destroy();
+
+                    stockIsMobile = isStockMobile();
+                    const dt = stockDataTable();
+                    dt.page(page).draw(false);
+                }, 250);
+            });
 
             /* 🔥 LOAD REQUEST */
             function loadHistory(){
@@ -654,81 +705,8 @@ while($prod = mysqli_fetch_assoc($pq)){
 
                         ht.columns.adjust();
 
-                        // 🔥 EXPAND / COLLAPSE DETAIL ITEM
-                        attachHistoryExpand();
-
                     }, 100);
                 });
-            }
-
-            function attachHistoryExpand(){
-                const table = document.getElementById('requestHistory');
-
-                if(!table) return;
-
-                table.querySelectorAll('.btn-expand').forEach(function(btn){
-                    if(btn.dataset.bound) return;
-                    btn.dataset.bound = '1';
-
-                    btn.addEventListener('click', function(){
-                        const tr = this.closest('tr');
-                        const row = $('#requestHistory').DataTable().row(tr);
-
-                        if(tr.classList.contains('shown')){
-                            row.child.hide();
-                            tr.classList.remove('shown');
-                            this.querySelector('i').className = 'fas fa-chevron-right';
-                            return;
-                        }
-
-                        row.child(detailHtml(tr.dataset.items || '[]')).show();
-
-                        tr.classList.add('shown');
-                        this.querySelector('i').className = 'fas fa-chevron-down';
-                    });
-                });
-            }
-
-            function detailHtml(itemsJson){
-                let items;
-                try {
-                    items = JSON.parse(itemsJson);
-                } catch(e){
-                    items = [];
-                }
-
-                if(!items.length){
-                    return '<div class="history-detail">Tidak ada item</div>';
-                }
-
-                const rows = items.map(function(it){
-                    const img = it.photo
-                        ? `<img class="product-img" src="${escapeHtml(it.photo)}" alt="">`
-                        : `<div class="product-icon"><i class="fas fa-box-open"></i></div>`;
-
-                    return `
-                        <div class="detail-item">
-                            <div class="detail-prod">
-                                ${img}
-                                <div>
-                                    <div class="detail-name">${escapeHtml(it.name)}</div>
-                                    <div class="detail-code">${escapeHtml(it.code)}</div>
-                                </div>
-                            </div>
-                            <div class="detail-qty">
-                                <i class="fas fa-cubes me-1"></i>
-                                ${fmt(it.qty)} pcs
-                            </div>
-                        </div>
-                    `;
-                }).join('');
-
-                return `
-                    <div class="history-detail">
-                        <div class="detail-head">Detail Item</div>
-                        ${rows}
-                    </div>
-                `;
             }
 
             function escapeHtml(s){
@@ -742,6 +720,15 @@ while($prod = mysqli_fetch_assoc($pq)){
             /* 🔥 TOGGLE REQUEST / RIWAYAT */
             const panelToggle = document.getElementById('panelToggle');
             let historyLoaded = false;
+
+            const panelToggleWrap = document.querySelector('.panel-toggle-wrap');
+            if(panelToggleWrap){
+                panelToggleWrap.addEventListener('click', function(e){
+                    if(e.target.closest('.switch-toggle')) return;
+                    panelToggle.checked = !panelToggle.checked;
+                    panelToggle.dispatchEvent(new Event('change'));
+                });
+            }
 
             panelToggle.addEventListener('change', function () {
                 const formMode = document.getElementById('formMode');
