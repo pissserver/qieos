@@ -66,7 +66,7 @@ if($count === 0){ ?>
     <!-- INPUTS -->
     <div class="item-inputs">
         <div class="input-group-modern">
-            <div class="input-icon">
+            <div class="input-icon input-icon-qty">
                 <i class="fas fa-cubes"></i>
             </div>
             <input type="number"
@@ -78,7 +78,7 @@ if($count === 0){ ?>
         </div>
 
         <div class="input-group-modern">
-            <div class="input-icon">
+            <div class="input-icon input-icon-unit">
                 <i class="fas fa-balance-scale"></i>
             </div>
             <input type="text"
@@ -88,7 +88,7 @@ if($count === 0){ ?>
         </div>
 
         <div class="input-group-modern">
-            <div class="input-icon">
+            <div class="input-icon input-icon-price">
                 <i class="fas fa-wallet"></i>
             </div>
             <input type="number"

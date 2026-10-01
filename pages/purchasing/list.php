@@ -391,6 +391,10 @@ while($p = mysqli_fetch_assoc($qProd)){
     /* ---------- DataTable ---------- */
     const PURCHASE_MOBILE_BP = 575.98;
 
+    // desktop/tablet: show entries & search satu baris lurus,
+    // info & pagination satu baris di bawahnya
+    const PURCHASE_DOM_DESKTOP = "<'dt-top'<'dl'l><'df'f>>rt<'dt-bot'i<'dt-pag'p>>";
+
     function isPurchaseMobile(){
         return window.innerWidth <= PURCHASE_MOBILE_BP;
     }
@@ -407,7 +411,7 @@ while($p = mysqli_fetch_assoc($qProd)){
                 : [[5,10,25,50],[5,10,25,50]],
 
             pagingType: mobile ? 'simple_numbers' : 'full_numbers',
-            dom: mobile ? 'ftp' : 'lftip',
+            dom: mobile ? 'ftp' : PURCHASE_DOM_DESKTOP,
             searchDelay: 250,
 
             responsive:true,

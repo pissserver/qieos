@@ -54,7 +54,7 @@ while($f = mysqli_fetch_assoc($qForms)){
                         Form Pembelian 
                     </div>
                     <div class="panel-subtitle">
-                        Pilih form daftar belanja lalu input qty & harga beli
+                        Pilih form, input qty & harga beli
                     </div>
                 </div>
             </div>
@@ -81,8 +81,8 @@ while($f = mysqli_fetch_assoc($qForms)){
                         <div class="row mb-3">
                             <div class="col-md-12">
                                 <div class="input-group-modern">
-                                    <div class="input-icon">
-                                        <i class="fas fa-hashtag"></i>
+                                    <div class="input-icon input-icon-form">
+                                        <i class="fas fa-file-invoice"></i>
                                     </div>
 
                                     <select
@@ -93,7 +93,7 @@ while($f = mysqli_fetch_assoc($qForms)){
                                         <option value=""></option>
                                         <?php foreach($listForms as $f): ?>
                                         <option value="<?= $f['id'] ?>">
-                                            <?= htmlspecialchars($f['form']) ?> - <?= date('d F Y', strtotime($f['date'])) ?>
+                                            <?= htmlspecialchars($f['form']) ?> &middot; <?= date('d M Y', strtotime($f['date'])) ?>
                                         </option>
                                         <?php endforeach; ?>
                                     </select>
@@ -102,21 +102,26 @@ while($f = mysqli_fetch_assoc($qForms)){
                         </div>
 
                         <!-- DAFTAR ITEM -->
-                        <div class="section-title">Daftar Belanja</div>
+                        <div class="section-title">
+                            <i class="fas fa-list-check"></i>
+                            Daftar Belanja
+                        </div>
 
                         <div id="itemsContainer" class="mt-3">
-                            <p class="text-muted mb-0">
-                                <i class="fas fa-info-circle me-1"></i>
+                            <div class="purchase-hint">
+                                <i class="fas fa-info-circle"></i>
                                 Pilih form di atas untuk menampilkan daftar belanja produknya.
-                            </p>
+                            </div>
                         </div>
 
                         <!-- ACTION -->
-                        <div class="d-flex justify-content-end gap-2 mt-4">
+                        <div class="d-flex justify-content-end gap-2 mt-4 form-actions">
+
                             <button type="submit" id="savePurchaseBtn" class="btn-save" disabled>
-                                <i class="fas fa-save me-1"></i>
-                                Simpan Pembelian
+                                <i class="fas fa-save"></i>
+                                Save
                             </button>
+
                         </div>
 
                     </form>
@@ -137,26 +142,26 @@ while($f = mysqli_fetch_assoc($qForms)){
     <div class="modal-dialog modal-xl modal-dialog-centered">
         <div class="modal-content stock-panel border-0">
 
-            <div class="panel-header panel-dark my-3 mx-3">
+            <div class="panel-header panel-dark my-3 mx-3 mp-add-header">
                 <div class="panel-left">
                     <div class="panel-icon">
                         <i class="fas fas fa-file-alt"></i>
                     </div>
 
-                    <div>
+                    <div class="mp-add-head-text">
                         <div class="panel-title">
                             Edit Form Pembelian 
                         </div>
                         <div class="panel-subtitle">
-                            Edit informasi pembelian dan detail stok produk
+                            Edit qty & harga beli
                         </div>
                     </div>
                 </div>
 
-                <button class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                <button class="btn-close btn-close-white mp-add-close" data-bs-dismiss="modal"></button>
             </div>
 
-            <div class="mt-2 px-5" id="editPurchaseContent"></div>
+            <div class="mt-2 px-5 mp-add-body" id="editPurchaseContent"></div>
         </div>
     </div>
 </div>
@@ -225,10 +230,10 @@ while($f = mysqli_fetch_assoc($qForms)){
 
             if(!id){
                 container.innerHTML = `
-                    <p class="text-muted mb-0">
-                        <i class="fas fa-info-circle me-1"></i>
+                    <div class="purchase-hint">
+                        <i class="fas fa-info-circle"></i>
                         Pilih form di atas untuk menampilkan daftar belanja produknya.
-                    </p>
+                    </div>
                 `;
                 document.getElementById('savePurchaseBtn').disabled = true;
                 return;
@@ -252,6 +257,17 @@ while($f = mysqli_fetch_assoc($qForms)){
     document.addEventListener('DOMContentLoaded', initPurchaseSelect);
 
     const panelToggle = document.getElementById('panelToggle');
+    let purchaseHistoryLoaded = false;
+
+    // seluruh area toggle bisa diklik (kecuali switch langsung)
+    const panelToggleWrap = document.querySelector('.panel-toggle-wrap');
+    if(panelToggleWrap){
+        panelToggleWrap.addEventListener('click', function(e){
+            if(e.target.closest('.switch-toggle')) return;
+            panelToggle.checked = !panelToggle.checked;
+            panelToggle.dispatchEvent(new Event('change'));
+        });
+    }
 
     panelToggle.addEventListener('change', function(){
 
@@ -268,7 +284,10 @@ while($f = mysqli_fetch_assoc($qForms)){
             labelForm.classList.remove('active');
             labelEdit.classList.add('active');
 
-            loadPurchaseTable();
+            if(!purchaseHistoryLoaded){
+                purchaseHistoryLoaded = true;
+                loadPurchaseTable();
+            }
         }else{
             editMode.classList.remove('active');
             formMode.classList.add('active');
@@ -278,6 +297,63 @@ while($f = mysqli_fetch_assoc($qForms)){
         }
 
     });
+
+    /* ---------- DataTable ---------- */
+    const PURCHASE_MOBILE_BP = 575.98;
+
+    // desktop/tablet: show entries & search satu baris lurus,
+    // info & pagination satu baris di bawahnya
+    const PURCHASE_DOM_DESKTOP = "<'dt-top'<'dl'l><'df'f>>rt<'dt-bot'i<'dt-pag'p>>";
+
+    function isPurchaseMobile(){
+        return window.innerWidth <= PURCHASE_MOBILE_BP;
+    }
+
+    let purchaseIsMobile = isPurchaseMobile();
+
+    function purchaseDataTable(){
+        const mobile = isPurchaseMobile();
+
+        return $('#purchaseTable').DataTable({
+            pageLength: mobile ? 4 : 5,
+            lengthMenu: mobile
+                ? [[4,5,10,25,50],[4,5,10,25,50]]
+                : [[5,10,25,50],[5,10,25,50]],
+
+            pagingType: mobile ? 'simple_numbers' : 'full_numbers',
+            dom: mobile ? 'ftp' : PURCHASE_DOM_DESKTOP,
+            searchDelay: 250,
+
+            responsive:true,
+            autoWidth:false,
+            order: [[0, 'desc']],
+            ordering: true,
+            language:{
+                search:"",
+                searchPlaceholder:"Cari purchase...",
+
+                zeroRecords: `
+                    <div class="empty-search">
+                        <img src="../../assets/img/illustrations/empty-data.png" class="empty-img">
+                        <div class="empty-title">Purchase tidak ditemukan</div>
+                        <div class="empty-sub">
+                            Coba gunakan kata kunci lain
+                        </div>
+                    </div>
+                `,
+
+                emptyTable: `
+                    <div class="empty-search">
+                        <img src="../../assets/img/illustrations/empty-data.png" class="empty-img">
+                        <div class="empty-title">Belum ada data purchase</div>
+                        <div class="empty-sub">
+                            Silakan tambahkan purchase terlebih dahulu
+                        </div>
+                    </div>
+                `
+            }
+        });
+    }
 
     function loadPurchaseTable(){
         fetch('purchase-table.php')
@@ -291,38 +367,9 @@ while($f = mysqli_fetch_assoc($qForms)){
                     $('#purchaseTable').DataTable().destroy();
                 }
 
-                let table = $('#purchaseTable').DataTable({
-                    pageLength:5,
-                    lengthMenu:[[5,10,25,50],[5,10,25,50]],
-                    responsive:true,
-                    autoWidth:false,
-                    order: [[0, 'desc']],
-                    ordering: true,
-                    language:{
-                        search:"",
-                        searchPlaceholder:"Cari purchase...",
-                        
-                        zeroRecords: `
-                            <div class="empty-search">
-                                <img src="../../assets/img/illustrations/empty-data.png" class="empty-img">
-                                <div class="empty-title">Purchase tidak ditemukan</div>
-                                <div class="empty-sub">
-                                    Coba gunakan kata kunci lain
-                                </div>
-                            </div>
-                        `,
+                purchaseIsMobile = isPurchaseMobile();
 
-                        emptyTable: `
-                            <div class="empty-search">
-                                <img src="../../assets/img/illustrations/empty-data.png" class="empty-img">
-                                <div class="empty-title">Belum ada data purchase</div>
-                                <div class="empty-sub">
-                                    Silakan tambahkan purchase terlebih dahulu
-                                </div>
-                            </div>
-                        `
-                    }
-                });
+                const table = purchaseDataTable();
 
                 table.columns.adjust();
 
@@ -333,6 +380,23 @@ while($f = mysqli_fetch_assoc($qForms)){
             },250);
         });
     }
+
+    /* rebuild tabel saat pindah mobile <-> desktop */
+    let purchaseResizeTimer;
+    window.addEventListener('resize', function(){
+        clearTimeout(purchaseResizeTimer);
+        purchaseResizeTimer = setTimeout(function(){
+            if(isPurchaseMobile() === purchaseIsMobile) return;
+            if(!$.fn.DataTable.isDataTable('#purchaseTable')) return;
+
+            const page = $('#purchaseTable').DataTable().page();
+            $('#purchaseTable').DataTable().destroy();
+
+            purchaseIsMobile = isPurchaseMobile();
+            const dt = purchaseDataTable();
+            dt.page(page).draw(false);
+        }, 250);
+    });
 </script>
 
 <!-- Script Edit -->

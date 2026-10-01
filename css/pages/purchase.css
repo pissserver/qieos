@@ -160,14 +160,23 @@
 
     /* SECTION */
     .section-title{
-        display:inline-block;
-        background:#edf4ff;
-        color:var(--primary-dark);
-        padding:5px 12px;
-        border-radius:7px;
+        display:inline-flex;
+        align-items:center;
+        gap:8px;
+        background:#eef2ff;
+        color:#3730a3;
+        padding:7px 14px;
+        border-radius:10px;
         font-size:12px;
-        font-weight:600;
+        font-weight:700;
+        letter-spacing:.2px;
         margin-bottom:14px;
+        border:1px solid rgba(99,102,241,.18);
+    }
+
+    .section-title i{
+        font-size:11px;
+        opacity:.85;
     }
 
     /* FORM */
@@ -175,19 +184,70 @@
         display:flex;
         align-items:center;
         margin-bottom:14px;
+        min-width:0;
+        max-width:100%;
     }
 
     .input-icon{
+        position:relative;
+        flex:0 0 42px;
         width:42px;
         height:42px;
-        border-radius:10px;
+        border-radius:13px;
         background:linear-gradient(135deg,#334155,#1e293b);
         display:flex;
         align-items:center;
         justify-content:center;
         color:#fff;
         margin-right:10px;
-        box-shadow:0 4px 10px rgba(15,23,42,.18);
+        font-size:15px;
+        overflow:hidden;
+        box-shadow:
+            0 6px 14px rgba(15,23,42,.18),
+            inset 0 1px 0 rgba(255,255,255,.35);
+        transition:transform .2s ease, box-shadow .2s ease;
+    }
+
+    .input-icon::after{
+        content:"";
+        position:absolute;
+        inset:0;
+        background:linear-gradient(160deg, rgba(255,255,255,.38), rgba(255,255,255,0) 55%);
+        pointer-events:none;
+    }
+
+    .input-icon i{
+        position:relative;
+        z-index:1;
+        text-shadow:0 1px 2px rgba(15,23,42,.35);
+    }
+
+    .input-icon-form{
+        background:linear-gradient(135deg,#6366f1,#4f46e5);
+    }
+
+    .input-icon-qty{
+        background:linear-gradient(135deg,#0ea5e9,#2563eb);
+    }
+
+    .input-icon-unit{
+        background:linear-gradient(135deg,#059669,#0d9488);
+    }
+
+    .input-icon-price{
+        background:linear-gradient(135deg,#f59e0b,#ea580c);
+    }
+
+    .input-icon-hash{
+        background:linear-gradient(135deg,#334155,#0f172a);
+    }
+
+    /* input & select2 mengisi sisa ruang di sebelah kanan icon */
+    .input-group-modern > .form-control,
+    .input-group-modern > .select2-container{
+        flex:1 1 0%;
+        min-width:0;
+        width:auto !important;
     }
 
     .form-control{
@@ -208,12 +268,39 @@
 
     /* BUTTON */
     .btn-save{
-        background:linear-gradient(90deg,#1e293b,#334155);
+        background:linear-gradient(135deg,#1e293b,#334155);
         border:none;
-        border-radius:8px;
+        border-radius:10px;
         color:#fff;
-        padding:10px 24px;
+        padding:11px 26px;
         font-weight:600;
+        font-size:13.5px;
+        display:inline-flex;
+        align-items:center;
+        justify-content:center;
+        gap:8px;
+        box-shadow:0 8px 18px -10px rgba(15,23,42,.9);
+        transition:transform .2s ease, box-shadow .2s ease, opacity .2s ease;
+    }
+
+    .btn-save:hover:not(:disabled){
+        transform:translateY(-1px);
+        box-shadow:0 12px 22px -10px rgba(15,23,42,.95);
+    }
+
+    .btn-save:active:not(:disabled){
+        transform:translateY(0);
+    }
+
+    .btn-save:disabled{
+        opacity:.55;
+        cursor:not-allowed;
+        box-shadow:none;
+    }
+
+    .btn-save:focus-visible{
+        outline:3px solid rgba(79,70,229,.35);
+        outline-offset:2px;
     }
 
     .btn-prev-form{
@@ -237,6 +324,63 @@
     .btn-prev-form:hover,
     .btn-change-form:hover{
         opacity:.9;
+    }
+
+    /* Baris atas: "Show entries" kiri, search kanan - lurus satu baris.
+       Baris bawah: info kiri, pagination kanan. */
+    .dataTables_wrapper .dt-top{
+        display:flex;
+        align-items:center;
+        justify-content:space-between;
+        flex-wrap:wrap;
+        gap:10px 16px;
+        margin-bottom:18px;
+    }
+
+    .dataTables_wrapper .dt-bot{
+        display:flex;
+        align-items:center;
+        justify-content:space-between;
+        flex-wrap:wrap;
+        gap:10px 16px;
+        margin-top:14px;
+    }
+
+    .dataTables_wrapper .dt-top .dataTables_length,
+    .dataTables_wrapper .dt-top .dataTables_filter{
+        float:none;
+        margin:0;
+        padding-left:0;
+        padding-right:0;
+        text-align:left;
+        flex:0 0 auto;
+        width:auto !important;
+        max-width:100%;
+    }
+
+    .dataTables_wrapper .dt-top .dataTables_filter{
+        text-align:right;
+    }
+
+    .dataTables_wrapper .dt-top .dataTables_filter label{
+        display:inline-flex;
+        align-items:center;
+        margin:0;
+        padding:0;
+        float:none;
+        width:auto;
+        text-align:right;
+        line-height:1;
+    }
+
+    .dataTables_wrapper .dt-bot .dataTables_info{
+        padding-top:0;
+        margin:0;
+        flex:0 0 auto;
+    }
+
+    .dataTables_wrapper .dt-bot .dataTables_paginate{
+        margin-top:0;
     }
 
     /* DATATABLE */
@@ -314,7 +458,21 @@
     /* FORM LAYOUT */
     .input-group-modern .form-control{
         min-width:0;
-        flex:1 1 auto;
+        flex:1 1 0%;
+        width:auto;
+    }
+
+    /* nilai panjang di dalam input dipotong, bukan menabrak card */
+    .input-group-modern .form-control,
+    .item-row.purchase-card .item-inputs .form-control{
+        text-overflow:ellipsis;
+    }
+
+    /* kolom grid/form tidak boleh memaksa card melebar */
+    .item-row.purchase-card .item-inputs > *,
+    .item-row.purchase-card .item-inputs .input-group-modern{
+        min-width:0;
+        max-width:100%;
     }
 
     /* TABLE WRAPPER */
@@ -358,172 +516,32 @@
         padding-top:14px;
     }
 
-    @media (max-width:767.98px){
-        .dataTables_wrapper .dataTables_paginate,
-        .dataTables_wrapper .dataTables_paginate .pagination{
-            justify-content:center;
-        }
-
-        .dataTables_wrapper .dataTables_info{
-            text-align:center;
-        }
-    }
-
-    /* RESPONSIVE - TABLET & MOBILE */
-    @media (max-width:991.98px){
-        .section-card{
-            padding:18px;
-            border-radius:18px;
-        }
-
-        .panel-header{
-            flex-direction:column;
-            align-items:flex-start;
-            gap:14px;
-            padding:16px 18px;
-        }
-
-        .panel-left{
-            width:100%;
-        }
-
-        .panel-toggle-wrap{
-            width:100%;
-            justify-content:flex-start;
-            padding-top:12px;
-            border-top:1px solid rgba(255,255,255,.15);
-        }
-    }
-
-    @media (max-width:575.98px){
-        .section-card{
-            padding:14px;
-        }
-
-        .panel-icon{
-            width:48px;
-            height:48px;
-            font-size:18px;
-            border-radius:14px;
-        }
-
-        .panel-title{
-            font-size:15px;
-        }
-
-        .panel-subtitle{
-            font-size:12px;
-        }
-
-        .mt-5.px-4,
-        .mt-4.px-4{
-            padding-left:0 !important;
-            padding-right:0 !important;
-        }
-
-        .input-icon{
-            width:38px;
-            height:38px;
-        }
-
-        .btn-prev-form,
-        .btn-change-form,
-        .btn-save{
-            padding:10px 14px;
-            font-size:13px;
-        }
-
-        .d-flex.justify-content-end.gap-2{
-            flex-wrap:wrap;
-        }
-
-        .dataTables_filter input{
-            width:100% !important;
-        }
-
-        .dataTables_wrapper .dataTables_filter{
-            width:100%;
-        }
-    }
-
-    /* ===== SELECT2 - samakan dengan .form-control ===== */
-    .select2-container--default .select2-selection--single{
-        height:42px;
-        border:1px solid var(--border);
-        border-radius:8px;
-        font-size:14px;
-    }
-
-    .select2-container--default .select2-selection--single .select2-selection__rendered{
-        line-height:40px;
-        padding-left:12px;
-        color:var(--text);
-        font-size:14px;
-    }
-
-    .select2-container--default .select2-selection--single .select2-selection__arrow{
-        right:10px;
-    }
-
-    .select2-container--default .select2-selection--single .select2-selection__clear{
-        line-height:40px;
-        margin-right:20px;
-        color:var(--muted);
-    }
-
-    .select2-container--default .select2-selection--single .select2-selection__placeholder{
-        color:var(--muted);
-    }
-
-    .select2-container--default.select2-container--open .select2-selection--single,
-    .select2-container--default .select2-selection--single:hover,
-    .select2-container--default.select2-container--focus .select2-selection--single{
-        border-color:var(--primary);
-        box-shadow:0 0 0 3px rgba(30,41,59,.15);
-        outline:none;
-    }
-
-    .select2-container--default .select2-dropdown{
-        border:1px solid var(--border);
-        border-radius:8px;
-        box-shadow:0 8px 24px rgba(15,23,42,.12);
-    }
-
-    .select2-container--default .select2-search--dropdown .select2-search__field{
-        border:1px solid var(--border);
-        border-radius:8px;
-        padding:6px 10px;
-        font-size:14px;
-    }
-
-    .select2-container--default .select2-search--dropdown .select2-search__field:focus{
-        border-color:var(--primary);
-        box-shadow:0 0 0 3px rgba(30,41,59,.15);
-        outline:none;
-    }
-
-    .select2-container--default .select2-results__option--highlighted[aria-selected]{
-        background:var(--primary);
-    }
-
-    .select2-container--default .select2-results__option[aria-selected="true"]{
-        background:#e8edf5;
-        color:var(--text);
-    }
-
     /* ===== ITEM CARD (Form Pembelian & Edit) ===== */
     .item-row.purchase-card{
-        background:#f8fafc;
-        border:1px solid #eef2f7;
-        border-radius:14px;
-        padding:12px 14px;
-        margin-bottom:12px;
-        transition:box-shadow .2s ease,border-color .2s ease;
+        background:linear-gradient(180deg,#ffffff,#f8fafc);
+        border:1px solid #dbe4ef;
+        border-radius:16px;
+        padding:14px 16px;
+        margin-bottom:18px !important;
+        box-shadow:0 1px 2px rgba(15,23,42,.05), 0 10px 22px -18px rgba(15,23,42,.45);
+        position:relative;
+        overflow:hidden;
+        transition:box-shadow .2s ease,border-color .2s ease, transform .2s ease;
+    }
+
+    .item-row.purchase-card::before{
+        content:"";
+        position:absolute;
+        top:0;
+        left:0;
+        bottom:0;
+        width:3px;
+        background:linear-gradient(180deg,#6366f1,#0ea5e9);
     }
 
     .item-row.purchase-card:hover{
         border-color:#d7e1ee;
-        box-shadow:0 4px 14px rgba(15,23,42,.06);
+        box-shadow:0 8px 22px -12px rgba(15,23,42,.35);
     }
 
     .item-row.purchase-card .item-head{
@@ -620,8 +638,8 @@
 
     .item-row.purchase-card .item-inputs{
         display:grid;
-        grid-template-columns:repeat(3,1fr);
-        gap:10px;
+        grid-template-columns:1fr 1fr 1.2fr;
+        gap:12px;
     }
 
     .item-row.purchase-card .item-inputs .input-group-modern{
@@ -632,27 +650,523 @@
     .item-row.purchase-card .item-inputs .form-control{
         min-width:0;
     }
+    @media (max-width:767.98px){
+        .dataTables_wrapper .dataTables_paginate,
+        .dataTables_wrapper .dataTables_paginate .pagination{
+            justify-content:center;
+        }
+
+        .dataTables_wrapper .dataTables_info{
+            text-align:center;
+        }
+    }
+
+    /* RESPONSIVE - TABLET & MOBILE */
+    @media (max-width:991.98px){
+        .section-card{
+            padding:18px;
+            border-radius:18px;
+        }
+
+        .panel-header{
+            flex-direction:column;
+            align-items:flex-start;
+            gap:14px;
+            padding:16px 18px;
+        }
+
+        .panel-left{
+            width:100%;
+        }
+
+        .panel-toggle-wrap{
+            width:100%;
+            justify-content:flex-start;
+            padding-top:12px;
+            border-top:1px solid rgba(255,255,255,.15);
+        }
+    }
 
     @media (max-width:575.98px){
+        /* ===== PANEL: semua konten di dalam card, tidak boleh keluar ===== */
+        .section-card{
+            padding:0;
+            border-radius:22px;
+            overflow:hidden;
+            position:relative;
+        }
+
+        /* header jadi blok inset, seperti kartu list.php */
+        .section-card > .panel-header{
+            margin:12px 12px 0;
+            border-radius:18px;
+            padding:14px 16px;
+        }
+
+        /* body: jarak aman dari header panel */
+        .section-card > .mt-4.px-4{
+            padding:22px 16px 20px !important;
+            margin-top:0 !important;
+            background:#fff;
+            min-width:0;
+        }
+
+        .stock-body{
+            min-width:0;
+            width:100%;
+        }
+
+        .panel-mode{
+            min-width:0;
+        }
+
+        #itemsContainer{
+            min-width:0;
+        }
+
+        .panel-icon{
+            width:44px;
+            height:44px;
+            flex:0 0 44px;
+            font-size:17px;
+            border-radius:13px;
+        }
+
+        .panel-title{
+            font-size:14px;
+            line-height:1.25;
+        }
+
+        .panel-subtitle{
+            display:-webkit-box;
+            -webkit-line-clamp:2;
+            -webkit-box-orient:vertical;
+            overflow:hidden;
+            font-size:10.5px;
+            line-height:1.35;
+            margin-top:2px;
+        }
+
+        #editPurchaseModal .panel-subtitle{
+            -webkit-line-clamp:1;
+        }
+
+        /* ===== TOGGLE: segmented switch ===== */
+        .section-card > .panel-header .panel-toggle-wrap{
+            width:100%;
+            max-width:100%;
+            flex:0 0 auto;
+            justify-content:center;
+            gap:0;
+            padding:4px;
+            border-radius:14px;
+            background:rgba(255,255,255,.1);
+            border:1px solid rgba(255,255,255,.14);
+            border-top:none;
+        }
+
+        .panel-toggle-wrap .switch-toggle{
+            display:none;
+        }
+
+        .panel-toggle-wrap .toggle-label{
+            flex:1 1 0;
+            text-align:center;
+            padding:9px 12px;
+            border-radius:11px;
+            font-size:11.5px;
+            font-weight:700;
+            letter-spacing:.2px;
+            color:rgba(255,255,255,.65);
+            cursor:pointer;
+            user-select:none;
+            transition:.25s;
+        }
+
+        .panel-toggle-wrap .toggle-label.active{
+            color:#0f172a;
+            background:#fff;
+            box-shadow:0 4px 10px rgba(2,6,23,.35);
+        }
+
+        .section-title{
+            font-size:11px;
+            padding:6px 11px;
+            border-radius:9px;
+        }
+
+        /* ===== ITEM CARD: 2 kolom, icon-card tetap di kiri ===== */
+        .item-row.purchase-card{
+            padding:14px 14px 14px 16px;
+            border-radius:16px;
+            box-shadow:0 2px 10px -4px rgba(15,23,42,.22);
+        }
+
         .item-row.purchase-card .item-head{
             flex-wrap:wrap;
+            gap:8px;
+            margin-bottom:10px;
+        }
+
+        .item-row.purchase-card .item-index{
+            width:24px;
+            height:24px;
+            font-size:10px;
+            border-radius:8px;
         }
 
         .item-row.purchase-card .item-name{
+            flex:1 1 100%;
             width:100%;
             min-width:100%;
+            font-size:12.5px;
         }
 
         .item-row.purchase-card .item-plan{
             width:100%;
+            margin-left:0;
             justify-content:flex-start;
+            gap:5px;
         }
 
+        .item-row.purchase-card .plan-label{
+            font-size:9px;
+        }
+
+        .item-row.purchase-card .plan-chip{
+            font-size:10px;
+            padding:3px 8px;
+        }
+
+        /* qty & satuan berpasangan, harga melebar penuh */
         .item-row.purchase-card .item-inputs{
             grid-template-columns:1fr 1fr;
+            gap:10px;
         }
 
         .item-row.purchase-card .item-inputs .input-group-modern:last-child{
             grid-column:1 / -1;
         }
+
+        .item-row.purchase-card .input-icon{
+            flex:0 0 34px;
+            width:34px;
+            height:34px;
+            margin-right:8px;
+            font-size:12px;
+            border-radius:11px;
+        }
+
+        .item-row.purchase-card .form-control{
+            height:40px;
+            font-size:12.5px;
+        }
+
+        /* tombol simpan full width di mobile */
+        #form-stock > div:last-child{
+            display:flex;
+        }
+
+        .btn-save{
+            width:100%;
+            min-height:44px;
+            padding:10px 14px;
+            font-size:13px;
+        }
+
+        /* ===== SEARCH: gaya kartu ===== */
+        .dataTables_wrapper .dataTables_filter{
+            display:flex;
+            width:100%;
+            margin:0 0 10px;
+            padding:0;
+        }
+
+        .dataTables_wrapper .dataTables_filter label{
+            display:flex;
+            width:100%;
+            margin:0;
+            padding:0;
+        }
+
+        .dataTables_wrapper .dataTables_filter input{
+            width:100% !important;
+            height:40px;
+            margin:0;
+            border-radius:14px !important;
+            border:1px solid transparent !important;
+            background-color:#f1f5f9;
+            background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='M20.5 20.5l-4-4'/%3E%3C/svg%3E");
+            background-repeat:no-repeat;
+            background-position:13px center;
+            background-size:15px 15px;
+            padding:0 12px 0 35px !important;
+            font-size:12px;
+            color:#0f172a;
+            box-shadow:inset 0 1px 2px rgba(15,23,42,.04);
+            outline:none;
+            transition:background-color .2s, box-shadow .2s;
+        }
+
+        .dataTables_wrapper .dataTables_filter input::placeholder{
+            color:#94a3b8;
+        }
+
+        .dataTables_wrapper .dataTables_filter input:focus{
+            background-color:#fff;
+            box-shadow:
+                0 0 0 2px #fff,
+                0 0 0 4px rgba(99,102,241,.35),
+                0 10px 20px -10px rgba(79,70,229,.6);
+        }
+
+        /* ===== PAGINASI: di tengah, gaya kartu ===== */
+        .dataTables_wrapper .dataTables_paginate{
+            float:none;
+            display:flex;
+            flex-wrap:wrap;
+            justify-content:center;
+            align-items:center;
+            gap:5px;
+            margin:10px 0 12px;
+            padding:0;
+        }
+
+        .dataTables_wrapper .dataTables_paginate .pagination{
+            margin:0;
+            flex-wrap:wrap;
+            justify-content:center;
+            gap:5px;
+        }
+
+        .dataTables_wrapper .dataTables_paginate .page-item{
+            margin:0 !important;
+        }
+
+        .dataTables_wrapper .dataTables_paginate .page-link{
+            min-width:30px;
+            height:30px;
+            padding:0 8px;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            border-radius:10px !important;
+            font-size:11px;
+            font-weight:700;
+            color:#475569 !important;
+            background:#fff !important;
+            border:1px solid #e2e8f0 !important;
+            box-shadow:0 2px 6px rgba(15,23,42,.05) !important;
+            transition:transform .18s ease, box-shadow .18s ease;
+        }
+
+        .dataTables_wrapper .dataTables_paginate .page-link:hover{
+            transform:translateY(-1px);
+            box-shadow:0 6px 12px -6px rgba(15,23,42,.35) !important;
+        }
+
+        .dataTables_wrapper .dataTables_paginate .page-item.active .page-link{
+            color:#fff !important;
+            background:linear-gradient(135deg,#4f46e5,#6366f1) !important;
+            border-color:transparent !important;
+            box-shadow:0 8px 16px -7px rgba(79,70,229,.95) !important;
+        }
+
+        .dataTables_wrapper .dataTables_paginate .page-item.disabled .page-link{
+            color:#94a3b8 !important;
+            background:#f8fafc !important;
+        }
+
+        .dataTables_wrapper .dataTables_length,
+        .dataTables_wrapper .dataTables_info{
+            display:none;
+        }
+
+        /* ===== MODAL EDIT: kartu inset, snug di layar kecil ===== */
+        #editPurchaseModal .modal-dialog{
+            margin:10px;
+            max-width:none;
+        }
+
+        /* margin:auto, bukan align-items:center -> form panjang tetap bisa di-scroll
+           dari atas, tidak terpotong keluar container */
+        #editPurchaseModal .modal-dialog.modal-dialog-centered{
+            display:flex;
+            min-height:calc(100% - 20px);
+            max-height:calc(100vh - 20px);
+        }
+
+        #editPurchaseModal .modal-content{
+            margin:auto;
+            max-height:calc(100vh - 20px);
+            border-radius:18px !important;
+            border:1px solid rgba(15,23,42,.07);
+            overflow-y:auto !important;
+            overscroll-behavior:contain;
+        }
+
+        /* header tetap satu baris di mobile, walau tablet sudah column */
+        #editPurchaseModal .mp-add-header{
+            flex-direction:row !important;
+            flex-wrap:nowrap !important;
+            align-items:center !important;
+            gap:10px;
+            margin:10px 10px 0 !important;
+            padding:12px 14px;
+            border-radius:14px;
+            position:sticky;
+            top:10px;
+            z-index:5;
+        }
+
+        #editPurchaseModal .mp-add-header .panel-left{
+            gap:10px;
+            min-width:0;
+            flex:1 1 auto;
+            width:auto !important;
+            max-width:100%;
+        }
+
+        #editPurchaseModal .mp-add-header .panel-icon{
+            width:34px;
+            height:34px;
+            flex:0 0 34px;
+            font-size:13px;
+            border-radius:11px;
+        }
+
+        /* tombol close menempel kanan, tidak ikut terpotong */
+        #editPurchaseModal .mp-add-close{
+            flex:0 0 auto;
+            align-self:center;
+            margin:0 !important;
+            padding:5px;
+            border-radius:10px;
+            background-color:rgba(255,255,255,.14);
+            background-repeat:no-repeat;
+            background-size:1rem 1rem;
+            box-shadow:0 2px 8px rgba(2,6,23,.25);
+            opacity:1;
+        }
+
+        #editPurchaseModal .mp-add-body{
+            margin:0 !important;
+            padding:14px 16px 0 !important;
+        }
+
+        /* ruang bawah setelah tombol Save */
+        #editPurchaseModal .mp-add-footer{
+            position:sticky;
+            bottom:0;
+            z-index:5;
+            margin:14px 0 0;
+            /* safe-area lewat padding, bukan ::after flex-basis:100%
+               -- pseudo-element flex akan memeras tombol Save jadi 0 lebar */
+            padding:12px 0 calc(16px + env(safe-area-inset-bottom,0px));
+            border-top:1px solid #e2e8f0;
+            background:#fff;
+        }
+
+        #editPurchaseModal .mp-add-footer .btn-save{
+            flex:1 1 auto;
+            width:auto;
+            min-width:0;
+        }
     }
+
+    /* ===== SELECT2 - samakan dengan .form-control ===== */
+    .select2-container--default .select2-selection--single{
+        height:42px;
+        border:1px solid var(--border);
+        border-radius:8px;
+        font-size:14px;
+    }
+
+    .select2-container--default .select2-selection--single .select2-selection__rendered{
+        line-height:40px;
+        padding-left:12px;
+        color:var(--text);
+        font-size:14px;
+    }
+
+    .select2-container--default .select2-selection--single .select2-selection__arrow{
+        right:10px;
+    }
+
+    .select2-container--default .select2-selection--single .select2-selection__clear{
+        line-height:40px;
+        margin-right:20px;
+        color:var(--muted);
+    }
+
+    .select2-container--default .select2-selection--single .select2-selection__placeholder{
+        color:var(--muted);
+    }
+
+    .select2-container--default.select2-container--open .select2-selection--single,
+    .select2-container--default .select2-selection--single:hover,
+    .select2-container--default.select2-container--focus .select2-selection--single{
+        border-color:var(--primary);
+        box-shadow:0 0 0 3px rgba(30,41,59,.15);
+        outline:none;
+    }
+
+    .select2-container--default .select2-dropdown{
+        border:1px solid var(--border);
+        border-radius:8px;
+        box-shadow:0 8px 24px rgba(15,23,42,.12);
+    }
+
+    .select2-container--default .select2-search--dropdown .select2-search__field{
+        border:1px solid var(--border);
+        border-radius:8px;
+        padding:6px 10px;
+        font-size:14px;
+    }
+
+    .select2-container--default .select2-search--dropdown .select2-search__field:focus{
+        border-color:var(--primary);
+        box-shadow:0 0 0 3px rgba(30,41,59,.15);
+        outline:none;
+    }
+
+    .select2-container--default .select2-results__option--highlighted[aria-selected]{
+        background:var(--primary);
+    }
+
+    .select2-container--default .select2-results__option[aria-selected="true"]{
+        background:#e8edf5;
+        color:var(--text);
+    }
+
+    .mp-add-footer{
+        display:flex;
+        justify-content:flex-end;
+        gap:10px;
+        margin:18px 0 0;
+        /* ruang bawah setelah tombol Save di desktop & tablet.
+           nilai mobile tetap menang karena spesifisitasnya lebih tinggi */
+        padding-bottom:10px;
+    }
+
+    /* EMPTY / HINT */
+    .purchase-hint{
+        display:flex;
+        align-items:flex-start;
+        gap:10px;
+        padding:16px 18px;
+        border-radius:14px;
+        background:#f8fafc;
+        border:1px dashed #cbd5e1;
+        color:#64748b;
+        font-size:13.5px;
+        line-height:1.5;
+        margin-bottom:0;
+    }
+
+    .purchase-hint i{
+        margin-top:1px;
+        color:#94a3b8;
+        flex:0 0 auto;
+    }
+

@@ -7,12 +7,10 @@ SELECT
     purchases.form,
     purchases.date,
     purchases.created_at,
-    purchase_items.qty,
-    purchase_items.remaining_qty,
-    purchase_items.unit,
 
     GROUP_CONCAT(products.name SEPARATOR ', ') as products,
-    COUNT(CASE WHEN purchase_items.qty IS NOT NULL AND purchase_items.deleted_at IS NULL THEN 1 END) as total_item
+    COUNT(CASE WHEN purchase_items.qty IS NOT NULL AND purchase_items.deleted_at IS NULL THEN 1 END) as total_item,
+    COUNT(CASE WHEN purchase_items.deleted_at IS NULL AND purchase_items.remaining_qty < purchase_items.qty THEN 1 END) as used_item
 
 FROM purchases
 
@@ -34,6 +32,10 @@ WHERE purchases.deleted_at IS NULL
 GROUP BY purchases.id
 ORDER BY purchases.id DESC
 ");
+
+if(!$q){
+    die(mysqli_error($conn));
+}
 ?>
 
 <link rel="stylesheet" href="<?php echo BASE_URL; ?>/css/pages/purchase-table.css?v=<?php echo filemtime(__DIR__ . '/../../css/pages/purchase-table.css'); ?>">
@@ -50,6 +52,7 @@ ORDER BY purchases.id DESC
 
 <tbody>
 <?php while($d=mysqli_fetch_assoc($q)): ?>
+<?php $isUsed = ((int)$d['used_item'] > 0); ?>
 <tr class="purchase-row">
 
     <!-- ID -->
@@ -59,17 +62,29 @@ ORDER BY purchases.id DESC
                 <i class="fas fa-file-invoice"></i>
             </div>
 
-            <div>
-                <div class="fw-bold"><?= $d['form'] ?></div>
+            <div class="purchase-box-text">
+                <div class="fw-bold"><?= htmlspecialchars($d['form']) ?></div>
                 <small class="text-muted">
                     <i class="fas fa-receipt me-1"></i>Data Pembelian
                 </small>
+
+                <!-- ringkasan tambahan, hanya tampil di mobile -->
+                <div class="mp-meta">
+                    <span class="mp-meta-item">
+                        <i class="fas fa-calendar-alt"></i>
+                        <?= date('d M Y', strtotime($d['date'])) ?>
+                    </span>
+                    <span class="mp-meta-item">
+                        <i class="fas fa-boxes-stacked"></i>
+                        <?= (int)$d['total_item'] ?> item
+                    </span>
+                </div>
             </div>
         </div>
     </td>
 
     <!-- DATE -->
-    <td class="text-center">
+    <td class="text-center mp-hide">
         <span class="date-badge">
             <i class="fas fa-calendar-alt"></i>
             <?= date('d F Y', strtotime($d['date'])) ?>
@@ -77,7 +92,7 @@ ORDER BY purchases.id DESC
     </td>
 
     <!-- TOTAL ITEM -->
-    <td class="text-center">
+    <td class="text-center mp-hide">
         <span class="created-badge">
             <i class="fas fa-boxes-stacked"></i>
             <?= (int)$d['total_item'] ?> item
@@ -86,21 +101,24 @@ ORDER BY purchases.id DESC
 
     <!-- ACTION -->
     <td class="text-center">
+        <div class="mp-actions">
 
-        <?php if ($d['remaining_qty'] === $d['qty']): ?>
+            <?php if(!$isUsed): ?>
 
-        <button class="action-btn btn-edit editPurchaseBtn" data-id="<?= $d['id'] ?>">
-            <i class="fas fa-edit"></i>
-        </button>
+            <button class="action-btn btn-edit editPurchaseBtn" data-id="<?= (int)$d['id'] ?>">
+                <i class="fas fa-edit"></i>
+            </button>
 
-        <?php else: ?>
+            <?php else: ?>
 
-        <span class="text-muted">
-            <i class="fas fa-lock me-1"></i> Tidak dapat diubah
-        </span>
+            <span class="action-lock">
+                <i class="fas fa-lock"></i>
+                <span class="action-lock-text">Tidak dapat diubah</span>
+            </span>
 
-        <?php endif; ?>
-        
+            <?php endif; ?>
+
+        </div>
     </td>
 
 </tr>

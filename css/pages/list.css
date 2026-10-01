@@ -317,6 +317,63 @@
         opacity:.9;
     }
 
+    /* Baris atas: "Show entries" kiri, search kanan - lurus satu baris.
+       Baris bawah: info kiri, pagination kanan. */
+    .dataTables_wrapper .dt-top{
+        display:flex;
+        align-items:center;
+        justify-content:space-between;
+        flex-wrap:wrap;
+        gap:10px 16px;
+        margin-bottom:18px;
+    }
+
+    .dataTables_wrapper .dt-bot{
+        display:flex;
+        align-items:center;
+        justify-content:space-between;
+        flex-wrap:wrap;
+        gap:10px 16px;
+        margin-top:14px;
+    }
+
+    .dataTables_wrapper .dt-top .dataTables_length,
+    .dataTables_wrapper .dt-top .dataTables_filter{
+        float:none;
+        margin:0;
+        padding-left:0;
+        padding-right:0;
+        text-align:left;
+        flex:0 0 auto;
+        width:auto !important;
+        max-width:100%;
+    }
+
+    .dataTables_wrapper .dt-top .dataTables_filter{
+        text-align:right;
+    }
+
+    .dataTables_wrapper .dt-top .dataTables_filter label{
+        display:inline-flex;
+        align-items:center;
+        margin:0;
+        padding:0;
+        float:none;
+        width:auto;
+        text-align:right;
+        line-height:1;
+    }
+
+    .dataTables_wrapper .dt-bot .dataTables_info{
+        padding-top:0;
+        margin:0;
+        flex:0 0 auto;
+    }
+
+    .dataTables_wrapper .dt-bot .dataTables_paginate{
+        margin-top:0;
+    }
+
     /* DATATABLE */
     .dataTables_filter input{
         border-radius:8px !important;

@@ -37,7 +37,7 @@ while($d = mysqli_fetch_assoc($q)){
     <div class="row mb-3">
         <div class="col-md-12">
             <div class="input-group-modern">
-                <div class="input-icon">
+                <div class="input-icon input-icon-hash">
                     <i class="fas fa-hashtag"></i>
                 </div>
                 <input type="text" class="form-control fw-bold" value="<?= $f ? htmlspecialchars($f['form']) : 'FORM-' . str_pad($id,7,'0',STR_PAD_LEFT) ?>" readonly>
@@ -45,7 +45,10 @@ while($d = mysqli_fetch_assoc($q)){
         </div>
     </div>
 
-    <div class="section-title">Detail Item Pembelian</div>
+    <div class="section-title">
+        <i class="fas fa-list-check"></i>
+        Detail Item Pembelian
+    </div>
 
     <?php if(empty($items)): ?>
 
@@ -87,7 +90,7 @@ while($d = mysqli_fetch_assoc($q)){
         <!-- INPUTS -->
         <div class="item-inputs">
             <div class="input-group-modern">
-                <div class="input-icon">
+                <div class="input-icon input-icon-qty">
                     <i class="fas fa-cubes"></i>
                 </div>
                 <input type="number"
@@ -100,7 +103,7 @@ while($d = mysqli_fetch_assoc($q)){
             </div>
 
             <div class="input-group-modern">
-                <div class="input-icon">
+                <div class="input-icon input-icon-unit">
                     <i class="fas fa-balance-scale"></i>
                 </div>
                 <input type="text"
@@ -110,7 +113,7 @@ while($d = mysqli_fetch_assoc($q)){
             </div>
 
             <div class="input-group-modern">
-                <div class="input-icon">
+                <div class="input-icon input-icon-price">
                     <i class="fas fa-wallet"></i>
                 </div>
                 <input type="number"
@@ -129,9 +132,9 @@ while($d = mysqli_fetch_assoc($q)){
 
     <?php endif; ?>
 
-    <div class="text-end mt-4 mb-3">
+    <div class="mp-add-footer">
         <button type="submit" class="btn-save">
-            <i class="fas fa-save me-1"></i> Update
+            <i class="fas fa-save"></i> Save
         </button>
     </div>
 
