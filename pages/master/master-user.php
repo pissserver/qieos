@@ -9,6 +9,7 @@ include '../../sessions/session.php';
     <title>Master User - Qieos</title>
     <?php include '../../script/headscript.php'; ?>
 
+    <link rel="stylesheet" href="<?php echo BASE_URL; ?>/css/pages/master-product.css?v=<?php echo filemtime(__DIR__ . '/../../css/pages/master-product.css'); ?>">
     <link rel="stylesheet" href="<?php echo BASE_URL; ?>/css/pages/master-user.css?v=<?php echo filemtime(__DIR__ . '/../../css/pages/master-user.css'); ?>">
 </head>
 
@@ -87,13 +88,13 @@ include '../../sessions/session.php';
     <div class="modal-dialog modal-xl modal-dialog-centered">
         <div class="modal-content stock-panel border-0">
 
-            <div class="panel-header panel-dark my-3 mx-3">
+            <div class="panel-header panel-dark my-3 mx-3 mp-add-header">
                 <div class="panel-left">
                     <div class="panel-icon">
                         <i class="fas fa-user-plus"></i>
                     </div>
 
-                    <div>
+                    <div class="mp-add-head-text">
                         <div class="panel-title">
                             Tambah User
                         </div>
@@ -103,10 +104,10 @@ include '../../sessions/session.php';
                     </div>
                 </div>
 
-                <button class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                <button class="btn-close btn-close-white mp-add-close" data-bs-dismiss="modal"></button>
             </div>
 
-            <div class="mt-2 px-5" id="addUserContent"></div>
+            <div class="mt-2 px-5 mp-add-body" id="addUserContent"></div>
         </div>
     </div>
 </div>
@@ -116,13 +117,13 @@ include '../../sessions/session.php';
     <div class="modal-dialog modal-xl modal-dialog-centered">
         <div class="modal-content stock-panel border-0">
 
-            <div class="panel-header panel-dark my-3 mx-3">
+            <div class="panel-header panel-dark my-3 mx-3 mp-add-header">
                 <div class="panel-left">
                     <div class="panel-icon">
                         <i class="fas fa-user-pen"></i>
                     </div>
 
-                    <div>
+                    <div class="mp-add-head-text">
                         <div class="panel-title">
                             Edit User
                         </div>
@@ -132,10 +133,10 @@ include '../../sessions/session.php';
                     </div>
                 </div>
 
-                <button class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                <button class="btn-close btn-close-white mp-add-close" data-bs-dismiss="modal"></button>
             </div>
 
-            <div class="mt-2 px-5" id="editUserContent"></div>
+            <div class="mt-2 px-5 mp-add-body" id="editUserContent"></div>
         </div>
     </div>
 </div>

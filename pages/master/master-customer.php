@@ -41,17 +41,17 @@
     <div class="modal fade" id="addCustomerModal" tabindex="-1">
         <div class="modal-dialog modal-xl modal-dialog-centered">
             <div class="modal-content stock-panel border-0">
-                <div class="panel-header panel-dark my-3 mx-3">
+                <div class="panel-header panel-dark my-3 mx-3 mp-add-header">
                     <div class="panel-left">
                         <div class="panel-icon"><i class="fas fa-plus"></i></div>
-                        <div>
+                        <div class="mp-add-head-text">
                             <div class="panel-title">Tambah Customer</div>
                             <div class="panel-subtitle">Tambah nama dan nomor telepon customer</div>
                         </div>
                     </div>
-                    <button class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    <button class="btn-close btn-close-white mp-add-close" data-bs-dismiss="modal"></button>
                 </div>
-                <div class="mt-2 px-5" id="addCustomerContent"></div>
+                <div class="mt-2 px-5 mp-add-body" id="addCustomerContent"></div>
             </div>
         </div>
     </div>
@@ -60,17 +60,17 @@
     <div class="modal fade" id="editCustomerModal" tabindex="-1">
         <div class="modal-dialog modal-xl modal-dialog-centered">
             <div class="modal-content stock-panel border-0">
-                <div class="panel-header panel-dark my-3 mx-3">
+                <div class="panel-header panel-dark my-3 mx-3 mp-add-header">
                     <div class="panel-left">
                         <div class="panel-icon"><i class="fas fa-edit"></i></div>
-                        <div>
+                        <div class="mp-add-head-text">
                             <div class="panel-title">Edit Customer</div>
                             <div class="panel-subtitle">Ubah informasi customer</div>
                         </div>
                     </div>
-                    <button class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    <button class="btn-close btn-close-white mp-add-close" data-bs-dismiss="modal"></button>
                 </div>
-                <div class="mt-2 px-5" id="editCustomerContent"></div>
+                <div class="mt-2 px-5 mp-add-body" id="editCustomerContent"></div>
             </div>
         </div>
     </div>

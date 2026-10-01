@@ -54,17 +54,17 @@ include '../../sessions/session.php';
     <div class="modal fade" id="addSupplierModal" tabindex="-1">
         <div class="modal-dialog modal-xl modal-dialog-centered">
             <div class="modal-content stock-panel border-0">
-                <div class="panel-header panel-dark my-3 mx-3">
+                <div class="panel-header panel-dark my-3 mx-3 mp-add-header">
                     <div class="panel-left">
                         <div class="panel-icon"><i class="fas fa-plus"></i></div>
-                        <div>
+                        <div class="mp-add-head-text">
                             <div class="panel-title">Tambah Supplier</div>
                             <div class="panel-subtitle">Tambah nama, telepon, dan alamat supplier</div>
                         </div>
                     </div>
-                    <button class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    <button class="btn-close btn-close-white mp-add-close" data-bs-dismiss="modal"></button>
                 </div>
-                <div class="mt-2 px-5" id="addSupplierContent"></div>
+                <div class="mt-2 px-5 mp-add-body" id="addSupplierContent"></div>
             </div>
         </div>
     </div>
@@ -73,17 +73,17 @@ include '../../sessions/session.php';
     <div class="modal fade" id="editSupplierModal" tabindex="-1">
         <div class="modal-dialog modal-xl modal-dialog-centered">
             <div class="modal-content stock-panel border-0">
-                <div class="panel-header panel-dark my-3 mx-3">
+                <div class="panel-header panel-dark my-3 mx-3 mp-add-header">
                     <div class="panel-left">
                         <div class="panel-icon"><i class="fas fa-edit"></i></div>
-                        <div>
+                        <div class="mp-add-head-text">
                             <div class="panel-title">Edit Supplier</div>
                             <div class="panel-subtitle">Ubah informasi supplier</div>
                         </div>
                     </div>
-                    <button class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    <button class="btn-close btn-close-white mp-add-close" data-bs-dismiss="modal"></button>
                 </div>
-                <div class="mt-2 px-5" id="editSupplierContent"></div>
+                <div class="mt-2 px-5 mp-add-body" id="editSupplierContent"></div>
             </div>
         </div>
     </div>

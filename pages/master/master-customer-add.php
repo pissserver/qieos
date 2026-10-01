@@ -15,7 +15,7 @@
             </div>
         </div>
     </div>
-    <div class="text-end mt-4 mb-3">
-        <button type="submit" class="btn-save"><i class="fas fa-plus me-1"></i> Tambah Customer</button>
+    <div class="mp-add-footer">
+        <button type="submit" class="btn-save"><i class="fas fa-save"></i> Save</button>
     </div>
 </form>
