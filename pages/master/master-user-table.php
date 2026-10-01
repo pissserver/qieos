@@ -68,7 +68,7 @@ $count_cashier = $q_cashier ? (int)mysqli_fetch_assoc($q_cashier)['c'] : 0;
 
                     <div class="mp-meta">
                         <small class="text-muted text-capitalize">
-                            <?= htmlspecialchars($d['username']) ?>
+                            <i class="fas fa-at me-1"></i><?= htmlspecialchars($d['username']) ?>
                         </small>
                     </div>
                 </div>

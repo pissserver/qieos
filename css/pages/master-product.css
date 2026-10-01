@@ -1412,11 +1412,11 @@ textarea.form-control {
         overflow-wrap: anywhere;
     }
 
-    /* pemisah antar meta (mis. telepon • alamat) */
-    #supplierTableContainer .mp-meta .mp-meta-sep::before {
-        content: "•";
-        margin-right: 6px;
-        color: #cbd5e1;
+    /* meta bertumpuk (mis. telepon di atas alamat) */
+    #supplierTableContainer .mp-meta.mp-meta-col {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 2px;
     }
 
     #productTableContainer .mp-cat-inline {

@@ -22,9 +22,9 @@ include '../../sessions/session.php';
                 </div>
                 <div>
                     <div class="fw-bold"><?= htmlspecialchars($d['name']) ?></div>
-                    <div class="mp-meta">
-                        <small class="text-muted"><?= htmlspecialchars($d['phone'] ?: '-') ?></small>
-                        <small class="text-muted mp-meta-sep"><?= htmlspecialchars($d['address'] ?: '-') ?></small>
+                    <div class="mp-meta mp-meta-col">
+                        <small class="text-muted"><i class="fas fa-phone me-1"></i><?= htmlspecialchars($d['phone'] ?: '-') ?></small>
+                        <small class="text-muted"><i class="fas fa-location-dot me-1"></i><?= htmlspecialchars($d['address'] ?: '-') ?></small>
                     </div>
                 </div>
             </div>
