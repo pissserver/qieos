@@ -170,10 +170,10 @@ $lowStockDefault = get_low_stock_default($conn);
 
     </div>
 
-    <div class="text-end mt-4 mb-3">
+    <div class="mp-add-footer">
         <button type="submit" class="btn-save">
-            <i class="fas fa-plus me-1"></i>
-            Tambah Produk
+            <i class="fas fa-save"></i>
+            Save
         </button>
     </div>
 

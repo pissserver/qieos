@@ -41,18 +41,29 @@ include '../../sessions/session.php';
                     <div class="fw-bold">
                         <?= htmlspecialchars($d['name']) ?>
                     </div>
+
+                    <!-- MOBILE: kode + kategori inline, kolomnya disembunyikan di HP -->
+                    <div class="mp-meta">
+                        <small class="text-muted">
+                            <?= htmlspecialchars($d['code']) ?>
+                        </small>
+
+                        <span class="mp-cat-inline mp-cat-<?= strtolower(htmlspecialchars($d['category'])) ?>">
+                            <?= ucwords(strtolower(htmlspecialchars($d['category']))) ?>
+                        </span>
+                    </div>
                 </div>
 
             </div>
         </td>
 
-        <td class="text-center">
+        <td class="text-center mp-col-kode">
             <span class="unit-badge">
                 <?= htmlspecialchars($d['code']) ?>
             </span>
         </td>
 
-        <td class="text-center">
+        <td class="text-center mp-col-kat">
             <span class="stock-badge stock-success">
                 <?= ucwords(strtolower(htmlspecialchars($d['category']))) ?>
             </span>

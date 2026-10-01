@@ -445,6 +445,16 @@
     font-weight: 800;
 }
 
+.combine-count::before {
+    content: '';
+    display: inline-block;
+    width: 1px;
+    height: 12px;
+    background: linear-gradient(180deg, transparent, #c7d2fe, transparent);
+    margin-right: 10px;
+    vertical-align: middle;
+}
+
 /* --- Sticky bar total harga --- */
 .combine-sticky-total {
     display: flex;
@@ -485,18 +495,112 @@
 }
 
 /* --- Responsive --- */
-@media (max-width: 767.98px) {
+@media (max-width: 575.98px) {
     /* breathing room under the last panel on phones */
     .master-product-last-row { margin-bottom: 28px; }
+
+    /* Padding konten disamakan dengan header: 12px */
+    #combineModal .combine-modal-body {
+        padding-left: 12px !important;
+        padding-right: 12px !important;
+    }
+
+    /* Header: margin + padding minimal, close button inline kanan */
+    #combineModal .panel-header {
+        flex-direction: row !important;
+        flex-wrap: nowrap !important;
+        align-items: center !important;
+        gap: 10px;
+        margin: 12px 12px 0 !important;
+        padding: 12px 14px;
+    }
+    #combineModal .panel-left {
+        min-width: 0;
+        flex: 1;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    #combineModal .combine-head-text {
+        flex: 1;
+        min-width: 0;
+    }
+    #combineModal .panel-icon {
+        width: 38px;
+        height: 38px;
+        font-size: 14px;
+        flex-shrink: 0;
+    }
+    #combineModal .panel-title {
+        font-size: 14.5px;
+        line-height: 1.25;
+    }
+    #combineModal .combine-modal-subtitle {
+        font-size: 10.5px;
+        line-height: 1.35;
+        margin-top: 2px;
+    }
+    #combineModal .combine-modal-close {
+        flex-shrink: 0;
+        width: 28px;
+        height: 28px;
+        font-size: 11px;
+        margin: 0;
+        align-self: center;
+    }
+
+    /* Row produk: harga dan button silang inline di satu baris */
+    .combine-item-row {
+        flex-wrap: nowrap;
+        gap: 8px;
+        padding: 8px;
+    }
+    .combine-item-row .select2-container {
+        flex: 1 1 auto;
+        min-width: 0;
+    }
+    .cb-row-price {
+        flex-shrink: 0;
+        min-width: 70px;
+        font-size: 12.5px;
+        text-align: right;
+    }
+    .cb-row-remove {
+        flex-shrink: 0;
+        width: 30px;
+        height: 30px;
+        font-size: 11px;
+    }
+
+    /* Footer: Batal/Simpan flex full + padding bottom */
+    #combineModal .combine-footer {
+        display: flex;
+        gap: 8px;
+        margin-top: 14px;
+        padding-bottom: 16px;
+        text-align: center;
+    }
+    #combineModal .combine-footer .btn {
+        flex: 1 1 0;
+        height: 46px;
+        font-size: 13.5px;
+        font-weight: 700;
+        border-radius: 12px;
+        margin: 0;
+    }
+    #combineModal .combine-footer .btn i {
+        font-size: 12px;
+    }
 
     .combine-grid { grid-template-columns: 1fr; gap: 14px; }
     .combine-card { padding: 15px; border-radius: 18px; }
     .combine-total-price { font-size: 15.5px; }
     .combine-sticky-total { flex-wrap: wrap; }
     .combine-sticky-value { width: 100%; text-align: center; }
-    .combine-item-row { padding: 10px 8px; }
-    .combine-item-row select.form-input { flex: 1 1 100%; }
-    .combine-item-row .select2-container { flex: 1 1 100%; }
-    .cb-qty-input { width: 100% !important; flex: 1; }
-    .cb-row-price { flex: 0 1 auto; }
+}
+
+/* --- Tablet & desktop: modal tinggal dibiarkan --- */
+@media (min-width: 576px) {
+    .combine-grid { grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); }
+    .combine-card { padding: 18px 18px 16px; border-radius: 20px; }
 }

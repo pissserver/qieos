@@ -81,10 +81,10 @@ $editJson = $editCombo ? json_encode($editCombo) : 'null';
     <div class="combine-sticky-value" id="combineTotalVal">Rp 0</div>
 </div>
 
-<div class="text-end mt-3 mb-2">
+<div class="text-end mt-3 mb-2 combine-footer">
     <button type="button" class="btn btn-cancel me-2" data-bs-dismiss="modal">Batal</button>
     <button type="submit" class="btn btn-save">
-        <i class="fas fa-save me-1"></i> Simpan Racikan
+        <i class="fas fa-save me-1"></i> Save
     </button>
 </div>
 

@@ -727,21 +727,10 @@ document.getElementById('btnAddSupplier').addEventListener('click', function(){
     if(row){
         try { row.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
         catch(e){}
+        /* Dropdown sengaja TIDAK dibuka di sini. User baru melihat daftar
+           supplier setelah klik field select-nya sendiri. */
         var sel = row.querySelector('select');
-        if(sel){
-            if(isSupplierSelect2(sel)){
-                // dibuka di tick berikutnya, bukan di tengah handler click:
-                // select2.open() yang dipanggil tepat setelah init() bisa
-                // melempar error internal di 4.1.0-rc.0
-                setTimeout(function(){
-                    if(!isSupplierSelect2(sel)) return;
-                    try{ $(sel).select2('open'); }catch(err){}
-                }, 0);
-            }
-            else {
-                sel.focus();
-            }
-        }
+        if(sel && !isSupplierSelect2(sel)) sel.focus();
     }
 });
 

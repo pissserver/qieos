@@ -117,13 +117,13 @@ include __DIR__ . '/../components/data/stock-status.php';
         <div class="modal-dialog modal-xl modal-dialog-centered">
             <div class="modal-content stock-panel border-0">
 
-                <div class="panel-header panel-dark my-3 mx-3">
+                <div class="panel-header panel-dark my-3 mx-3 mp-add-header">
                     <div class="panel-left">
                         <div class="panel-icon">
                             <i class="fas fa-plus"></i>
                         </div>
 
-                        <div>
+                        <div class="mp-add-head-text">
                             <div class="panel-title">
                                 Tambah Produk
                             </div>
@@ -133,10 +133,10 @@ include __DIR__ . '/../components/data/stock-status.php';
                         </div>
                     </div>
 
-                    <button class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    <button class="btn-close btn-close-white mp-add-close" data-bs-dismiss="modal"></button>
                 </div>
 
-                <div class="mt-2 px-5" id="addProductContent"></div>
+                <div class="mt-2 px-5 mp-add-body" id="addProductContent"></div>
             </div>
         </div>
     </div>
@@ -152,20 +152,20 @@ include __DIR__ . '/../components/data/stock-status.php';
                             <i class="fas fa-blender"></i>
                         </div>
 
-                        <div>
+                        <div class="combine-head-text">
                             <div class="panel-title" id="combineModalTitle">
                                 Tambah Racikan
                             </div>
-                            <div class="panel-subtitle">
-                                Nama paket + pilih produk bahan, total harga dihitung otomatis
+                            <div class="panel-subtitle combine-modal-subtitle">
+                                Nama paket + pilih produk bahan
                             </div>
                         </div>
                     </div>
 
-                    <button class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Tutup"></button>
+                    <button class="btn-close btn-close-white combine-modal-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
                 </div>
 
-                <div class="mt-2 px-5" id="combineFormContent"></div>
+                <div class="mt-2 px-5 combine-modal-body" id="combineFormContent"></div>
             </div>
         </div>
     </div>
@@ -230,8 +230,91 @@ include __DIR__ . '/../components/data/stock-status.php';
 <?php include '../../script/footscript.php'; ?>
 
 <script>
+    const PRODUCT_MOBILE_BP = 575.98;
+
+    function isProductMobile(){
+        return window.innerWidth <= PRODUCT_MOBILE_BP;
+    }
+
+    let productIsMobile = isProductMobile();
+
+    /* Tombol "Tambah Produk" & search dimasukkin ke wrapper yang sama.
+       Dipanggil ulang setelah setiap init karena wrapper ikut hilang
+       saat DataTable di-destroy. */
+    function placeProductActions(){
+        const filter = $('#stockTable_filter');
+        if(!filter.length) return;
+
+        if(!filter.parent().hasClass('table-action-wrapper')){
+            filter.wrap('<div class="table-action-wrapper"></div>');
+        }
+
+        $('#btnContainer').show().appendTo(filter.parent());
+    }
+
+    function productDataTable(){
+        const mobile = isProductMobile();
+
+        const options = {
+            pageLength: mobile ? 4 : 5,
+            lengthMenu: mobile
+                ? [[4,5,10,25,50],[4,5,10,25,50]]
+                : [[5,10,25,50],[5,10,25,50]],
+
+            /* pager disamakan dengan tabel Stok Kantin (simple_numbers) */
+            pagingType: mobile ? "simple_numbers" : "full_numbers",
+            searchDelay: 250,
+
+            responsive: true,
+            autoWidth: false,
+            language:{
+                search:"",
+                searchPlaceholder:"Cari produk...",
+
+                zeroRecords: `
+                    <div class="empty-search">
+                        <img src="../../assets/img/illustrations/empty-data.png" class="empty-img">
+                        <div class="empty-title">Produk tidak ditemukan</div>
+                        <div class="empty-sub">
+                            Coba gunakan kata kunci lain
+                        </div>
+                    </div>
+                `,
+
+                emptyTable: `
+                    <div class="empty-search">
+                        <img src="../../assets/img/illustrations/empty-data.png" class="empty-img">
+                        <div class="empty-title">Belum ada data produk</div>
+                        <div class="empty-sub">
+                            Silakan tambahkan produk terlebih dahulu
+                        </div>
+                    </div>
+                `
+            },
+
+            order: []
+        };
+
+        /* "dom" HANYA di-set untuk mobile. Di desktop/tablet default
+           DataTables Bootstrap 5-lah yang dipakai:
+           "<'row'<'col-sm-12 col-md-6'l><'col-sm-12 col-md-6'f>><'row...>"
+           Wrapper row/col itu yang menaruh "Show entries" (l) dan
+           search + tombol (f) dalam satu baris. Kalau "dom" di-set
+           manual, wrapper tersebut hilang dan search/tombol turun ke
+           baris sendiri. */
+        if(mobile) options.dom = "ftp";
+
+        const dt = $('#stockTable').DataTable(options);
+
+        dt.columns.adjust();
+        placeProductActions();
+
+        return dt;
+    }
+
     function loadProductTable(){
         $('#btnContainer').hide().insertBefore('#productTableContainer');
+
         fetch('master-product-table.php')
         .then(res => res.text())
         .then(html => {
@@ -244,48 +327,33 @@ include __DIR__ . '/../components/data/stock-status.php';
 
             // Reinit DataTable
             setTimeout(()=>{
-            $('#stockTable').DataTable({
-                pageLength: 5,
-                lengthMenu:[[5,10,25,50],[5,10,25,50]],
-                responsive: true,
-                autoWidth: false,
-                language:{
-                    search:"",
-                    searchPlaceholder:"Cari produk...",
-
-                    zeroRecords: `
-                        <div class="empty-search">
-                            <img src="../../assets/img/illustrations/empty-data.png" class="empty-img">
-                            <div class="empty-title">Produk tidak ditemukan</div>
-                            <div class="empty-sub">
-                                Coba gunakan kata kunci lain
-                            </div>
-                        </div>
-                    `,
-
-                    emptyTable: `
-                        <div class="empty-search">
-                            <img src="../../assets/img/illustrations/empty-data.png" class="empty-img">
-                            <div class="empty-title">Belum ada data produk</div>
-                            <div class="empty-sub">
-                                Silakan tambahkan produk terlebih dahulu
-                            </div>
-                        </div>
-                    `
-                }
-            });
-
-            // Buat wrapper untuk search + button
-            $('#stockTable_filter')
-                .wrap('<div class="table-action-wrapper"></div>');
-
-            // Pindahkan tombol ke wrapper
-            $('#btnContainer')
-                .show()
-                .appendTo('.table-action-wrapper');
+                productIsMobile = isProductMobile();
+                productDataTable();
             },100);
         });
     }
+
+    /* 🔥 REBUILD TABEL KETIKA GANTI MOBILE / DESKTOP */
+    let productResizeTimer;
+    window.addEventListener('resize', function(){
+        clearTimeout(productResizeTimer);
+        productResizeTimer = setTimeout(function(){
+            if(isProductMobile() === productIsMobile) return;
+            if(!$.fn.DataTable.isDataTable('#stockTable')) return;
+
+            const current = $('#stockTable').DataTable();
+            const page = current.page();
+            const keyword = current.search();
+
+            // tombol dikeluarkan dulu supaya tidak ikut hilang bersama wrapper
+            $('#btnContainer').appendTo('#productTableContainer');
+            current.destroy();
+
+            productIsMobile = isProductMobile();
+            const dt = productDataTable();
+            dt.search(keyword).page(page).draw(false);
+        }, 250);
+    });
 
     $(document).ready(function(){
         loadProductTable();
@@ -324,6 +392,18 @@ include __DIR__ . '/../components/data/stock-status.php';
         });
 
     });
+
+    // Bootstrap modal enforceFocus block input di luar modal body. Select2
+    // search field di mobile (dropdownParent = body) harus di-allow.
+    // Capture: true supaya handler ini jalan SEBELUM handler Bootstrap.
+    document.addEventListener('focusin', function(e){
+        if(e.target.closest && e.target.closest('.select2-search__field')){
+            e.stopImmediatePropagation();
+            e.stopPropagation();
+        }
+    }, true);
+
+    //php:placeholder
 
     // Kategori "Additional" di form tambah: sembunyikan satuan, batas stok & supplier
     function initAddCategoryToggle(){
@@ -395,6 +475,10 @@ include __DIR__ . '/../components/data/stock-status.php';
     // ===== MULTI SUPPLIER (sama seperti halaman detail) =====
     let ADD_SUPPLIER_STATE = { fields:null, template:null, list:[] };
 
+    function ADD_SUPPLIER_MOBILE(){
+        return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    }
+
     // ===== SELECT2 UNTUK PICK SUPPLIER =====
     // Opsi <select> asli tetap jadi sumber data (dibaca .value saat submit),
     // select2 hanya mengganti tampilannya jadi bisa diketik & dicari.
@@ -403,8 +487,12 @@ include __DIR__ . '/../components/data/stock-status.php';
             width: '100%',
             placeholder: 'Cari / pilih supplier...',
             allowClear: true,
-            // dropdown tetap di dalam modal supaya tidak ketimpa modal lain
-            dropdownParent: $('#addProductModal'),
+            // Mobile: dropdown harus nempel di <body>. Dropdown yang parent-nya
+            // modal di-append di dalam .modal-dialog, yang punya overflow, jadi
+            // search field-nya.zero-height dan tidak bisa diketik.
+            dropdownParent: $('#addProductModal').length && !ADD_SUPPLIER_MOBILE()
+                ? $('#addProductModal')
+                : document.body,
             language: {
                 noResults: function(){ return 'Supplier tidak ditemukan'; },
                 searching: function(){ return 'Mencari...' },
@@ -412,6 +500,8 @@ include __DIR__ . '/../components/data/stock-status.php';
             }
         };
     }
+
+    //php:placeholder
 
     function isAddSupplierSelect2(sel){
         return !!($.fn.select2) && $(sel).hasClass('select2-hidden-accessible');
@@ -432,7 +522,17 @@ include __DIR__ . '/../components/data/stock-status.php';
         if(!$.fn.select2 || !ADD_SUPPLIER_STATE.fields) return;
         ADD_SUPPLIER_STATE.fields.querySelectorAll('select').forEach(sel=>{
             if(isAddSupplierSelect2(sel)) return;
-            $(sel).select2(addSupplierSelect2Config());
+            var cfg = addSupplierSelect2Config();
+            $(sel).select2(cfg);
+            // Mobile: prevent native select dari override select2
+            if(ADD_SUPPLIER_MOBILE()){
+                $(sel).on('mousedown touchstart', function(e){
+                    if($(this).hasClass('select2-hidden-accessible')){
+                        e.preventDefault();
+                        $(this).select2('open');
+                    }
+                });
+            }
         });
     }
 
@@ -544,20 +644,13 @@ include __DIR__ . '/../components/data/stock-status.php';
         if(!ADD_SUPPLIER_STATE.fields || !ADD_SUPPLIER_STATE.template) return;
         ADD_SUPPLIER_STATE.fields.appendChild(ADD_SUPPLIER_STATE.template.content.cloneNode(true));
         refreshAddSupplierRows();
+        /* Dropdown sengaja TIDAK dibuka di sini. User baru melihat daftar
+           supplier setelah klik field select-nya sendiri. */
         const rows = ADD_SUPPLIER_STATE.fields.querySelectorAll('.supplier-field-row');
         const last = rows[rows.length - 1];
         if(last){
             const sel = last.querySelector('select');
-            if(isAddSupplierSelect2(sel)){
-                // dibuka di tick berikutnya, bukan di tengah handler click:
-                // select2.open() yang dipanggil tepat setelah init() bisa
-                // melempar error internal di 4.1.0-rc.0
-                setTimeout(function(){
-                    if(!isAddSupplierSelect2(sel)) return;
-                    try{ $(sel).select2('open'); }catch(err){}
-                }, 0);
-            }
-            else if(sel) sel.focus();
+            if(sel && !isAddSupplierSelect2(sel)) sel.focus();
         }
     });
 
