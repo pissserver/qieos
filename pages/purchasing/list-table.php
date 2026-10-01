@@ -47,17 +47,36 @@ $q = mysqli_query($conn,"
                 <i class="fas fa-file-invoice"></i>
             </div>
 
-            <div>
+            <div class="purchase-box-text">
                 <div class="fw-bold"><?= htmlspecialchars($d['form']) ?></div>
                 <small class="text-muted">
                     <i class="fas fa-receipt me-1"></i>Daftar Belanja
                 </small>
+
+                <!-- ringkasan tambahan, hanya tampil di mobile -->
+                <div class="mp-meta">
+                    <span class="mp-meta-item">
+                        <i class="fas fa-calendar-alt"></i>
+                        <?= date('d M Y', strtotime($d['date'])) ?>
+                    </span>
+                    <span class="mp-meta-item">
+                        <i class="fas fa-box"></i>
+                        <?= $d['total_items'] ?> item
+                    </span>
+
+                    <span class="mp-meta-total">
+                        <i class="fas fa-money-bill"></i>
+                        <span class="mp-meta-total-value">
+                            Rp <?= number_format($d['total_price'], 0, ',', '.') ?>
+                        </span>
+                    </span>
+                </div>
             </div>
         </div>
     </td>
 
     <!-- DATE -->
-    <td class="text-center">
+    <td class="text-center mp-hide">
         <span class="date-badge">
             <i class="fas fa-calendar-alt"></i>
             <?= date('d F Y', strtotime($d['date'])) ?>
@@ -65,7 +84,7 @@ $q = mysqli_query($conn,"
     </td>
 
     <!-- TOTAL ITEM -->
-    <td class="text-center">
+    <td class="text-center mp-hide">
         <span class="note-badge">
             <i class="fas fa-box"></i>
             <?= $d['total_items'] ?>
@@ -73,7 +92,7 @@ $q = mysqli_query($conn,"
     </td>
 
     <!-- TOTAL PRICE -->
-    <td class="text-center">
+    <td class="text-center mp-hide">
         <span class="created-badge">
             <i class="fas fa-money-bill"></i>
             Rp <?= number_format($d['total_price'], 0, ',', '.') ?>
@@ -82,25 +101,27 @@ $q = mysqli_query($conn,"
 
     <!-- ACTION -->
     <td class="text-center">
+        <div class="mp-actions">
 
-        <button class="action-btn btn-edit editPurchaseBtn" data-id="<?= $d['id'] ?>">
-            <i class="fas fa-edit"></i>
-        </button>
+            <?php if((int)$d['used_flag'] === 0): ?>
+            <button class="action-btn btn-edit editPurchaseBtn" data-id="<?= $d['id'] ?>">
+                <i class="fas fa-edit"></i>
+            </button>
 
-        <?php if((int)$d['used_flag'] === 0): ?>
-        <button class="action-btn btn-delete deletePurchaseBtn"
-            data-id="<?= $d['id'] ?>"
-            data-date="<?= $d['date'] ?>">
-            <i class="fas fa-trash"></i>
-        </button>
-        <?php endif; ?>
+            <button class="action-btn btn-delete deletePurchaseBtn"
+                data-id="<?= $d['id'] ?>"
+                data-date="<?= $d['date'] ?>">
+                <i class="fas fa-trash"></i>
+            </button>
+            <?php endif; ?>
 
-        <button class="action-btn btn-print printPurchaseBtn"
-            data-id="<?= $d['id'] ?>"
-            data-date="<?= $d['date'] ?>">
-            <i class="fas fa-print"></i>
-        </button>
-        
+            <button class="action-btn btn-print printPurchaseBtn"
+                data-id="<?= $d['id'] ?>"
+                data-date="<?= $d['date'] ?>">
+                <i class="fas fa-print"></i>
+            </button>
+
+        </div>
     </td>
 
 </tr>

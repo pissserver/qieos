@@ -67,47 +67,70 @@ function buildProductOptions($products, $currentName, $currentId){
                    name="item_id[]"
                    value="<?= $d['item_id'] ?>">
 
-            <div class="col-md-4">
-                <select
-                    name="product_id[]"
-                    class="form-control product-select"
-                    placeholder="Nama Produk"
-                    required>
-                    <?= buildProductOptions($products, $d['name'], $d['product_id']) ?>
-                </select>
+            <div class="col-md-4 item-product">
+                <div class="input-group-modern">
+                    <div class="input-icon input-icon-product">
+                        <i class="fas fa-box"></i>
+                    </div>
+                    <select
+                        name="product_id[]"
+                        class="form-control product-select"
+                        placeholder="Nama Produk"
+                        required>
+                        <?= buildProductOptions($products, $d['name'], $d['product_id']) ?>
+                    </select>
+                </div>
             </div>
 
             <div class="col-md-2">
-                <input type="number"
-                       name="qty_buy[]"
-                       class="form-control"
-                       value="<?= $d['qty_buy'] ?>"
-                       required>
+                <div class="input-group-modern">
+                    <div class="input-icon input-icon-qty">
+                        <i class="fas fa-cubes"></i>
+                    </div>
+                    <input type="number"
+                           name="qty_buy[]"
+                           class="form-control"
+                           value="<?= $d['qty_buy'] ?>"
+                           required>
+                </div>
             </div>
 
             <div class="col-md-2">
-                <input type="text"
-                       name="unit_buy[]"
-                       class="form-control"
-                       value="<?= htmlspecialchars($d['unit_buy']) ?>"
-                       required>
+                <div class="input-group-modern">
+                    <div class="input-icon input-icon-unit">
+                        <i class="fas fa-balance-scale"></i>
+                    </div>
+                    <input type="text"
+                           name="unit_buy[]"
+                           class="form-control"
+                           value="<?= htmlspecialchars($d['unit_buy']) ?>"
+                           required>
+                </div>
             </div>
 
-            <div class="col-md-3">
-                <input type="number"
-                       name="price_buy[]"
-                       class="form-control"
-                       placeholder="Harga"
-                       min="0"
-                       value="<?= $d['price_buy'] !== null && $d['price_buy'] !== '' ? (int)$d['price_buy'] : '' ?>">
+            <div class="col-md-3 item-price">
+                <div class="input-group-modern">
+                    <div class="input-icon input-icon-price">
+                        <i class="fas fa-wallet"></i>
+                    </div>
+                    <input type="number"
+                           name="price_buy[]"
+                           class="form-control"
+                           placeholder="Harga"
+                           min="0"
+                           value="<?= $d['price_buy'] !== null && $d['price_buy'] !== '' ? (int)$d['price_buy'] : '' ?>">
+                </div>
             </div>
 
-            <div class="col-md-1">
-                <button type="button"
-                        class="btn btn-danger w-100"
-                        onclick="removeItem(this)">
-                    <i class="fas fa-trash"></i>
-                </button>
+            <div class="col-md-1 item-remove">
+                <div class="input-group-modern">
+                    <button type="button"
+                            class="input-icon input-icon-danger"
+                            onclick="removeItem(this)">
+                        <i class="fas fa-trash"></i>
+                        <span>Hapus</span>
+                    </button>
+                </div>
             </div>
 
         </div>
@@ -116,7 +139,7 @@ function buildProductOptions($products, $currentName, $currentId){
 
     </div>
 
-    <div class="d-flex justify-content-end gap-2 mt-4 mb-4">
+    <div class="mp-add-footer d-flex justify-content-end gap-2 mt-4 mb-4">
 
         <button type="button"
                 class="btn-save"
@@ -128,7 +151,7 @@ function buildProductOptions($products, $currentName, $currentId){
         <button type="submit"
                 class="btn-save">
             <i class="fas fa-save"></i>
-            Update
+            Save
         </button>
 
     </div>

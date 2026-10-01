@@ -79,48 +79,68 @@ while($p = mysqli_fetch_assoc($qProd)){
 
                             <div class="item-row row mb-3">
 
-                                <div class="col-md-4">
-                                    <select
-                                        name="product_id[]"
-                                        class="form-control product-select"
-                                        placeholder="Nama Produk"
-                                        required>
-                                        <option value=""></option>
-                                        <?php foreach($products as $p): ?>
-                                        <option value="<?= $p['id'] ?>" data-name="<?= htmlspecialchars($p['name']) ?>" data-unit="<?= htmlspecialchars($p['unit']) ?>"><?= htmlspecialchars($p['name']) ?></option>
-                                        <?php endforeach; ?>
-                                    </select>
+                                <div class="col-md-4 item-product">
+                                    <div class="input-group-modern">
+                                        <div class="input-icon input-icon-product">
+                                            <i class="fas fa-box"></i>
+                                        </div>
+                                        <select
+                                            name="product_id[]"
+                                            class="form-control product-select"
+                                            placeholder="Nama Produk"
+                                            required>
+                                            <option value=""></option>
+                                            <?php foreach($products as $p): ?>
+                                            <option value="<?= $p['id'] ?>" data-name="<?= htmlspecialchars($p['name']) ?>" data-unit="<?= htmlspecialchars($p['unit']) ?>"><?= htmlspecialchars($p['name']) ?></option>
+                                            <?php endforeach; ?>
+                                        </select>
+                                    </div>
                                 </div>
 
                                 <div class="col-md-2">
-                                    <input type="number"
-                                        name="qty_buy[]"
-                                        class="form-control"
-                                        placeholder="Qty"
-                                        required>
+                                    <div class="input-group-modern">
+                                        <div class="input-icon input-icon-qty">
+                                            <i class="fas fa-cubes"></i>
+                                        </div>
+                                        <input type="number"
+                                            name="qty_buy[]"
+                                            class="form-control"
+                                            placeholder="Qty"
+                                            required>
+                                    </div>
                                 </div>
 
                                 <div class="col-md-2">
-                                    <input type="text"
-                                        name="unit_buy[]"
-                                        class="form-control"
-                                        placeholder="Satuan"
-                                        required>
+                                    <div class="input-group-modern">
+                                        <div class="input-icon input-icon-unit">
+                                            <i class="fas fa-balance-scale"></i>
+                                        </div>
+                                        <input type="text"
+                                            name="unit_buy[]"
+                                            class="form-control"
+                                            placeholder="Satuan"
+                                            required>
+                                    </div>
                                 </div>
 
-                                <div class="col-md-4">
-                                    <input type="number"
-                                        name="price_buy[]"
-                                        class="form-control"
-                                        placeholder="Total Harga (Rp)"
-                                        min="0">
+                                <div class="col-md-4 item-price">
+                                    <div class="input-group-modern">
+                                        <div class="input-icon input-icon-price">
+                                            <i class="fas fa-wallet"></i>
+                                        </div>
+                                        <input type="number"
+                                            name="price_buy[]"
+                                            class="form-control"
+                                            placeholder="Total Harga (Rp)"
+                                            min="0">
+                                    </div>
                                 </div>
 
                             </div>
 
                         </div>
 
-                        <div class="d-flex justify-content-end gap-2 mt-4">
+                        <div class="d-flex justify-content-end gap-2 mt-4 form-actions">
 
                             <button type="button"
                                     class="btn-save"
@@ -135,7 +155,7 @@ while($p = mysqli_fetch_assoc($qProd)){
                                     class="btn-save">
 
                                 <i class="fas fa-save"></i>
-                                Simpan
+                                Save
 
                             </button>
 
@@ -158,13 +178,13 @@ while($p = mysqli_fetch_assoc($qProd)){
     <div class="modal-dialog modal-xl modal-dialog-centered">
         <div class="modal-content stock-panel border-0">
 
-            <div class="panel-header panel-dark my-3 mx-3">
+            <div class="panel-header panel-dark my-3 mx-3 mp-add-header">
                 <div class="panel-left">
                     <div class="panel-icon">
                         <i class="fas fas fa-file-alt"></i>
                     </div>
 
-                    <div>
+                    <div class="mp-add-head-text">
                         <div class="panel-title">
                             Edit Daftar Belanja 
                         </div>
@@ -174,10 +194,10 @@ while($p = mysqli_fetch_assoc($qProd)){
                     </div>
                 </div>
 
-                <button class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                <button class="btn-close btn-close-white mp-add-close" data-bs-dismiss="modal"></button>
             </div>
 
-            <div class="mt-2 px-5" id="editPurchaseContent"></div>
+            <div class="mt-2 px-5 mp-add-body" id="editPurchaseContent"></div>
         </div>
     </div>
 </div>
@@ -242,19 +262,31 @@ while($p = mysqli_fetch_assoc($qProd)){
         let row = document.createElement('div');
         row.className = 'item-row row mb-3';
         row.innerHTML = `
-            <div class="col-md-4">
-                <select name="product_id[]" class="form-control product-select" placeholder="Nama Produk" required>
-                    ${buildProductOptions('')}
-                </select>
+            <div class="col-md-4 item-product">
+                <div class="input-group-modern">
+                    <div class="input-icon input-icon-product"><i class="fas fa-box"></i></div>
+                    <select name="product_id[]" class="form-control product-select" placeholder="Nama Produk" required>
+                        ${buildProductOptions('')}
+                    </select>
+                </div>
             </div>
             <div class="col-md-2">
-                <input type="number" name="qty_buy[]" class="form-control" placeholder="Qty" required>
+                <div class="input-group-modern">
+                    <div class="input-icon input-icon-qty"><i class="fas fa-cubes"></i></div>
+                    <input type="number" name="qty_buy[]" class="form-control" placeholder="Qty" required>
+                </div>
             </div>
             <div class="col-md-2">
-                <input type="text" name="unit_buy[]" class="form-control" placeholder="Satuan" required>
+                <div class="input-group-modern">
+                    <div class="input-icon input-icon-unit"><i class="fas fa-balance-scale"></i></div>
+                    <input type="text" name="unit_buy[]" class="form-control" placeholder="Satuan" required>
+                </div>
             </div>
-            <div class="col-md-4">
-                <input type="number" name="price_buy[]" class="form-control" placeholder="Harga" min="0">
+            <div class="col-md-4 item-price">
+                <div class="input-group-modern">
+                    <div class="input-icon input-icon-price"><i class="fas fa-wallet"></i></div>
+                    <input type="number" name="price_buy[]" class="form-control" placeholder="Harga" min="0">
+                </div>
             </div>
         `;
         container.appendChild(row);
@@ -315,6 +347,17 @@ while($p = mysqli_fetch_assoc($qProd)){
     });
 
     const panelToggle = document.getElementById('panelToggle');
+    let purchaseHistoryLoaded = false;
+
+    // seluruh area toggle bisa diklik (kecuali switch langsung)
+    const panelToggleWrap = document.querySelector('.panel-toggle-wrap');
+    if(panelToggleWrap){
+        panelToggleWrap.addEventListener('click', function(e){
+            if(e.target.closest('.switch-toggle')) return;
+            panelToggle.checked = !panelToggle.checked;
+            panelToggle.dispatchEvent(new Event('change'));
+        });
+    }
 
     panelToggle.addEventListener('change', function(){
 
@@ -331,7 +374,10 @@ while($p = mysqli_fetch_assoc($qProd)){
             labelForm.classList.remove('active');
             labelEdit.classList.add('active');
 
-            loadPurchaseTable();
+            if(!purchaseHistoryLoaded){
+                purchaseHistoryLoaded = true;
+                loadPurchaseTable();
+            }
         }else{
             editMode.classList.remove('active');
             formMode.classList.add('active');
@@ -341,6 +387,59 @@ while($p = mysqli_fetch_assoc($qProd)){
         }
 
     });
+
+    /* ---------- DataTable ---------- */
+    const PURCHASE_MOBILE_BP = 575.98;
+
+    function isPurchaseMobile(){
+        return window.innerWidth <= PURCHASE_MOBILE_BP;
+    }
+
+    let purchaseIsMobile = isPurchaseMobile();
+
+    function purchaseDataTable(){
+        const mobile = isPurchaseMobile();
+
+        return $('#purchaseTable').DataTable({
+            pageLength: mobile ? 4 : 5,
+            lengthMenu: mobile
+                ? [[4,5,10,25,50],[4,5,10,25,50]]
+                : [[5,10,25,50],[5,10,25,50]],
+
+            pagingType: mobile ? 'simple_numbers' : 'full_numbers',
+            dom: mobile ? 'ftp' : 'lftip',
+            searchDelay: 250,
+
+            responsive:true,
+            autoWidth:false,
+            order: [[0, 'desc']],
+            ordering: true,
+            language:{
+                search:"",
+                searchPlaceholder:"Cari daftar belanja...",
+
+                zeroRecords: `
+                    <div class="empty-search">
+                        <img src="../../assets/img/illustrations/empty-data.png" class="empty-img">
+                        <div class="empty-title">Purchase tidak ditemukan</div>
+                        <div class="empty-sub">
+                            Coba gunakan kata kunci lain
+                        </div>
+                    </div>
+                `,
+
+                emptyTable: `
+                    <div class="empty-search">
+                        <img src="../../assets/img/illustrations/empty-data.png" class="empty-img">
+                        <div class="empty-title">Belum ada data list belanja</div>
+                        <div class="empty-sub">
+                            Silakan buat list belanja terlebih dahulu
+                        </div>
+                    </div>
+                `
+            }
+        });
+    }
 
     function loadPurchaseTable(){
         fetch('list-table.php')
@@ -354,38 +453,9 @@ while($p = mysqli_fetch_assoc($qProd)){
                     $('#purchaseTable').DataTable().destroy();
                 }
 
-                let table = $('#purchaseTable').DataTable({
-                    pageLength:5,
-                    lengthMenu:[[5,10,25,50],[5,10,25,50]],
-                    responsive:true,
-                    autoWidth:false,
-                    order: [[0, 'desc']],
-                    ordering: true,
-                    language:{
-                        search:"",
-                        searchPlaceholder:"Cari daftar belanja...",
-                        
-                        zeroRecords: `
-                            <div class="empty-search">
-                                <img src="../../assets/img/illustrations/empty-data.png" class="empty-img">
-                                <div class="empty-title">Purchase tidak ditemukan</div>
-                                <div class="empty-sub">
-                                    Coba gunakan kata kunci lain
-                                </div>
-                            </div>
-                        `,
+                purchaseIsMobile = isPurchaseMobile();
 
-                        emptyTable: `
-                            <div class="empty-search">
-                                <img src="../../assets/img/illustrations/empty-data.png" class="empty-img">
-                                <div class="empty-title">Belum ada data list belanja</div>
-                                <div class="empty-sub">
-                                    Silakan buat list belanja terlebih dahulu
-                                </div>
-                            </div>
-                        `
-                    }
-                });
+                const table = purchaseDataTable();
 
                 table.columns.adjust();
 
@@ -397,51 +467,91 @@ while($p = mysqli_fetch_assoc($qProd)){
         });
     }
 
+    /* rebuild tabel saat pindah mobile <-> desktop */
+    let purchaseResizeTimer;
+    window.addEventListener('resize', function(){
+        clearTimeout(purchaseResizeTimer);
+        purchaseResizeTimer = setTimeout(function(){
+            if(isPurchaseMobile() === purchaseIsMobile) return;
+            if(!$.fn.DataTable.isDataTable('#purchaseTable')) return;
+
+            const page = $('#purchaseTable').DataTable().page();
+            $('#purchaseTable').DataTable().destroy();
+
+            purchaseIsMobile = isPurchaseMobile();
+            const dt = purchaseDataTable();
+            dt.page(page).draw(false);
+        }, 250);
+    });
+
     function addItem()
     {
         let html = `
             <div class="item-row row mb-3">
 
-                <div class="col-md-4">
-                    <select
-                        name="product_id[]"
-                        class="form-control product-select"
-                        placeholder="Nama Produk"
-                        required>
-                        ${buildProductOptions('')}
-                    </select>
+                <div class="col-md-4 item-product">
+                    <div class="input-group-modern">
+                        <div class="input-icon input-icon-product">
+                            <i class="fas fa-box"></i>
+                        </div>
+                        <select
+                            name="product_id[]"
+                            class="form-control product-select"
+                            placeholder="Nama Produk"
+                            required>
+                            ${buildProductOptions('')}
+                        </select>
+                    </div>
                 </div>
 
                 <div class="col-md-2">
-                    <input type="number"
-                        name="qty_buy[]"
-                        class="form-control"
-                        placeholder="Qty"
-                        required>
+                    <div class="input-group-modern">
+                        <div class="input-icon input-icon-qty">
+                            <i class="fas fa-cubes"></i>
+                        </div>
+                        <input type="number"
+                            name="qty_buy[]"
+                            class="form-control"
+                            placeholder="Qty"
+                            required>
+                    </div>
                 </div>
 
                 <div class="col-md-2">
-                    <input type="text"
-                        name="unit_buy[]"
-                        class="form-control"
-                        placeholder="Satuan"
-                        required>
+                    <div class="input-group-modern">
+                        <div class="input-icon input-icon-unit">
+                            <i class="fas fa-balance-scale"></i>
+                        </div>
+                        <input type="text"
+                            name="unit_buy[]"
+                            class="form-control"
+                            placeholder="Satuan"
+                            required>
+                    </div>
                 </div>
 
-                <div class="col-md-3">
-                    <input type="number"
-                        name="price_buy[]"
-                        class="form-control"
-                        placeholder="Harga"
-                        min="0">
+                <div class="col-md-3 item-price">
+                    <div class="input-group-modern">
+                        <div class="input-icon input-icon-price">
+                            <i class="fas fa-wallet"></i>
+                        </div>
+                        <input type="number"
+                            name="price_buy[]"
+                            class="form-control"
+                            placeholder="Harga"
+                            min="0">
+                    </div>
                 </div>
 
-                <div class="col-md-1">
-                    <button type="button"
-                            class="btn btn-danger w-100"
-                            onclick="removeItem(this)">
-                        <i class="fas fa-trash"></i>
-                    </button>
+                <div class="col-md-1 item-remove">
+                    <div class="input-group-modern">
+                        <button type="button"
+                                class="input-icon input-icon-danger"
+                                onclick="removeItem(this)">
+                            <i class="fas fa-trash"></i>
+                            <span>Hapus</span>
+                        </button>
+                    </div>
                 </div>
 
             </div>
@@ -464,48 +574,71 @@ while($p = mysqli_fetch_assoc($qProd)){
                     name="item_id[]"
                     value="">
 
-                <div class="col-md-4">
-                    <select
-                        name="product_id[]"
-                        class="form-control product-select"
-                        placeholder="Nama Produk"
-                        required>
-                        ${buildProductOptions('')}
-                    </select>
+                <div class="col-md-4 item-product">
+                    <div class="input-group-modern">
+                        <div class="input-icon input-icon-product">
+                            <i class="fas fa-box"></i>
+                        </div>
+                        <select
+                            name="product_id[]"
+                            class="form-control product-select"
+                            placeholder="Nama Produk"
+                            required>
+                            ${buildProductOptions('')}
+                        </select>
+                    </div>
                 </div>
 
                 <div class="col-md-2">
-                    <input type="number"
-                        name="qty_buy[]"
-                        class="form-control"
-                        placeholder="Qty"
-                        min="0"
-                        required>
+                    <div class="input-group-modern">
+                        <div class="input-icon input-icon-qty">
+                            <i class="fas fa-cubes"></i>
+                        </div>
+                        <input type="number"
+                            name="qty_buy[]"
+                            class="form-control"
+                            placeholder="Qty"
+                            min="0"
+                            required>
+                    </div>
                 </div>
 
                 <div class="col-md-2">
-                    <input type="text"
-                        name="unit_buy[]"
-                        class="form-control"
-                        placeholder="Satuan"
-                        required>
+                    <div class="input-group-modern">
+                        <div class="input-icon input-icon-unit">
+                            <i class="fas fa-balance-scale"></i>
+                        </div>
+                        <input type="text"
+                            name="unit_buy[]"
+                            class="form-control"
+                            placeholder="Satuan"
+                            required>
+                    </div>
                 </div>
 
-                <div class="col-md-3">
-                    <input type="number"
-                        name="price_buy[]"
-                        class="form-control"
-                        placeholder="Harga"
-                        min="0"
-                        value="">
+                <div class="col-md-3 item-price">
+                    <div class="input-group-modern">
+                        <div class="input-icon input-icon-price">
+                            <i class="fas fa-wallet"></i>
+                        </div>
+                        <input type="number"
+                            name="price_buy[]"
+                            class="form-control"
+                            placeholder="Harga"
+                            min="0"
+                            value="">
+                    </div>
                 </div>
 
-                <div class="col-md-1">
-                    <button type="button"
-                            class="btn btn-danger w-100"
-                            onclick="removeItem(this)">
-                        <i class="fas fa-trash"></i>
-                    </button>
+                <div class="col-md-1 item-remove">
+                    <div class="input-group-modern">
+                        <button type="button"
+                                class="input-icon input-icon-danger"
+                                onclick="removeItem(this)">
+                            <i class="fas fa-trash"></i>
+                            <span>Hapus</span>
+                        </button>
+                    </div>
                 </div>
 
             </div>
@@ -644,7 +777,7 @@ while($p = mysqli_fetch_assoc($qProd)){
                             <td style="text-align:center">${item.qty}</td>
                             <td style="text-align:center">${item.unit}</td>
                             <td style="text-align:center"></td>
-                            <td style="text-align:center">☐</td>
+                            <td style="text-align:center"><span class="chk"></span></td>
                         </tr>
                     `;
                 });
@@ -675,6 +808,15 @@ while($p = mysqli_fetch_assoc($qProd)){
 
                             th {
                                 background: #f2f2f2;
+                            }
+
+                            .chk {
+                                display: inline-block;
+                                width: 13px;
+                                height: 13px;
+                                border: 1.5px solid #000;
+                                background: #fff;
+                                vertical-align: middle;
                             }
                         </style>
                     </head>
@@ -714,7 +856,7 @@ while($p = mysqli_fetch_assoc($qProd)){
 
                 win.document.close();
 
-                // 🔥 FIX IMPORTANT
+                // FIX IMPORTANT
                 setTimeout(() => {
                     win.print();
                 }, 300);

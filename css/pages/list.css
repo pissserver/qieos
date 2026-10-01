@@ -174,20 +174,90 @@
     .input-group-modern{
         display:flex;
         align-items:center;
-        margin-bottom:14px;
+        gap:10px;
     }
 
+    /* icon input jadi kartu: gradient + gloss + shadow */
     .input-icon{
+        position:relative;
+        flex:0 0 42px;
         width:42px;
         height:42px;
-        border-radius:10px;
-        background:linear-gradient(135deg,#334155,#1e293b);
+        border-radius:13px;
         display:flex;
         align-items:center;
         justify-content:center;
+        font-size:15px;
         color:#fff;
-        margin-right:10px;
-        box-shadow:0 4px 10px rgba(15,23,42,.18);
+        overflow:hidden;
+        box-shadow:
+            0 6px 14px rgba(15,23,42,.18),
+            inset 0 1px 0 rgba(255,255,255,.35);
+        transition:transform .2s ease, box-shadow .2s ease;
+    }
+
+    .input-icon::after{
+        content:"";
+        position:absolute;
+        inset:0;
+        background:linear-gradient(160deg, rgba(255,255,255,.38), rgba(255,255,255,0) 55%);
+        pointer-events:none;
+    }
+
+    .input-icon i{
+        position:relative;
+        z-index:1;
+        text-shadow:0 1px 2px rgba(15,23,42,.35);
+    }
+
+    .input-icon-product{
+        background:linear-gradient(135deg,#4f46e5,#7c3aed);
+    }
+
+    .input-icon-qty{
+        background:linear-gradient(135deg,#0ea5e9,#2563eb);
+    }
+
+    .input-icon-unit{
+        background:linear-gradient(135deg,#059669,#0d9488);
+    }
+
+    .input-icon-price{
+        background:linear-gradient(135deg,#f59e0b,#ea580c);
+    }
+
+    .input-icon-danger{
+        background:linear-gradient(135deg,#f43f5e,#e11d48);
+    }
+
+    /* tombol hapus memakai kartu icon yang sama */
+    button.input-icon{
+        padding:0;
+        border:none;
+        cursor:pointer;
+        appearance:none;
+        -webkit-appearance:none;
+    }
+
+    button.input-icon:hover{
+        transform:translateY(-2px);
+        box-shadow:
+            0 10px 20px rgba(15,23,42,.26),
+            inset 0 1px 0 rgba(255,255,255,.35);
+    }
+
+    button.input-icon:active{
+        transform:translateY(0);
+    }
+
+    button.input-icon:focus-visible{
+        outline:3px solid rgba(225,29,72,.35);
+        outline-offset:2px;
+    }
+
+    /* label tombol hanya muncul di mobile (pill penuh) */
+    button.input-icon-danger span{
+        display:none;
     }
 
     .form-control{
@@ -195,6 +265,14 @@
         border-radius:8px;
         border:1px solid var(--border);
         font-size:14px;
+    }
+
+    /* input & select2 mengisi sisa ruang di sebelah kanan icon */
+    .input-group-modern > .form-control,
+    .input-group-modern > .select2-container{
+        flex:1 1 0%;
+        min-width:0;
+        width:auto !important;
     }
 
     textarea.form-control{
@@ -399,23 +477,99 @@
     }
 
     @media (max-width:575.98px){
+        /* ===== PANEL: semua konten di dalam card, tidak boleh keluar ===== */
         .section-card{
-            padding:14px;
+            padding:0;
+            border-radius:22px;
+            overflow:hidden;
+            position:relative;
+        }
+
+        /* header jadi blok inset, seperti kartu sales-stock */
+        .section-card > .panel-header{
+            margin:12px 12px 0;
+            border-radius:18px;
+            padding:14px 16px;
+        }
+
+        /* body: jarak aman dari header panel */
+        .section-card > .mt-5.px-4,
+        .section-card > .mt-4.px-4{
+            padding:20px 12px 16px !important;
+            margin-top:0 !important;
+            background:#fff;
+            min-width:0;
+        }
+
+        .stock-body{
+            min-width:0;
+            width:100%;
+        }
+
+        .panel-mode{
+            min-width:0;
+        }
+
+        #itemsContainer{
+            min-width:0;
         }
 
         .panel-icon{
-            width:48px;
-            height:48px;
-            font-size:18px;
-            border-radius:14px;
+            width:44px;
+            height:44px;
+            flex:0 0 44px;
+            font-size:17px;
+            border-radius:13px;
         }
 
         .panel-title{
-            font-size:15px;
+            font-size:14px;
+            line-height:1.25;
         }
 
         .panel-subtitle{
-            font-size:12px;
+            display:block;
+            font-size:10.5px;
+            line-height:1.35;
+            margin-top:2px;
+        }
+
+        /* ===== TOGGLE: segmented switch, seperti sales-stock ===== */
+        .section-card > .panel-header .panel-toggle-wrap{
+            width:100%;
+            max-width:100%;
+            flex:0 0 auto;
+            justify-content:center;
+            gap:0;
+            padding:4px;
+            border-radius:14px;
+            background:rgba(255,255,255,.1);
+            border:1px solid rgba(255,255,255,.14);
+            border-top:none;
+        }
+
+        .panel-toggle-wrap .switch-toggle{
+            display:none;
+        }
+
+        .panel-toggle-wrap .toggle-label{
+            flex:1 1 0;
+            text-align:center;
+            padding:9px 12px;
+            border-radius:11px;
+            font-size:11.5px;
+            font-weight:700;
+            letter-spacing:.2px;
+            color:rgba(255,255,255,.65);
+            cursor:pointer;
+            user-select:none;
+            transition:.25s;
+        }
+
+        .panel-toggle-wrap .toggle-label.active{
+            color:#0f172a;
+            background:#fff;
+            box-shadow:0 4px 10px rgba(2,6,23,.35);
         }
 
         .mt-5.px-4,
@@ -424,13 +578,355 @@
             padding-right:0 !important;
         }
 
-        .dataTables_filter input{
-            width:100% !important;
+        /* ===== FORM ITEM: grid 2 kolom, tanpa card box ===== */
+        .item-row.row{
+            display:grid;
+            grid-template-columns:1fr 1fr;
+            gap:10px;
+            margin-left:0 !important;
+            margin-right:0 !important;
+            margin-bottom:12px;
+            min-width:0;
         }
 
-        .dataTables_wrapper .dataTables_filter{
+        .item-row.row > [class*="col-"]{
+            width:auto !important;
+            min-width:0;
+            flex:none !important;
+            padding-left:0;
+            padding-right:0;
+            margin-bottom:0;
+        }
+
+        .input-group-modern{
+            gap:8px;
+            min-width:0;
             width:100%;
         }
+
+        /* input & select2 tidak boleh memaksa kolom melebar */
+        .input-group-modern > .form-control,
+        .input-group-modern > .select2-container{
+            min-width:0;
+            max-width:100%;
+        }
+
+        .item-row .select2-container--default .select2-selection__rendered{
+            overflow:hidden;
+            text-overflow:ellipsis;
+            white-space:nowrap;
+        }
+
+        /* produk & harga melebar penuh */
+        .item-row.row > .item-product,
+        .item-row.row > .item-price{
+            grid-column:1 / -1;
+        }
+
+        /* tombol hapus melebar penuh, di tengah */
+        .item-row.row > .item-remove{
+            grid-column:1 / -1;
+            display:flex;
+            justify-content:center;
+        }
+
+        .item-row.row > .item-remove .input-group-modern{
+            max-width:220px;
+        }
+
+        /* icon input tetap card, lebih ringkas di layar kecil */
+        .input-icon{
+            flex:0 0 38px;
+            width:38px;
+            height:38px;
+            font-size:13px;
+            border-radius:12px;
+        }
+
+        .item-row .form-control,
+        .item-row .select2-container--default .select2-selection--single{
+            height:42px;
+        }
+
+        .item-row .select2-container--default .select2-selection--single .select2-selection__rendered,
+        .item-row .select2-container--default .select2-selection__clear{
+            line-height:40px;
+            font-size:12.5px;
+        }
+
+        .item-row .select2-container--default .select2-results__option,
+        .item-row .select2-container--default .select2-search--dropdown .select2-search__field,
+        .item-row .select2-container--default .select2-results__message{
+            font-size:12.5px;
+        }
+
+        /* tombol hapus jadi pill penuh, di tengah (form utama & modal) */
+        .item-row.row > .item-remove .input-group-modern,
+        #editPurchaseContent .item-remove .input-group-modern,
+        #editPurchaseModal .item-remove .input-group-modern{
+            width:100%;
+            max-width:220px;
+            justify-content:center;
+            gap:8px;
+        }
+
+        .item-row.row > .item-remove button.input-icon,
+        #editPurchaseContent .item-remove button.input-icon,
+        #editPurchaseModal .item-remove button.input-icon{
+            flex:0 0 auto;
+            width:100%;
+            height:44px;
+            min-width:0;
+            border-radius:12px;
+            display:inline-flex;
+            align-items:center;
+            justify-content:center;
+            gap:8px;
+            padding:0 16px;
+            font-size:13px;
+            font-weight:700;
+            letter-spacing:.2px;
+            color:#fff;
+            background:linear-gradient(135deg,#fb7185,#e11d48);
+            box-shadow:0 8px 16px -10px rgba(225,29,72,.95);
+        }
+
+        .item-row.row > .item-remove button.input-icon span,
+        #editPurchaseContent .item-remove button.input-icon span,
+        #editPurchaseModal .item-remove button.input-icon span{
+            display:inline;
+        }
+
+        .item-row.row > .item-remove button.input-icon:hover,
+        #editPurchaseContent .item-remove button.input-icon:hover,
+        #editPurchaseModal .item-remove button.input-icon:hover{
+            background:linear-gradient(135deg,#f43f5e,#be123c);
+            box-shadow:0 10px 20px -10px rgba(225,29,72,1);
+        }
+
+        .item-row.row > .item-remove button.input-icon:active,
+        #editPurchaseContent .item-remove button.input-icon:active,
+        #editPurchaseModal .item-remove button.input-icon:active{
+            transform:translateY(1px);
+            box-shadow:0 4px 10px -8px rgba(225,29,72,.9);
+        }
+
+        /* ===== ACTION FORM: tombol full width ===== */
+        .form-actions{
+            display:flex;
+            flex-direction:column;
+            gap:10px;
+            margin-top:16px;
+        }
+
+        .form-actions .btn-save{
+            width:100%;
+            min-height:46px;
+            border-radius:12px;
+            font-size:13px;
+        }
+
+        /* ===== TABEL: wrapper & kartu tidak boleh keluar panel ===== */
+        #purchase-table{
+            min-width:0;
+            width:100%;
+        }
+
+        .dataTables_wrapper{
+            width:100%;
+            min-width:0;
+        }
+
+        .dataTables_wrapper .col-sm-12:has(> table.dataTable){
+            overflow-x:visible;
+            min-width:0;
+        }
+
+        /* ===== SEARCH: gaya kartu, seperti sales-stock ===== */
+        .dataTables_wrapper .dataTables_filter{
+            display:flex;
+            width:100%;
+            margin:0 0 10px;
+            padding:0;
+        }
+
+        .dataTables_wrapper .dataTables_filter label{
+            display:flex;
+            width:100%;
+            margin:0;
+            padding:0;
+        }
+
+        .dataTables_wrapper .dataTables_filter input{
+            width:100% !important;
+            height:40px;
+            margin:0;
+            border-radius:14px !important;
+            border:1px solid transparent !important;
+            background-color:#f1f5f9;
+            background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='M20.5 20.5l-4-4'/%3E%3C/svg%3E");
+            background-repeat:no-repeat;
+            background-position:13px center;
+            background-size:15px 15px;
+            padding:0 12px 0 35px !important;
+            font-size:12px;
+            color:#0f172a;
+            box-shadow:inset 0 1px 2px rgba(15,23,42,.04);
+            outline:none;
+            transition:background-color .2s, box-shadow .2s;
+        }
+
+        .dataTables_wrapper .dataTables_filter input::placeholder{
+            color:#94a3b8;
+        }
+
+        .dataTables_wrapper .dataTables_filter input:focus{
+            background-color:#fff;
+            box-shadow:
+                0 0 0 2px #fff,
+                0 0 0 4px rgba(99,102,241,.35),
+                0 10px 20px -10px rgba(79,70,229,.6);
+        }
+
+        /* ===== PAGINASI: di tengah, gaya kartu ===== */
+        .dataTables_wrapper .dataTables_paginate{
+            float:none;
+            display:flex;
+            flex-wrap:wrap;
+            justify-content:center;
+            align-items:center;
+            gap:5px;
+            margin:10px 0 12px;
+            padding:0;
+        }
+
+        .dataTables_wrapper .dataTables_paginate .pagination{
+            margin:0;
+            flex-wrap:wrap;
+            justify-content:center;
+            gap:5px;
+        }
+
+        .dataTables_wrapper .dataTables_paginate .page-item{
+            margin:0 !important;
+        }
+
+        .dataTables_wrapper .dataTables_paginate .page-link{
+            min-width:30px;
+            height:30px;
+            padding:0 8px;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            border-radius:10px !important;
+            font-size:11px;
+            font-weight:700;
+            color:#475569 !important;
+            background:#fff !important;
+            border:1px solid #e2e8f0 !important;
+            box-shadow:0 2px 6px rgba(15,23,42,.05) !important;
+            transition:transform .18s ease, box-shadow .18s ease;
+        }
+
+        .dataTables_wrapper .dataTables_paginate .page-link:hover{
+            transform:translateY(-1px);
+            box-shadow:0 6px 12px -6px rgba(15,23,42,.35) !important;
+        }
+
+        .dataTables_wrapper .dataTables_paginate .page-item.active .page-link{
+            color:#fff !important;
+            background:linear-gradient(135deg,#4f46e5,#6366f1) !important;
+            border-color:transparent !important;
+            box-shadow:0 8px 16px -7px rgba(79,70,229,.95) !important;
+        }
+
+        .dataTables_wrapper .dataTables_paginate .page-item.disabled .page-link{
+            color:#94a3b8 !important;
+            background:#f8fafc !important;
+        }
+
+        .dataTables_wrapper .dataTables_length,
+        .dataTables_wrapper .dataTables_info{
+            display:none;
+        }
+
+        /* ===== MODAL EDIT: kartu dengan radius, snug di layar kecil ===== */
+        #editPurchaseModal .modal-dialog{
+            margin:10px;
+            max-width:none;
+        }
+
+        #editPurchaseModal .modal-content{
+            max-height:calc(100vh - 20px);
+            border-radius:18px !important;
+            border:1px solid rgba(15,23,42,.07);
+            box-shadow:0 20px 44px -18px rgba(15,23,42,.55) !important;
+            overflow-y:auto !important;
+            -webkit-overflow-scrolling:touch;
+        }
+
+        #editPurchaseModal .modal-dialog.modal-dialog-centered{
+            display:flex;
+            align-items:center;
+            min-height:calc(100% - var(--bs-modal-margin, 1rem) * 2);
+        }
+
+        #editPurchaseModal .mp-add-header{
+            flex-direction:row !important;
+            flex-wrap:nowrap !important;
+            align-items:center !important;
+            gap:10px;
+            margin:10px 10px 0 !important;
+            padding:12px 14px;
+            border-radius:14px;
+            position:sticky;
+            top:10px;
+            z-index:5;
+        }
+
+        #editPurchaseModal .mp-add-header .panel-left{
+            gap:10px;
+            min-width:0;
+            flex:1;
+        }
+
+        #editPurchaseModal .mp-add-header .panel-icon{
+            width:34px;
+            height:34px;
+            flex:0 0 34px;
+            font-size:13px;
+            border-radius:11px;
+        }
+
+        #editPurchaseModal .mp-add-body{
+            margin:0 !important;
+            padding:12px 12px 0 !important;
+        }
+
+        #editPurchaseModal .mp-add-footer{
+            display:flex;
+            justify-content:flex-end;
+            gap:10px;
+            margin:14px 0 0;
+            padding:12px 0 2px;
+            border-top:1px solid #e2e8f0;
+            background:transparent;
+            position:sticky;
+            bottom:0;
+            text-align:initial;
+        }
+
+        #editPurchaseModal .mp-add-footer .btn-save{
+            flex:1 1 0;
+            width:auto;
+            min-width:0;
+            min-height:44px;
+            padding:0 12px;
+            border-radius:11px;
+            font-size:12.5px;
+        }
+
+        /* tombol hapus di modal diatur bersama form utama di atas */
     }
 
     /* ===== SELECT2 - samakan dengan .form-control ===== */
