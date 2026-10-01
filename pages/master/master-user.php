@@ -148,6 +148,14 @@ include '../../sessions/session.php';
 <script>
     let activeRole = 'administrator';
 
+    const USER_MOBILE_BP = 575.98;
+
+    function isUserMobile(){
+        return window.innerWidth <= USER_MOBILE_BP;
+    }
+
+    let userIsMobile = isUserMobile();
+
     // ----- TAB INDICATOR -----
     function positionIndicator(){
         const tabs = document.querySelectorAll('.mu-tab');
@@ -189,11 +197,13 @@ include '../../sessions/session.php';
             }
 
             const isCashier = role === 'cashier';
+            const mobile = isUserMobile();
 
             setTimeout(()=>{
-                $('#userTable').DataTable({
-                    pageLength: 5,
-                    lengthMenu: [[5,10,25,50],[5,10,25,50]],
+                const options = {
+                    pageLength: mobile ? 4 : 5,
+                    lengthMenu: mobile ? [[4,5,10,25,50],[4,5,10,25,50]] : [[5,10,25,50],[5,10,25,50]],
+                    pagingType: mobile ? "simple_numbers" : "full_numbers",
                     responsive: true,
                     autoWidth: false,
                     language:{
@@ -220,7 +230,9 @@ include '../../sessions/session.php';
                             </div>
                         `
                     }
-                });
+                };
+                if(mobile) options.dom = "ftp";
+                $('#userTable').DataTable(options);
 
                 // Buat wrapper untuk search + button
                 $('#userTable_filter')
@@ -378,6 +390,18 @@ include '../../sessions/session.php';
     // ----- INIT -----
     $(document).ready(function(){
         loadUserTable('administrator');
+    });
+
+    // ----- REBUILD TABEL KETIKA GANTI MOBILE / DESKTOP -----
+    let userResizeTimer;
+    window.addEventListener('resize', function(){
+        clearTimeout(userResizeTimer);
+        userResizeTimer = setTimeout(function(){
+            if(isUserMobile() === userIsMobile) return;
+            if(!$.fn.DataTable.isDataTable('#userTable')) return;
+            userIsMobile = isUserMobile();
+            loadUserTable(activeRole);
+        }, 250);
     });
 </script>
 

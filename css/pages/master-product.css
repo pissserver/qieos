@@ -1451,7 +1451,7 @@ textarea.form-control {
 }
 
 /* ============================================================
-   SEARCH + PAGINASI + TOMBOL (master produk)
+   SEARCH + PAGINASI + TOMBOL (semua master: produk, customer, supplier, user)
 
    Hanya mobile yang dirombak: search full width di atas,
    tombol full width di bawahnya.
@@ -1461,7 +1461,10 @@ textarea.form-control {
 @media (max-width: 575.98px) {
 
     /* ---------- SEARCH ---------- */
-    #productTableContainer .dataTables_filter {
+    #productTableContainer .dataTables_filter,
+    #customerTableContainer .dataTables_filter,
+    #supplierTableContainer .dataTables_filter,
+    #userTableContainer .dataTables_filter {
         display: flex;
         width: 100%;
         margin: 0;
@@ -1469,13 +1472,19 @@ textarea.form-control {
     }
 
 
-    #productTableContainer .dataTables_filter label {
+    #productTableContainer .dataTables_filter label,
+    #customerTableContainer .dataTables_filter label,
+    #supplierTableContainer .dataTables_filter label,
+    #userTableContainer .dataTables_filter label {
         display: flex;
         width: 100%;
         margin: 0;
     }
 
-    #productTableContainer .dataTables_filter input {
+    #productTableContainer .dataTables_filter input,
+    #customerTableContainer .dataTables_filter input,
+    #supplierTableContainer .dataTables_filter input,
+    #userTableContainer .dataTables_filter input {
         width: 100% !important;
         height: 40px;
         border-radius: 14px !important;
@@ -1493,11 +1502,17 @@ textarea.form-control {
         transition: background-color .2s, box-shadow .2s;
     }
 
-    #productTableContainer .dataTables_filter input::placeholder {
+    #productTableContainer .dataTables_filter input::placeholder,
+    #customerTableContainer .dataTables_filter input::placeholder,
+    #supplierTableContainer .dataTables_filter input::placeholder,
+    #userTableContainer .dataTables_filter input::placeholder {
         color: #94a3b8;
     }
 
-    #productTableContainer .dataTables_filter input:focus {
+    #productTableContainer .dataTables_filter input:focus,
+    #customerTableContainer .dataTables_filter input:focus,
+    #supplierTableContainer .dataTables_filter input:focus,
+    #userTableContainer .dataTables_filter input:focus {
         background-color: #fff;
         box-shadow:
             0 0 0 2px #fff,
@@ -1506,7 +1521,10 @@ textarea.form-control {
     }
 
     /* ---------- TOMBOL: full width di bawah search ---------- */
-    #productTableContainer .table-action-wrapper {
+    #productTableContainer .table-action-wrapper,
+    #customerTableContainer .table-action-wrapper,
+    #supplierTableContainer .table-action-wrapper,
+    #userTableContainer .table-action-wrapper {
         flex-direction: column;
         align-items: stretch;
         justify-content: flex-start;
@@ -1514,16 +1532,25 @@ textarea.form-control {
         margin-bottom: 12px;
     }
 
-    #productTableContainer .table-action-wrapper #stockTable_filter {
+    #productTableContainer .table-action-wrapper #stockTable_filter,
+    #customerTableContainer .table-action-wrapper #stockTable_filter,
+    #supplierTableContainer .table-action-wrapper #stockTable_filter,
+    #userTableContainer .table-action-wrapper #userTable_filter {
         width: 100%;
     }
 
-    #productTableContainer #btnContainer {
+    #productTableContainer #btnContainer,
+    #customerTableContainer #btnContainer,
+    #supplierTableContainer #btnContainer,
+    #userTableContainer .mu-toolbar {
         display: block;
         width: 100%;
     }
 
-    #productTableContainer .mu-add-btn {
+    #productTableContainer .mu-add-btn,
+    #customerTableContainer .mu-add-btn,
+    #supplierTableContainer .mu-add-btn,
+    #userTableContainer .mu-add-btn {
         width: 100%;
         height: 44px;
         border-radius: 14px;
@@ -1531,14 +1558,23 @@ textarea.form-control {
         margin: 0;
     }
 
-    #productTableContainer .mu-add-btn:active {
+    #productTableContainer .mu-add-btn:active,
+    #customerTableContainer .mu-add-btn:active,
+    #supplierTableContainer .mu-add-btn:active,
+    #userTableContainer .mu-add-btn:active {
         transform: scale(.985);
         box-shadow: 0 6px 14px rgba(79, 70, 229, .3);
     }
 
     /* ---------- PAGINASI ---------- */
     #productTableContainer .dataTables_paginate,
-    #productTableContainer .dataTables_paginate .pagination {
+    #productTableContainer .dataTables_paginate .pagination,
+    #customerTableContainer .dataTables_paginate,
+    #customerTableContainer .dataTables_paginate .pagination,
+    #supplierTableContainer .dataTables_paginate,
+    #supplierTableContainer .dataTables_paginate .pagination,
+    #userTableContainer .dataTables_paginate,
+    #userTableContainer .dataTables_paginate .pagination {
         float: none;
         display: flex;
         flex-wrap: wrap;
@@ -1549,11 +1585,17 @@ textarea.form-control {
         padding: 0;
     }
 
-    #productTableContainer .dataTables_paginate .page-item {
+    #productTableContainer .dataTables_paginate .page-item,
+    #customerTableContainer .dataTables_paginate .page-item,
+    #supplierTableContainer .dataTables_paginate .page-item,
+    #userTableContainer .dataTables_paginate .page-item {
         margin: 0 !important;
     }
 
-    #productTableContainer .dataTables_paginate .page-link {
+    #productTableContainer .dataTables_paginate .page-link,
+    #customerTableContainer .dataTables_paginate .page-link,
+    #supplierTableContainer .dataTables_paginate .page-link,
+    #userTableContainer .dataTables_paginate .page-link {
         min-width: 30px;
         height: 30px;
         padding: 0 8px;
@@ -1570,25 +1612,40 @@ textarea.form-control {
         transition: transform .18s ease, box-shadow .18s ease;
     }
 
-    #productTableContainer .dataTables_paginate .page-link:hover {
+    #productTableContainer .dataTables_paginate .page-link:hover,
+    #customerTableContainer .dataTables_paginate .page-link:hover,
+    #supplierTableContainer .dataTables_paginate .page-link:hover,
+    #userTableContainer .dataTables_paginate .page-link:hover {
         transform: translateY(-1px);
         box-shadow: 0 6px 12px -6px rgba(15, 23, 42, .35) !important;
     }
 
-    #productTableContainer .dataTables_paginate .page-item.active .page-link {
+    #productTableContainer .dataTables_paginate .page-item.active .page-link,
+    #customerTableContainer .dataTables_paginate .page-item.active .page-link,
+    #supplierTableContainer .dataTables_paginate .page-item.active .page-link,
+    #userTableContainer .dataTables_paginate .page-item.active .page-link {
         color: #fff !important;
         background: linear-gradient(135deg, #4f46e5, #6366f1) !important;
         border-color: transparent !important;
         box-shadow: 0 8px 16px -7px rgba(79, 70, 229, .95) !important;
     }
 
-    #productTableContainer .dataTables_paginate .page-item.disabled .page-link {
+    #productTableContainer .dataTables_paginate .page-item.disabled .page-link,
+    #customerTableContainer .dataTables_paginate .page-item.disabled .page-link,
+    #supplierTableContainer .dataTables_paginate .page-item.disabled .page-link,
+    #userTableContainer .dataTables_paginate .page-item.disabled .page-link {
         color: #94a3b8 !important;
         background: #f8fafc !important;
     }
 
     #productTableContainer .dataTables_length,
-    #productTableContainer .dataTables_info {
+    #productTableContainer .dataTables_info,
+    #customerTableContainer .dataTables_length,
+    #customerTableContainer .dataTables_info,
+    #supplierTableContainer .dataTables_length,
+    #supplierTableContainer .dataTables_info,
+    #userTableContainer .dataTables_length,
+    #userTableContainer .dataTables_info {
         display: none;
     }
 }

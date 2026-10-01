@@ -106,25 +106,37 @@ function loadSupplierTable(){
         }
 
         setTimeout(()=>{
-        $('#stockTable').DataTable({
-            pageLength: 5,
-            lengthMenu:[[5,10,25,50],[5,10,25,50]],
-            responsive: true,
-            autoWidth: false,
-            language:{
-                search:"",
-                searchPlaceholder:"Cari supplier...",
-                zeroRecords: '<div class="empty-search"><img src="../../assets/img/illustrations/empty-data.png" class="empty-img"><div class="empty-title">Supplier tidak ditemukan</div><div class="empty-sub">Coba gunakan kata kunci lain</div></div>',
-                emptyTable: '<div class="empty-search"><img src="../../assets/img/illustrations/empty-data.png" class="empty-img"><div class="empty-title">Belum ada data supplier</div><div class="empty-sub">Silakan tambahkan supplier terlebih dahulu</div></div>'
-            }
-        });
-        $('#stockTable_filter').wrap('<div class="table-action-wrapper"></div>');
-        $('#btnContainer').show().appendTo('.table-action-wrapper');
+            const mobile = isSupplierMobile();
+            const options = {
+                pageLength: mobile ? 4 : 5,
+                lengthMenu: mobile ? [[4,5,10,25,50],[4,5,10,25,50]] : [[5,10,25,50],[5,10,25,50]],
+                pagingType: mobile ? "simple_numbers" : "full_numbers",
+                responsive: true,
+                autoWidth: false,
+                language:{
+                    search:"",
+                    searchPlaceholder:"Cari supplier...",
+                    zeroRecords: '<div class="empty-search"><img src="../../assets/img/illustrations/empty-data.png" class="empty-img"><div class="empty-title">Supplier tidak ditemukan</div><div class="empty-sub">Coba gunakan kata kunci lain</div></div>',
+                    emptyTable: '<div class="empty-search"><img src="../../assets/img/illustrations/empty-data.png" class="empty-img"><div class="empty-title">Belum ada data supplier</div><div class="empty-sub">Silakan tambahkan supplier terlebih dahulu</div></div>'
+                }
+            };
+            if(mobile) options.dom = "ftp";
+            $('#stockTable').DataTable(options);
+            $('#stockTable_filter').wrap('<div class="table-action-wrapper"></div>');
+            $('#btnContainer').show().appendTo('.table-action-wrapper');
         },100);
     });
 }
 
 $(document).ready(function(){ loadSupplierTable(); });
+
+const SUPPLIER_MOBILE_BP = 575.98;
+
+function isSupplierMobile(){
+    return window.innerWidth <= SUPPLIER_MOBILE_BP;
+}
+
+let supplierIsMobile = isSupplierMobile();
 
 // ADD
 $(document).on('click','#btnAddSupplier',function(){
@@ -172,6 +184,28 @@ $(document).on('click','.deleteSupplierBtn',function(){
             .then(res=>res.json()).then(res=>{ if(res.status==='success'){ QToast('Terhapus','Data berhasil dihapus','success'); loadSupplierTable(); } });
         }
     });
+});
+</script>
+<script>
+let supplierResizeTimer;
+window.addEventListener('resize', function(){
+    clearTimeout(supplierResizeTimer);
+    supplierResizeTimer = setTimeout(function(){
+        if(isSupplierMobile() === supplierIsMobile) return;
+        if(!$.fn.DataTable.isDataTable('#stockTable')) return;
+        const current = $('#stockTable').DataTable();
+        const page = current.page();
+        const keyword = current.search();
+        $('#btnContainer').appendTo('#supplierTableContainer');
+        current.destroy();
+        supplierIsMobile = isSupplierMobile();
+        loadSupplierTable();
+        setTimeout(()=>{
+            if($.fn.DataTable.isDataTable('#stockTable')){
+                $('#stockTable').DataTable().search(keyword).page(page).draw(false);
+            }
+        }, 150);
+    }, 250);
 });
 </script>
 
