@@ -66,15 +66,17 @@ $count_cashier = $q_cashier ? (int)mysqli_fetch_assoc($q_cashier)['c'] : 0;
                         <?= htmlspecialchars($d['fullname']) ?>
                     </div>
 
-                    <small class="text-muted text-capitalize">
-                        <?= htmlspecialchars($d['username']) ?>
-                    </small>
+                    <div class="mp-meta">
+                        <small class="text-muted text-capitalize">
+                            <?= htmlspecialchars($d['username']) ?>
+                        </small>
+                    </div>
                 </div>
 
             </div>
         </td>
 
-        <td class="text-center">
+        <td class="text-center mp-col-role">
 
             <?php if($d['role'] === 'developer'): ?>
                 <span class="stock-badge dev-badge text-capitalize">
@@ -95,7 +97,7 @@ $count_cashier = $q_cashier ? (int)mysqli_fetch_assoc($q_cashier)['c'] : 0;
 
         </td>
 
-        <td class="text-center">
+        <td class="text-center mp-col-date">
 
             <span class="unit-badge">
                 <i class="fas fa-cubes me-1"></i>

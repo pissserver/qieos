@@ -302,12 +302,16 @@
     box-shadow: 0 12px 28px rgba(139, 92, 246, .45);
 }
 
-/* --- Modal --- */
+/* --- Modal ---
+   Bentuk disamakan dengan modal master lain (16px, tanpa garis).
+   overflow tetap visible karena dropdown select2 harus bisa keluar
+   dari batas modal. */
 #combineModal .modal-content {
     background: #fff !important;
-    border-radius: 18px !important;
+    border: 0 !important;
+    border-radius: 16px !important;
     overflow: visible !important;
-    box-shadow: 0 26px 60px rgba(15, 23, 42, .3);
+    box-shadow: 0 20px 40px rgba(15, 23, 42, .25);
 }
 #combineModal .modal-body {
     overflow: visible !important;

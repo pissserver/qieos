@@ -19,10 +19,13 @@
                 </div>
                 <div>
                     <div class="fw-bold"><?= htmlspecialchars($d['name']) ?></div>
+                    <div class="mp-meta">
+                        <small class="text-muted"><?= htmlspecialchars($d['phone'] ?: '-') ?></small>
+                    </div>
                 </div>
             </div>
         </td>
-        <td class="text-center">
+        <td class="text-center mp-col-phone">
             <span class="unit-badge"><?= htmlspecialchars($d['phone'] ?: '-') ?></span>
         </td>
         <td class="text-center">

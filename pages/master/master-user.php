@@ -67,10 +67,15 @@ include '../../sessions/session.php';
                             </button>
                         </div>
 
-                        <button type="button" class="btn mu-add-btn" id="btnAddUser">
-                            <i class="fas fa-user-plus me-2"></i>
-                            Tambah User
-                        </button>
+                        <div class="mu-toolbar-right">
+                            <!-- SEARCH: diisi otomatis oleh DataTable di desktop/tablet -->
+                            <div class="mu-search-slot" id="muSearchSlot"></div>
+
+                            <button type="button" class="btn mu-add-btn" id="btnAddUser">
+                                <i class="fas fa-user-plus me-2"></i>
+                                Tambah User
+                            </button>
+                        </div>
                     </div>
 
                     <!-- TABLE -->
@@ -176,6 +181,10 @@ include '../../sessions/session.php';
     function loadUserTable(role){
         activeRole = role;
 
+        // Bersihkan search yang sempat dipindah ke toolbar supaya tidak
+        // tertinggal saat tabel dibangun ulang.
+        $('.mu-search-slot').empty();
+
         fetch('master-user-table.php?role=' + encodeURIComponent(role))
         .then(res => res.text())
         .then(html => {
@@ -234,9 +243,16 @@ include '../../sessions/session.php';
                 if(mobile) options.dom = "ftp";
                 $('#userTable').DataTable(options);
 
-                // Buat wrapper untuk search + button
-                $('#userTable_filter')
-                    .wrap('<div class="table-action-wrapper"></div>');
+                // Desktop & tablet: search pindah ke toolbar, di samping
+                // tombol Tambah User (posisi awal).
+                // Mobile: search tetap di atas tabel, full width.
+                const $filter = $('#userTable_filter');
+
+                if(mobile){
+                    $filter.wrap('<div class="table-action-wrapper"></div>');
+                } else {
+                    $filter.appendTo('.mu-search-slot');
+                }
             },100);
         });
     }

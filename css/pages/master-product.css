@@ -563,6 +563,32 @@
     box-shadow: 0 20px 40px rgba(15, 23, 42, .25);
 }
 
+/* ============================================================
+   MODAL MASTER (generik)
+
+   Semua modal master memakai class .stock-panel pada
+   .modal-content. Rule ini menyamakan border, radius, dan
+   shadow dengan modal tambah/edit produk (16px, tanpa garis,
+   overflow hidden) supaya tidak ada modal yang beda bentuk.
+   ============================================================ */
+.modal-content.stock-panel {
+    background: #fff !important;
+    border: 0 !important;
+    border-radius: 16px !important;
+    overflow: hidden;
+    box-shadow: 0 20px 40px rgba(15, 23, 42, .25);
+}
+
+.stock-panel .btn-close {
+    filter: brightness(0) invert(1);
+}
+
+/* jaga agar elemen di dalam modal tidak ikut transparan saat
+   animasi modal Bootstrap berjalan */
+.modal-content.stock-panel * {
+    opacity: 1 !important;
+}
+
 #addProductModal .btn-close,
 #editProductModal .btn-close {
     filter: brightness(0) invert(1);
@@ -800,8 +826,14 @@ textarea.form-control {
     gap: 10px;
 }
 
-#stockSettingModal .btn-cancel,
-#stockSettingModal #btnSaveStockSetting {
+#stockSettingModal .mp-add-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+#stockSettingModal .mp-add-footer .btn-cancel,
+#stockSettingModal .mp-add-footer .btn-save {
     flex: 0 1 132px;
     min-width: 0;
     height: 44px;
@@ -812,38 +844,22 @@ textarea.form-control {
     justify-content: center;
     gap: 8px;
     font-size: 13.5px;
-    font-weight: 600;
+    font-weight: 700;
     line-height: 1;
     border-radius: 10px;
     white-space: nowrap;
 }
 
-.modal-x-close {
-    position: absolute;
-    top: 14px;
-    right: 14px;
-    z-index: 1060;
-    width: 34px;
-    height: 34px;
-    border: none;
-    border-radius: 50%;
-    background: rgba(15, 23, 42, .55);
-    color: #fff;
-    font-size: 14px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all .3s ease;
+#stockSettingModal .mp-add-footer .btn-cancel {
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    color: #475569;
 }
 
-.modal-x-close:hover {
-    background: rgba(15, 23, 42, .85);
-    transform: rotate(90deg);
-}
-
-.modal-x-close:focus {
-    outline: none;
-    box-shadow: 0 0 0 3px rgba(15, 23, 42, .25);
+#stockSettingModal .mp-add-footer .btn-cancel:hover {
+    background: #f8fafc;
+    border-color: #cbd5e1;
+    color: #334155;
 }
 
 /* DATATABLE WRAPPER */
@@ -1151,13 +1167,16 @@ textarea.form-control {
     font-size: 9.5px;
 }
 /* ============================================================
-   MASTER PRODUK - TABEL MOBILE (gaya kartu, sama seperti
-   panel Stok Kantin di sales-stock.css)
+   MASTER TABEL MOBILE - CARD MODE (produk, customer, supplier, user)
+   Gaya kartu horizontal dengan gradient accent violet
    ============================================================ */
 @media (max-width: 575.98px) {
 
     /* tabel jadi daftar kartu */
-    #productTableContainer #stockTable {
+    #productTableContainer #stockTable,
+    #customerTableContainer #stockTable,
+    #supplierTableContainer #stockTable,
+    #userTableContainer #userTable {
         min-width: 0 !important;
         width: 100% !important;
         border-spacing: 0 !important;
@@ -1166,23 +1185,38 @@ textarea.form-control {
         margin: 0;
     }
 
-    #productTableContainer #stockTable thead {
+    #productTableContainer #stockTable thead,
+    #customerTableContainer #stockTable thead,
+    #supplierTableContainer #stockTable thead,
+    #userTableContainer #userTable thead {
         display: none;
     }
 
     /* .table > :not(:first-child) memberi border-top 2px di tbody */
     #productTableContainer #stockTable > tbody,
-    #productTableContainer #stockTable > tfoot {
+    #productTableContainer #stockTable > tfoot,
+    #customerTableContainer #stockTable > tbody,
+    #customerTableContainer #stockTable > tfoot,
+    #supplierTableContainer #stockTable > tbody,
+    #supplierTableContainer #stockTable > tfoot,
+    #userTableContainer #userTable > tbody,
+    #userTableContainer #userTable > tfoot {
         border-top: 0 !important;
     }
 
-    #productTableContainer #stockTable tbody {
+    #productTableContainer #stockTable tbody,
+    #customerTableContainer #stockTable tbody,
+    #supplierTableContainer #stockTable tbody,
+    #userTableContainer #userTable tbody {
         display: flex;
         flex-direction: column;
         gap: 7px;
     }
 
-    #productTableContainer #stockTable tbody tr {
+    #productTableContainer #stockTable tbody tr,
+    #customerTableContainer #stockTable tbody tr,
+    #supplierTableContainer #stockTable tbody tr,
+    #userTableContainer #userTable tbody tr {
         display: flex !important;
         align-items: center;
         gap: 10px;
@@ -1199,7 +1233,10 @@ textarea.form-control {
     }
 
     /* aksen ungu di sisi kiri */
-    #productTableContainer #stockTable tbody tr::before {
+    #productTableContainer #stockTable tbody tr::before,
+    #customerTableContainer #stockTable tbody tr::before,
+    #supplierTableContainer #stockTable tbody tr::before,
+    #userTableContainer #userTable tbody tr::before {
         content: "";
         position: absolute;
         left: 0;
@@ -1212,7 +1249,13 @@ textarea.form-control {
     }
 
     #productTableContainer #stockTable tbody tr:hover,
-    #productTableContainer #stockTable tbody tr:active {
+    #productTableContainer #stockTable tbody tr:active,
+    #customerTableContainer #stockTable tbody tr:hover,
+    #customerTableContainer #stockTable tbody tr:active,
+    #supplierTableContainer #stockTable tbody tr:hover,
+    #supplierTableContainer #stockTable tbody tr:active,
+    #userTableContainer #userTable tbody tr:hover,
+    #userTableContainer #userTable tbody tr:active {
         transform: none;
         box-shadow: none;
     }
@@ -1220,13 +1263,25 @@ textarea.form-control {
     /* matikan efek hover abu-abu (.table-hover) di mobile */
     #productTableContainer #stockTable.table-hover > tbody > tr:hover > *,
     #productTableContainer #stockTable.table-hover > tbody > tr:hover > td,
-    #productTableContainer #stockTable.table-hover > tbody > tr:hover > th {
+    #productTableContainer #stockTable.table-hover > tbody > tr:hover > th,
+    #customerTableContainer #stockTable.table-hover > tbody > tr:hover > *,
+    #customerTableContainer #stockTable.table-hover > tbody > tr:hover > td,
+    #customerTableContainer #stockTable.table-hover > tbody > tr:hover > th,
+    #supplierTableContainer #stockTable.table-hover > tbody > tr:hover > *,
+    #supplierTableContainer #stockTable.table-hover > tbody > tr:hover > td,
+    #supplierTableContainer #stockTable.table-hover > tbody > tr:hover > th,
+    #userTableContainer #userTable.table-hover > tbody > tr:hover > *,
+    #userTableContainer #userTable.table-hover > tbody > tr:hover > td,
+    #userTableContainer #userTable.table-hover > tbody > tr:hover > th {
         box-shadow: none !important;
         background-color: transparent !important;
         color: inherit;
     }
 
-    #productTableContainer #stockTable tbody td {
+    #productTableContainer #stockTable tbody td,
+    #customerTableContainer #stockTable tbody td,
+    #supplierTableContainer #stockTable tbody td,
+    #userTableContainer #userTable tbody td {
         display: block !important;
         width: auto !important;
         border: none !important;
@@ -1235,47 +1290,63 @@ textarea.form-control {
         vertical-align: middle;
     }
 
-    #productTableContainer #stockTable tbody td:first-child {
+    #productTableContainer #stockTable tbody td:first-child,
+    #customerTableContainer #stockTable tbody td:first-child,
+    #supplierTableContainer #stockTable tbody td:first-child,
+    #userTableContainer #userTable tbody td:first-child {
         flex: 1 1 auto;
         min-width: 0;
     }
 
-    /* kolom Kode & Kategori disembunyikan (infonya inline di sel produk) */
+    /* kolom desktop-only disembunyikan (info inline di sel pertama) */
     #productTableContainer #stockTable tbody td.mp-col-kode,
-    #productTableContainer #stockTable tbody td.mp-col-kat {
+    #productTableContainer #stockTable tbody td.mp-col-kat,
+    #customerTableContainer #stockTable tbody td.mp-col-phone,
+    #supplierTableContainer #stockTable tbody td.mp-col-phone,
+    #supplierTableContainer #stockTable tbody td.mp-col-address,
+    #userTableContainer #userTable tbody td.mp-col-role,
+    #userTableContainer #userTable tbody td.mp-col-date {
         display: none !important;
     }
 
-    /* harga jual */
-    #productTableContainer #stockTable tbody td:nth-child(4) {
-        display: flex !important;
-        flex: 0 0 auto;
-        justify-content: flex-end;
-    }
-
-    /* tombol aksi */
-    #productTableContainer #stockTable tbody td:last-child {
+    /* kolom akhir (aksi) */
+    #productTableContainer #stockTable tbody td:last-child,
+    #customerTableContainer #stockTable tbody td:last-child,
+    #supplierTableContainer #stockTable tbody td:last-child,
+    #userTableContainer #userTable tbody td:last-child {
         flex: 0 0 auto;
         float: none;
         margin: 0;
     }
 
-    /* produk */
-    #productTableContainer .product-wrap {
+    /* wrap avatar + text */
+    #productTableContainer .product-wrap,
+    #customerTableContainer .product-wrap,
+    #supplierTableContainer .product-wrap,
+    #userTableContainer .product-wrap {
         display: flex;
         align-items: center;
         gap: 10px;
         min-width: 0;
     }
 
-    #productTableContainer .product-wrap > div:not(.product-img-placeholder) {
+    #productTableContainer .product-wrap > div:not(.product-img-placeholder),
+    #customerTableContainer .product-wrap > div:not(.product-img-placeholder),
+    #supplierTableContainer .product-wrap > div:not(.product-img-placeholder),
+    #userTableContainer .product-wrap > div:not(.product-img-placeholder):not(.avatar) {
         flex: 1 1 auto;
         min-width: 0;
     }
 
 
     #productTableContainer .product-img,
-    #productTableContainer .product-img-placeholder {
+    #productTableContainer .product-img-placeholder,
+    #customerTableContainer .product-img,
+    #customerTableContainer .product-img-placeholder,
+    #supplierTableContainer .product-img,
+    #supplierTableContainer .product-img-placeholder,
+    #userTableContainer .avatar-photo,
+    #userTableContainer .avatar {
         width: 36px;
         height: 36px;
         flex: 0 0 36px;
@@ -1284,22 +1355,29 @@ textarea.form-control {
         box-shadow: 0 0 0 2px #fff, 0 0 0 3px rgba(99, 102, 241, .28);
     }
 
-    /* placeholder tanpa foto: gradasi warna, bukan kotak gelap */
-    #productTableContainer .product-img-placeholder {
+    /* placeholder tanpa foto: gradasi warna */
+    #productTableContainer .product-img-placeholder,
+    #customerTableContainer .product-img-placeholder,
+    #supplierTableContainer .product-img-placeholder {
         font-size: 16px;
         color: #fff;
         background: linear-gradient(140deg, #6366f1, #8b5cf6);
         box-shadow: 0 0 0 2px #fff, 0 0 0 3px rgba(99, 102, 241, .32);
     }
 
-    /* ikon di dalam placeholder ikut square & proporsional seperti foto */
-    #productTableContainer .product-img-placeholder i {
+    #productTableContainer .product-img-placeholder i,
+    #customerTableContainer .product-img-placeholder i,
+    #supplierTableContainer .product-img-placeholder i,
+    #userTableContainer .avatar i {
         font-size: 16px;
         line-height: 1;
     }
 
 
-    #productTableContainer .product-wrap .fw-bold {
+    #productTableContainer .product-wrap .fw-bold,
+    #customerTableContainer .product-wrap .fw-bold,
+    #supplierTableContainer .product-wrap .fw-bold,
+    #userTableContainer .product-wrap .fw-bold {
         font-size: 12px;
         font-weight: 700;
         color: #0f172a;
@@ -1310,15 +1388,21 @@ textarea.form-control {
         overflow-wrap: anywhere;
     }
 
-    /* kode + kategori inline */
-    #productTableContainer .mp-meta {
+    /* meta inline (kode, telepon, username, dll) */
+    #productTableContainer .mp-meta,
+    #customerTableContainer .mp-meta,
+    #supplierTableContainer .mp-meta,
+    #userTableContainer .mp-meta {
         display: flex;
         align-items: center;
         gap: 6px;
         min-width: 0;
     }
 
-    #productTableContainer .mp-meta small {
+    #productTableContainer .mp-meta small,
+    #customerTableContainer .mp-meta small,
+    #supplierTableContainer .mp-meta small,
+    #userTableContainer .mp-meta small {
         font-size: 9.5px;
         font-weight: 600;
         letter-spacing: .5px;
@@ -1326,6 +1410,13 @@ textarea.form-control {
         line-height: 1.3;
         white-space: normal;
         overflow-wrap: anywhere;
+    }
+
+    /* pemisah antar meta (mis. telepon • alamat) */
+    #supplierTableContainer .mp-meta .mp-meta-sep::before {
+        content: "•";
+        margin-right: 6px;
+        color: #cbd5e1;
     }
 
     #productTableContainer .mp-cat-inline {
@@ -1367,7 +1458,10 @@ textarea.form-control {
 
 
     /* tombol aksi */
-    #productTableContainer #stockTable tbody .action-btn {
+    #productTableContainer #stockTable tbody .action-btn,
+    #customerTableContainer #stockTable tbody .action-btn,
+    #supplierTableContainer #stockTable tbody .action-btn,
+    #userTableContainer #userTable tbody .action-btn {
         width: 32px;
         height: 32px;
         margin: 0;
@@ -1376,7 +1470,10 @@ textarea.form-control {
     }
 
     /* empty state: tanpa kartu, tanpa aksen, gambar di tengah */
-    #productTableContainer #stockTable tbody tr:has(.empty-search) {
+    #productTableContainer #stockTable tbody tr:has(.empty-search),
+    #customerTableContainer #stockTable tbody tr:has(.empty-search),
+    #supplierTableContainer #stockTable tbody tr:has(.empty-search),
+    #userTableContainer #userTable tbody tr:has(.empty-search) {
         padding: 0;
         background: transparent;
         border: none;
@@ -1385,48 +1482,57 @@ textarea.form-control {
         justify-content: center;
     }
 
-    #productTableContainer #stockTable tbody tr:has(.empty-search)::before {
+    #productTableContainer #stockTable tbody tr:has(.empty-search)::before,
+    #customerTableContainer #stockTable tbody tr:has(.empty-search)::before,
+    #supplierTableContainer #stockTable tbody tr:has(.empty-search)::before,
+    #userTableContainer #userTable tbody tr:has(.empty-search)::before {
         content: none;
     }
 
-    #productTableContainer #stockTable tbody tr:has(.empty-search) > td {
+    #productTableContainer #stockTable tbody tr:has(.empty-search) > td,
+    #customerTableContainer #stockTable tbody tr:has(.empty-search) > td,
+    #supplierTableContainer #stockTable tbody tr:has(.empty-search) > td,
+    #userTableContainer #userTable tbody tr:has(.empty-search) > td {
         flex: 1 1 100% !important;
         width: 100% !important;
         padding: 0 !important;
         border: 0 !important;
     }
 
-    #productTableContainer #stockTable tbody .empty-search {
+    #productTableContainer #stockTable tbody .empty-search,
+    #customerTableContainer #stockTable tbody .empty-search,
+    #supplierTableContainer #stockTable tbody .empty-search,
+    #userTableContainer #userTable tbody .empty-search {
         padding: 14px 10px 18px;
         text-align: center;
     }
 
-    #productTableContainer #stockTable tbody .empty-img {
+    #productTableContainer #stockTable tbody .empty-img,
+    #customerTableContainer #stockTable tbody .empty-img,
+    #supplierTableContainer #stockTable tbody .empty-img,
+    #userTableContainer #userTable tbody .empty-img {
         display: block;
         width: 120px;
         margin: 0 auto 8px;
         opacity: .8;
     }
 
-    #productTableContainer #stockTable tbody .empty-title {
+    #productTableContainer #stockTable tbody .empty-title,
+    #customerTableContainer #stockTable tbody .empty-title,
+    #supplierTableContainer #stockTable tbody .empty-title,
+    #userTableContainer #userTable tbody .empty-title {
         font-size: 12.5px;
         font-weight: 700;
         color: #0f172a;
         margin-bottom: 4px;
     }
 
-    #productTableContainer #stockTable tbody .empty-sub {
+    #productTableContainer #stockTable tbody .empty-sub,
+    #customerTableContainer #stockTable tbody .empty-sub,
+    #supplierTableContainer #stockTable tbody .empty-sub,
+    #userTableContainer #userTable tbody .empty-sub {
         font-size: 10.5px;
         color: #64748b;
-    }
-
-    /* search full width */
-    #productTableContainer .dataTables_filter {
-        width: 100%;
-    }
-
-    #productTableContainer .dataTables_filter input {
-        width: 100% !important;
     }
 }
 /* ============================================================
@@ -1541,16 +1647,14 @@ textarea.form-control {
 
     #productTableContainer #btnContainer,
     #customerTableContainer #btnContainer,
-    #supplierTableContainer #btnContainer,
-    #userTableContainer .mu-toolbar {
+    #supplierTableContainer #btnContainer {
         display: block;
         width: 100%;
     }
 
     #productTableContainer .mu-add-btn,
     #customerTableContainer .mu-add-btn,
-    #supplierTableContainer .mu-add-btn,
-    #userTableContainer .mu-add-btn {
+    #supplierTableContainer .mu-add-btn {
         width: 100%;
         height: 44px;
         border-radius: 14px;
@@ -1560,8 +1664,7 @@ textarea.form-control {
 
     #productTableContainer .mu-add-btn:active,
     #customerTableContainer .mu-add-btn:active,
-    #supplierTableContainer .mu-add-btn:active,
-    #userTableContainer .mu-add-btn:active {
+    #supplierTableContainer .mu-add-btn:active {
         transform: scale(.985);
         box-shadow: 0 6px 14px rgba(79, 70, 229, .3);
     }
@@ -1774,6 +1877,19 @@ textarea.form-control {
 
     .mp-add-footer .btn-save {
         width: 100%;
+    }
+
+    /* Modal 2 tombol (Batal + Save): dibagi rata, tetap 1 baris */
+    #stockSettingModal .mp-add-footer {
+        gap: 10px;
+    }
+
+    #stockSettingModal .mp-add-footer .btn-cancel,
+    #stockSettingModal .mp-add-footer .btn-save {
+        flex: 1 1 0;
+        width: auto;
+        min-width: 0;
+        padding: 0 12px;
     }
 }
 

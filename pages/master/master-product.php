@@ -175,28 +175,26 @@ include __DIR__ . '/../components/data/stock-status.php';
         <div class="modal-dialog modal-md modal-dialog-centered">
             <div class="modal-content stock-panel border-0">
 
-                <div class="panel-header panel-primary my-3 mx-3" id="stockSettingHeader">
+                <div class="panel-header panel-dark my-3 mx-3 mp-add-header" id="stockSettingHeader">
                     <div class="panel-left">
                         <div class="panel-icon">
                             <i class="fas fa-gauge-high"></i>
                         </div>
 
-                        <div>
+                        <div class="mp-add-head-text">
                             <div class="panel-title">
                                 Batas Stok Global
                             </div>
                             <div class="panel-subtitle">
-                                Default batas stok menipis untuk semua produk baru
+                                Default batas stok menipis untuk produk baru
                             </div>
                         </div>
                     </div>
 
-                    <button type="button" class="modal-x-close" data-bs-dismiss="modal" aria-label="Tutup">
-                        <i class="fas fa-times"></i>
-                    </button>
+                    <button class="btn-close btn-close-white mp-add-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
                 </div>
 
-                <div class="mt-2 px-5 pb-4">
+                <div class="mt-2 px-5 mp-add-body">
                     <label class="form-label"><i class="fas fa-gauge-high me-1"></i> Batas Stok Menipis (default)</label>
                     <div class="input-group-modern">
                         <div class="input-icon">
@@ -213,10 +211,11 @@ include __DIR__ . '/../components/data/stock-status.php';
                         Status stok: 0 = Habis, 1 s/d batas = Menipis, di atas batas = Ready. Produk lama memakai batasnya sendiri, produk baru memakai nilai ini.
                     </small>
 
-                    <div class="text-end mt-4">
-                        <button type="button" class="btn btn-cancel me-2" data-bs-dismiss="modal">Batal</button>
-                        <button type="button" class="btn btn-primary" id="btnSaveStockSetting">
-                            <i class="fas fa-save me-1"></i> Simpan
+                    <div class="mp-add-footer">
+                        <button type="button" class="btn btn-cancel" data-bs-dismiss="modal">Batal</button>
+                        <button type="button" class="btn btn-save" id="btnSaveStockSetting">
+                            <i class="fas fa-save"></i>
+                            Save
                         </button>
                     </div>
                 </div>

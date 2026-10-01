@@ -17,18 +17,22 @@ include '../../sessions/session.php';
     <tr class="stock-row">
         <td>
             <div class="product-wrap">
-                <div class="product-img-placeholder" style="background:linear-gradient(135deg,#059669,#10b981);">
+                <div class="product-img-placeholder">
                     <i class="fas fa-truck"></i>
                 </div>
                 <div>
                     <div class="fw-bold"><?= htmlspecialchars($d['name']) ?></div>
+                    <div class="mp-meta">
+                        <small class="text-muted"><?= htmlspecialchars($d['phone'] ?: '-') ?></small>
+                        <small class="text-muted mp-meta-sep"><?= htmlspecialchars($d['address'] ?: '-') ?></small>
+                    </div>
                 </div>
             </div>
         </td>
-        <td class="text-center">
+        <td class="text-center mp-col-phone">
             <span class="unit-badge"><?= htmlspecialchars($d['phone'] ?: '-') ?></span>
         </td>
-        <td class="text-center">
+        <td class="text-center mp-col-address">
             <span class="stock-badge stock-success"><?= htmlspecialchars($d['address'] ?: '-') ?></span>
         </td>
         <td class="text-center">
