@@ -1594,25 +1594,38 @@ textarea.form-control {
 }
 
 /* ============================================================
-   MODAL TAMBAH PRODUK
+   MODAL TAMBAH PRODUK (spesifik untuk produk)
 
    Desktop & tablet: tampilan tetap seperti semula
    (header tetap my-3 mx-3, konten tetap mt-2 px-5, input foto
    masih lengkap dengan input file + petunjuk format).
 
    Yang dirapikan hanya mobile (<=575.98px):
+   - input foto diminimalkan (preview + label saja)
+   ============================================================ */
+
+/* ============================================================
+   MODAL FORM (generik)
+
+   .mp-add-header / .mp-add-head-text / .mp-add-body /
+   .mp-add-close / .mp-add-footer dipakai bersama oleh semua
+   modal master (produk, customer, supplier, user).
+
+   Desktop & tablet: .mp-add-body tetap mt-2 px-5 dari HTML,
+   .mp-add-footer tetap rata kanan.
+
+   Yang dirapikan hanya mobile (<=575.98px):
    - gutter konten = gutter header (rata kiri-kanan)
    - header satu baris, tombol X tidak jatuh ke baris sendiri
-   - input foto diminimalkan (preview + label saja)
    - tombol Save jadi baris penuh
    ============================================================ */
-#addProductModal .mp-add-footer {
+.mp-add-footer {
     margin-top: 24px;
     margin-bottom: 16px;
     text-align: right;
 }
 
-#addProductModal .mp-add-footer .btn-save {
+.mp-add-footer .btn-save {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -1628,42 +1641,40 @@ textarea.form-control {
     transition: transform .18s ease, box-shadow .18s ease, background .2s;
 }
 
-#addProductModal .mp-add-footer .btn-save i {
-    font-size: 13px;
-}
+.mp-add-footer .btn-save i { font-size: 13px; }
 
-#addProductModal .mp-add-footer .btn-save:hover {
+.mp-add-footer .btn-save:hover {
     color: #fff;
     transform: translateY(-1px);
     box-shadow: 0 14px 24px -12px rgba(15, 23, 42, .85);
 }
 
-#addProductModal .mp-add-footer .btn-save:active {
-    transform: translateY(0);
-}
+.mp-add-footer .btn-save:active { transform: translateY(0); }
 
 @media (max-width: 575.98px) {
 
     /* ---------- HEADER ---------- */
-    #addProductModal .mp-add-header {
-        flex-direction: row;
-        flex-wrap: nowrap;
-        align-items: center;
+    .mp-add-header {
+        flex-direction: row !important;
+        flex-wrap: nowrap !important;
+        align-items: center !important;
         gap: 10px;
         margin: 12px 12px 0 !important;
         padding: 12px 14px;
     }
 
-    #addProductModal .mp-add-header .panel-left {
+    .mp-add-header .panel-left {
         gap: 10px;
         min-width: 0;
+        flex: 1;
     }
 
-    #addProductModal .mp-add-head-text {
+    .mp-add-head-text {
         min-width: 0;
+        flex: 1;
     }
 
-    #addProductModal .mp-add-header .panel-icon {
+    .mp-add-header .panel-icon {
         width: 40px;
         height: 40px;
         border-radius: 12px;
@@ -1671,30 +1682,47 @@ textarea.form-control {
         flex: 0 0 auto;
     }
 
-    #addProductModal .mp-add-header .panel-title {
+    .mp-add-header .panel-title {
         font-size: 15px;
         line-height: 1.25;
     }
 
-    #addProductModal .mp-add-header .panel-subtitle {
+    .mp-add-header .panel-subtitle {
         font-size: 11px;
         line-height: 1.45;
         margin-top: 2px;
     }
 
-    #addProductModal .mp-add-close {
+    .mp-add-close {
         flex: 0 0 auto;
         margin: 0;
         align-self: center;
     }
 
     /* ---------- BODY: gutter sama dengan header ---------- */
-    #addProductModal .mp-add-body {
+    .mp-add-body {
         margin: 0 !important;
         padding: 12px 12px 0 !important;
     }
 
-    /* ---------- INPUT FOTO: MINIMAL ---------- */
+    /* ---------- FOOTER + TOMBOL SAVE ---------- */
+    .mp-add-footer {
+        display: flex;
+        justify-content: center;
+        margin: 16px 0 0;
+        padding: 14px 0 18px;
+        border-top: 1px solid #e2e8f0;
+        text-align: initial;
+    }
+
+    .mp-add-footer .btn-save {
+        width: 100%;
+    }
+}
+
+@media (max-width: 575.98px) {
+
+    /* ---------- INPUT FOTO: MINIMAL (spesifik produk) ---------- */
     #addProductModal .photo-upload-box {
         position: relative;
         flex-direction: row;
@@ -1719,19 +1747,5 @@ textarea.form-control {
     #addProductModal .photo-upload-box .photo-input-details input[type="file"],
     #addProductModal .photo-upload-box .photo-input-details small {
         display: none;
-    }
-
-    /* ---------- FOOTER + TOMBOL SAVE ---------- */
-    #addProductModal .mp-add-footer {
-        display: flex;
-        justify-content: center;
-        margin: 16px 0 0;
-        padding: 14px 0 18px;
-        border-top: 1px solid #e2e8f0;
-        text-align: initial;
-    }
-
-    #addProductModal .mp-add-footer .btn-save {
-        width: 100%;
     }
 }
