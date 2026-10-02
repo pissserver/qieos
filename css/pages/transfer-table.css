@@ -1,241 +1,920 @@
-﻿.request-card{
-    background:#fff;
-    border-radius:18px;
-    padding:20px;
-    margin-bottom:15px;
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    gap:20px;
-    box-shadow:0 8px 18px rgba(15,23,42,.05);
-    transition: box-shadow .2s ease, transform .2s ease;
-    border:1px solid #f1f5f9;
+﻿/* =========================================================
+   PANEL REQUEST PENDING - Transfer Gudang
+   -------------------------------------------------------------
+   Redraw: premium minimalis, tiga breakpoint (desktop / tablet /
+   mobile).
+
+   Token lokal dipakai supaya gaya kartu ini tidak bocor ke tabel
+   riwayat yang memakai komponen bersama
+   (pages/components/tables/history-request-table.php).
+
+   Semua selector WAJIB di-scope ke .transfer-pending-card.
+   Kartu pending dan tabel riwayat sama-sama memakai
+   .status-badge; tanpa scope, gaya pending akan menimpa riwayat.
+   ========================================================= */
+
+.transfer-pending-card {
+
+    --rc-ink: #0f172a;
+    --rc-body: #475569;
+    --rc-muted: #94a3b8;
+
+    --rc-line: #e8edf5;
+    --rc-line-soft: #eef2f7;
+    --rc-surface: #f8fafc;
+    --rc-surface-head: #fbfcfe;
+
+    --rc-indigo: #4f46e5;
+    --rc-indigo-soft: #eef2ff;
+    --rc-indigo-line: #e0e7ff;
+
+    --rc-amber: #b45309;
+    --rc-amber-soft: #fffbeb;
+    --rc-amber-line: #fde68a;
+
+    --rc-red: #dc2626;
+    --rc-red-soft: #fef2f2;
+    --rc-red-line: #fecaca;
 }
 
-.request-card:hover{
-    transform:translateY(-3px);
-    box-shadow:0 15px 30px rgba(15,23,42,.10);
+/* ---------- KARTU ---------- */
+
+.transfer-pending-card .request-card {
+    position: relative;
+    margin-bottom: 16px;
+    border: 1px solid var(--rc-line);
+    border-radius: 22px;
+    background: #fff;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, .03), 0 14px 30px -18px rgba(15, 23, 42, .22);
+    overflow: hidden;
+    transition: box-shadow .3s ease, border-color .3s ease, transform .3s ease;
 }
 
-.request-main{
-    flex:1 1 auto;
-    min-width:0;
+.transfer-pending-card .request-card:last-child {
+    margin-bottom: 0;
 }
 
-.request-head{
-    display:flex;
-    align-items:center;
-    gap:16px;
-    flex-wrap:wrap;
+.transfer-pending-card .request-card:hover {
+    border-color: #dce4f0;
+    box-shadow: 0 2px 4px rgba(15, 23, 42, .04), 0 26px 46px -22px rgba(15, 23, 42, .26);
+    transform: translateY(-2px);
 }
 
-.req-code-pill{
-    display:inline-flex;
-    align-items:center;
-    padding:10px 16px;
-    border-radius:12px;
-    background:linear-gradient(135deg,#1e293b,#0f172a);
-    color:#fff;
-    font-family:'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-    font-weight:800;
-    font-size:14px;
-    letter-spacing:.6px;
-    box-shadow:0 6px 14px rgba(15,23,42,.22);
+/* ---------- RAIL PENANDA ---------- */
+
+.transfer-pending-card .request-rail {
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 4px;
+    background: linear-gradient(180deg, #fbbf24 0%, #f59e0b 55%, #fb923c 100%);
 }
 
-.req-code-pill i{
-    color:#818cf8;
+/* ---------- KEPALA ---------- */
+
+.transfer-pending-card .request-head {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    width: 100%;
+    margin: 0;
+    padding: 16px 18px 16px 22px;
+    border: 0;
+    background: none;
+    color: inherit;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+    appearance: none;
+    -webkit-appearance: none;
+    transition: background .25s ease;
 }
 
-.req-by{
-    background:#f8fafc;
-    border:1px solid #e2e8f0;
-    color:#334155;
-    padding:8px 12px;
-    border-radius:10px;
-    font-size:13px;
-    font-weight:600;
+.transfer-pending-card .request-head:hover {
+    background: var(--rc-surface-head);
 }
 
-.request-left{
-    display:flex;
-    align-items:center;
-    gap:16px;
+.transfer-pending-card .request-head:active .request-mark {
+    transform: scale(.97);
 }
 
-.product-avatar{
-    width:58px;
-    height:58px;
-    border-radius:16px;
-    background:linear-gradient(135deg,#334155,#0f172a);
-    color:#fff;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    font-size:22px;
+.transfer-pending-card .request-head:focus-visible {
+    outline: 2px solid #6366f1;
+    outline-offset: -3px;
 }
 
-.product-name{
-    font-size:15px;
-    font-weight:700;
-    color:#0f172a;
+.transfer-pending-card .request-mark {
+    flex: 0 0 44px;
+    width: 44px;
+    height: 44px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(140deg, #eef2ff 0%, #e0e7ff 100%);
+    border: 1px solid rgba(79, 70, 229, .10);
+    color: var(--rc-indigo);
+    font-size: 16px;
+    box-shadow: 0 6px 14px -8px rgba(79, 70, 229, .45);
 }
 
-.product-code{
-    font-size:12px;
-    color:#64748b;
+.transfer-pending-card .request-head-text {
+    flex: 1 1 auto;
+    min-width: 0;
 }
 
-.request-meta{
-    display:flex;
-    gap:10px;
-    flex-wrap:wrap;
+.transfer-pending-card .request-code {
+    display: block;
+    color: var(--rc-ink);
+    font-size: 15px;
+    font-weight: 800;
+    letter-spacing: .2px;
+    line-height: 1.25;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
-.qty-badge{
-    background:#eef2ff;
-    color:#4338ca;
-    padding:8px 12px;
-    border-radius:10px;
-    font-size:13px;
-    font-weight:600;
-    white-space:nowrap;
+.transfer-pending-card .request-by {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 3px;
+    color: var(--rc-muted);
+    font-size: 11.5px;
+    font-weight: 600;
+    line-height: 1.3;
 }
 
-.date-badge{
-    background:#f8fafc;
-    border:1px solid #e2e8f0;
-    color:#334155;
-    padding:8px 12px;
-    border-radius:10px;
-    font-size:13px;
-    font-weight:600;
+.transfer-pending-card .request-by>span {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    min-width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
-/* LIST ITEM */
-.request-items{
-    margin-top:14px;
-    border-top:1px dashed #e2e8f0;
-    padding-top:12px;
+.transfer-pending-card .request-by i {
+    flex: 0 0 auto;
+    font-size: 10px;
+    color: #b8c1ce;
 }
 
-.mini-item{
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    gap:14px;
-    background:#f8fafc;
-    border:1px solid #f1f5f9;
-    border-radius:12px;
-    padding:9px 14px;
-    margin-bottom:8px;
-    transition:.2s;
+.transfer-pending-card .request-by-dot {
+    flex: 0 0 3px;
+    width: 3px;
+    height: 3px;
+    border-radius: 50%;
+    background: #cbd5e1;
 }
 
-.mini-item:hover{
-    border-color:#c7d2fe;
-    background:#fafbff;
+/* ---------- KELOMPOK KANAN (status + angka) ---------- */
+
+.transfer-pending-card .request-side {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
 }
 
-.mini-item:last-child{
-    margin-bottom:0;
+/* badge status:override .status-badge bawaan riwayat */
+.transfer-pending-card .request-head .status-badge {
+    gap: 6px;
+    padding: 7px 12px !important;
+    border-radius: 999px !important;
+    font-size: 11.5px !important;
+    font-weight: 700;
+    line-height: 1;
+    white-space: nowrap;
+    background: var(--rc-amber-soft);
+    color: var(--rc-amber);
+    box-shadow: inset 0 0 0 1px var(--rc-amber-line);
 }
 
-.mini-prod{
-    display:flex;
-    align-items:center;
-    gap:12px;
-    min-width:0;
+.transfer-pending-card .request-head .status-badge i {
+    font-size: 10px;
 }
 
-.product-avatar-sm,
-.product-img-sm{
-    width:38px;
-    height:38px;
-    border-radius:10px;
-    flex:0 0 38px;
+.transfer-pending-card .stat-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 11px;
+    border: 1px solid var(--rc-line-soft);
+    border-radius: 10px;
+    background: #fff;
+    color: var(--rc-body);
+    font-size: 11.5px;
+    font-weight: 700;
+    line-height: 1;
+    white-space: nowrap;
 }
 
-.product-avatar-sm{
-    background:linear-gradient(135deg,#eef2ff,#e0e7ff);
-    color:#4338ca;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    font-size:14px;
+.transfer-pending-card .stat-chip i {
+    font-size: 10px;
+    color: #a9b4c3;
 }
 
-.product-img-sm{
-    object-fit:cover;
-    border:2px solid #e2e8f0;
+.transfer-pending-card .stat-chip-strong {
+    background: var(--rc-indigo-soft);
+    border-color: var(--rc-indigo-line);
+    color: #4338ca;
+    font-variant-numeric: tabular-nums;
 }
 
-.request-action{
-    display:flex;
-    gap:10px;
-    flex:0 0 auto;
+.transfer-pending-card .stat-chip-strong i {
+    color: #818cf8;
 }
 
-.btn-approve{
-    border:none;
-    background:linear-gradient(135deg,#16a34a,#15803d);
-    color:#fff;
-    padding:10px 16px;
-    border-radius:12px;
-    font-weight:600;
-    transition:.25s;
+/* ---------- TOMBOL DETAIL ---------- */
+
+.transfer-pending-card .request-toggle {
+    flex: 0 0 auto;
+    height: 40px;
+    padding: 0 14px;
+    border: 1px solid var(--rc-line);
+    border-radius: 12px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #fff;
+    color: #334155;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: -.1px;
+    line-height: 1;
+    white-space: nowrap;
+    transition: background .25s ease, color .25s ease, border-color .25s ease,
+        box-shadow .25s ease;
 }
 
-.btn-approve:hover{
-    transform:translateY(-2px);
-    box-shadow:0 8px 20px rgba(22,163,74,.25);
+.transfer-pending-card .request-head:hover .request-toggle {
+    background: var(--rc-surface);
+    border-color: #dce4f0;
+    color: var(--rc-ink);
 }
 
-.btn-reject-modern{
-    border:none;
-    background:linear-gradient(135deg,#dc2626,#b91c1c);
-    color:#fff;
-    padding:10px 16px;
-    border-radius:12px;
-    font-weight:600;
-    transition:.25s;
+.transfer-pending-card .request-toggle>i {
+    font-size: 10px;
+    transition: transform .38s cubic-bezier(.4, 0, .2, 1);
 }
 
-.btn-reject-modern:hover{
-    transform:translateY(-2px);
-    box-shadow:0 8px 20px rgba(220,38,38,.25);
+.transfer-pending-card .request-toggle-count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 5px;
+    border-radius: 6px;
+    background: #f1f5f9;
+    color: #64748b;
+    font-size: 10.5px;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
 }
 
-.empty-state{
-    text-align:center;
-    padding:60px 20px;
-    color:#64748b;
+.transfer-pending-card .request-head.is-open .request-toggle {
+    background: var(--rc-indigo-soft);
+    border-color: var(--rc-indigo-line);
+    color: #4338ca;
 }
 
-.empty-state i{
-    font-size:48px;
-    margin-bottom:15px;
-    opacity:.5;
+.transfer-pending-card .request-head.is-open .request-toggle>i {
+    transform: rotate(180deg);
 }
 
-@media(max-width:768px){
+.transfer-pending-card .request-head.is-open .request-toggle-count {
+    background: #fff;
+    color: #4338ca;
+}
 
-    .request-card{
-        flex-direction:column;
-        align-items:stretch;
-        gap:15px;
+/* ---------- PANEL DETAIL ---------- */
+/* 0fr -> 1fr: tinggi mengikuti isi tanpa perlu max-height tebakan,
+   daftar panjang tetap bisa digulir lewat .request-items-inner. */
+
+.transfer-pending-card .request-items {
+    display: grid;
+    grid-template-rows: 0fr;
+    opacity: 0;
+    transition: grid-template-rows .38s cubic-bezier(.4, 0, .2, 1), opacity .26s ease;
+}
+
+.transfer-pending-card .request-items.is-open {
+    grid-template-rows: 1fr;
+    opacity: 1;
+}
+
+.transfer-pending-card .request-items-inner {
+    min-height: 0;
+    overflow: hidden;
+}
+
+.transfer-pending-card .request-items.is-open>.request-items-inner {
+    max-height: min(62vh, 520px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+}
+
+.transfer-pending-card .request-items-panel {
+    margin: 12px 12px;
+    padding: 12px 14px 13px;
+    border: 1px solid var(--rc-line-soft);
+    border-radius: 16px;
+    background: var(--rc-surface);
+}
+
+.transfer-pending-card .request-items-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 0 2px 9px;
+    margin-bottom: 3px;
+    border-bottom: 1px solid #e9eef5;
+}
+
+.transfer-pending-card .request-items-title {
+    color: #334155;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+.transfer-pending-card .request-items-total {
+    color: var(--rc-muted);
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 1;
+    white-space: nowrap;
+}
+
+/* ---------- BARIS PRODUK ----------
+   Jarak antar produk 3px: ruang kosong=list, garis rambut hanya
+   pemisah tipis antar baris. Padding vertikal ditipkan supaya tinggi
+   baris mendekati tinggi foto, bukan bertumpuk ruang kosong. */
+
+.transfer-pending-card .item-list {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.transfer-pending-card .item-line {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 2px;
+    border-bottom: 1px solid #e9eef5;
+    transition: background .2s ease;
+}
+
+.transfer-pending-card .item-line:last-child {
+    border-bottom: 0;
+}
+
+.transfer-pending-card .item-prod {
+    margin-top: -30px;
+    margin-bottom: -30px;
+    flex: 1 1 auto;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+}
+
+.transfer-pending-card .item-thumb {
+    flex: 0 0 40px;
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    border: 1px solid #eaeff6;
+    object-fit: cover;
+    background: #fff;
+    box-shadow: 0 4px 10px -6px rgba(15, 23, 42, .38);
+}
+
+.transfer-pending-card .item-thumb-empty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #b9c3d0;
+    font-size: 13px;
+}
+
+.transfer-pending-card .item-text {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.transfer-pending-card .item-name {
+    min-width: 0;
+    color: var(--rc-ink);
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: -.2px;
+    line-height: 1.25;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.transfer-pending-card .item-code {
+    min-width: 0;
+    color: #a7b1bf;
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: .4px;
+    line-height: 1.2;
+    text-transform: uppercase;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.transfer-pending-card .item-qty {
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 12px;
+    border-radius: 10px;
+    background: var(--rc-indigo-soft);
+    color: #4338ca;
+    font-size: 12px;
+    font-weight: 800;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+
+.transfer-pending-card .item-qty i {
+    font-size: 9.5px;
+    color: #818cf8;
+}
+
+.transfer-pending-card .line-more {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    padding: 8px 2px 0;
+    color: var(--rc-muted);
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.transfer-pending-card .line-more i {
+    font-size: 10px;
+}
+
+/* ---------- AKSI ---------- */
+
+.transfer-pending-card .request-action {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    padding: 12px 14px 14px;
+    border-top: 1px solid var(--rc-line-soft);
+}
+
+.transfer-pending-card .btn-approve,
+.transfer-pending-card .btn-reject {
+    position: relative;
+    overflow: hidden;
+    min-height: 44px;
+    padding: 0 16px;
+    border-radius: 13px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: -.1px;
+    line-height: 1;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: transform .18s ease, box-shadow .22s ease, background .22s ease,
+        color .22s ease, border-color .22s ease;
+}
+
+.transfer-pending-card .btn-approve {
+    border: 1px solid transparent;
+    background: linear-gradient(135deg, #4f46e5 0%, #6366f1 55%, #7c6cf5 100%);
+    color: #fff;
+    box-shadow: 0 10px 22px -12px rgba(79, 70, 229, .9);
+}
+
+.transfer-pending-card .btn-approve:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 16px 30px -14px rgba(79, 70, 229, .95);
+}
+
+/* tolak dijaga minimalis: garis tipis merah, merah penuh saat hover */
+.transfer-pending-card .btn-reject {
+    border: 1px solid var(--rc-red-line);
+    background: #fff;
+    color: var(--rc-red);
+}
+
+.transfer-pending-card .btn-reject:hover {
+    background: var(--rc-red-soft);
+    border-color: #fca5a5;
+    transform: translateY(-1px);
+    box-shadow: 0 10px 20px -14px rgba(220, 38, 38, .85);
+}
+
+.transfer-pending-card .btn-approve:active,
+.transfer-pending-card .btn-reject:active {
+    transform: translateY(0);
+}
+
+/* sapuan cahaya pada tombol utama */
+.transfer-pending-card .btn-approve::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: 60%;
+    background: linear-gradient(110deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, .28) 50%, rgba(255, 255, 255, 0) 100%);
+    transform: translateX(-130%);
+    pointer-events: none;
+    transition: transform .55s ease;
+}
+
+.transfer-pending-card .btn-approve:hover::after {
+    transform: translateX(180%);
+}
+
+.transfer-pending-card .btn-approve i,
+.transfer-pending-card .btn-reject i {
+    font-size: 11px;
+}
+
+/* ---------- FOKUS KEYBOARD ---------- */
+
+.transfer-pending-card .request-action :focus-visible {
+    outline: 2px solid #6366f1;
+    outline-offset: 2px;
+    border-radius: 13px;
+}
+
+/* ---------- KOSONG ---------- */
+
+.transfer-pending-card .empty-state {
+    padding: 40px 20px;
+    border: 1px dashed var(--rc-line);
+    border-radius: 20px;
+    background: linear-gradient(180deg, var(--rc-surface-head), #fff);
+    text-align: center;
+    color: var(--rc-muted);
+}
+
+.transfer-pending-card .empty-mark {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 52px;
+    height: 52px;
+    margin-bottom: 12px;
+    border-radius: 16px;
+    background: #fff;
+    border: 1px solid var(--rc-line);
+    box-shadow: 0 10px 22px -16px rgba(15, 23, 42, .5);
+    color: #c3ccd9;
+    font-size: 19px;
+}
+
+.transfer-pending-card .empty-title {
+    margin: 0 0 5px;
+    color: #334155;
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.transfer-pending-card .empty-text {
+    display: block;
+    max-width: 360px;
+    margin: 0 auto;
+    font-size: 11.5px;
+    line-height: 1.55;
+}
+
+/* ---------- HEMAT GERAKAN ---------- */
+
+@media (prefers-reduced-motion: reduce) {
+
+    .transfer-pending-card .request-card,
+    .transfer-pending-card .request-head,
+    .transfer-pending-card .request-toggle,
+    .transfer-pending-card .request-toggle>i,
+    .transfer-pending-card .request-items,
+    .transfer-pending-card .btn-approve,
+    .transfer-pending-card .btn-reject,
+    .transfer-pending-card .btn-approve::after {
+        transition-duration: .01ms !important;
+    }
+}
+
+/* =========================================================
+   TABLET
+   Sidebar 260px membuat area konten lebih sempit dari viewport,
+   jadi kelompok status/angka turun ke baris kedua lebih dulu.
+   ========================================================= */
+
+@media (max-width: 991.98px) {
+    .transfer-pending-card .request-card {
+        margin-bottom: 14px;
+        border-radius: 20px;
     }
 
-    .request-action{
-        width:100%;
+    .transfer-pending-card .request-head {
+        flex-wrap: wrap;
+        align-items: flex-start;
+        gap: 12px;
+        padding: 14px 16px 14px 20px;
     }
 
-    .request-action button{
-        flex:1;
+    .transfer-pending-card .request-head-text {
+        flex: 1 1 0;
+        padding-top: 3px;
     }
 
-    .mini-item{
-        flex-wrap:wrap;
+    .transfer-pending-card .request-toggle {
+        align-self: center;
     }
 
+    .transfer-pending-card .request-side {
+        flex: 1 0 100%;
+        margin-left: 76px;
+    }
+
+    .transfer-pending-card .request-items-panel {
+        margin: 10px 10px;
+        padding: 11px 12px 12px;
+    }
+
+    .transfer-pending-card .item-line {
+        gap: 8px;
+        padding: 2px;
+    }
+
+    .transfer-pending-card .item-prod {
+        gap: 8px;
+    }
+
+    .transfer-pending-card .item-thumb {
+        flex: 0 0 36px;
+        width: 36px;
+        height: 36px;
+        border-radius: 11px;
+        font-size: 12px;
+    }
+
+    .transfer-pending-card .item-name {
+        font-size: 12.5px;
+    }
+
+    .transfer-pending-card .item-code {
+        font-size: 10px;
+    }
+
+    .transfer-pending-card .item-qty {
+        padding: 6px 11px;
+        font-size: 11.5px;
+    }
+
+    .transfer-pending-card .request-action {
+        padding: 11px 12px 13px;
+    }
+}
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width: 575.98px) {
+    .transfer-pending-card .request-card {
+        margin-bottom: 12px;
+        border-radius: 18px;
+    }
+
+    .transfer-pending-card .request-card:hover {
+        transform: none;
+    }
+
+    .transfer-pending-card .request-head {
+        flex-wrap: wrap;
+        gap: 10px;
+        padding: 12px 12px 12px 16px;
+    }
+
+    .transfer-pending-card .request-mark {
+        flex: 0 0 38px;
+        width: 38px;
+        height: 38px;
+        border-radius: 12px;
+        font-size: 14px;
+    }
+
+    /* baris 1 penuh oleh ikon + judul, supaya chip status/jumlah dan
+       tombol dropdown turun ke baris 2 dan tombolnya menempel di
+       sebelah kanan chip qty */
+    .transfer-pending-card .request-head-text {
+        flex: 1 1 calc(100% - 48px);
+        padding-top: 2px;
+    }
+
+    .transfer-pending-card .request-code {
+        font-size: 13.5px;
+        letter-spacing: .1px;
+    }
+
+    .transfer-pending-card .request-by {
+        margin-top: 2px;
+        font-size: 10.5px;
+    }
+
+    /* tombol detail: ikon saja, menempel di kanan chip qty.
+       flex 0 1 40px -> boleh menyusut kalau ruang tidak cukup,
+       min-width 32px menjaga target sentuhnya tetap wajar. */
+    .transfer-pending-card .request-toggle {
+        flex: 0 1 40px;
+        min-width: 32px;
+        align-self: center;
+        justify-content: center;
+        margin-left: auto;
+        width: 40px;
+        height: 36px;
+        padding: 0;
+        border-radius: 11px;
+        overflow: hidden;
+    }
+
+    .transfer-pending-card .request-toggle-text {
+        display: none;
+    }
+
+    .transfer-pending-card .request-toggle>i {
+        font-size: 11px;
+    }
+
+    /* satu baris saja: chip tidak boleh membungkus ke bawah, jadi
+       tombol yang menyerap ruang yang kurang */
+    .transfer-pending-card .request-side {
+        flex: 1 0 auto;
+        flex-wrap: nowrap;
+        min-width: 0;
+        margin-left: 0;
+        gap: 5px;
+    }
+
+    .transfer-pending-card .request-side>* {
+        flex: 0 0 auto;
+    }
+
+    .transfer-pending-card .request-head .status-badge {
+        padding: 6px 9px !important;
+        font-size: 9.5px !important;
+    }
+
+    .transfer-pending-card .request-head .status-badge i {
+        font-size: 9px;
+    }
+
+    .transfer-pending-card .stat-chip {
+        padding: 5px 8px;
+        font-size: 10px;
+        gap: 5px;
+    }
+
+    .transfer-pending-card .stat-chip i {
+        font-size: 8.5px;
+    }
+
+    .transfer-pending-card .request-items-panel {
+        margin: 8px 8px;
+        padding: 10px 10px 11px;
+        border-radius: 14px;
+    }
+
+    .transfer-pending-card .request-items-head {
+        padding: 0 2px 8px;
+    }
+
+    .transfer-pending-card .request-items-title {
+        font-size: 9px;
+        letter-spacing: .8px;
+    }
+
+    .transfer-pending-card .request-items-total {
+        font-size: 10px;
+    }
+
+    .transfer-pending-card .item-line {
+        gap: 8px;
+        padding: 2px;
+    }
+
+    .transfer-pending-card .item-prod {
+        gap: 8px;
+    }
+
+    .transfer-pending-card .item-thumb {
+        flex: 0 0 34px;
+        width: 34px;
+        height: 34px;
+        border-radius: 10px;
+        font-size: 11px;
+    }
+
+    .transfer-pending-card .item-text {
+        gap: 1px;
+    }
+
+    .transfer-pending-card .item-name {
+        font-size: 12px;
+    }
+
+    .transfer-pending-card .item-code {
+        font-size: 9px;
+        letter-spacing: .3px;
+    }
+
+    .transfer-pending-card .item-qty {
+        padding: 6px 9px;
+        font-size: 11px;
+        gap: 5px;
+    }
+
+    .transfer-pending-card .line-more {
+        padding: 9px 2px 0;
+        font-size: 10.5px;
+    }
+
+    .transfer-pending-card .request-action {
+        gap: 8px;
+        padding: 10px 10px 11px;
+    }
+
+    .transfer-pending-card .btn-approve,
+    .transfer-pending-card .btn-reject {
+        min-height: 42px;
+        padding: 0 10px;
+        border-radius: 12px;
+        font-size: 12.5px;
+    }
+
+    .transfer-pending-card .empty-state {
+        padding: 26px 16px;
+        border-radius: 16px;
+    }
+
+    .transfer-pending-card .empty-mark {
+        width: 40px;
+        height: 40px;
+        margin-bottom: 8px;
+        border-radius: 13px;
+        font-size: 15px;
+    }
+
+    .transfer-pending-card .empty-title {
+        font-size: 12.5px;
+        margin-bottom: 3px;
+    }
+
+    .transfer-pending-card .empty-text {
+        font-size: 10.5px;
+    }
+}
+
+/* =========================================================
+   LAYAR SANGAT SEMPIT (<=359px)
+   Even after the icon button shrinks, three chips in one row no
+   longer fit. The product-count chip is dropped first: status and
+   the qty chip stay next to the dropdown button. The count itself is
+   still visible in the detail panel header.
+   ========================================================= */
+
+@media (max-width: 359.98px) {
+    .transfer-pending-card .request-side .stat-chip:not(.stat-chip-strong) {
+        display: none;
+    }
+
+    .transfer-pending-card .request-toggle {
+        min-width: 30px;
+        height: 34px;
+    }
 }

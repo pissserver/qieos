@@ -1,252 +1,290 @@
-/* HERO HEADER */
-            .transfer-header{
-                background:linear-gradient(135deg,#334155,#0f172a);
-                color:#fff;
-                border-radius:24px;
-                padding:30px;
-                display:flex;
-                justify-content:space-between;
-                align-items:center;
-                margin-bottom:25px;
-                box-shadow:0 12px 30px rgba(15,23,42,.15);
-            }
+/* =========================================================
+   TRANSFER GUDANG
+   Fokus mobile. Desktop & tablet dibiarkan seperti aslinya,
+   hanya dressing mobile yang diselaraskan dengan sales-stock.php.
+   ========================================================= */
 
-            .transfer-header h3{
-                font-weight:800;
-                margin:5px 0;
-                color:#fff;
-            }
+:root {
+    --tr-muted: #64748b;
+    --tr-border: #e2e8f0;
+}
 
-            .transfer-header p{
-                opacity:.85;
-                margin:0;
-            }
+/* ---------- SECTION ---------- */
 
-            .transfer-icon{
-                width:90px;
-                height:90px;
-                border-radius:22px;
-                background:rgba(255,255,255,.08);
-                display:flex;
-                justify-content:center;
-                align-items:center;
-                font-size:34px;
-            }
+.section-card {
+    background: #fff;
+    border-radius: 24px;
+    padding: 24px;
+    box-shadow: 0 8px 24px rgba(15, 23, 42, .05);
+    position: relative;
+    overflow: hidden;
+}
 
-            /* SECTION */
+/* ---------- PANEL ---------- */
 
-            .section-card{
-                background:#fff;
-                border-radius:24px;
-                padding:24px;
-                box-shadow:0 8px 24px rgba(15,23,42,.05);
-            }
+.panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+    padding: 18px 22px;
+    border-radius: 18px;
+}
 
-            /* PANEL */
+.panel-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    min-width: 0;
+    flex: 1 1 auto;
+}
 
-            .panel-header{
-                display:flex;
-                justify-content:space-between;
-                align-items:center;
-                gap:16px;
-                flex-wrap:wrap;
-                padding:18px 22px;
-                border-radius:18px;
-            }
+.panel-left > div {
+    min-width: 0;
+}
 
-            .panel-left{
-                display:flex;
-                align-items:center;
-                gap:16px;
-                min-width:0;
-                flex:1 1 auto;
-            }
+.panel-icon {
+    width: 58px;
+    height: 58px;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+}
 
-            .panel-left > div{
-                min-width:0;
-            }
+.panel-title {
+    font-size: 17px;
+    font-weight: 700;
+}
 
-            .panel-icon{
-                width:58px;
-                height:58px;
-                border-radius:16px;
-                display:flex;
-                align-items:center;
-                justify-content:center;
-                font-size:22px;
-            }
+.panel-subtitle {
+    font-size: 13px;
+    opacity: .85;
+}
 
-            .panel-title{
-                font-size:17px;
-                font-weight:700;
-            }
+.panel-primary {
+    background: linear-gradient(135deg, #0f172a, #1e293b, #334155);
+    color: #fff;
+}
 
-            .panel-subtitle{
-                font-size:13px;
-                opacity:.85;
-            }
+.panel-primary .panel-icon {
+    background: rgba(255, 255, 255, .12);
+}
 
-            /* REQUEST PANEL */
+/* ---------- CONTAINER ---------- */
 
-            .panel-primary{
-                background:linear-gradient(135deg, #0f172a, #1e293b, #334155);
-                color:#fff;
-            }
+#transfer-table,
+#history-table {
+    width: 100%;
+    min-width: 0;
+}
 
-            .panel-primary .panel-icon{
-                background:rgba(255,255,255,.12);
-            }
+/* ---------- EMPTY STATE ---------- */
 
-            .panel-warning{
-                background:linear-gradient(
-                    135deg,
-                    #f59e0b,
-                    #d97706
-                );
-                color:#fff;
-            }
+.empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--tr-muted);
+}
 
-            .panel-warning .panel-icon{
-                background:rgba(255,255,255,.15);
-            }
+.empty-state i {
+    font-size: 48px;
+    margin-bottom: 15px;
+    opacity: .5;
+}
 
-            /* HISTORY PANEL */
+.empty-state small {
+    display: block;
+    max-width: 380px;
+    margin: 0 auto;
+    line-height: 1.5;
+}
 
-            .panel-dark{
-                background:linear-gradient(
-                    135deg,
-                    #334155,
-                    #0f172a
-                );
-                color:#fff;
-            }
+/* ---------- DATATABLES WRAPPER ---------- */
 
-            .panel-dark .panel-icon{
-                background:rgba(255,255,255,.12);
-            }
+.dataTables_wrapper {
+    width: 100%;
+    overflow: visible;
+}
 
-            /* EMPTY SEARCH */
+/* Scroll horizontal hanya kolom tabel, bukan wrapper */
+.dataTables_wrapper .col-sm-12:has(> table.dataTable) {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
 
-            .empty-img{
-                width:370px;
-                opacity:.9;
-                margin-bottom:18px;
-            }
+/* ---------- EMPTY SEARCH (DataTables) ---------- */
 
-            .empty-title{
-                font-size:18px;
-                font-weight:700;
-                color:#0f172a;
-                margin-bottom:6px;
-            }
+.empty-img {
+    width: 370px;
+    opacity: .9;
+    margin-bottom: 18px;
+}
 
-            .empty-sub{
-                font-size:14px;
-                color:#64748b;
-            }
+.empty-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: #0f172a;
+    margin-bottom: 6px;
+}
 
-            /* TABLE WRAPPER */
-            #transfer-table,
-            #history-table{
-                width:100%;
-            }
+.empty-sub {
+    font-size: 14px;
+    color: var(--tr-muted);
+}
 
-            /* Wrapper tidak di-scroll agar search & pagination tidak terpotong */
-            .dataTables_wrapper{
-                width:100%;
-                overflow:visible;
-            }
+/* ---------- PAGINATION ---------- */
 
-            /* Scroll horizontal hanya pada kolom tabel DataTables */
-            .dataTables_wrapper .col-sm-12:has(> table.dataTable){
-                overflow-x:auto;
-                -webkit-overflow-scrolling:touch;
-            }
+.dataTables_wrapper .dataTables_paginate {
+    float: none;
+    margin-top: 14px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 4px;
+}
 
-            /* Pagination & info sejajar rapi, tidak overflow */
-            .dataTables_wrapper .dataTables_paginate{
-                float:none;
-                margin-top:14px;
-                display:flex;
-                flex-wrap:wrap;
-                justify-content:flex-end;
-                gap:4px;
-            }
+.dataTables_wrapper .dataTables_paginate .pagination {
+    margin: 0;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+}
 
-            .dataTables_wrapper .dataTables_paginate .pagination{
-                margin:0;
-                flex-wrap:wrap;
-                justify-content:flex-end;
-            }
+.dataTables_wrapper .dataTables_info {
+    padding-top: 14px;
+}
 
-            .dataTables_wrapper .dataTables_info{
-                padding-top:14px;
-            }
+/* =========================================================
+   TABLET
+   ========================================================= */
 
-            @media (max-width:767.98px){
-                .dataTables_wrapper .dataTables_paginate,
-                .dataTables_wrapper .dataTables_paginate .pagination{
-                    justify-content:center;
-                }
+@media (max-width: 991.98px) {
+    .section-card {
+        padding: 18px;
+        border-radius: 18px;
+    }
 
-                .dataTables_wrapper .dataTables_info{
-                    text-align:center;
-                }
-            }
+    .panel-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 14px;
+        padding: 16px 18px;
+    }
 
-            /* RESPONSIVE - TABLET & MOBILE */
-            @media (max-width:991.98px){
-                .section-card{
-                    padding:18px;
-                    border-radius:18px;
-                }
+    .panel-left {
+        width: 100%;
+    }
+}
 
-                .panel-header{
-                    flex-direction:column;
-                    align-items:flex-start;
-                    gap:14px;
-                    padding:16px 18px;
-                }
+/* =========================================================
+   MOBILE - disamakan dengan sales-stock.php
+   ========================================================= */
 
-                .panel-left{
-                    width:100%;
-                }
+@media (max-width: 575.98px) {
+    .section-card {
+        padding: 14px;
+        border-radius: 20px;
+    }
 
-                .transfer-header{
-                    padding:22px;
-                }
-            }
+    .panel-icon {
+        width: 36px;
+        height: 36px;
+        flex: 0 0 36px;
+        font-size: 14px;
+        border-radius: 12px;
+    }
 
-            @media (max-width:575.98px){
-                .section-card{
-                    padding:14px;
-                }
+    .panel-title {
+        font-size: 13px;
+        line-height: 1.2;
+    }
 
-                .panel-icon{
-                    width:48px;
-                    height:48px;
-                    font-size:18px;
-                    border-radius:14px;
-                }
+    .panel-subtitle {
+        display: block;
+        font-size: 10px;
+        line-height: 1.3;
+        margin-top: 2px;
+    }
 
-                .panel-title{
-                    font-size:15px;
-                }
+    .mt-4.px-4 {
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+    }
 
-                .panel-subtitle{
-                    font-size:12px;
-                }
+    /* Header jadi kolom: isi penuh, panel di dalam kartu */
+    .transfer-pending-card,
+    .transfer-history-card {
+        padding: 12px !important;
+    }
 
-                .mt-4.px-4{
-                    padding-left:0 !important;
-                    padding-right:0 !important;
-                }
+    .transfer-pending-card .panel-header,
+    .transfer-history-card .panel-header {
+        flex-direction: column;
+        align-items: stretch;
+        justify-content: center;
+        gap: 11px;
+        padding: 12px;
+        border-radius: 16px;
+    }
 
-                .dataTables_filter input{
-                    width:100% !important;
-                }
+    .transfer-pending-card .panel-left,
+    .transfer-history-card .panel-left {
+        width: auto;
+        flex: 1 1 auto;
+        gap: 10px;
+        min-width: 0;
+    }
 
-                .dataTables_wrapper .dataTables_filter{
-                    width:100%;
-                }
-            }
+    .transfer-pending-card .mt-4.px-4,
+    .transfer-history-card .mt-4.px-4 {
+        margin-top: 12px !important;
+        margin-bottom: 0 !important;
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+    }
+
+    /* CATATAN: aturan search / paginate DataTables TIDAK ditulis di sini.
+       History memakai komponen yang sama dengan sales-stock.php, jadi
+       tampilan search-nya harus dibiarkan persis seperti di sana. */
+
+    /* Empty state */
+    .empty-state {
+        padding: 26px 16px;
+        border: 1px dashed var(--tr-border);
+        border-radius: 16px;
+        background: #fbfcfe;
+    }
+
+    .empty-state i {
+        font-size: 30px;
+        opacity: .35;
+        margin-bottom: 6px;
+    }
+
+    .empty-state h6 {
+        font-size: 12.5px;
+        color: #334155;
+    }
+
+    .empty-state small {
+        font-size: 10.5px;
+        color: #94a3b8;
+    }
+
+    .empty-img {
+        width: 120px;
+        margin: 0 auto 8px;
+        opacity: .8;
+    }
+
+    .empty-title {
+        font-size: 12.5px;
+        margin-bottom: 4px;
+    }
+
+    .empty-sub {
+        font-size: 10.5px;
+    }
+}

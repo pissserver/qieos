@@ -6,8 +6,10 @@
         <title>Transfer Gudang - Qieos</title>
         <?php include '../../script/headscript.php'; ?>
 
-        <link rel="stylesheet" href="<?php echo BASE_URL; ?>/css/pages/transfer.css?v=<?php echo filemtime(__DIR__ . '/../../css/pages/transfer.css'); ?>">
-        <link rel="stylesheet" href="<?php echo BASE_URL; ?>/css/pages/transfer-table.css?v=<?php echo filemtime(__DIR__ . '/../../css/pages/transfer-table.css'); ?>">
+<link rel="stylesheet" href="<?php echo BASE_URL; ?>/css/pages/history-request-table.css?v=<?php echo filemtime(__DIR__ . '/../../css/pages/history-request-table.css'); ?>">
+<link rel="stylesheet" href="<?php echo BASE_URL; ?>/css/pages/transfer.css?v=<?php echo filemtime(__DIR__ . '/../../css/pages/transfer.css'); ?>">
+<link rel="stylesheet" href="<?php echo BASE_URL; ?>/css/pages/transfer-table.css?v=<?php echo filemtime(__DIR__ . '/../../css/pages/transfer-table.css'); ?>">
+<link rel="stylesheet" href="<?php echo BASE_URL; ?>/css/pages/transfer-history.css?v=<?php echo filemtime(__DIR__ . '/../../css/pages/transfer-history.css'); ?>">
     </head>
 
     <body>
@@ -32,7 +34,7 @@
                 </div> -->
 
                 <!-- REQUEST PENDING -->
-                <div class="section-card mb-4 mt-5">
+                <div class="section-card transfer-pending-card mb-4 mt-5">
                     <div class="panel-header panel-primary">
                         <div class="panel-left">
                             <div class="panel-icon">
@@ -56,7 +58,7 @@
                 </div>
 
                 <!-- HISTORY -->
-                <div class="section-card mb-5">
+                <div class="section-card transfer-history-card mb-5">
                     <div class="panel-header panel-primary">
                         <div class="panel-left">
                             <div class="panel-icon">
@@ -184,6 +186,22 @@
 
             function fmt(n){
                 return String(n || 0).replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+            }
+
+            // TAMPILKAN / SEMBUNYIKAN DETAIL PRODUK
+            // ctrl = kepala kartu (satu tombol disclosure untuk seluruh header)
+            function toggleRequestItems(ctrl){
+                const card = ctrl.closest('.request-card');
+                if(!card) return;
+
+                const items = card.querySelector('.request-items');
+                if(!items) return;
+
+                const willOpen = !items.classList.contains('is-open');
+
+                items.classList.toggle('is-open', willOpen);
+                ctrl.classList.toggle('is-open', willOpen);
+                ctrl.setAttribute('aria-expanded', willOpen ? 'true' : 'false');
             }
 
             // PRINT

@@ -1,0 +1,396 @@
+/* =========================================================
+   RIWAYAT REQUEST - MOBILE MINIMALIS 2 BARIS
+   Salinan persis dari sales-stock.css (blok .request-stock-card)
+   supaya kartu riwayat transfer sama dengan sales-stock.php.
+   Hanya blok mobile; desktop tetap pakai history-request-table.css.
+   ========================================================= */
+
+@media (max-width:575.98px){
+
+    .transfer-history-card #requestHistory{
+        width:100% !important;
+        min-width:0 !important;
+        table-layout:auto !important;
+        border-collapse:separate;
+        border-spacing:0 !important;
+        margin:0;
+    }
+
+    .transfer-history-card #requestHistory thead{
+        display:none;
+    }
+
+    .transfer-history-card #requestHistory > tbody{
+        border-top:0 !important;
+    }
+
+    .transfer-history-card #requestHistory tbody{
+        display:flex;
+        flex-direction:column;
+        gap:8px;
+    }
+
+    .transfer-history-card #requestHistory tbody > tr.history-row{
+        display:grid !important;
+        grid-template-columns:minmax(0,1fr) auto auto;
+        grid-template-areas:
+            "code   status actions"
+            "meta   date   qty";
+        align-items:center;
+        gap:5px 8px;
+        width:100%;
+        margin:0;
+        padding:11px 12px;
+        border-radius:16px;
+        border:1px solid rgba(15,23,42,.06);
+        background:#fff;
+        box-shadow:none;
+        cursor:default;
+    }
+
+    .transfer-history-card .history-row > td{
+        display:block !important;
+        width:auto !important;
+        max-width:none;
+        padding:0 !important;
+        border:none !important;
+        border-radius:0 !important;
+        background:transparent !important;
+        vertical-align:middle;
+    }
+
+    .transfer-history-card .history-row > td:nth-child(1){ grid-column:1; grid-row:1 / span 2; min-width:0; }
+    .transfer-history-card .history-row > td:nth-child(2){ grid-area:qty; justify-self:end; }
+    .transfer-history-card .history-row > td:nth-child(3){ grid-area:status; justify-self:end; }
+    .transfer-history-card .history-row > td:nth-child(4){ grid-area:date; justify-self:start; min-width:0; }
+    .transfer-history-card .history-row > td:nth-child(5){ grid-area:actions; justify-self:end; }
+
+    .transfer-history-card #requestHistory.table-hover > tbody > tr.history-row:hover > *{
+        background-color:transparent !important;
+        box-shadow:none !important;
+    }
+
+    /* baris 1: no. request (tanpa badge gelap) */
+    .transfer-history-card .history-row .product-wrap{
+        display:flex;
+        flex-direction:column;
+        align-items:flex-start;
+        gap:3px;
+        min-width:0;
+    }
+
+    .transfer-history-card .history-row .req-code-badge{
+        display:inline-flex;
+        align-items:center;
+        gap:5px;
+        padding:0;
+        max-width:100%;
+        border-radius:0;
+        background:none;
+        box-shadow:none;
+        color:#0f172a;
+        font-size:clamp(11px,3.4vw,12.5px);
+        font-weight:800;
+        letter-spacing:0;
+        white-space:normal;
+        overflow-wrap:anywhere;
+    }
+
+    .transfer-history-card .history-row .req-code-badge i{
+        flex:0 0 auto;
+        font-size:11px;
+        color:#94a3b8;
+    }
+
+    /* baris 2: meta tipis (produk di atas, user di bawah) */
+    .transfer-history-card .history-row .product-wrap > div:last-child{
+        display:flex;
+        flex-direction:column;
+        align-items:flex-start;
+        gap:1px;
+        min-width:0;
+    }
+
+    .transfer-history-card .history-row .product-name,
+    .transfer-history-card .history-row .product-code{
+        font-size:10px;
+        font-weight:600;
+        line-height:1.3;
+        color:#94a3b8;
+        text-transform:capitalize;
+        white-space:normal;
+        overflow-wrap:anywhere;
+    }
+
+    .transfer-history-card .history-row .product-name{
+        color:#64748b;
+    }
+
+    /* tanggal jadi teks meta */
+    /* tanggal jadi teks meta (tanpa karakter pemisah tambahan) */
+    .transfer-history-card .history-row .date-badge{
+        display:inline-flex;
+        align-items:center;
+        gap:4px;
+        padding:0;
+        max-width:100%;
+        border:none;
+        background:none;
+        color:#94a3b8;
+        font-size:9px;
+        font-weight:600;
+        white-space:normal;
+        overflow-wrap:anywhere;
+    }
+
+    .transfer-history-card .history-row .date-badge::before{
+        content:none;
+    }
+
+    .transfer-history-card .history-row .date-badge i{
+        display:none;
+    }
+
+    /* total pcs: teks polos, tanpa badge */
+    .transfer-history-card .history-row .qty-badge{
+        display:inline-flex;
+        align-items:center;
+        gap:4px;
+        padding:0;
+        border:none;
+        background:none;
+        color:#4338ca;
+        font-size:10.5px;
+        font-weight:800;
+        white-space:nowrap;
+    }
+
+    .transfer-history-card .history-row .qty-badge i{
+        font-size:9.5px;
+        color:#818cf8;
+    }
+
+    /* status pill */
+    .transfer-history-card .history-row .status-badge{
+        gap:4px;
+        padding:3px 7px;
+        border-radius:8px;
+        font-size:9px;
+        font-weight:700;
+        white-space:nowrap;
+    }
+
+    .transfer-history-card .history-row .status-badge i{
+        font-size:8px;
+    }
+
+    .transfer-history-card .history-row .status-approved{
+        background:#ecfdf5;
+        color:#15803d;
+    }
+
+    .transfer-history-card .history-row .status-rejected{
+        background:#fef2f2;
+        color:#b91c1c;
+    }
+
+    .transfer-history-card .history-row .status-pending{
+        background:#fffbeb;
+        color:#b45309;
+    }
+
+    /* aksi */
+    .transfer-history-card .history-row .row-actions{
+        gap:4px;
+    }
+
+    .transfer-history-card .history-row .act-btn,
+    .transfer-history-card .history-row .lock-hint{
+        flex:0 0 27px;
+        width:27px;
+        height:27px;
+        border-radius:8px;
+        font-size:10px;
+    }
+
+    .transfer-history-card .history-row .lock-hint{
+        background:#f1f5f9;
+        color:#94a3b8;
+    }
+
+    /* kosong */
+    .transfer-history-card .empty-search{
+        padding:16px 12px 18px;
+        text-align:center;
+    }
+
+    .transfer-history-card .empty-img{
+        display:block;
+        width:120px;
+        margin:0 auto 8px;
+        opacity:.8;
+    }
+
+    .transfer-history-card .empty-title{
+        font-size:12.5px;
+        font-weight:700;
+        color:#0f172a;
+        margin-bottom:4px;
+    }
+
+    .transfer-history-card .empty-sub{
+        font-size:10.5px;
+        color:#64748b;
+    }
+
+    /* baris kosong: tanpa garis, tanpa kartu, isi penuh & di tengah */
+    .transfer-history-card #requestHistory tbody tr:has(.empty-search){
+        display:block !important;
+        width:100%;
+        padding:0;
+        margin:0;
+        border:0;
+        background:transparent;
+        box-shadow:none;
+    }
+
+    .transfer-history-card #requestHistory tbody tr:has(.empty-search) > td{
+        display:block;
+        width:100% !important;
+        padding:0 !important;
+        border:0 !important;
+        text-align:center;
+    }
+
+    .transfer-history-card .empty-state{
+        padding:26px 16px;
+        border:1px dashed #e2e8f0;
+        border-radius:16px;
+        background:#fbfcfe;
+    }
+
+    .transfer-history-card .empty-state i{
+        font-size:30px;
+        opacity:.35;
+        margin-bottom:6px;
+    }
+
+    .transfer-history-card .empty-state h6{
+        font-size:12.5px;
+        color:#334155;
+    }
+
+    .transfer-history-card .empty-state small{
+        font-size:10.5px;
+        color:#94a3b8;
+    }
+
+
+    /* ===== SEARCH ===== */
+    .transfer-history-card .dataTables_wrapper .dataTables_filter{
+        display:flex;
+        width:100%;
+        margin:0 0 10px;
+        padding:0;
+    }
+
+    .transfer-history-card .dataTables_wrapper .dataTables_filter label{
+        display:flex;
+        width:100%;
+        margin:0;
+        padding:0;
+    }
+
+    .transfer-history-card .dataTables_wrapper .dataTables_filter input{
+        width:100% !important;
+        height:40px;
+        margin:0;
+        border-radius:14px !important;
+        border:1px solid transparent !important;
+        background-color:#f1f5f9;
+        background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='M20.5 20.5l-4-4'/%3E%3C/svg%3E");
+        background-repeat:no-repeat;
+        background-position:13px center;
+        background-size:15px 15px;
+        padding:0 12px 0 35px !important;
+        font-size:12px;
+        color:#0f172a;
+        box-shadow:inset 0 1px 2px rgba(15,23,42,.04);
+        outline:none;
+        transition:background-color .2s, box-shadow .2s;
+    }
+
+    .transfer-history-card .dataTables_wrapper .dataTables_filter input::placeholder{
+        color:#94a3b8;
+    }
+
+    .transfer-history-card .dataTables_wrapper .dataTables_filter input:focus{
+        background-color:#fff;
+        box-shadow:
+            0 0 0 2px #fff,
+            0 0 0 4px rgba(99,102,241,.35),
+            0 10px 20px -10px rgba(79,70,229,.6);
+    }
+
+    /* pagination */
+    .transfer-history-card .dataTables_wrapper .dataTables_paginate{
+        float:none;
+        display:flex;
+        flex-wrap:wrap;
+        justify-content:center;
+        align-items:center;
+        gap:5px;
+        margin:10px 0 12px;
+        padding:0;
+    }
+
+    .transfer-history-card .dataTables_wrapper .dataTables_paginate .pagination{
+        margin:0;
+        flex-wrap:wrap;
+        justify-content:center;
+        gap:5px;
+    }
+
+    .transfer-history-card .dataTables_wrapper .dataTables_paginate .page-item{
+        margin:0 !important;
+    }
+
+    .transfer-history-card .dataTables_wrapper .dataTables_paginate .page-link{
+        min-width:30px;
+        height:30px;
+        padding:0 8px;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        border-radius:10px !important;
+        font-size:11px;
+        font-weight:700;
+        color:#475569 !important;
+        background:#fff !important;
+        border:1px solid #e2e8f0 !important;
+        box-shadow:0 2px 6px rgba(15,23,42,.05) !important;
+        transition:transform .18s ease, box-shadow .18s ease;
+    }
+
+    .transfer-history-card .dataTables_wrapper .dataTables_paginate .page-link:hover{
+        transform:translateY(-1px);
+        box-shadow:0 6px 12px -6px rgba(15,23,42,.35) !important;
+    }
+
+    .transfer-history-card .dataTables_wrapper .dataTables_paginate .page-item.active .page-link{
+        color:#fff !important;
+        background:linear-gradient(135deg,#4f46e5,#6366f1) !important;
+        border-color:transparent !important;
+        box-shadow:0 8px 16px -7px rgba(79,70,229,.95) !important;
+    }
+
+    .transfer-history-card .dataTables_wrapper .dataTables_paginate .page-item.disabled .page-link{
+        color:#94a3b8 !important;
+        background:#f8fafc !important;
+    }
+
+    .dataTables_wrapper .dataTables_length,
+    .dataTables_wrapper .dataTables_info{
+        display:none;
+    }
+}
