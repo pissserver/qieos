@@ -1,98 +1,662 @@
-﻿.stock-wrapper {
-    background: #f4f6f9;
-    padding: 20px;
-    border-radius: 12px;
+.stock-wrapper {
+    background: transparent;
+    padding: 0;
+    border-radius: 0;
 }
 
 .stock-card {
     border: none;
-    border-radius: 20px;
-    box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+    border-radius: 0;
+    box-shadow: none;
     overflow: hidden;
+    background: transparent;
 }
 
 .stock-header-detail {
-    background: linear-gradient(135deg,#0f2027,#203a43,#2c5364);
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
     color: #fff;
-    padding: 16px 20px;
-    font-weight: 600;
+    padding: 14px 20px;
+    font-weight: 700;
+    font-size: 14px;
     display: flex;
     align-items: center;
     gap: 10px;
+    border-radius: 14px;
     margin-bottom: 20px;
+    box-shadow: 0 8px 20px rgba(99, 102, 241, .25);
+    border: 1px solid rgba(255, 255, 255, .2);
+}
+
+.stock-header-detail i {
+    font-size: 16px;
+}
+
+.table-stock {
+    border-collapse: separate;
+    border-spacing: 0;
+    width: 100% !important;
+    margin: 0;
+    table-layout: auto;
 }
 
 .table-stock thead {
-    background: #f1f3f5;
+    background: transparent;
 }
 
 .table-stock th {
-    font-size: 12px;
+    font-size: 10.5px;
+    font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: .6px;
-    color: #555;
+    letter-spacing: .1em;
+    color: #94a3b8;
+    border: none !important;
+    border-bottom: 1px solid #e2e8f0 !important;
+    padding: 0 16px 10px;
+    white-space: nowrap;
+    background: transparent;
+    vertical-align: bottom;
 }
 
-.table-stock td {
+/* th dan td sudah sama-sama 16px kiri/kanan, jadi yang perlu dijamin
+   hanya arah teksnya agar header sejajar dengan isi kolom */
+.table-stock thead th:first-child {
+    text-align: left;
+}
+
+.table-stock thead th:not(:first-child) {
+    text-align: center;
+}
+
+.table-stock tbody tr {
+    background: #fff;
+    box-shadow: 0 1px 3px rgba(15, 23, 42, .06);
+    transition: box-shadow .25s ease, transform .25s ease;
+    border-radius: 0;
+    position: relative;
+}
+
+.table-stock tbody tr:hover {
+    box-shadow: 0 6px 18px rgba(99, 102, 241, .12);
+    transform: translateY(-1px);
+}
+
+.table-stock tbody tr td {
+    border: none !important;
+    border-bottom: 1px solid #f1f5f9 !important;
+    padding: 13px 16px;
+    background: #fff;
     vertical-align: middle;
+    font-size: 13px;
+    line-height: 1.4;
+}
+
+/* Lebar kolom harus dipasang pada th DAN td, dan totalnya harus 100%.
+   Tabel detail mutasi hanya 3 kolom: Tanggal / Order / Qty. */
+.table-stock thead th:nth-child(1),
+.table-stock tbody tr td:first-child {
+    width: 40%;
+    text-align: left;
+}
+
+.table-stock thead th:nth-child(2),
+.table-stock tbody tr td:nth-child(2) {
+    width: 32%;
+    text-align: center;
+}
+
+.table-stock thead th:nth-child(3),
+.table-stock tbody tr td:nth-child(3) {
+    width: 28%;
+    text-align: center;
+}
+
+/* ---------- CHIP: satu baris, bukan label di atas nilai ----------
+   Label "ORDER" di dalam chip sebelumnya menduplikasi header kolom
+   dan membuat badge terasa berat, jadi diganti ikon + kode. */
+.chip-order {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    padding: 5px 13px 5px 5px;
+    border-radius: 999px;
+    background: linear-gradient(135deg, #ffffff, #f8fafc);
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, .04), inset 0 1px 0 #fff;
+    transition: transform .22s cubic-bezier(.34, 1.56, .64, 1), box-shadow .22s ease, border-color .22s ease;
+    position: relative;
+    overflow: hidden;
+    max-width: 100%;
+}
+
+.chip-order-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    flex: 0 0 26px;
+    border-radius: 999px;
+    background: linear-gradient(135deg, #6366f1, #4f46e5);
+    color: #fff;
+    font-size: 10.5px;
+    box-shadow: 0 2px 6px rgba(79, 70, 229, .35), inset 0 1px 0 rgba(255, 255, 255, .3);
+}
+
+.chip-order-code {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: .01em;
+    color: #334155;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    position: relative;
+    z-index: 1;
+}
+
+/* shimmer halus, hanya saat hover */
+.chip-order::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(105deg, transparent 35%, rgba(255, 255, 255, .7) 50%, transparent 65%);
+    background-size: 250% 100%;
+    background-position: 200% 0;
+    transition: background-position .65s ease;
+    pointer-events: none;
+}
+
+.table-stock tbody tr:hover .chip-order {
+    transform: translateY(-1px);
+    border-color: #c7d2fe;
+    box-shadow: 0 6px 16px rgba(79, 70, 229, .16), inset 0 1px 0 #fff;
+}
+
+.table-stock tbody tr:hover .chip-order::after {
+    background-position: -60% 0;
+}
+
+/* ---------- CHIP QTY ---------- */
+.chip-qty {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 5px;
+    padding: 6px 14px;
+    border-radius: 999px;
+    background: linear-gradient(135deg, #dcfce7, #bbf7d0);
+    border: 1px solid rgba(21, 128, 61, .18);
+    box-shadow: 0 1px 2px rgba(15, 23, 42, .05), inset 0 1px 0 rgba(255, 255, 255, .6);
+    transition: transform .22s cubic-bezier(.34, 1.56, .64, 1), box-shadow .22s ease;
+}
+
+.chip-qty-value {
     font-size: 14px;
+    font-weight: 800;
+    line-height: 1;
+    color: #15803d;
+    font-variant-numeric: tabular-nums;
 }
 
-.badge-qty {
-    background: #e7f1ff;
-    color: #1d4ed8;
-    padding: 6px 10px;
-    border-radius: 8px;
-    font-size: 13px;
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
+.chip-qty-unit {
+    font-size: 9.5px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .7px;
+    color: #15803d;
+    opacity: .65;
 }
 
-.badge-remain {
-    background: #e9fbe7;
-    color: #9b1818;
-    padding: 6px 10px;
-    border-radius: 8px;
-    font-size: 13px;
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-}
-
-.badge-price {
-    background: #fff3cd;
-    color: #856404;
-    padding: 6px 10px;
-    border-radius: 8px;
-    font-size: 13px;
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
+.table-stock tbody tr:hover .chip-qty {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(21, 128, 61, .2), inset 0 1px 0 rgba(255, 255, 255, .6);
 }
 
 .date-block {
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 5px;
 }
 
 .date-main {
-    font-weight: 600;
-    color: #111;
+    font-weight: 700;
+    font-size: 13px;
+    color: #0f172a;
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 7px;
+    font-variant-numeric: tabular-nums;
+}
+
+.date-main i {
+    color: #6366f1;
+    font-size: 12px;
 }
 
 .form-badge {
-    font-size: 12px;
+    font-size: 11px;
     color: #64748b;
+    font-weight: 600;
     display: flex;
     align-items: center;
     gap: 6px;
+    letter-spacing: .3px;
 }
 
 .form-badge i {
     color: #0ea5e9;
+    font-size: 10px;
+}
+
+.mutation-detail-empty {
+    text-align: center;
+    padding: 40px 20px;
+    color: #94a3b8;
+}
+
+.mutation-detail-empty i {
+    font-size: 32px;
+    margin-bottom: 12px;
+    opacity: .5;
+}
+
+.mutation-detail-empty div {
+    font-size: 13px;
+    color: #64748b;
+}
+
+/* ============================================================
+   FIFO LAYER MOBILE - CARD MODE PREMIUM
+   ============================================================ */
+@media (max-width: 575.98px) {
+    .stock-wrapper {
+        background: transparent;
+        padding: 0;
+    }
+
+    .stock-card {
+        border-radius: 0;
+        box-shadow: none;
+        background: transparent;
+    }
+
+    .stock-header-detail {
+        display: none;
+    }
+
+    /* card mode */
+    #tableMutation {
+        min-width: 0 !important;
+        width: 100% !important;
+        border-spacing: 0 !important;
+        border-collapse: separate;
+        table-layout: auto !important;
+        margin: 0;
+    }
+
+    #tableMutation thead {
+        display: none;
+    }
+
+    #tableMutation > tbody,
+    #tableMutation > tfoot {
+        border-top: 0 !important;
+    }
+
+    #tableMutation tbody {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    #tableMutation tbody tr {
+        display: flex !important;
+        flex-direction: column;
+        width: 100%;
+        margin: 0 !important;
+        padding: 14px;
+        border-radius: 16px;
+        border: 1px solid rgba(99, 102, 241, .14);
+        background: linear-gradient(135deg, rgba(99, 102, 241, .06), #fff 50%);
+        box-shadow: 0 4px 12px rgba(15, 23, 42, .06);
+        transition: transform .2s ease, box-shadow .2s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    /* aksen ungu kiri */
+    #tableMutation tbody tr::before {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 12px;
+        bottom: 12px;
+        width: 4px;
+        border-radius: 0 4px 4px 0;
+        background: linear-gradient(180deg, #818cf8, #7c3aed);
+    }
+
+    #tableMutation tbody tr:active {
+        transform: scale(.98);
+    }
+
+    #tableMutation tbody td {
+        display: block !important;
+        width: 100% !important;
+        border: none !important;
+        padding: 0 !important;
+        background: transparent !important;
+        margin-bottom: 8px;
+    }
+
+    #tableMutation tbody td:last-child {
+        margin-bottom: 0;
+    }
+
+    /* date block */
+    .date-block {
+        gap: 6px;
+        margin-bottom: 4px;
+    }
+
+    .date-main {
+        font-size: 13px;
+        font-weight: 700;
+        color: #0f172a;
+    }
+
+    .date-main i {
+        color: #6366f1;
+        font-size: 12px;
+    }
+
+    .form-badge {
+        font-size: 10px;
+        color: #64748b;
+        font-weight: 600;
+        letter-spacing: .3px;
+    }
+
+    .form-badge i {
+        font-size: 9px;
+        color: #0ea5e9;
+    }
+
+    /* chips */
+    .chip-order {
+        padding: 5px 12px 5px 5px;
+        width: 100%;
+        justify-content: flex-start;
+    }
+
+    .chip-order-icon {
+        width: 24px;
+        height: 24px;
+        flex-basis: 24px;
+        font-size: 10px;
+    }
+
+    .chip-order-code {
+        font-size: 11.5px;
+    }
+
+    .chip-qty {
+        width: 100%;
+        justify-content: center;
+        padding: 6px 12px;
+    }
+
+    /* DataTables wrapper */
+    #tableMutation_wrapper .dataTables_filter {
+        display: flex;
+        width: 100%;
+        margin: 0 0 12px;
+        padding: 0;
+    }
+
+    #tableMutation_wrapper .dataTables_filter label {
+        display: flex;
+        width: 100%;
+        margin: 0;
+        padding: 0;
+        float: none;
+        text-indent: 0;
+    }
+
+    /* Ukuran & gaya disamakan dengan search panel Stok Gudang
+       (lihat stock.css #stockTableContainer .dataTables_filter input) */
+    #tableMutation_wrapper .dataTables_filter input {
+        width: 100% !important;
+        height: 40px;
+        border-radius: 14px !important;
+        border: 1px solid transparent !important;
+        background-color: #f1f5f9;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='M20.5 20.5l-4-4'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: 13px center;
+        background-size: 15px 15px;
+        padding: 0 12px 0 35px !important;
+        font-size: 12px;
+        color: #0f172a;
+        box-shadow: inset 0 1px 2px rgba(15, 23, 42, .04);
+        outline: none;
+        transition: background-color .2s ease, box-shadow .2s ease;
+    }
+
+    #tableMutation_wrapper .dataTables_filter input::placeholder {
+        color: #94a3b8;
+    }
+
+    /* Ring focus dibuat inset karena .fifo-container memakai overflow:hidden,
+       sehingga ring yang keluar 4px akan terpotong di tepi panel */
+    #tableMutation_wrapper .dataTables_filter input:focus {
+        background-color: #fff;
+        border-color: rgba(99, 102, 241, .55) !important;
+        box-shadow:
+            inset 0 0 0 1px rgba(99, 102, 241, .35),
+            inset 0 2px 6px rgba(79, 70, 229, .12);
+    }
+
+    /* pagination */
+    #tableMutation_wrapper .dataTables_paginate,
+    #tableMutation_wrapper .dataTables_paginate .pagination {
+        float: none;
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        align-items: center;
+        gap: 5px;
+        margin: 12px 0 0;
+        padding: 0;
+    }
+
+    #tableMutation_wrapper .dataTables_paginate .page-item {
+        margin: 0 !important;
+    }
+
+    #tableMutation_wrapper .dataTables_paginate .page-link {
+        min-width: 30px;
+        height: 30px;
+        padding: 0 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 10px !important;
+        font-size: 11px;
+        font-weight: 700;
+        color: #475569 !important;
+        background: #fff !important;
+        border: 1px solid #e2e8f0 !important;
+        box-shadow: 0 2px 6px rgba(15, 23, 42, .05) !important;
+        transition: transform .18s ease, box-shadow .18s ease;
+    }
+
+    #tableMutation_wrapper .dataTables_paginate .page-link:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 6px 12px -6px rgba(15, 23, 42, .35) !important;
+    }
+
+    #tableMutation_wrapper .dataTables_paginate .page-item.active .page-link {
+        color: #fff !important;
+        background: linear-gradient(135deg, #4f46e5, #6366f1) !important;
+        border-color: transparent !important;
+        box-shadow: 0 8px 16px -7px rgba(79, 70, 229, .95) !important;
+    }
+
+    #tableMutation_wrapper .dataTables_paginate .page-item.disabled .page-link {
+        color: #94a3b8 !important;
+        background: #f8fafc !important;
+    }
+
+    #tableMutation_wrapper .dataTables_length,
+    #tableMutation_wrapper .dataTables_info {
+        display: none;
+    }
+
+    /* empty state khusus FIFO */
+    #tableMutation tbody tr:has(.mutation-detail-empty) {
+        padding: 0;
+        background: transparent;
+        border: none;
+        box-shadow: none;
+    }
+
+    #tableMutation tbody tr:has(.mutation-detail-empty)::before {
+        content: none;
+    }
+
+    #tableMutation tbody tr:has(.mutation-detail-empty) > td {
+        padding: 30px 20px !important;
+    }
+
+    .mutation-detail-empty {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .mutation-detail-empty i {
+        font-size: 28px;
+        opacity: .4;
+    }
+
+.mutation-detail-empty div {
+    font-size: 12px;
+}
+}
+
+/* Samakan lebar search FIFO dengan panel Stok Gudang di atas.
+
+   Dua sumber geser dari volt.css/Bootstrap:
+   1. .dataTables_filter global diberi padding-right 1.5rem
+   2. dom default DataTables Bootstrap membungkus isi dalam
+      .row > .col-sm-12, dan gutter .row memberi padding 0.75rem
+      per sisi plus margin negatif - itu yang bikin sisi kiri meleset.
+   Panel Stok Gudang pakai dom "ftp" tanpa wrapper, jadi nol Issues. */
+.stock-wrapper,
+.stock-wrapper .table-responsive,
+#tableMutation_wrapper {
+    width: 100%;
+    max-width: 100%;
+}
+
+/* Netralkan gutter grid Bootstrap di dalam wrapper DataTables */
+#tableMutation_wrapper .row {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+}
+
+#tableMutation_wrapper .row > [class*="col-"] {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+}
+
+#tableMutation_wrapper .dataTables_filter {
+    padding: 0 !important;
+    margin: 0 0 12px;
+    text-align: left;
+}
+
+#tableMutation_wrapper .dataTables_filter input {
+    box-sizing: border-box;
+    margin-left: 0;
+}
+
+/* ============================================================
+   EMPTY STATE (markup terpisah, bukan baris tabel)
+   ============================================================ */
+.mutation-detail-empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 56px 24px;
+    border-radius: 16px;
+    border: 1.5px dashed #e2e8f0;
+    background: linear-gradient(135deg, #fbfdff, #f8fafc);
+    animation: fifoEmptyIn .32s cubic-bezier(.22, 1, .36, 1);
+}
+
+.mutation-detail-empty-icon {
+    width: 76px;
+    height: 76px;
+    margin-bottom: 18px;
+    border-radius: 22px;
+    background: linear-gradient(135deg, #eef2ff, #f5f3ff);
+    border: 1px solid #e0e7ff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 30px;
+    color: #6366f1;
+}
+
+.mutation-detail-empty-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: #334155;
+    margin-bottom: 6px;
+}
+
+.mutation-detail-empty-sub {
+    font-size: 13px;
+    color: #94a3b8;
+    line-height: 1.5;
+    max-width: 320px;
+}
+
+@keyframes fifoEmptyIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px) scale(.985);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@media (max-width: 575.98px) {
+    .mutation-detail-empty-state {
+        padding: 40px 18px;
+    }
+
+    .mutation-detail-empty-icon {
+        width: 64px;
+        height: 64px;
+        border-radius: 18px;
+        font-size: 25px;
+        margin-bottom: 14px;
+    }
+
+    .mutation-detail-empty-title {
+        font-size: 14px;
+    }
+
+    .mutation-detail-empty-sub {
+        font-size: 12px;
+    }
 }
