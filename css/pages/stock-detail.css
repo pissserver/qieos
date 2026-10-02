@@ -373,19 +373,20 @@
         text-indent: 0;
     }
 
+    /* Ukuran & gaya disamakan dengan search panel Stok Gudang
+       (lihat stock.css #stockTableContainer .dataTables_filter input) */
     #tableStock_wrapper .dataTables_filter input {
         width: 100% !important;
-        height: 46px;
-        border-radius: 15px !important;
+        height: 40px;
+        border-radius: 14px !important;
         border: 1px solid transparent !important;
         background-color: #f1f5f9;
         background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='M20.5 20.5l-4-4'/%3E%3C/svg%3E");
         background-repeat: no-repeat;
-        background-position: 14px center;
-        background-size: 17px 17px;
-        padding: 0 14px 0 40px !important;
-        font-size: 13.5px;
-        font-weight: 500;
+        background-position: 13px center;
+        background-size: 15px 15px;
+        padding: 0 12px 0 35px !important;
+        font-size: 12px;
         color: #0f172a;
         box-shadow: inset 0 1px 2px rgba(15, 23, 42, .04);
         outline: none;
@@ -396,12 +397,14 @@
         color: #94a3b8;
     }
 
+    /* Ring focus dibuat inset karena .fifo-container memakai overflow:hidden,
+       sehingga ring yang keluar 4px akan terpotong di tepi panel */
     #tableStock_wrapper .dataTables_filter input:focus {
         background-color: #fff;
+        border-color: rgba(99, 102, 241, .55) !important;
         box-shadow:
-            0 0 0 2px #fff,
-            0 0 0 4px rgba(99, 102, 241, .35),
-            0 10px 20px -10px rgba(79, 70, 229, .6);
+            inset 0 0 0 1px rgba(99, 102, 241, .35),
+            inset 0 2px 6px rgba(79, 70, 229, .12);
     }
 
     /* pagination */
