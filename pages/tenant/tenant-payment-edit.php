@@ -37,7 +37,7 @@ $d = mysqli_fetch_assoc($q);
 
 <div class="row">
 
-    <div class="col-md-6">
+    <div class="col-md-6 etp-field">
         <label style="display:block;font-size:13px;font-weight:600;color:#334155;margin-bottom:6px;">
             <i class="fas fa-store" style="color:#6366f1;margin-right:4px"></i> Nama Tenant
         </label>
@@ -60,7 +60,7 @@ $d = mysqli_fetch_assoc($q);
         </select>
     </div>
 
-    <div class="col-md-6">
+    <div class="col-md-6 etp-field">
         <label style="display:block;font-size:13px;font-weight:600;color:#334155;margin-bottom:6px;">
             <i class="fas fa-calendar" style="color:#6366f1;margin-right:4px"></i> Tanggal Pembayaran
         </label>
@@ -73,7 +73,7 @@ $d = mysqli_fetch_assoc($q);
 
 <div class="text-end mt-4 mb-3">
     <button type="submit" class="btn-save">
-        <i class="fas fa-save me-1"></i> Update
+        <i class="fas fa-save me-1"></i> Save
     </button>
 </div>
 

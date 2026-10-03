@@ -1018,6 +1018,17 @@ body {
             justify-content:center;
             min-width:0;
         }
+
+        .pagination{
+            flex-wrap:wrap;
+            gap:4px;
+            max-width:100%;
+        }
+
+        .page-item .page-link{
+            padding:8px 13px;
+            font-size:13px;
+        }
     }
 
     /* Modal Detail (premium light) */

@@ -53,6 +53,13 @@
     .panel-left { width: 100%; }
 }
 
+@media (min-width: 576px) {
+    .section-card .mt-4 {
+        padding-left: 22px;
+        padding-right: 22px;
+    }
+}
+
 @media (max-width: 575.98px) {
     .section-card { padding: 14px; }
     .panel-icon { width: 48px; height: 48px; font-size: 18px; border-radius: 14px; }

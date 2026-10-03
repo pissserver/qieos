@@ -2,6 +2,25 @@
     include '../../sessions/session.php';
     header('Content-Type: application/json');
 
+    if($_GET['action']=='getOne'){
+        $id = (int)$_GET['id'];
+        $type = $_GET['type'];
+
+        $table = $type === 'utility' ? 'utility_payments' : 'tenant_payments';
+
+        $stmt = mysqli_prepare($conn,"SELECT * FROM $table WHERE id = ?");
+        mysqli_stmt_bind_param($stmt,"i",$id);
+        mysqli_stmt_execute($stmt);
+        $q = mysqli_stmt_get_result($stmt);
+        $payment = mysqli_fetch_assoc($q);
+
+        echo json_encode([
+            'status'=>'success',
+            'payment'=>$payment
+        ]);
+        exit;
+    }
+
     if($_GET['action']=='store') {
         
         $type = $_POST['type'];

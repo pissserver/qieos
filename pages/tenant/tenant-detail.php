@@ -18,6 +18,7 @@
     <?php include '../../script/headscript.php'; ?>
 
     <link rel="stylesheet" href="<?php echo BASE_URL; ?>/css/pages/tenant-detail.css?v=<?php echo filemtime(__DIR__ . '/../../css/pages/tenant-detail.css'); ?>">
+    <link rel="stylesheet" href="<?php echo BASE_URL; ?>/css/pages/tenant-detail-table.css?v=<?php echo filemtime(__DIR__ . '/../../css/pages/tenant-detail-table.css'); ?>">
 
     <style>
         /* ===== PANEL ACTION BUTTONS ===== */
@@ -148,6 +149,14 @@
                 width:100%;justify-content:flex-end;
             }
             .tenant-act-btn span{display:inline}
+
+            /* Modal edit pembayaran & edit tenant: judul & tombol close tetap sebaris */
+            #editPaymentModal .panel-header,
+            #editTenantModal .panel-header{
+                flex-direction:row;
+                align-items:center;
+                gap:12px;
+            }
         }
         @media(max-width:575px){
             .panel-right{gap:6px}
@@ -161,6 +170,94 @@
             .etd-input-icon{left:12px;font-size:13px}
             .etd-btn{padding:9px 16px;font-size:13px;border-radius:10px}
             .etd-form-footer{flex-wrap:wrap}
+
+            /* ===== MODAL EDIT PEMBAYARAN (mobile) ===== */
+
+            /* Konten: tanpa padding kiri-kanan px-5 */
+            #editPaymentContent{
+                padding-left:12px !important;
+                padding-right:12px !important;
+                margin-top:0 !important;
+            }
+
+            #editPaymentContent .section-title{
+                margin-top:8px;
+                padding-left:10px;
+            }
+
+            #editPaymentContent .row{
+                margin-left:0;
+                margin-right:0;
+            }
+
+            #editPaymentContent .etp-field{
+                margin-bottom:16px;
+            }
+
+            #editPaymentContent .etp-field:last-child{
+                margin-bottom:4px;
+            }
+
+            #editPaymentContent .btn-save{
+                width:100%;
+                height:46px;
+                border-radius:12px;
+                font-size:14px;
+            }
+
+            /* ===== MODAL EDIT TENANT (mobile) ===== */
+            #editTenantModal .etd-modal-body{
+                padding:6px 20px 16px;
+            }
+
+            #editTenantModal .etd-form-footer .btn-save{
+                display:inline-flex;
+                align-items:center;
+                justify-content:center;
+                gap:8px;
+
+                width:100%;
+                height:46px;
+                padding:0 18px;
+                border-radius:12px;
+                font-size:14px;
+            }
+
+            #editTenantModal .etd-form-footer .btn-save i{
+                font-size:13px;
+            }
+        }
+    /* ===== MODAL EDIT PEMBAYARAN & EDIT TENANT (desktop) ===== */
+        #editPaymentModal .modal-content,
+        #editTenantModal .modal-content{
+            border-radius:24px;
+            overflow:hidden;
+        }
+
+        /* Jarak atas judul "Informasi Pembayaran" di modal edit payment */
+        #editPaymentContent .section-title{
+            margin-top:18px;
+        }
+
+        @media(min-width:576px){
+            /* Jarak header ke konten tetap rapat, konten di dalam (ada padding) */
+            #editPaymentModal .panel-header{
+                margin:18px 16px 8px !important;
+            }
+
+            #editTenantModal .panel-header{
+                margin:12px 16px 8px !important;
+            }
+
+            #editPaymentContent{
+                padding-left:32px !important;
+                padding-right:32px !important;
+                margin-top:0 !important;
+            }
+
+            #editTenantModal .etd-modal-body{
+                padding:4px 32px 16px;
+            }
         }
     </style>
 </head>
@@ -362,25 +459,29 @@
 
     <!-- EDIT TENANT MODAL -->
     <div class="modal fade" id="editTenantModal" tabindex="-1">
-        <div class="modal-dialog modal-lg modal-dialog-centered">
-            <div class="modal-content border-0" style="border-radius:20px;overflow:hidden;box-shadow:0 25px 60px rgba(15,23,42,.25)">
+        <div class="modal-dialog modal-xl modal-dialog-centered">
+            <div class="modal-content stock-panel border-0">
 
-                <div class="etd-modal-header">
-                    <div class="etd-modal-header-left">
-                        <div class="etd-modal-icon etd-modal-icon-edit">
+                <div class="panel-header panel-dark my-3 mx-3">
+                    <div class="panel-left">
+                        <div class="panel-icon">
                             <i class="fas fa-pen-to-square"></i>
                         </div>
+
                         <div>
-                            <div class="etd-modal-title">Edit Tenant</div>
-                            <div class="etd-modal-subtitle">Perbarui informasi tenant</div>
+                            <div class="panel-title">
+                                Edit Tenant
+                            </div>
+                            <div class="panel-subtitle">
+                                Perbarui informasi tenant
+                            </div>
                         </div>
                     </div>
-                    <button class="etd-modal-close" data-bs-dismiss="modal">
-                        <i class="fas fa-xmark"></i>
-                    </button>
+
+                    <button class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
 
-                <div class="etd-modal-body">
+                <div class="etd-modal-body mt-2">
                     <form id="editTenantForm">
                         <input type="hidden" name="id" id="editTenantId" value="">
 
@@ -417,12 +518,9 @@
                         </div>
 
                         <div class="etd-form-footer">
-                            <button type="button" class="etd-btn etd-btn-cancel" data-bs-dismiss="modal">
-                                Batal
-                            </button>
-                            <button type="submit" class="etd-btn etd-btn-save">
-                                <i class="fas fa-check-circle"></i>
-                                Simpan Perubahan
+                            <button type="submit" class="btn-save">
+                                <i class="fas fa-save"></i>
+                                Save
                             </button>
                         </div>
                     </form>
@@ -440,9 +538,23 @@
     const tenantMenu=document.getElementById("tenantMenu");
     const tenantArrow=document.getElementById("tenantArrow");
 
+    const tenantPanelHeader = document.querySelector('.panel-header');
+
+    function positionTenantMenu(){
+        if(window.innerWidth > 575) return;
+
+        const rect = tenantPanelHeader.getBoundingClientRect();
+
+        tenantMenu.style.setProperty('--tm-left', rect.left + 'px');
+        tenantMenu.style.setProperty('--tm-width', rect.width + 'px');
+        tenantMenu.style.setProperty('--tm-top', (rect.bottom + 10) + 'px');
+    }
+
     tenantToggle.addEventListener("click",function(e){
 
         e.stopPropagation();
+
+        positionTenantMenu();
 
         tenantMenu.classList.toggle("show");
 
@@ -457,10 +569,20 @@
         tenantToggle.classList.remove("active");
 
     });
+
+    window.addEventListener("resize",positionTenantMenu);
+    window.addEventListener("scroll",positionTenantMenu,true);
 </script>
 
 <!-- Switch Payment Tab -->
 <script>
+    const USER_ROLE = '<?= $user['role'] ?>';
+
+    function renderMobileCards(){
+        // Tidak pakai card lagi, pakai tabel responsive biasa
+        return;
+    }
+
     document.addEventListener("DOMContentLoaded", function(){
         loadPayment("tenant");
     });
@@ -475,8 +597,126 @@
         loadPayment(type);
     }
 
+    function formatRupiah(value){
+        const num = Number(String(value).replace(/[^0-9.-]/g,"")) || 0;
+        return "Rp " + num.toLocaleString("id-ID");
+    }
+
+    function rowAttr(row, name){
+        if(!row || !row.getAttribute) return "";
+
+        const val = row.getAttribute("data-" + name);
+
+        return val === null ? "" : String(val).trim();
+    }
+
+    function paymentCardBadge(status){
+        return String(status).trim().toLowerCase() === "paid"
+            ? '<span class="paym-card-badge is-paid"><i class="fas fa-check"></i>Lunas</span>'
+            : '<span class="paym-card-badge is-pending"><i class="fas fa-clock"></i>Belum Lunas</span>';
+    }
+
+    function paymentCardActions(row){
+        const id = rowAttr(row, "id");
+        const type = rowAttr(row, "type");
+        const paymentDate = rowAttr(row, "payment-date");
+
+        if(USER_ROLE !== "staff kasir"){
+            return '' +
+                '<button class="paym-card-btn is-edit editPaymentBtn" data-id="'+id+'" data-type="'+type+'">' +
+                    '<i class="fas fa-pen"></i>' +
+                '</button>' +
+                '<button class="paym-card-btn is-delete deletePaymentBtn" data-id="'+id+'" data-date="'+paymentDate+'" data-type="'+type+'">' +
+                    '<i class="fas fa-trash"></i>' +
+                '</button>';
+        }
+
+        return '<button class="paym-card-btn is-print" onclick="printReceipt(\''+id+'\', \''+type+'\')">' +
+            '<i class="fas fa-print"></i>' +
+        '</button>';
+    }
+
+    function renderPaymentCards(api, box){
+        let rows = [];
+
+        // nodes() selalu mengembalikan elemen <tr> asli, sehingga
+        // atribut data-* pasti terbaca (data() tidak selalu begitu)
+        try{
+            rows = api.rows({page:"current"}).nodes().toArray();
+        }catch(err){
+            rows = [];
+        }
+
+        // Hanya baris pembayaran asli (DataTables menyisipkan bar
+        // "no data" sendiri saat search tidak menemukan hasil)
+        let cards = rows.filter(function(row){
+            return row && row.getAttribute && row.getAttribute("data-id");
+        });
+
+        if(!cards.length){
+            const tbody = document.querySelector("#tablePayment tbody");
+
+            if(tbody){
+                cards = Array.prototype.slice.call(tbody.querySelectorAll("tr[data-id]"));
+            }
+        }
+
+        if(!cards.length){
+            let noMatch = false;
+
+            try{
+                const info = api.page.info();
+                noMatch = info.recordsTotal > 0 && info.recordsDisplay === 0;
+            }catch(err){
+                noMatch = false;
+            }
+
+            box.innerHTML =
+                '<div class="empty-search">' +
+                    '<img src="../../assets/img/illustrations/empty-data.png" class="empty-img" alt="">' +
+                    '<div class="empty-title">'+ (noMatch ? "Pembayaran tidak ditemukan" : "Belum ada data pembayaran") +'</div>' +
+                    '<div class="empty-sub">'+ (noMatch ? "Coba gunakan kata kunci lain" : "Silakan tambahkan pembayaran terlebih dahulu") +'</div>' +
+                '</div>';
+            return;
+        }
+
+        box.innerHTML = cards.map(function(row){
+            const cells = row.cells || [];
+
+            const date = rowAttr(row, "date")
+                || (cells[0] ? cells[0].textContent.replace(/\s+/g," ").trim() : "")
+                || "-";
+
+            const amount = rowAttr(row, "amount")
+                || (cells[1] ? cells[1].textContent.replace(/[^0-9]/g,"") : "");
+
+            const status = rowAttr(row, "status");
+
+            return '' +
+            '<article class="paym-card">' +
+                '<div class="paym-card-icon">' +
+                    '<i class="fa-solid fa-wallet"></i>' +
+                '</div>' +
+                '<div class="paym-card-main">' +
+                    '<div class="paym-card-date">'+ date +'</div>' +
+                    '<div class="paym-card-row">' +
+                        '<span class="paym-card-amount">'+ (amount ? formatRupiah(amount) : "-") +'</span>' +
+                        paymentCardBadge(status) +
+                    '</div>' +
+                '</div>' +
+                '<div class="paym-card-actions">'+ paymentCardActions(row) +'</div>' +
+            '</article>';
+        }).join("");
+    }
+
     function loadPayment(type){
-        document.getElementById("payment-content").innerHTML=`
+        const paymentContent = document.getElementById("payment-content");
+
+        if($.fn.DataTable.isDataTable("#tablePayment")){
+            $("#tablePayment").DataTable().destroy();
+        }
+
+        paymentContent.innerHTML=`
             <div class="loading-box">
                 <i class="fas fa-spinner fa-spin"></i>
                 Memuat data...
@@ -487,25 +727,81 @@
         .then(res=>res.text())
         .then(html=>{
 
-            document.getElementById("payment-content").innerHTML=html;
+            paymentContent.innerHTML=html;
 
-            if($.fn.DataTable.isDataTable("#tablePayment")){
-                $("#tablePayment").DataTable().destroy();
-            }
+            const mobile = window.innerWidth <= 575;
 
-            $("#tablePayment").DataTable({
-                pageLength:10,
-                responsive:true,
+            const dt = $("#tablePayment").DataTable({
+                pageLength:5,
+                lengthMenu:[5, 10, 25, 50, 100],
+                responsive: !mobile,
                 ordering:false,
                 autoWidth:false,
+                pagingType: mobile ? "simple_numbers" : "full_numbers",
+                dom: mobile ? "ftp" : "f l t p",
 
                 language:{
                     search:"",
-                    searchPlaceholder:"Cari pembayaran..."
+                    searchPlaceholder:"Cari pembayaran...",
+
+                    zeroRecords:
+                        '<div class="empty-search">' +
+                            '<img src="../../assets/img/illustrations/empty-data.png" class="empty-img" alt="">' +
+                            '<div class="empty-title">Pembayaran tidak ditemukan</div>' +
+                            '<div class="empty-sub">Coba gunakan kata kunci lain</div>' +
+                        '</div>',
+
+                    emptyTable:
+                        '<div class="empty-search">' +
+                            '<img src="../../assets/img/illustrations/empty-data.png" class="empty-img" alt="">' +
+                            '<div class="empty-title">Belum ada data pembayaran</div>' +
+                            '<div class="empty-sub">Silakan tambahkan pembayaran terlebih dahulu</div>' +
+                        '</div>'
+                },
+
+                drawCallback: function(){
+                    if(!mobile) return;
+
+                    const wrapper = document.getElementById("tablePayment_wrapper");
+                    let box = document.getElementById("paymentCardsMobile");
+
+                    if(!box){
+                        box = document.createElement("div");
+                        box.id = "paymentCardsMobile";
+                        box.className = "paym-cards";
+
+                        const paginate = wrapper.querySelector(".dataTables_paginate");
+
+                        if(paginate){
+                            wrapper.insertBefore(box, paginate);
+                        } else {
+                            wrapper.appendChild(box);
+                        }
+                    }
+
+                    renderPaymentCards(this.api(), box);
                 }
             });
+
+            // Search + tombol tambah dalam satu baris
+            $('#tablePayment_filter').wrap('<div class="table-action-wrapper"></div>');
+
+            if(mobile){
+                $('#tpwBtnContainer').show().appendTo('.table-action-wrapper');
+            } else {
+                // Show entries di kiri, search + tombol di kanan
+                $('.table-action-wrapper').wrap('<div class="table-toolbar"></div>');
+                $('#tablePayment_length').prependTo('.table-toolbar');
+                $('#tpwBtnContainer').show().appendTo('.table-action-wrapper');
+            }
+
+            window.currentPaymentDT = dt;
         });
     }
+
+    window.addEventListener('resize', function(){
+        // resize handler jika perlu
+    });
 </script>
 
 <!-- Script Add -->
@@ -632,9 +928,7 @@
 
                 $('#editPaymentModal').modal('hide');
 
-                setTimeout(() => {
-                    loadPayment(type);
-                }, 1000);
+                updateRowInTable(id, type);
 
             }else{
 
@@ -647,6 +941,28 @@
             QToast('Error', 'Gagal memproses update', 'error');
         });
     });
+
+    function updateRowInTable(id, type){
+        fetch('tenant-payment-action.php?action=getOne&id='+id+'&type='+type)
+        .then(res=>res.json())
+        .then(data=>{
+            if(data.status==='success'){
+                const payment = data.payment;
+                const row = $('#tablePayment').DataTable().row('[data-id="'+id+'"]');
+                
+                if(row.length){
+                    const dateFormatted = new Date(payment.payment_date).toLocaleDateString('id-ID',{day:'numeric',month:'long',year:'numeric'});
+                    
+                    row.node().dataset.date = dateFormatted;
+                    row.node().dataset.paymentDate = payment.payment_date;
+                    
+                    $(row.node()).find('.date-main').html('<i class="fa-regular fa-calendar"></i> '+dateFormatted);
+                    
+                    $('#tablePayment').DataTable().draw(false);
+                }
+            }
+        });
+    }
 </script>
 
 <!-- Script Delete -->
@@ -674,7 +990,8 @@
             if(ok){
                 fetch('tenant-payment-action.php?action=destroy', {
                     method: 'POST',
-                    body: new URLSearchParams({ id: id, type: type })
+                    headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+                    body: 'id=' + id + '&type=' + type
                 })
                 .then(res=>res.json())
                 .then(res=>{
@@ -683,10 +1000,16 @@
 
                         QToast('Terhapus', 'Data berhasil dihapus', 'success');
 
-                        setTimeout(() => {
-                            loadPayment(type);
-                        }, 1000);
+                        const table = $('#tablePayment').DataTable();
+                        table.row('[data-id="'+id+'"]').remove().draw(false);
+
+                    }else{
+                        QToast('Gagal', res.message || 'Terjadi kesalahan', 'error');
                     }
+                })
+                .catch(err=>{
+                    console.error(err);
+                    QToast('Error', 'Gagal menghapus data', 'error');
                 });
             }
         });

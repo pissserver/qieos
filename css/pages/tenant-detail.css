@@ -511,6 +511,7 @@
             left:-125px;
             min-width:340px;
             padding:10px;
+            z-index:99999;
 
             background:linear-gradient(160deg,#ffffff,#f8fbff);
             border:1px solid rgba(99,102,241,.15);
@@ -685,4 +686,137 @@
            (volt.css global memakai overflow:hidden di .panel-header) */
         .panel-header{
             overflow:visible;
+        }
+
+        /* ===== MOBILE RESPONSIVE ===== */
+        @media(max-width:575px){
+            /* Panel: tombol Edit/Hapus tetap sebaris dengan judul, bukan turun */
+            .panel-header{
+                flex-direction:row;
+                align-items:center;
+                gap:10px;
+            }
+
+            .panel-left{
+                width:auto;
+                flex:1 1 auto;
+                gap:12px;
+                min-width:0;
+            }
+
+            .panel-icon{
+                width:46px;
+                height:46px;
+                font-size:18px;
+                flex-shrink:0;
+            }
+
+            .tenant-toggle{
+                font-size:16px;
+                max-width:100%;
+                min-width:0;
+            }
+
+            .tenant-toggle span{
+                display:block;
+                min-width:0;
+            }
+
+            .panel-subtitle{
+                font-size:11px;
+            }
+
+            /* Mobile: dropdown diposition lewat JS (fixed) agar:
+   1. lebarnya persis sama dengan panel header
+   2. selalu di atas tombol Edit/Hapus */
+            .tenant-menu{
+                position:fixed;
+                top:var(--tm-top, calc(100% + 10px));
+                left:var(--tm-left, 14px);
+                right:auto;
+                width:var(--tm-width, calc(100% - 28px));
+                max-width:none;
+                min-width:0;
+                margin:0;
+                padding:12px;
+                border-radius:20px;
+                transform-origin:top left;
+                z-index:99999;
+            }
+
+            /*_override transform animasi_*/
+            .tenant-menu{
+                transform:translateY(-10px) scale(.96);
+            }
+
+            .tenant-menu.show{
+                transform:translateY(0) scale(1);
+            }
+
+            .tenant-header{
+                padding:16px 18px;
+                border-radius:16px;
+                margin-bottom:12px;
+            }
+
+            .tenant-header small{
+                font-size:11px;
+            }
+
+            .tenant-header h6{
+                font-size:18px;
+                margin-top:4px;
+            }
+
+            .tenant-item{
+                padding:16px 18px;
+                margin-bottom:10px;
+                border-radius:16px;
+                font-size:16px;
+            }
+
+            .tenant-item span{
+                gap:13px;
+            }
+
+            .tenant-item span i{
+                width:44px;
+                height:44px;
+                font-size:17px;
+                border-radius:13px;
+                flex-shrink:0;
+            }
+
+            .tenant-item .fa-check{
+                width:36px;
+                height:36px;
+                font-size:15px;
+            }
+
+            /* Tab switch: icon di atas, teks di bawahnya */
+            .payment-tabs{
+                gap:10px;
+                padding:8px;
+                margin:16px 0 20px;
+            }
+
+            .payment-tab{
+                display:flex;
+                flex-direction:column;
+                align-items:center;
+                justify-content:center;
+                gap:6px;
+
+                padding:12px 8px;
+
+                font-size:12.5px;
+                line-height:1.3;
+                text-align:center;
+            }
+
+            .payment-tab i{
+                margin-right:0;
+                font-size:17px;
+                line-height:1;
+            }
         }
