@@ -1538,10 +1538,12 @@
                 background:#f8fafc !important;
             }
 
-            #stockTableContainer .dataTables_length,
-            #stockTableContainer .dataTables_info{
-                display:none;
-            }
+            /* "Show n entries" + baris info TIDAK lagi disembunyikan di
+               <=575.98px. Rule display:none dihapus supaya sama dengan
+               Master & Purchasing: mobile pakai dom "fltip" sehingga
+               length, filter, table, info, dan paginate semuanya tampil.
+               Styling kontrolnya sekarang datang dari
+               css/components/datatable-premium.css. */
 
             .fifo-container{
                 padding:14px;
@@ -1604,34 +1606,16 @@
                 max-width:100%;
             }
 
-            /* volt.css memberi padding-right 1.5rem pada .dataTables_filter,
-               dan dom default DataTables membungkus isi dalam .row > .col-sm-12
-               yang menambah gutter 0.75px per sisi. Panel Stok Gudang pakai
-               dom "ftp" tanpa wrapper, jadi semua ini harus dinolkan. */
-            .fifo-panel-col #tableStock_wrapper .row{
-                margin-left:0 !important;
-                margin-right:0 !important;
-            }
+            /* CATATAN: blok netralisasi gutter .row > .col-sm-12 untuk panel
+               detail FIFO yang dulu ada di sini sudah DIHAPUS.
 
-            .fifo-panel-col #tableStock_wrapper .row > [class*="col-"]{
-                padding-left:0 !important;
-                padding-right:0 !important;
-            }
+               Selector lamanya salah id: menulis "#tableStock_wrapper",
+               padahal tabel detail mutasi adalah "#tableMutation" (lihat
+               pages/stock/mutation-detail.php). Akibatnya blok itu tidak
+               pernah match apa-apa di halaman ini - jadi always mati.
 
-            .fifo-panel-col #tableStock_wrapper .dataTables_filter{
-                padding-right:0 !important;
-                padding-left:0 !important;
-                margin-left:0;
-                width:100%;
-            }
-
-            .fifo-panel-col #tableStock_wrapper .dataTables_filter label{
-                padding-left:0 !important;
-                float:none;
-            }
-
-            .fifo-panel-col #tableStock_wrapper .dataTables_filter input{
-                margin-left:0;
-                box-sizing:border-box;
-            }
+               Versi yang benar sudah ada di css/pages/mutation-detail.css
+               (#tableMutation_wrapper .row, .row > [class*="col-"],
+               .dataTables_filter, .dataTables_filter input) jadi tidak perlu
+               diulang di sini. */
         }

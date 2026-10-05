@@ -41,6 +41,7 @@ while($prod = mysqli_fetch_assoc($pq)){
 
         <link rel="stylesheet" href="<?php echo BASE_URL; ?>/css/pages/sales-stock.css?v=<?php echo filemtime(__DIR__ . '/../../css/pages/sales-stock.css'); ?>">
         <link rel="stylesheet" href="<?php echo BASE_URL; ?>/css/pages/history-request-table.css?v=<?php echo filemtime(__DIR__ . '/../../css/pages/history-request-table.css'); ?>">
+        <link rel="stylesheet" href="<?php echo BASE_URL; ?>/css/components/datatable-premium.css?v=<?php echo filemtime(__DIR__ . '/../../css/components/datatable-premium.css'); ?>">
     </head>
 
     <body>
@@ -143,7 +144,7 @@ while($prod = mysqli_fetch_assoc($pq)){
                         </div>
 
                         <div id="editMode" class="panel-mode">
-                            <div id="history-table">
+                            <div id="history-table" class="dt-premium">
                                 <div class="text-center py-5">
                                     <i class="fas fa-spinner fa-spin fa-2x text-secondary"></i>
                                 </div>
@@ -179,7 +180,7 @@ while($prod = mysqli_fetch_assoc($pq)){
                     </div>
 
                     <div class="mt-4 px-4">
-                        <div id="sales-table"></div>
+                        <div id="sales-table" class="dt-premium"></div>
                     </div>
                 </div>
             </div>
@@ -188,6 +189,8 @@ while($prod = mysqli_fetch_assoc($pq)){
         <?php include '../components/modals/request-detail-modal.php'; ?>
 
         <?php include '../../script/footscript.php'; ?>
+
+        <script src="<?php echo BASE_URL; ?>/script/datatable-compact.js?v=<?php echo filemtime(__DIR__ . '/../../script/datatable-compact.js'); ?>"></script>
 
         <script>
             const PRODUCTS = <?= json_encode($products) ?>;
@@ -563,11 +566,14 @@ while($prod = mysqli_fetch_assoc($pq)){
             });
             addItem();
 
-            /* 🔥 LOAD TABLE */
-            const STOCK_MOBILE_BP = 575.98;
-
+            /* ---------- LOAD TABLE ---------- */
+            /* Breakpoint, pager, dan chip info sekarang milik helper bersama
+               script/datatable-compact.js, sama seperti Master, Purchasing,
+               Stok Gudang, Mutasi, dan Transfer. Jadi angka 575.98 tidak lagi
+               ditulis ulang di file ini - kalau suatu saat berubah, cukup
+               diubah satu tempat. */
             function isStockMobile(){
-                return window.innerWidth <= STOCK_MOBILE_BP;
+                return MP_TABLE.isMobile();
             }
 
             let stockIsMobile = isStockMobile();
@@ -580,47 +586,105 @@ while($prod = mysqli_fetch_assoc($pq)){
             function stockDataTable(){
                 const mobile = isStockMobile();
 
-                const lang = {
-                    search:"",
-                    searchPlaceholder:"Cari produk...",
+                const options = {
+                    pageLength: 5,
+                    lengthMenu: [[5,10,25,50],[5,10,25,50]],
 
-                    zeroRecords: `
-                        <div class="empty-search">
-                            <img src="../../assets/img/illustrations/empty-data.png" class="empty-img">
-                            <div class="empty-title">Produk tidak ditemukan</div>
-                            <div class="empty-sub">
-                                Coba gunakan kata kunci lain
-                            </div>
-                        </div>
-                    `,
+                    /* Pager kustom dari script/datatable-compact.js: 3 nomor di
+                       mobile, 5 di tablet/desktop, halaman 1 & terakhir dikunci
+                       di dua ujung, dan "..." hanya muncul kalau memang ada
+                       nomor yang disembunyikan. Bentuk pil & warnanya sudah
+                       diatur di css/components/datatable-premium.css.
 
-                    emptyTable: `
-                        <div class="empty-search">
-                            <img src="../../assets/img/illustrations/empty-data.png" class="empty-img">
-                            <div class="empty-title">Belum ada data produk</div>
-                            <div class="empty-sub">
-                                Silakan tambahkan stok terlebih dahulu
-                            </div>
-                        </div>
-                    `
-                };
+                       DULU mobile memakai "simple_numbers" dengan pageLength 4
+                       dan desktop memakai "lftip" (length di kiri, filter di
+                       kanan, tabel, info, paginate). Sekarang keduanya ikut
+                       default Bootstrap 5 supaya baris kontrolnya bisa
+                       diratakan oleh premium. */
+                    pagingType: "mp_compact",
 
-                /* pager disamakan dengan tabel riwayat (simple_numbers) */
-                const dt = $("#stockTable").DataTable({
-                    pageLength: mobile ? 4 : 5,
-                    lengthMenu: mobile
-                        ? [[4,5,10,25,50],[4,5,10,25,50]]
-                        : [[5,10,25,50],[5,10,25,50]],
+                    /* Chip "Menampilkan 1-5 dari 137 produk", plus
+                       "dari N produk" kalau sedang difilter. */
+                    infoCallback: MP_TABLE.infoCallback('produk'),
 
-                    pagingType: mobile ? "simple_numbers" : "full_numbers",
-                    dom: mobile ? "ftp" : "lftip",
                     searchDelay: 250,
 
-                    responsive: true,
+                    /* Opsi "responsive: true" DIHAPUS. Opsi itu hanya dibaca
+                       oleh extension Responsive (responsive.dataTables.min.js)
+                       yang TIDAK dimuat di script/headscript.php - yang ada
+                       hanya jquery.dataTables.min.js + dataTables.bootstrap5.min.js,
+                       jadi nilainya diam-diam diabaikan. Responsif di
+                       halaman ini ditangani manual: tukar "dom" saat
+                       breakpoint mobile (lihat bawah) + card mode mobile yang
+                       dikerjakan css/pages/sales-stock.css. */
                     autoWidth: false,
-                    language: lang,
+                    language: {
+                        search:"",
+                        searchPlaceholder:"Cari produk...",
+
+                        /* Panah Previous/Next memakai glyph, bukan teks
+                           "Previous". Pada rentang 9 pil, dua pil teks memakan
+                           ~150px dari baris pager sementara sisa ruang di
+                           layar 320-360px cuma ~290-330px. Aksesibilitas tetap
+                           terjaga: aria-label dibacakan bahasa Indonesia lewat
+                           oAria.paginate di bawah. */
+                        paginate:{
+                            previous:"&#8249;",  // ‹
+                            next:"&#8250;"       // ›
+                        },
+
+                        /* Label yang dibacakan screen reader tetap bahasa Indonesia. */
+                        oAria:{
+                            paginate:{
+                                pageLabel:"Halaman {page}",
+                                previous:"Halaman sebelumnya",
+                                next:"Halaman berikutnya"
+                            }
+                        },
+
+                        zeroRecords: `
+                            <div class="empty-search">
+                                <img src="../../assets/img/illustrations/empty-data.png" class="empty-img">
+                                <div class="empty-title">Produk tidak ditemukan</div>
+                                <div class="empty-sub">
+                                    Coba gunakan kata kunci lain
+                                </div>
+                            </div>
+                        `,
+
+                        emptyTable: `
+                            <div class="empty-search">
+                                <img src="../../assets/img/illustrations/empty-data.png" class="empty-img">
+                                <div class="empty-title">Belum ada data produk</div>
+                                <div class="empty-sub">
+                                    Silakan tambahkan stok terlebih dahulu
+                                </div>
+                            </div>
+                        `
+                    },
                     order: [],
-                });
+                };
+
+                /* Mobile pakai "fltip": search + show entries + tabel + baris
+                   info chip + pagination. "l" dan "i" ikut dirender supaya user
+                   bisa menaikkan jumlah baris dan tahu posisinya di daftar
+                   tanpa scroll ke atas.
+
+                   DULU mobile memakai dom "ftp" (tanpa "l" & "i") plus rule
+                   ".dataTables_wrapper .dataTables_length/_info{display:none}"
+                   di css/pages/sales-stock.css, sehingga Show n entries dan
+                   baris info disembunyikan di layar kecil. Sekarang keduanya
+                   tampil, sama seperti halaman lain.
+
+                   "dom" HANYA di-set untuk mobile. Di desktop/tablet TIDAK
+                   di-set, sama seperti halaman lain, jadi wrapper .row +
+                   .col-* bawaan DataTables Bootstrap 5 yang dipakai:
+
+                     <'row'<'col-sm-12 col-md-6'l><'col-sm-12 col-md-6'f>><'row dt-row'
+                     <'col-sm-12'tr>><'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>> */
+                if(mobile) options.dom = "fltip";
+
+                const dt = $("#stockTable").DataTable(options);
 
                 dt.columns.adjust();
                 updateStockCount(dt.page.info().recordsTotal);
@@ -629,90 +693,211 @@ while($prod = mysqli_fetch_assoc($pq)){
             }
 
             function loadTable() {
+                /* --- Ambil state SEBELUM markup ditimpa -------------------------------
+                   Penting diambil di sini: setelah innerHTML diganti, node
+                   <table id="stockTable"> yang lama ikut terbuang.
+                   isDataTable() mencari node berdasarkan identitas
+                   (o.nTable === t), jadi sesudah itu isDataTable("#stockTable")
+                   sudah false dan state-nya tidak bisa diambil lagi.
+
+                   Yang penting di halaman ini: loadTable() dipanggil setelah
+                   kirim request, jadi tanpa ini tabel lompat balik ke halaman 1
+                   DAN filter pencarian ikut hilang tepat setelah user mengirim. */
+                const prev = $.fn.DataTable.isDataTable("#stockTable")
+                    ? $("#stockTable").DataTable()
+                    : null;
+
+                const keep = prev ? {
+                    page: prev.page(),
+                    keyword: prev.search(),
+                    length: prev.page.len()
+                } : null;
+
                 fetch("sales-table.php")
                     .then((res) => res.text())
                     .then((html) => {
+                        /* destroy dulu, node lama masih terpasang jadi aman.
+                           Kalau dibiarkan, instance-nya menumpuk di registry
+                           DataTable.settings setiap loadTable(). Sesudahnya
+                           innerHTML menghapus node lama itu.
+
+                           DULU urutannya terbalik (innerHTML dulu, destroy
+                           belakangan) sehingga isDataTable() selalu false dan
+                           tidak ada yang pernah ikut di-destroy. */
+                        if(prev) prev.destroy();
+
                         document.getElementById("sales-table").innerHTML = html;
 
-                        if ($.fn.DataTable.isDataTable("#stockTable")) {
-                            $("#stockTable").DataTable().destroy();
-                        }
-
                         stockIsMobile = isStockMobile();
-                        stockDataTable();
+
+                        const dt = stockDataTable();
+
+                        if(keep){
+                            /* Halaman di luar rentang otomatis dikembalikan
+                               DataTable ke 0, jadi aman walau baris habis. */
+                            dt.page.len(keep.length)
+                              .search(keep.keyword)
+                              .page(keep.page)
+                              .draw(false);
+                        }
                     });
             }
 
-            /* 🔥 REBUILD TABLE KETIKA GANTI MOBILE / DESKTOP */
+            /* ---------- LOAD REQUEST ---------- */
+            function historyDataTableOptions(){
+                const mobile = isStockMobile();
+
+                const options = {
+                    pageLength: 5,
+                    lengthMenu: [[5,10,25,50],[5,10,25,50]],
+
+                    /* Pager + chip info yang sama dengan tabel Stok Kantin,
+                       supaya kedua tabel di halaman ini serasi satu sama
+                       lain dan dengan halaman lain. */
+                    pagingType: "mp_compact",
+                    infoCallback: MP_TABLE.infoCallback('request'),
+
+                    autoWidth: false,
+                    language:{
+                        search:"",
+                        searchPlaceholder:"Cari request...",
+
+                        paginate:{
+                            previous:"&#8249;",  // ‹
+                            next:"&#8250;"       // ›
+                        },
+
+                        oAria:{
+                            paginate:{
+                                pageLabel:"Halaman {page}",
+                                previous:"Halaman sebelumnya",
+                                next:"Halaman berikutnya"
+                            }
+                        },
+
+                        zeroRecords: `
+                            <div class="empty-search">
+                                <img src="../../assets/img/illustrations/empty-data.png" class="empty-img">
+                                <div class="empty-title">Request tidak ditemukan</div>
+                                <div class="empty-sub">
+                                    Coba gunakan kata kunci lain
+                                </div>
+                            </div>
+                        `,
+
+                        emptyTable: `
+                            <div class="empty-search">
+                                <img src="../../assets/img/illustrations/empty-data.png" class="empty-img">
+                                <div class="empty-title">Belum ada data request</div>
+                                <div class="empty-sub">
+                                    Silakan tambahkan stok terlebih dahulu
+                                </div>
+                            </div>
+                        `
+                    },
+
+                    /* PENTING: IKUTIN SORT SQL */
+                    order: []
+                };
+
+                /* Sama seperti tabel Stok Kantin: "dom" hanya di-set untuk
+                   mobile. DULU tabel ini tidak pernah punya "dom" sama sekali,
+                   termasuk di mobile, sehingga "l" & "i" ikut hilang. */
+                if(mobile) options.dom = "fltip";
+
+                return options;
+            }
+
+            function historyDataTable(){
+                const table = $('#requestHistory');
+                if(!table.length) return null;
+
+                const ht = table.DataTable(historyDataTableOptions());
+                ht.columns.adjust();
+
+                return ht;
+            }
+
+            function loadHistory(){
+                /* Ambil state SEBELUM markup ditimpa - lihat catatan lengkap
+                   di loadTable() di atas, mekanismenya sama persis. */
+                const prev = $.fn.DataTable.isDataTable('#requestHistory')
+                    ? $('#requestHistory').DataTable()
+                    : null;
+
+                const keep = prev ? {
+                    page: prev.page(),
+                    keyword: prev.search(),
+                    length: prev.page.len()
+                } : null;
+
+                fetch('../components/tables/history-request-table.php?view=sales')
+                .then(res=>res.text())
+                .then(html=>{
+                    /* destroy dulu, node lama masih terpasang. DULU urutannya
+                       terbalik sehingga isDataTable() selalu false. */
+                    if(prev) prev.destroy();
+
+                    document.getElementById("history-table").innerHTML = html;
+
+                    requestAnimationFrame(()=>{
+                        const ht = historyDataTable();
+
+                        if(ht && keep){
+                            ht.page.len(keep.length)
+                              .search(keep.keyword)
+                              .page(keep.page)
+                              .draw(false);
+                        }
+                    });
+                });
+            }
+
+            /* ---------- REBUILD KETIKA GANTI MOBILE / DESKTOP ----------
+               Kedua tabel di halaman ini (Stok Kantin & Riwayat) punya
+               breakpoint yang sama, jadi satu handler cukup. Tabel yang belum
+               termuat / sedang di luar panel toggle dilewati. */
             let stockResizeTimer;
             window.addEventListener("resize", function(){
                 clearTimeout(stockResizeTimer);
                 stockResizeTimer = setTimeout(function(){
                     if(isStockMobile() === stockIsMobile) return;
-                    if(!$.fn.DataTable.isDataTable("#stockTable")) return;
 
-                    const page = $("#stockTable").DataTable().page();
-                    $("#stockTable").DataTable().destroy();
+                    /* Simpan state kedua tabel dulu, baru flip flag. Keduanya
+                       rebuild in-place (tanpa fetch) supaya tidak ada flash
+                       kosong. */
+                    const keep = {};
+
+                    ['#stockTable', '#requestHistory'].forEach(function(sel){
+                        if(!$.fn.DataTable.isDataTable(sel)) return;
+
+                        const current = $(sel).DataTable();
+                        keep[sel] = {
+                            page: current.page(),
+                            keyword: current.search(),
+                            length: current.page.len()
+                        };
+
+                        current.destroy();
+                    });
 
                     stockIsMobile = isStockMobile();
-                    const dt = stockDataTable();
-                    dt.page(page).draw(false);
+
+                    if($('#stockTable').length) stockDataTable();
+                    if($('#requestHistory').length) historyDataTable();
+
+                    Object.keys(keep).forEach(function(sel){
+                        const k = keep[sel];
+                        if(!k) return;
+
+                        $(sel).DataTable()
+                              .page.len(k.length)
+                              .search(k.keyword)
+                              .page(k.page)
+                              .draw(false);
+                    });
                 }, 250);
             });
-
-            /* 🔥 LOAD REQUEST */
-            function loadHistory(){
-                fetch('../components/tables/history-request-table.php?view=sales')
-                .then(res=>res.text())
-                .then(html=>{
-                    document.getElementById("history-table").innerHTML = html;
-
-                    requestAnimationFrame(()=>{
-
-                        // 🔥 DESTROY DULU
-                        if ($.fn.DataTable.isDataTable('#requestHistory')) {
-                            $('#requestHistory').DataTable().destroy();
-                        }
-
-                        // 🔥 INIT ULANG
-                        let ht = $('#requestHistory').DataTable({
-                            pageLength: 5,
-                            lengthMenu:[[5,10,25,50],[5,10,25,50]],
-                            autoWidth: false,
-                            language:{
-                                search:"",
-                                searchPlaceholder:"Cari request...",
-
-                                zeroRecords: `
-                                    <div class="empty-search">
-                                        <img src="../../assets/img/illustrations/empty-data.png" class="empty-img">
-                                        <div class="empty-title">Request tidak ditemukan</div>
-                                        <div class="empty-sub">
-                                            Coba gunakan kata kunci lain
-                                        </div>
-                                    </div>
-                                `,
-
-                                emptyTable: `
-                                    <div class="empty-search">
-                                        <img src="../../assets/img/illustrations/empty-data.png" class="empty-img">
-                                        <div class="empty-title">Belum ada data request</div>
-                                        <div class="empty-sub">
-                                            Silakan tambahkan stok terlebih dahulu
-                                        </div>
-                                    </div>
-                                `
-                            },
-
-                            // 🔥 PENTING: IKUTIN SORT SQL
-                            order: []
-                        });
-
-                        ht.columns.adjust();
-
-                    });
-                });
-            }
 
             function escapeHtml(s){
                 return String(s == null ? '' : s)

@@ -1475,10 +1475,12 @@
                 background:#f8fafc !important;
             }
 
-            #stockTableContainer .dataTables_length,
-            #stockTableContainer .dataTables_info{
-                display:none;
-            }
+            /* "Show n entries" + baris info TIDAK lagi disembunyikan di
+               <=575.98px. Rule display:none dihapus supaya sama dengan
+               Master & Purchasing: mobile pakai dom "fltip" sehingga
+               length, filter, table, info, dan paginate semuanya tampil.
+               Styling kontrolnya sekarang datang dari
+               css/components/datatable-premium.css. */
 
             .fifo-container{
                 padding:14px;
@@ -1541,10 +1543,21 @@
                 max-width:100%;
             }
 
-            /* volt.css memberi padding-right 1.5rem pada .dataTables_filter,
-               dan dom default DataTables membungkus isi dalam .row > .col-sm-12
-               yang menambah gutter 0.75px per sisi. Panel Stok Gudang pakai
-               dom "ftp" tanpa wrapper, jadi semua ini harus dinolkan. */
+            /* volt.css memberi padding-right 1.5rem pada .dataTables_filter, dan
+               wrapper bawaan DataTables membungkus tiap kontrol dalam
+               .row > .col-sm-12 yang menambah gutter 0.75rem per sisi.
+               Panel detail FIFO ini sempit, jadi gutter + padding volt
+               itu bikin baris kontrol melebar lebih dari tabelnya sendiri
+               dan paginate Info bocor ke luar card. Semua dinolkan di sini
+               khusus untuk #tableStock_wrapper (ID), bukan global, supaya
+               halaman lain yang juga pakai .dataTables_filter tidak ikut
+               terpengaruh.
+
+               Blok kembarannya untuk mutasi ada di
+               css/pages/mutation-detail.css dengan id #tableMutation_wrapper.
+               JANGAN menyalin ke sini dengan id yang salah - dulu sempat
+               ditulis "#tableStock_wrapper" di css/pages/mutation.css
+               sehingga tidak pernah match apa-apa di halaman mutasi. */
             .fifo-panel-col #tableStock_wrapper .row{
                 margin-left:0 !important;
                 margin-right:0 !important;

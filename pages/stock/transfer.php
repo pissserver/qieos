@@ -10,6 +10,7 @@
 <link rel="stylesheet" href="<?php echo BASE_URL; ?>/css/pages/transfer.css?v=<?php echo filemtime(__DIR__ . '/../../css/pages/transfer.css'); ?>">
 <link rel="stylesheet" href="<?php echo BASE_URL; ?>/css/pages/transfer-table.css?v=<?php echo filemtime(__DIR__ . '/../../css/pages/transfer-table.css'); ?>">
 <link rel="stylesheet" href="<?php echo BASE_URL; ?>/css/pages/transfer-history.css?v=<?php echo filemtime(__DIR__ . '/../../css/pages/transfer-history.css'); ?>">
+    <link rel="stylesheet" href="<?php echo BASE_URL; ?>/css/components/datatable-premium.css?v=<?php echo filemtime(__DIR__ . '/../../css/components/datatable-premium.css'); ?>">
     </head>
 
     <body>
@@ -77,7 +78,7 @@
                     </div>
 
                     <div class="mt-4 px-4">
-                        <div id="history-table"></div>
+                        <div id="history-table" class="dt-premium"></div>
                     </div>
                 </div>
             </div>
@@ -87,6 +88,7 @@
 
         <?php include '../../script/footscript.php'; ?>
 
+        <script src="<?php echo BASE_URL; ?>/script/datatable-compact.js?v=<?php echo filemtime(__DIR__ . '/../../script/datatable-compact.js'); ?>"></script>
 
         <script>
             var lastPendingHtml = '';
@@ -125,58 +127,193 @@
                 });
             }
 
+            /* ---------- DataTable riwayat request ---------- */
+
+            /* Breakpoint & pager milik helper bersama
+               script/datatable-compact.js, sama seperti Master, Purchasing,
+               Stok Gudang, dan Mutasi. */
+            function isTransferMobile(){
+                return MP_TABLE.isMobile();
+            }
+
+            let transferIsMobile = isTransferMobile();
+
+            function historyDataTableOptions(){
+                const mobile = isTransferMobile();
+
+                const options = {
+                    pageLength: 5,
+                    lengthMenu: [[5,10,25,50],[5,10,25,50]],
+
+                    /* Pager kustom dari script/datatable-compact.js: 3 nomor
+                       di mobile, 5 di tablet/desktop, halaman 1 & terakhir
+                       dikunci di dua ujung, dan "…" hanya muncul kalau memang
+                       ada nomor yang disembunyikan. Bentuk pil & warnanya sudah
+                       diatur di css/components/datatable-premium.css.
+
+                       DULU halaman ini memakai pager bawaan DataTables
+                       ("simple_numbers" asumsi default) yang menambah pil
+                       "Previous"/"Next" berupa teks. */
+                    pagingType: "mp_compact",
+
+                    /* Chip "Menampilkan 1-5 dari 87 request", plus
+                       "dari N request" kalau sedang difilter. */
+                    infoCallback: MP_TABLE.infoCallback('request'),
+
+                    autoWidth: false,
+
+                    /* "dom" HANYA di-set untuk mobile. Di desktop/tablet TIDAK
+                       di-set, sama seperti halaman lain, jadi wrapper .row +
+                       .col-* bawaan Bootstrap 5 yang dipakai
+                       css/components/datatable-premium.css.
+
+                       DULU "dom" tidak pernah di-set sama sekali, termasuk di
+                       mobile, sehingga Show n entries & baris info ikut
+                       disembunyikan oleh rule
+                       ".dataTables_wrapper .dataTables_length/_info{display:none}"
+                       di css/pages/transfer-history.css. Rule itu sudah
+                       dihapus, jadi mobile sekarang pakai "fltip": search +
+                       show entries + tabel + chip info + pagination. */
+                    language:{
+                        search:"",
+                        searchPlaceholder:"Cari request...",
+
+                        paginate:{
+                            previous:"&#8249;",  // ‹
+                            next:"&#8250;"       // ›
+                        },
+
+                        oAria:{
+                            paginate:{
+                                pageLabel:"Halaman {page}",
+                                previous:"Halaman sebelumnya",
+                                next:"Halaman berikutnya"
+                            }
+                        },
+
+                        zeroRecords: `
+                            <div class="empty-search">
+                                <img src="../../assets/img/illustrations/empty-data.png" class="empty-img">
+                                <div class="empty-title">Request tidak ditemukan</div>
+                                <div class="empty-sub">
+                                    Coba gunakan kata kunci lain
+                                </div>
+                            </div>
+                        `,
+
+                        emptyTable: `
+                            <div class="empty-search">
+                                <img src="../../assets/img/illustrations/empty-data.png" class="empty-img">
+                                <div class="empty-title">Belum ada data request</div>
+                                <div class="empty-sub">
+                                    Silakan tambahkan stok terlebih dahulu
+                                </div>
+                            </div>
+                        `
+                    },
+
+                    /* PENTING: IKUTIN SORT SQL */
+                    order: []
+                };
+
+                if(mobile) options.dom = "fltip";
+
+                return options;
+            }
+
+            function historyDataTable(){
+                const table = $('#requestHistory');
+                if(!table.length) return null;
+
+                const ht = table.DataTable(historyDataTableOptions());
+                ht.columns.adjust();
+
+                return ht;
+            }
+
             function loadHistory(){
+                /* --- Ambil state SEBELUM markup ditimpa ----------------------------
+                   Penting diambil di sini: setelah innerHTML diganti, node
+                   <table id="requestHistory"> yang lama ikut terbuang.
+                   isDataTable() mencari node berdasarkan identitas
+                   (o.nTable === t), jadi sesudah itu isDataTable('#requestHistory')
+                   sudah false dan state-nya tidak bisa diambil lagi.
+
+                   Yang penting di halaman ini: loadHistory() dipanggil ulang
+                   setiap kali user menyetujui / menolak request, jadi tanpa ini
+                   tabel lompat balik ke halaman 1 DAN filter pencarian ikut
+                   hilang tepat di momen user sedang menelusuri history. */
+                const prev = $.fn.DataTable.isDataTable('#requestHistory')
+                    ? $('#requestHistory').DataTable()
+                    : null;
+
+                const keep = prev ? {
+                    page: prev.page(),
+                    keyword: prev.search(),
+                    length: prev.page.len()
+                } : null;
+
                 fetch('../components/tables/history-request-table.php?view=transfer')
                 .then(res=>res.text())
                 .then(html=>{
+                    /* destroy dulu, node lama masih terpasang jadi aman. Kalau
+                       dibiarkan, instance-nya menumpuk di registry
+                       DataTable.settings setiap loadHistory(). Sesudahnya
+                       innerHTML menghapus node lama itu.
+
+                       DULU urutannya terbalik (innerHTML dulu, destroy
+                       belakangan) sehingga isDataTable() selalu false dan
+                       tidak ada yang pernah ikut di-destroy. */
+                    if(prev) prev.destroy();
+
                     document.getElementById("history-table").innerHTML = html;
 
                     setTimeout(() => {
+                        transferIsMobile = isTransferMobile();
 
-                        // 🔥 DESTROY DULU
-                        if ($.fn.DataTable.isDataTable('#requestHistory')) {
-                            $('#requestHistory').DataTable().destroy();
+                        const ht = historyDataTable();
+
+                        if(ht && keep){
+                            /* Halaman di luar rentang otomatis dikembalikan
+                               DataTable ke 0, jadi aman walau baris habis (mis.
+                               request yang tadi baru saja disetujui/menolak
+                               tidak lagi muncul di hasil filter). */
+                            ht.page.len(keep.length)
+                              .search(keep.keyword)
+                              .page(keep.page)
+                              .draw(false);
                         }
-
-                        // 🔥 INIT ULANG
-                        let ht = $('#requestHistory').DataTable({
-                            pageLength: 5,
-                            lengthMenu:[[5,10,25,50],[5,10,25,50]],
-                            autoWidth: false,
-                            language:{
-                                search:"",
-                                searchPlaceholder:"Cari request...",
-
-                                zeroRecords: `
-                                    <div class="empty-search">
-                                        <img src="../../assets/img/illustrations/empty-data.png" class="empty-img">
-                                        <div class="empty-title">Request tidak ditemukan</div>
-                                        <div class="empty-sub">
-                                            Coba gunakan kata kunci lain
-                                        </div>
-                                    </div>
-                                `,
-
-                                emptyTable: `
-                                    <div class="empty-search">
-                                        <img src="../../assets/img/illustrations/empty-data.png" class="empty-img">
-                                        <div class="empty-title">Belum ada data request</div>
-                                        <div class="empty-sub">
-                                            Silakan tambahkan stok terlebih dahulu
-                                        </div>
-                                    </div>
-                                `
-                            },
-
-                            // 🔥 PENTING: IKUTIN SORT SQL
-                            order: [] 
-                        });
-
-                        ht.columns.adjust();
-
                     }, 100);
                 });
             }
+
+            /* Rebuild tabel riwayat saat pindah mobile <-> desktop.
+               Re-init in-place (tanpa fetch): data yang sama tetap tampil, jadi
+               tidak ada flash kosong tiap kali jendela di-resize. */
+            let transferResizeTimer;
+            window.addEventListener('resize', function(){
+                clearTimeout(transferResizeTimer);
+                transferResizeTimer = setTimeout(function(){
+                    if(isTransferMobile() === transferIsMobile) return;
+                    if(!$.fn.DataTable.isDataTable('#requestHistory')) return;
+
+                    const current = $('#requestHistory').DataTable();
+                    const page = current.page();
+                    const keyword = current.search();
+                    const length = current.page.len();
+
+                    current.destroy();
+
+                    transferIsMobile = isTransferMobile();
+                    const ht = historyDataTable();
+                    if(ht){
+                        ht.page.len(length)
+                          .search(keyword)
+                          .page(page)
+                          .draw(false);
+                    }
+                }, 250);
+            });
 
             function escapeHtml(s){
                 return String(s == null ? '' : s)

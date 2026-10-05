@@ -218,15 +218,25 @@
         color: #0ea5e9;
     }
 
-    /* Toolbar: Show entries di kiri, Search + Tambah di kanan */
-.table-toolbar{
-        display:flex;
-        align-items:center;
-        justify-content:space-between;
-        gap:16px;
-        width:100%;
-        margin-bottom:32px;
-    }
+    /* ---------- SEARCH, "SHOW n ENTRIES", PAGINASI ----------
+
+   Blok styling DataTables yang tadinya ada di file ini
+   (#paymentTableWrapper #tablePayment_filter / _length / _paging) sudah
+   DIHAPUS dan digantikan oleh css/components/datatable-premium.css, supaya
+   tabel pembayaran ini benar-benar sama dengan halaman Master, Purchasing,
+   Stok Gudang, Mutasi, Transfer, dan Sales.
+
+   Alasannya bukan sekadar biar lebih pendek: selector halaman itu berawalan
+   ID (#paymentTableWrapper #tablePayment_filter), dan spesifisitas ID selalu
+   menang atas selector premium yang hanya pakai kelas. Akibatnya styling
+   premium diam-diam tidak berlaku di sini - pil pager desktop 30px/11px
+   (premium 34px/12px), search 8px ketajaman (premium 13px), border abu
+  .visible (premium transparan), dan lebar search dikunci 180px. Semua itu
+   bikin halaman ini terlihat beda dari halaman lain.
+
+   Yang TETAP di file ini hanya yang memang spesifik halaman: .tpw-* (header +
+   tombol tambah), .table-stock (header/sel tabel), dan .paym-card* (kartu
+   mobile). */
 
     .table-action-wrapper{
         display:flex;
@@ -235,55 +245,6 @@
         gap:12px;
         width:auto;
         margin-bottom:0;
-    }
-
-    #paymentTableWrapper #tablePayment_filter,
-    #paymentTableWrapper #tablePayment_length{
-        float:none;
-        margin:0;
-        padding:0 !important;
-    }
-
-    #paymentTableWrapper #tablePayment_filter label,
-    #paymentTableWrapper #tablePayment_length label{
-        float:none;
-        margin:0;
-        display:flex;
-        align-items:center;
-        gap:8px;
-        color:#64748b;
-        font-size:13px;
-    }
-
-    #paymentTableWrapper #tablePayment_filter input{
-        height:42px;
-        margin:0;
-
-        border-radius:8px !important;
-        border:1px solid #cbd5e1 !important;
-        padding:8px 14px !important;
-    }
-
-    /* Desktop & tablet: search pendek (ikut master), bukan full */
-    @media (min-width:576px){
-        #paymentTableWrapper #tablePayment_filter input{
-            width:180px !important;
-        }
-
-        #paymentTableWrapper #tablePayment_filter label{
-            width:auto;
-        }
-    }
-
-    #paymentTableWrapper #tablePayment_length select{
-        min-width:75px !important;
-        height:38px !important;
-        padding:0 30px 0 12px !important;
-        border-radius:8px !important;
-        border:1px solid #cbd5e1 !important;
-        background-color:#fff !important;
-        color:#334155 !important;
-        font-size:13px;
     }
 
 .tpw-add-btn{
@@ -315,21 +276,10 @@
         font-size:14px;
     }
 
-    .dataTables_wrapper .dataTables_paginate{
-        float:none;
-        margin-top:18px;
-        display:flex;
-        flex-wrap:wrap;
-        justify-content:center;
-        gap:6px;
-    }
-
-    .dataTables_wrapper .dataTables_paginate .pagination{
-        margin:0;
-        flex-wrap:wrap;
-        justify-content:center;
-        gap:6px;
-    }
+    /* Blok ".dataTables_wrapper .dataTables_paginate" di sini dan blok
+       "#paymentTableWrapper .dataTables_paginate ..." di bawahnya sudah
+       dihapus; premium.css yang menata pagination (termasuk justify-content
+       rata kanan di desktop dan rata tengah di mobile). */
 
     @media (max-width:768px){
         .stock-wrapper{
@@ -370,56 +320,13 @@
         }
     }
 
-    /* ---------- PAGINASI (sama dengan master supplier) ---------- */
-        #paymentTableWrapper .dataTables_paginate,
-        #paymentTableWrapper .dataTables_paginate .pagination{
-            float:none;
-            display:flex;
-            flex-wrap:wrap;
-            justify-content:flex-end;
-            align-items:center;
-            gap:5px;
-            margin:12px 0 0;
-            padding:0;
-        }
-
-        #paymentTableWrapper .dataTables_paginate .page-item{
-            margin:0 !important;
-        }
-
-        #paymentTableWrapper .dataTables_paginate .page-link{
-            min-width:30px;
-            height:30px;
-            padding:0 8px;
-            display:flex;
-            align-items:center;
-            justify-content:center;
-            border-radius:10px !important;
-            font-size:11px;
-            font-weight:700;
-            color:#475569 !important;
-            background:#fff !important;
-            border:1px solid #e2e8f0 !important;
-            box-shadow:0 2px 6px rgba(15,23,42,.05) !important;
-            transition:transform .18s ease, box-shadow .18s ease;
-        }
-
-        #paymentTableWrapper .dataTables_paginate .page-link:hover{
-            transform:translateY(-1px);
-            box-shadow:0 6px 12px -6px rgba(15,23,42,.35) !important;
-        }
-
-        #paymentTableWrapper .dataTables_paginate .page-item.active .page-link{
-            color:#fff !important;
-            background:linear-gradient(135deg,#4f46e5,#6366f1) !important;
-            border-color:transparent !important;
-            box-shadow:0 8px 16px -7px rgba(79,70,229,.95) !important;
-        }
-
-        #paymentTableWrapper .dataTables_paginate .page-item.disabled .page-link{
-            color:#94a3b8 !important;
-            background:#f8fafc !important;
-        }
+    /* ---------- PAGINASI ----------
+       Blok lama "#paymentTableWrapper .dataTables_paginate ..." sudah
+       dihapus. Nilai yang di dalamnya (min-width 30px, font-size 11px,
+       border-radius 10px, active gradient, disabled abu-abu) memang sama
+       dengan premium.css untuk mobile, tapi selector-nya berawalan ID sehingga
+       menimpa premium juga di desktop - dan di desktop premium memang memakai
+       ukuran 34px/12px. Sekarang premium.css jadi satu-satunya sumber. */
 
     @media(max-width:575px){
         .tenant-payment-wrapper{
@@ -450,6 +357,12 @@
             backdrop-filter:blur(8px);
         }
 
+        /* Di mobile tombol "Tambah Pembayaran" ditumpuk di bawah search, bukan
+           berdiri di sampingnya. Selector .table-action-wrapper (1 kelas)
+           dipakai, bukan .table-action-wrapper #tablePayment_filter - yang
+           terakhir berawalan ID sehingga akan menimpa premium.css (tinggi
+           search 44px + font 13px) padahal premium sudah menata search mobile
+           ke 40px/12px seperti halaman lain. */
         .table-action-wrapper{
             width:100%;
             flex-direction:column;
@@ -457,39 +370,6 @@
             justify-content:flex-start;
             gap:10px;
             margin-bottom:16px;
-        }
-
-        /* Search & tombol sama-sama full width */
-        .table-action-wrapper #tablePayment_filter{
-            float:none !important;
-            flex:1 1 auto;
-            width:100% !important;
-            max-width:100% !important;
-            min-width:0;
-            margin:0 !important;
-            /* volt.css menambah padding-right 1.5rem -> search
-               selalu lebih pendek dari tombol */
-            padding:0 !important;
-        }
-
-        #tablePayment_wrapper .dataTables_length{
-            padding:0 !important;
-        }
-
-        .table-action-wrapper #tablePayment_filter label{
-            float:none !important;
-            display:block !important;
-            width:100% !important;
-            max-width:100% !important;
-            margin:0;
-        }
-
-        .table-action-wrapper #tablePayment_filter input{
-            display:block;
-            width:100% !important;
-            max-width:100% !important;
-            height:44px;
-            font-size:13px;
         }
 
         .tpw-add-btn{
@@ -505,15 +385,15 @@
             display:inline;
         }
 
-        #paymentTableWrapper .dataTables_paginate,
-        #paymentTableWrapper .dataTables_paginate .pagination{
-            justify-content:center;
-        }
+        /* Rata tengah untuk pagination dan "Show n entries"/baris info di mobile
+           sudah ditangani premium.css, jadi blok
+           "#paymentTableWrapper .dataTables_*" yang lama dihapus.
 
-        #paymentTableWrapper .dataTables_length,
-        #paymentTableWrapper .dataTables_info{
-            display:none;
-        }
+           PENTING: "Show n entries" + baris info TIDAK lagi disembunyikan
+           di <=575px. DULU di sini ada
+           "#paymentTableWrapper .dataTables_length/_info{display:none}",
+           jadi di mobile tidak ada chip info maupun dropdown jumlah baris.
+           Sekarang keduanya tampil, sama seperti halaman lain. */
 
         .table-stock thead th{
             font-size:10px;

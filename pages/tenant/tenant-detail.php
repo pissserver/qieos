@@ -19,6 +19,7 @@
 
     <link rel="stylesheet" href="<?php echo BASE_URL; ?>/css/pages/tenant-detail.css?v=<?php echo filemtime(__DIR__ . '/../../css/pages/tenant-detail.css'); ?>">
     <link rel="stylesheet" href="<?php echo BASE_URL; ?>/css/pages/tenant-detail-table.css?v=<?php echo filemtime(__DIR__ . '/../../css/pages/tenant-detail-table.css'); ?>">
+    <link rel="stylesheet" href="<?php echo BASE_URL; ?>/css/components/datatable-premium.css?v=<?php echo filemtime(__DIR__ . '/../../css/components/datatable-premium.css'); ?>">
 
     <style>
         /* ===== PANEL ACTION BUTTONS ===== */
@@ -158,6 +159,7 @@
             .tenant-act-btn span{display:inline}
 
             /* Modal edit pembayaran & edit tenant: judul & tombol close tetap sebaris */
+            #addPaymentModal .panel-header,
             #editPaymentModal .panel-header,
             #editTenantModal .panel-header{
                 flex-direction:row;
@@ -181,30 +183,36 @@
             /* ===== MODAL EDIT PEMBAYARAN (mobile) ===== */
 
             /* Konten: tanpa padding kiri-kanan px-5 */
+            #addPaymentContent,
             #editPaymentContent{
                 padding-left:12px !important;
                 padding-right:12px !important;
                 margin-top:0 !important;
             }
 
+            #addPaymentContent .section-title,
             #editPaymentContent .section-title{
                 margin-top:8px;
                 padding-left:10px;
             }
 
+            #addPaymentContent .row,
             #editPaymentContent .row{
                 margin-left:0;
                 margin-right:0;
             }
 
+            #addPaymentContent .etp-field,
             #editPaymentContent .etp-field{
                 margin-bottom:16px;
             }
 
+            #addPaymentContent .etp-field:last-child,
             #editPaymentContent .etp-field:last-child{
                 margin-bottom:4px;
             }
 
+            #addPaymentContent .mp-add-footer,
             #editPaymentContent .mp-add-footer{
                 flex-direction:column;
                 align-items:stretch;
@@ -212,6 +220,7 @@
                 padding-top:14px;
             }
 
+            #addPaymentContent .btn-save,
             #editPaymentContent .btn-save{
                 width:100%;
                 min-width:0;
@@ -244,6 +253,7 @@
             }
         }
     /* ===== MODAL EDIT PEMBAYARAN & EDIT TENANT (desktop) ===== */
+        #addPaymentModal .modal-content,
         #editPaymentModal .modal-content,
         #editTenantModal .modal-content{
             border-radius:24px;
@@ -257,6 +267,7 @@
 
         @media(min-width:576px){
             /* Jarak header ke konten tetap rapat, konten di dalam (ada padding) */
+            #addPaymentModal .panel-header,
             #editPaymentModal .panel-header{
                 margin:18px 16px 8px !important;
             }
@@ -265,6 +276,7 @@
                 margin:12px 16px 8px !important;
             }
 
+            #addPaymentContent,
             #editPaymentContent{
                 padding-left:32px !important;
                 padding-right:32px !important;
@@ -402,7 +414,7 @@
 
                 </div>
 
-                <div id="payment-content">
+                <div id="payment-content" class="dt-premium">
 
                     <div class="loading-box">
                         <i class="fas fa-spinner fa-spin"></i>
@@ -547,6 +559,8 @@
 </main>
 
 <?php include '../../script/footscript.php'; ?>
+
+<script src="<?php echo BASE_URL; ?>/script/datatable-compact.js?v=<?php echo filemtime(__DIR__ . '/../../script/datatable-compact.js'); ?>"></script>
 
 <!-- Tenant Dropdown -->
 <script>
@@ -725,12 +739,213 @@
         }).join("");
     }
 
+    /* ---------- DATA TABLE PEMBAYARAN ----------
+
+       Breakpoint, pager, dan chip info sekarang milik helper bersama
+       script/datatable-compact.js, sama seperti halaman Master, Purchasing,
+       Stok Gudang, Mutasi, Transfer, dan Sales. Angka 575.98 tidak lagi
+       ditulis ulang di file ini. */
+    function isPaymentMobile(){
+        return MP_TABLE.isMobile();
+    }
+
+    let paymentIsMobile = isPaymentMobile();
+
+    /* State per tab. "tenant" dan "utility" memakai tabel yang sama
+       (#tablePayment), jadi kalau state-nya disimpan di satu variabel global,
+       pindah tab akan ikut membawa kata kunci pencarian dari tab lain.
+       Dipisah per tab: masing-masing ingat halaman/pencarian/jumlah baris
+       sendiri, danberganti bolak-balik tidak kehilangan posisi. */
+    const paymentTableState = {
+        tenant:{ page:0, keyword:"", length:null },
+        utility:{ page:0, keyword:"", length:null }
+    };
+
+    /* Tab yang sedang ditampilkan. Dipakai untuk membedakan "reload tab yang
+       sama" dari "pindah tab" - lihat catatan di loadPayment(). */
+    let currentPaymentType = null;
+
+    function paymentDataTableOptions(){
+        const mobile = isPaymentMobile();
+
+        const options = {
+            pageLength:5,
+
+            /* Opsi 100 yang tadinya ada dihapus supaya daftar "Show n
+               entries" sama persis dengan halaman lain. */
+            lengthMenu:[[5,10,25,50],[5,10,25,50]],
+
+            /* Pager kustom dari script/datatable-compact.js: 3 nomor di
+               mobile, 5 di tablet/desktop, halaman pertama & terakhir dikunci
+               di dua ujung, dan "..." hanya muncul kalau memang ada nomor
+               yang disembunyikan.
+
+               DULU mobile memakai "simple_numbers" dengan dom "ftp". */
+            pagingType:"mp_compact",
+
+            /* Chip "Menampilkan 1-5 dari 137 pembayaran". */
+            infoCallback: MP_TABLE.infoCallback('pembayaran'),
+
+            /* Tabel ini tidak pernah diurutkan - urutan bawaan PHP sudah
+               "ORDER BY payment_date DESC". */
+            ordering:false,
+
+            /* Opsi "responsive" DIHAPUS. Opsi itu hanya dibaca oleh extension
+               Responsive (responsive.dataTables.min.js) yang TIDAK dimuat di
+               script/headscript.php - yang ada hanya jquery.dataTables.min.js +
+               dataTables.bootstrap5.min.js, jadi nilainya diam-diam diabaikan.
+               Tampilan mobile ditangani manual: tukar "dom" saat breakpoint
+               (lihat bawah) + kartu .paym-card dari drawCallback. */
+            autoWidth:false,
+
+            language:{
+                search:"",
+                searchPlaceholder:"Cari pembayaran...",
+
+                /* Panah Previous/Next memakai glyph supaya tidak memakan
+                   ruang di baris pager yang sempit. Aksesibilitas tetap
+                   terjaga lewat aria-label bahasa Indonesia di oAria. */
+                paginate:{
+                    previous:"&#8249;",  // ‹
+                    next:"&#8250;"       // ›
+                },
+
+                oAria:{
+                    paginate:{
+                        pageLabel:"Halaman {page}",
+                        previous:"Halaman sebelumnya",
+                        next:"Halaman berikutnya"
+                    }
+                },
+
+                zeroRecords:
+                    '<div class="empty-search">' +
+                        '<img src="../../assets/img/illustrations/empty-data.png" class="empty-img" alt="">' +
+                        '<div class="empty-title">Pembayaran tidak ditemukan</div>' +
+                        '<div class="empty-sub">Coba gunakan kata kunci lain</div>' +
+                    '</div>',
+
+                emptyTable:
+                    '<div class="empty-search">' +
+                        '<img src="../../assets/img/illustrations/empty-data.png" class="empty-img" alt="">' +
+                        '<div class="empty-title">Belum ada data pembayaran</div>' +
+                        '<div class="empty-sub">Silakan tambahkan pembayaran terlebih dahulu</div>' +
+                    '</div>'
+            },
+
+            drawCallback:function(){
+                /* Kartu mobile hanya dibuat saat breakpoint mobile. Di
+                   desktop/tablet tabelnya tetap jadi tabel. */
+                if(!isPaymentMobile()) return;
+
+                const wrapper = document.getElementById("tablePayment_wrapper");
+                if(!wrapper) return;
+
+                let box = document.getElementById("paymentCardsMobile");
+
+                if(!box){
+                    box = document.createElement("div");
+                    box.id = "paymentCardsMobile";
+                    box.className = "paym-cards";
+
+                    /* Ditaruh sebelum baris info chip, bukan sebelum
+                       paginate. DULU "i" tidak ikut di-render di mobile
+                       (dom "ftp"), jadi kartu bisa langsung menempel di bawah
+                       tabel. Sekarang dom "fltip" selalu menampilkan baris
+                       info, jadi titik sisipnya digeser ke atas supaya urutan
+                       bacanya: tabel -> kartu -> info -> paginate. */
+                    const anchor =
+                        wrapper.querySelector(".dataTables_info") ||
+                        wrapper.querySelector(".dataTables_paginate");
+
+                    if(anchor){
+                        wrapper.insertBefore(box, anchor);
+                    } else {
+                        wrapper.appendChild(box);
+                    }
+                }
+
+                renderPaymentCards(this.api(), box);
+            }
+        };
+
+        /* Mobile pakai "fltip": search + show entries + tabel + baris info chip
+           + pagination.
+
+           "dom" HANYA di-set untuk mobile. Di desktop/tablet TIDAK di-set,
+           sama seperti halaman lain, jadi wrapper .row + .col-* bawaan
+           DataTables Bootstrap 5 yang dipakai:
+
+             <'row'<'col-sm-12 col-md-6'l><'col-sm-12 col-md-6'f>><'row dt-row'
+             <'col-sm-12'tr>><'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>
+
+           DULU desktop memakai "f l t p" lalu "#tablePayment_length" dipindah
+           manual ke dalam .table-toolbar. Susunan manual itu sekarang
+           dihapus; premium.css yang menata baris kontrolnya, persis seperti
+           halaman lain. */
+        if(mobile) options.dom = "fltip";
+
+        return options;
+    }
+
+    function paymentDataTable(){
+        const table = $("#tablePayment");
+        if(!table.length) return null;
+
+        const dt = table.DataTable(paymentDataTableOptions());
+
+        /* Search + tombol "Tambah Pembayaran" dalam satu .table-action-wrapper
+           (helper yang sama dipakai halaman Master). */
+        MP_TABLE.placeActions("#tablePayment_filter", "#tpwBtnContainer");
+
+        dt.columns.adjust();
+
+        return dt;
+    }
+
     function loadPayment(type){
         const paymentContent = document.getElementById("payment-content");
 
-        if($.fn.DataTable.isDataTable("#tablePayment")){
-            $("#tablePayment").DataTable().destroy();
+        /* Urutan benar: node <table id="tablePayment"> masih terpasang, jadi
+           isDataTable() masih bisa menemukan instance lamanya. Kalau
+           innerHTML diganti lebih dulu, node itu ikut terbuang dan
+           isDataTable() selalu false - state tidak akan pernah tertangkap. */
+        const prev = $.fn.DataTable.isDataTable("#tablePayment")
+            ? $("#tablePayment").DataTable()
+            : null;
+
+        /* PENTING: loadPayment() dipanggil untuk dua hal yang BERBEDA, jadi
+           sumber state-nya harus dibedakan.
+
+             1. Tab yang sama di-reload (mis. setelah tambah pembayaran):
+                tabel yang sedang tampil adalah milik tab itu juga, jadi
+                posisinya yang harus dipertahankan.
+
+             2. Pindah tab ("tenant" <-> "utility"):
+                prev masih ada, tapi isinya milik tab LAIN. Kalau state-nya
+                ikut dipakai, pindah tab akan membawa kata kunci pencarian
+                dari tab sebelumnya - dan balik lagi ke tab pertama akan
+                menemukan kata kunci yang bukan miliknya.
+
+           Karena itu: sebelum tabel lama dibuang, posisinya ALWAYS disimpan ke
+           cache milik tab asalnya. Setelah itu yang dipulihkan hanya state
+           milik tab TUJUHAN - jadi reload tab yang sama ikut terjaga (karena
+           cache-nya baru saja diisi dari tabel yang sedang tampil), pindah tab
+           memakai state tab itu sendiri, dan tab yang belum pernah dibuka
+           mulai dari halaman 0 tanpa pencarian (length masih null). */
+        if (prev && currentPaymentType) {
+            paymentTableState[currentPaymentType] = {
+                page: prev.page(),
+                keyword: prev.search(),
+                length: prev.page.len()
+            };
         }
+
+        let live = paymentTableState[type].length
+            ? paymentTableState[type]
+            : null;
+
+        if(prev) prev.destroy();
 
         paymentContent.innerHTML=`
             <div class="loading-box">
@@ -745,78 +960,74 @@
 
             paymentContent.innerHTML=html;
 
-            const mobile = window.innerWidth <= 575;
+            paymentIsMobile = isPaymentMobile();
+            currentPaymentType = type;
 
-            const dt = $("#tablePayment").DataTable({
-                pageLength:5,
-                lengthMenu:[5, 10, 25, 50, 100],
-                responsive: !mobile,
-                ordering:false,
-                autoWidth:false,
-                pagingType: mobile ? "simple_numbers" : "full_numbers",
-                dom: mobile ? "ftp" : "f l t p",
+            const dt = paymentDataTable();
 
-                language:{
-                    search:"",
-                    searchPlaceholder:"Cari pembayaran...",
-
-                    zeroRecords:
-                        '<div class="empty-search">' +
-                            '<img src="../../assets/img/illustrations/empty-data.png" class="empty-img" alt="">' +
-                            '<div class="empty-title">Pembayaran tidak ditemukan</div>' +
-                            '<div class="empty-sub">Coba gunakan kata kunci lain</div>' +
-                        '</div>',
-
-                    emptyTable:
-                        '<div class="empty-search">' +
-                            '<img src="../../assets/img/illustrations/empty-data.png" class="empty-img" alt="">' +
-                            '<div class="empty-title">Belum ada data pembayaran</div>' +
-                            '<div class="empty-sub">Silakan tambahkan pembayaran terlebih dahulu</div>' +
-                        '</div>'
-                },
-
-                drawCallback: function(){
-                    if(!mobile) return;
-
-                    const wrapper = document.getElementById("tablePayment_wrapper");
-                    let box = document.getElementById("paymentCardsMobile");
-
-                    if(!box){
-                        box = document.createElement("div");
-                        box.id = "paymentCardsMobile";
-                        box.className = "paym-cards";
-
-                        const paginate = wrapper.querySelector(".dataTables_paginate");
-
-                        if(paginate){
-                            wrapper.insertBefore(box, paginate);
-                        } else {
-                            wrapper.appendChild(box);
-                        }
-                    }
-
-                    renderPaymentCards(this.api(), box);
-                }
-            });
-
-            // Search + tombol tambah dalam satu baris
-            $('#tablePayment_filter').wrap('<div class="table-action-wrapper"></div>');
-
-            if(mobile){
-                $('#tpwBtnContainer').show().appendTo('.table-action-wrapper');
-            } else {
-                // Show entries di kiri, search + tombol di kanan
-                $('.table-action-wrapper').wrap('<div class="table-toolbar"></div>');
-                $('#tablePayment_length').prependTo('.table-toolbar');
-                $('#tpwBtnContainer').show().appendTo('.table-action-wrapper');
+            if(dt && live){
+                /* Halaman di luar rentang otomatis dikembalikan DataTable
+                   ke 0, jadi aman walau baris habis. */
+                dt.page.len(live.length)
+                  .search(live.keyword)
+                  .page(live.page)
+                  .draw(false);
             }
 
             window.currentPaymentDT = dt;
         });
     }
 
+    /* Ingat posisi terakhir tiap tab supaya pindah tab & reload setelah
+       tambah pembayaran tidak mengembalikan tabel ke halaman 1. */
+    function rememberPaymentState(type){
+        if(!$.fn.DataTable.isDataTable("#tablePayment")) return;
+
+        const dt = $("#tablePayment").DataTable();
+
+        paymentTableState[type] = {
+            page: dt.page(),
+            keyword: dt.search(),
+            length: dt.page.len()
+        };
+    }
+
+    /* ---------- REBUILD KETIKA GANTI MOBILE / DESKTOP ----------
+
+       DULU handler resize di halaman ini kosong, jadi tabel yang sudah
+       dibangun dengan dom mobile tidak pernah dibangun ulang - susunan
+       kontrolnya tetap versi mobile padahal lebar jendela sudah berubah.
+       Sekarang tabel di-rebuild in-place (tanpa fetch) begitu breakpoint
+       dilewati, dengan state halaman/pencarian/jumlah baris tetap terjaga. */
+    let paymentResizeTimer;
     window.addEventListener('resize', function(){
-        // resize handler jika perlu
+        clearTimeout(paymentResizeTimer);
+        paymentResizeTimer = setTimeout(function(){
+            if(isPaymentMobile() === paymentIsMobile) return;
+            if(!$.fn.DataTable.isDataTable("#tablePayment")) return;
+
+            const type = currentPaymentType || "tenant";
+
+            /* Simpan posisi tabel yang sedang tampil dulu, baru flip flag dan
+               bangun ulang in-place (tanpa fetch, jadi tidak ada flash
+               kosong). */
+            rememberPaymentState(type);
+
+            $("#tablePayment").DataTable().destroy();
+
+            paymentIsMobile = isPaymentMobile();
+
+            const keep = paymentTableState[type];
+
+            const dt = paymentDataTable();
+
+            if(dt && keep.length){
+                dt.page.len(keep.length)
+                  .search(keep.keyword)
+                  .page(keep.page)
+                  .draw(false);
+            }
+        }, 250);
     });
 </script>
 
@@ -1045,17 +1256,19 @@
             newWindow.focus();
         }
 
-        if ($type == 'tenant') {
-            $tittle = 'Pembayaran Tenant';
-        } else {
-            $tittle = 'Pembayaran Air & Listrik';
-        }
+        /* DULU di sini ditulis "$type" dan "$tittle" (dengan tanda dolar),
+           padahal ini JavaScript, bukan PHP. "$type" tidak pernah terdefinisi
+           sehingga baris pengikutnya melempar ReferenceError dan judul struk
+           tidak pernah ikut saat navigator.share aktif. */
+        const title = type == 'tenant'
+            ? 'Pembayaran Tenant'
+            : 'Pembayaran Air & Listrik';
 
         // SHARE (jika user klik manual)
         if (navigator.share) {
             navigator.share({
-                title: 'Struk ' + $tittle,
-                text: 'Berikut struk ' + $tittle,
+                title: 'Struk ' + title,
+                text: 'Berikut struk ' + title,
                 url: receiptUrl
             }).catch(err => console.log(err));
         }

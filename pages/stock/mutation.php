@@ -11,6 +11,7 @@ include '../../sessions/session.php';
 
     <link rel="stylesheet" href="<?php echo BASE_URL; ?>/css/pages/mutation.css?v=<?php echo filemtime(__DIR__ . '/../../css/pages/mutation.css'); ?>">
     <link rel="stylesheet" href="<?php echo BASE_URL; ?>/css/pages/mutation-detail.css?v=<?php echo filemtime(__DIR__ . '/../../css/pages/mutation-detail.css'); ?>">
+    <link rel="stylesheet" href="<?php echo BASE_URL; ?>/css/components/datatable-premium.css?v=<?php echo filemtime(__DIR__ . '/../../css/components/datatable-premium.css'); ?>">
 </head>
 
 <body>
@@ -43,7 +44,7 @@ include '../../sessions/session.php';
 
                 <div class="mt-4 px-4">
                     <!-- TABLE -->
-                    <div class="table-responsive-wrap" id="stockTableContainer">
+                    <div class="table-responsive-wrap dt-premium" id="stockTableContainer">
                         <table class="table table-hover align-middle" id="stockTable">
                             <thead>
                                 <tr style="font-size:13px;color:#64748b;">
@@ -148,7 +149,7 @@ include '../../sessions/session.php';
                     </div>
                 </div>
 
-                <div id="fifo-detail">
+                <div id="fifo-detail" class="dt-premium">
 
                     <div class="fifo-empty">
 
@@ -174,11 +175,15 @@ include '../../sessions/session.php';
 
 <?php include '../../script/footscript.php'; ?>
 
-<script>
-    const STOCK_MOBILE_BP = 575.98;
+    <script src="<?php echo BASE_URL; ?>/script/datatable-compact.js?v=<?php echo filemtime(__DIR__ . '/../../script/datatable-compact.js'); ?>"></script>
 
+<script>
+    /* Breakpoint, pager, dan chip info sekarang milik helper bersama
+       script/datatable-compact.js, sama seperti Master, Purchasing, dan
+       Stok Gudang. Jadi angka 575.98 tidak lagi ditulis ulang di file ini -
+       kalau suatu saat berubah, cukup diubah satu tempat. */
     function isStockMobile(){
-        return window.innerWidth <= STOCK_MOBILE_BP;
+        return MP_TABLE.isMobile();
     }
 
     let stockIsMobile = isStockMobile();
@@ -187,19 +192,56 @@ include '../../sessions/session.php';
         const mobile = isStockMobile();
 
         const options = {
-            pageLength: mobile ? 4 : 5,
-            lengthMenu: mobile
-                ? [[4,5,10,25,50],[4,5,10,25,50]]
-                : [[5,10,25,50],[5,10,25,50]],
+            pageLength: 5,
+            lengthMenu: [[5,10,25,50],[5,10,25,50]],
 
-            pagingType: mobile ? "simple_numbers" : "full_numbers",
+            /* Pager kustom dari script/datatable-compact.js: 3 nomor di
+               mobile, 5 di tablet/desktop, halaman 1 & terakhir dikunci di
+               dua ujung, dan "…" hanya muncul kalau memang ada nomor yang
+               disembunyikan. Bentuk pil & warnanya sudah diatur di
+               css/components/datatable-premium.css.
+
+               DULU mobile memakai "simple_numbers" dengan pageLength 4,
+               sekarang keduanya disamakan supaya urutannya persis sama
+               dengan Master, Purchasing, dan Stok Gudang. */
+            pagingType: "mp_compact",
+
+            /* Chip "Menampilkan 1-5 dari 137 produk", plus
+               "dari N produk" kalau sedang difilter. */
+            infoCallback: MP_TABLE.infoCallback('produk'),
+
             searchDelay: 250,
 
-            responsive: true,
+            /* Opsi "responsive: true" DIHAPUS. Opsi itu hanya dibaca oleh
+               extension Responsive (responsive.dataTables.min.js) yang
+               TIDAK dimuat di script/headscript.php - yang ada hanya
+               jquery.dataTables.min.js + dataTables.bootstrap5.min.js,
+               jadi nilainya diam-diam diabaikan. Responsif di halaman ini
+               ditangani manual: tukar "dom" saat breakpoint mobile
+               (lihat bawah) + overflow-x pada kolom tabel. */
             autoWidth: false,
             language:{
                 search:"",
                 searchPlaceholder:"Cari produk...",
+
+                /* Panah Previous/Next memakai glyph, bukan teks "Previous".
+                   Pada rentang 9 pil, dua pil teks memakan ~150px dari baris
+                   pager sementara sisa ruang di layar 320-360px cuma
+                   ~290-330px. Aksesibilitas tetap terjaga: aria-label
+                   dibacakan bahasa Indonesia lewat oAria.paginate di bawah. */
+                paginate:{
+                    previous:"&#8249;",  // ‹
+                    next:"&#8250;"       // ›
+                },
+
+                /* Label yang dibacakan screen reader tetap bahasa Indonesia. */
+                oAria:{
+                    paginate:{
+                        pageLabel:"Halaman {page}",
+                        previous:"Halaman sebelumnya",
+                        next:"Halaman berikutnya"
+                    }
+                },
 
                 zeroRecords: `
                     <div class="empty-search">
@@ -219,7 +261,27 @@ include '../../sessions/session.php';
             }
         };
 
-        if(mobile) options.dom = "ftp";
+        /* Mobile pakai "fltip": search + show entries + tabel + baris info chip +
+           pagination. "l" dan "i" ikut dirender supaya user bisa menaikkan
+           jumlah baris dan tahu posisinya di daftar tanpa scroll ke atas.
+
+           DULU mobile memakai dom "ftp" (tanpa "l" & "i") plus rule
+           "#stockTableContainer .dataTables_length/_info{display:none}" di
+           css/pages/mutation.css, sehingga Show n entries dan baris info
+           disembunyikan di layar kecil. Sekarang keduanya tampil, sama
+           seperti Master & Purchasing.
+
+           "dom" HANYA di-set untuk mobile. Di desktop/tablet TIDAK di-set,
+           sama seperti Master & Purchasing, jadi wrapper .row + .col-*
+           bawaan DataTables Bootstrap 5 yang dipakai:
+
+             <'row'<'col-sm-12 col-md-6'l><'col-sm-12 col-md-6'f>><'row dt-row'
+             <'col-sm-12'tr>><'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>
+
+           Wrapper itu yang bikin css/components/datatable-premium.css bisa
+           meratakan baris atas (Show n entries kiri + search kanan) dan
+           baris bawah (chip info kiri + pagination kanan). */
+        if(mobile) options.dom = "fltip";
 
         const dt = $('#stockTable').DataTable(options);
         dt.columns.adjust();
@@ -238,6 +300,7 @@ include '../../sessions/session.php';
             const current = $('#stockTable').DataTable();
             const page = current.page();
             const keyword = current.search();
+            const length = current.page.len();
 
             // Highlight baris yang sedang aktif supaya tidak hilang saat tabel dibangun ulang
             const activeId = window.activeStockId;
@@ -246,7 +309,35 @@ include '../../sessions/session.php';
 
             stockIsMobile = isStockMobile();
             const dt = stockDataTable();
-            dt.search(keyword).page(page).draw(false);
+            dt.page.len(length)
+              .search(keyword)
+              .page(page)
+              .draw(false);
+
+            /* Panel detail FIFO juga harus dibangun ulang supaya search,
+               Show n entries, chip info, dan pager-nya ikut pindah mode.
+               Di-re-init in-place (tanpa fetch) supaya isi panel tidak
+               berkedip kosong. Kalau belum ada detail yang dimuat atau
+               markup-nya yang empty state, dilewati saja. */
+            const detailTable = document.getElementById('tableMutation');
+            if(detailTable && $.fn.dataTable.isDataTable(detailTable)){
+                const currentDetail = $(detailTable).DataTable();
+                const detailKeep = {
+                    page: currentDetail.page(),
+                    keyword: currentDetail.search(),
+                    length: currentDetail.page.len()
+                };
+
+                currentDetail.destroy();
+
+                const rebuilt = mutationDetailDataTable();
+                if(rebuilt){
+                    rebuilt.page.len(detailKeep.length)
+                            .search(detailKeep.keyword)
+                            .page(detailKeep.page)
+                            .draw(false);
+                }
+            }
 
             // Restore highlight
             if(activeId){
@@ -272,6 +363,82 @@ include '../../sessions/session.php';
         stockIsMobile = isStockMobile();
         stockDataTable();
     });
+
+    /* Opsi tabel detail FIFO mutasi. Dipisah jadi fungsi supaya bisa dipakai
+       lagi oleh handler resize - panel ini ikut perlu dibangun ulang ketika
+       pindah mobile <-> desktop, kalau tidak kontrolnya (search, Show n
+       entries, chip info, pager) tetap dalam mode yang lama. */
+    function mutationDetailOptions(){
+        const detailOptions = {
+            pageLength: 10,
+            /* Panel detail tetap 10 baris (bukan 5 seperti tabel utama)
+               supaya riwayat mutasi yang panjang tetap terbaca tanpa banyak
+               scroll. Dropdown-nya hanya menawarkan angka yang masuk akal
+               untuk panel selebar ini. */
+            lengthMenu: [[10,25,50],[10,25,50]],
+            searching: true,
+
+            /* Pager + chip info yang sama dengan tabel utama, supaya panel
+               kanan tidak terlihat seperti tabel kelas dua. */
+            pagingType: "mp_compact",
+            infoCallback: MP_TABLE.infoCallback('riwayat mutasi'),
+
+            /* Opsi "responsive: !mobile" DIHAPUS. Extension Responsive tidak
+               dimuat di script/headscript.php, jadi nilainya selalu
+               diabaikan. Card mode mobile di panel ini dikerjakan sendiri
+               oleh css/pages/mutation-detail.css, cukup dengan menukar
+               "dom". */
+            autoWidth: false,
+            ordering: false,
+            language: {
+                search: "",
+                searchPlaceholder:"Cari detail...",
+
+                paginate: {
+                    previous:"&#8249;",  // ‹
+                    next:"&#8250;"       // ›
+                },
+
+                oAria: {
+                    paginate: {
+                        pageLabel:"Halaman {page}",
+                        previous:"Halaman sebelumnya",
+                        next:"Halaman berikutnya"
+                    }
+                },
+
+                zeroRecords: `
+                    <div class="empty-search">
+                        <img src="../../assets/img/illustrations/empty-data.png" class="empty-img" style="width:200px;">
+                        <div class="empty-title">Data tidak ditemukan</div>
+                    </div>
+                `
+            }
+        };
+
+        /* Sama seperti tabel utama: "dom" hanya di-set untuk mobile.
+           Di desktop/tablet dibiarkan default supaya wrapper .row + .col-*
+           bawaan Bootstrap 5 yang dipakai
+           css/components/datatable-premium.css.
+
+           DULU "l" & "i" tidak ada di mobile (dom "ftp") dan
+           css/pages/mutation-detail.css menyembunyikan
+           "#tableMutation_wrapper .dataTables_length/_info". Sekarang
+           keduanya tampil supaya panel ini serasi dengan tabel utama. */
+        if(isStockMobile()) detailOptions.dom = "fltip";
+
+        return detailOptions;
+    }
+
+    function mutationDetailDataTable(){
+        const table = document.getElementById('tableMutation');
+        if(!table) return null;
+
+        const dt = $(table).DataTable(mutationDetailOptions());
+        dt.columns.adjust();
+
+        return dt;
+    }
 
     function loadDetail(id){
 
@@ -323,7 +490,6 @@ include '../../sessions/session.php';
             // Empty state dirender sebagai markup terpisah, bukan baris tabel,
             // jadi tidak ada sisa styling tabel yang ikut terbawa
             const table = document.getElementById('tableMutation');
-            const mobile = isStockMobile();
 
             const done = () => {
                 if (window.fifoRequestToken !== token) return;
@@ -346,32 +512,7 @@ include '../../sessions/session.php';
                 $(table).DataTable().destroy();
             }
 
-            $(table).DataTable({
-                pageLength: 10,
-                searching: true,
-                /* Card mode mobile dikerjakan sendiri di CSS, jadi
-                   DataTables Responsive dimatikan agar tidak membuat
-                   tabel anak yang bentrok dengan layout kartu. */
-                responsive: !mobile,
-                autoWidth: false,
-                ordering: false,
-                language: {
-                    search: "",
-                    searchPlaceholder:"Cari detail...",
-                    zeroRecords: `
-                        <div class="empty-search">
-                            <img src="../../assets/img/illustrations/empty-data.png" class="empty-img" style="width:200px;">
-                            <div class="empty-title">Data tidak ditemukan</div>
-                        </div>
-                    `,
-                    paginate: {
-                        first: "Awal",
-                        last: "Akhir",
-                        next: "→",
-                        previous: "←"
-                    }
-                }
-            });
+            mutationDetailDataTable();
 
             done();
 

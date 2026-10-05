@@ -1764,10 +1764,12 @@
         background:#f8fafc !important;
     }
 
-    .dataTables_wrapper .dataTables_length,
-    .dataTables_wrapper .dataTables_info{
-        display:none;
-    }
+    /* "Show n entries" + baris info TIDAK lagi disembunyikan di
+       <=575.98px. Rule display:none dihapus supaya sama dengan Master,
+       Purchasing, Stok Gudang, Mutasi, dan Transfer: mobile pakai dom
+       "fltip" sehingga length, filter, table, info, dan paginate semuanya
+       tampil. Styling kontrolnya sekarang datang dari
+       css/components/datatable-premium.css. */
 
     /* search tetap tersembunyi di halaman lain (mis. transfer), hanya aktif di card request & stok */
     .section-card:not(.request-stock-card) #history-table .dataTables_filter{

@@ -407,6 +407,13 @@
             inset 0 2px 6px rgba(79, 70, 229, .12);
     }
 
+    /* Premium (css/components/datatable-premium.css) memakai ring focus
+       yang keluar 4px dari input. Di panel ini ring itu terpotong tepi
+       card karena .fifo-container memakai overflow:hidden (lihat stock.css
+       .fifo-container), jadi cincin fokus keyboard di sini dibikin inset.
+       Rule ID ini lebih spesifik dari .dt-premium di premium, jadi yang
+       menang memang yang di atas - nilai premium tidak perlu diubah. */
+
     /* pagination */
     #tableStock_wrapper .dataTables_paginate,
     #tableStock_wrapper .dataTables_paginate .pagination {
@@ -458,10 +465,10 @@
         background: #f8fafc !important;
     }
 
-    #tableStock_wrapper .dataTables_length,
-    #tableStock_wrapper .dataTables_info {
-        display: none;
-    }
+    /* "Show n entries" + baris info di panel detail FIFO juga TIDAK
+       disembunyikan, supaya sama dengan tabel utama dan Master.
+       Rule display:none dihapus; styling kontrolnya sekarang dari
+       css/components/datatable-premium.css. */
 
     /* empty state khusus FIFO */
     #tableStock tbody tr:has(.fifo-detail-empty) {
@@ -502,8 +509,11 @@
    1. .dataTables_filter global diberi padding-right 1.5rem
    2. dom default DataTables Bootstrap membungkus isi dalam
       .row > .col-sm-12, dan gutter .row memberi padding 0.75rem
-      per sisi plus margin negatif — itu yang bikin sisi kiri meleset.
-   Panel Stok Gudang pakai dom "ftp" tanpa wrapper, jadi nol Issues. */
+      per sisi plus margin negatif - itu yang bikin sisi kiri meleset.
+   Nolkan gutter .row + padding volt itu supaya kontrol di panel sempit ini
+   selebar tabelnya. Berlaku untuk semua breakpoint karena wrapper .col-*
+   tetap dipakai di desktop/tablet pada panel ini (lihat blok "BARIS
+   ATAS/BWAH" di css/components/datatable-premium.css). */
 .stock-wrapper,
 .stock-wrapper .table-responsive,
 #tableStock_wrapper {

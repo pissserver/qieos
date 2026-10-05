@@ -389,8 +389,8 @@
         background:#f8fafc !important;
     }
 
-    .dataTables_wrapper .dataTables_length,
-    .dataTables_wrapper .dataTables_info{
-        display:none;
-    }
+    /* "Show n entries" + baris info TIDAK lagi disembunyikan di
+       <=575.98px. Rule display:none dihapus supaya sama dengan Master &
+       Purchasing. Styling kontrolnya sekarang datang dari
+       css/components/datatable-premium.css. */
 }
