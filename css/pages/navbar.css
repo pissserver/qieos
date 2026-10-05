@@ -1324,7 +1324,13 @@ PREMIUM NAVBAR V3
 @media (max-width:768px){
     .update-overlay{
         padding:16px;
-        align-items:flex-end;
+
+        /* DULU align-items:flex-end -> modal nempel dasar layar gaya
+           bottom sheet, padahal di desktop (dan di atas rule ini) sudah
+           align-items:center. Akibatnya posisi modal berubah-ubah hanya
+           karena jendela HP, dan di halaman Update detail posisinya terlihat
+           tidak di tengah. Sekarang tetap center di semua lebar. */
+        align-items:center;
     }
 
     .update-modal{

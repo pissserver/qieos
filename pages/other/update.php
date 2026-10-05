@@ -10,6 +10,7 @@ include '../../sessions/session.php';
     <?php include '../../script/headscript.php'; ?>
 
     <link rel="stylesheet" href="<?php echo BASE_URL; ?>/css/pages/update.css?v=<?php echo filemtime(__DIR__ . '/../../css/pages/update.css'); ?>">
+    <link rel="stylesheet" href="<?php echo BASE_URL; ?>/css/components/datatable-premium.css?v=<?php echo filemtime(__DIR__ . '/../../css/components/datatable-premium.css'); ?>">
 </head>
 
 <body>
@@ -46,7 +47,7 @@ include '../../sessions/session.php';
                                 Update
                             </div>
                             <div class="panel-subtitle">
-                                Menampilkan semua log history update sistem
+                                Riwayat pembaruan sistem
                             </div>
                         </div>
                     </div>
@@ -67,7 +68,7 @@ include '../../sessions/session.php';
                     <?php endif; ?>
                     
                     <!-- TABLE -->
-                    <div id="updateTableContainer"></div>
+                    <div id="updateTableContainer" class="dt-premium"></div>
                 </div>
             </div>
         </div>
@@ -78,26 +79,26 @@ include '../../sessions/session.php';
         <div class="modal-dialog modal-xl modal-dialog-centered">
             <div class="modal-content stock-panel border-0">
 
-                <div class="panel-header panel-dark my-3 mx-3">
+                <div class="panel-header panel-dark my-3 mx-3 mp-add-header">
                     <div class="panel-left">
                         <div class="panel-icon">
-                            <i class="fas fas fa-rocket"></i>
+                            <i class="fas fa-rocket"></i>
                         </div>
 
-                        <div>
+                        <div class="mp-add-head-text">
                             <div class="panel-title">
-                                Tambah Log Update 
+                                Tambah Log Update
                             </div>
                             <div class="panel-subtitle">
-                                Tambah nama update, tanggal, tipe, version dan deskripsi log update
+                                Lengkapi data dan detail pembaruan
                             </div>
                         </div>
                     </div>
 
-                    <button class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    <button class="btn-close btn-close-white mp-add-close" data-bs-dismiss="modal"></button>
                 </div>
 
-                <div class="mt-2 px-5" id="addUpdateContent"></div>
+                <div class="mt-2 px-5 mp-add-body" id="addUpdateContent"></div>
             </div>
         </div>
     </div>
@@ -107,26 +108,26 @@ include '../../sessions/session.php';
         <div class="modal-dialog modal-xl modal-dialog-centered">
             <div class="modal-content stock-panel border-0">
 
-                <div class="panel-header panel-dark my-3 mx-3">
+                <div class="panel-header panel-dark my-3 mx-3 mp-add-header">
                     <div class="panel-left">
                         <div class="panel-icon">
-                            <i class="fas fas fa-rocket"></i>
+                            <i class="fas fa-rocket"></i>
                         </div>
 
-                        <div>
+                        <div class="mp-add-head-text">
                             <div class="panel-title">
-                                Edit Update Log 
+                                Edit Log Update
                             </div>
                             <div class="panel-subtitle">
-                                Edit nama update, tanggal, tipe, version dan deskripsi log update
+                                Perbarui data dan detail pembaruan
                             </div>
                         </div>
                     </div>
 
-                    <button class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    <button class="btn-close btn-close-white mp-add-close" data-bs-dismiss="modal"></button>
                 </div>
 
-                <div class="mt-2 px-5" id="editUpdateContent"></div>
+                <div class="mt-2 px-5 mp-add-body" id="editUpdateContent"></div>
             </div>
         </div>
     </div>
@@ -182,55 +183,253 @@ include '../../sessions/session.php';
 
 <?php include '../../script/footscript.php'; ?>
 
+<script src="<?php echo BASE_URL; ?>/script/datatable-compact.js?v=<?php echo filemtime(__DIR__ . '/../../script/datatable-compact.js'); ?>"></script>
+
 <script>
+    /* ---------- LOAD TABLE ----------
+
+       Breakpoint, pager, dan chip info sekarang milik helper bersama
+       script/datatable-compact.js, sama seperti halaman Master, Purchasing,
+       Stok Gudang, Mutasi, Transfer, Sales, dan Detail Tenant. Angka 575.98
+       tidak lagi ditulis ulang di file ini. */
+    function isUpdateMobile(){
+        return MP_TABLE.isMobile();
+    }
+
+    let updateIsMobile = isUpdateMobile();
+
+    function updateDataTableOptions(){
+        const mobile = isUpdateMobile();
+
+        const options = {
+            pageLength: 5,
+            lengthMenu: [[5,10,25,50],[5,10,25,50]],
+
+            /* Pager kustom dari script/datatable-compact.js: 3 nomor di
+               mobile, 5 di tablet/desktop, halaman pertama & terakhir dikunci
+               di dua ujung, dan "..." hanya muncul kalau memang ada nomor
+               yang disembunyikan.
+
+               DULU halaman ini tidak menyebut pagingType sama sekali, jadi
+               DataTables memakai bawaannya "full_numbers" - window-nya di
+               numbers_length (default 7), yaitu 7 pil di tengah daftar. */
+            pagingType: "mp_compact",
+
+            /* Chip "Menampilkan 1-5 dari 137 log update" + "dari N log update"
+               kalau sedang difilter. DULU tidak ada infoCallback, jadi yang
+               tampil baris bawaan berbahasa Inggris
+               ("Showing 1 to 5 of 137 entries"). */
+            infoCallback: MP_TABLE.infoCallback('log update'),
+
+            /* Opsi "responsive: true" DIHAPUS. Opsi itu hanya dibaca oleh
+               extension Responsive (responsive.dataTables.min.js) yang TIDAK
+               dimuat di script/headscript.php - yang ada hanya
+               jquery.dataTables.min.js + dataTables.bootstrap5.min.js, jadi
+               nilainya diam-diam diabaikan. Responsif di halaman ini
+               ditangani manual: tukar "dom" saat breakpoint mobile (lihat
+               bawah) + gaya kartu mobile di css/pages/update.css. */
+            autoWidth: false,
+
+            /* Urutan mengikuti ORDER BY di update-table.php. */
+            order: [],
+
+            language:{
+                search:"",
+                searchPlaceholder:"Cari log update...",
+
+                /* Panah Previous/Next memakai glyph supaya tidak memakan
+                   ruang di baris pager yang sempit. Aksesibilitas tetap
+                   terjaga lewat aria-label bahasa Indonesia di oAria. */
+                paginate:{
+                    previous:"&#8249;",  // ‹
+                    next:"&#8250;"       // ›
+                },
+
+                oAria:{
+                    paginate:{
+                        pageLabel:"Halaman {page}",
+                        previous:"Halaman sebelumnya",
+                        next:"Halaman berikutnya"
+                    }
+                },
+
+                zeroRecords: `
+                    <div class="empty-search">
+                        <img src="../../assets/img/illustrations/empty-data.png" class="empty-img">
+                        <div class="empty-title">Log update tidak ditemukan</div>
+                        <div class="empty-sub">
+                            Coba gunakan kata kunci lain
+                        </div>
+                    </div>
+                `,
+                emptyTable: `
+                    <div class="empty-search">
+                        <img src="../../assets/img/illustrations/empty-data.png" class="empty-img">
+                        <div class="empty-title">Belum ada data log update</div>
+                        <div class="empty-sub">
+                            Silakan tambahkan log update terlebih dahulu
+                        </div>
+                    </div>
+                `
+            }
+        };
+
+        /* Mobile pakai "fltip": search + show entries + tabel + baris info chip
+           + pagination, semuanya dikurpose di tengah baris.
+
+           "dom" HANYA di-set untuk mobile. Di desktop/tablet TIDAK di-set,
+           sama seperti halaman lain, jadi wrapper .row + .col-* bawaan
+           DataTables Bootstrap 5 yang dipakai:
+
+             <'row'<'col-sm-12 col-md-6'l><'col-sm-12 col-md-6'f>><'row dt-row'
+             <'col-sm-12'tr>><'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>
+
+           DULU "dom" tidak pernah di-set sama sekali, termasuk di mobile,
+           sehingga baris panjang desktop ikut terpakai di layar 360px dan
+           kolom "Show n entries" ikut memutar halaman. */
+        if(mobile) options.dom = "fltip";
+
+        return options;
+    }
+
+    function updateDataTable(){
+        const table = $("#stockTable");
+        if(!table.length) return null;
+
+        const dt = table.DataTable(updateDataTableOptions());
+
+        const $filter = $('#stockTable_filter');
+
+        if(isUpdateMobile()){
+
+            /* ---------- MOBILE ----------
+
+               Urutan baris di mobile:
+
+                   search -> tombol Tambah -> show entries -> kartu
+
+               Hanya kotak search yang dibungkus .table-action-wrapper.
+               Tombol "Tambah Log Update" disisipkan SESUDAH wrapper, jadi
+               ia berada di antara search dan "Show n entries" - bukan di
+               atas search seperti di halaman Master, karena di sini tidak
+               ada tab yang butuh tombol.toml didahulukan.
+
+               Dulu tombol ikut masuk ke dalam wrapper bersama search.
+               Di mobile premium memberi .dataTables_filter width:100%, jadi
+               search melebar penuh dan tombol tergeser ke baris berikutnya
+               dengan justify-content:flex-end - posisinya tidak rata. */
+            if(!$filter.parent().hasClass('table-action-wrapper')){
+                $filter.wrap('<div class="table-action-wrapper"></div>');
+            }
+
+            /* Sisipkan berdasarkan node wrapper-nya, bukan selector global,
+               supaya tidak pernah bercabang kalau suatu saat halaman ini
+               punya tabel kedua. */
+            const $wrapper = $filter.parent('.table-action-wrapper');
+            if($wrapper.length){
+                $('#btnContainer').show().insertAfter($wrapper[0]);
+            }
+
+        }else{
+
+            /* ---------- DESKTOP / TABLET ----------
+               Search + tombol dalam satu baris, tombol nempel di kanan. */
+            MP_TABLE.placeActions("#stockTable_filter", "#btnContainer");
+
+        }
+
+        dt.columns.adjust();
+
+        return dt;
+    }
+
     function loadUpdateTable() {
         $('#btnContainer').hide().insertBefore('#updateTableContainer');
+
+        /* --- Ambil state SEBELUM markup ditimpa -------------------------------
+           Penting: ini harus di atas assignment innerHTML. Setelah markup,
+           node <table id="stockTable"> yang lama ikut terbuang, isDataTable()
+           mencari node berdasarkan identitas (o.nTable === t), jadi sesudah
+           itu isDataTable("#stockTable") sudah false dan state-nya tidak bisa
+           diambil lagi.
+
+           Ini bukan detail kecil: loadUpdateTable() dipanggil setiap kali
+           tambah / edit / hapus log update. Tanpa ini tabel lompat balik ke
+           halaman 1 DAN filter pencarian ikut hilang tepat setelah user
+           menyelesaikan aksi. */
+        const prev = $.fn.DataTable.isDataTable('#stockTable')
+            ? $('#stockTable').DataTable()
+            : null;
+
+        const keep = prev ? {
+            page: prev.page(),
+            keyword: prev.search(),
+            length: prev.page.len()
+        } : null;
+
         fetch('update-table.php')
         .then(res => res.text())
         .then(html => {
+            /* destroy dulu, node lama masih terpasang jadi aman. Kalau
+               dibiarkan, instance-nya menumpuk di registry
+               DataTable.settings setiap loadUpdateTable().
+
+               DULU urutannya terbalik (innerHTML dulu, destroy belakangan)
+               sehingga isDataTable() selalu false dan tidak ada yang pernah
+               ikut di-destroy. */
+            if(prev) prev.destroy();
+
             document.getElementById('updateTableContainer').innerHTML = html;
 
-            if($.fn.DataTable.isDataTable('#stockTable')){
-                $('#stockTable').DataTable().destroy();
-            }
+            updateIsMobile = isUpdateMobile();
 
-            setTimeout(()=>{
-            $('#stockTable').DataTable({
-                pageLength: 5,
-                lengthMenu:[[5,10,25,50],[5,10,25,50]],
-                responsive: true,
-                autoWidth: false,
-                order: [],
-                language:{
-                    search:"",
-                    searchPlaceholder:"Cari log update...",
-                    zeroRecords: `
-                        <div class="empty-search">
-                            <img src="../../assets/img/illustrations/empty-data.png" class="empty-img">
-                            <div class="empty-title">Log update tidak ditemukan</div>
-                            <div class="empty-sub">
-                                Coba gunakan kata kunci lain
-                            </div>
-                        </div>
-                    `,
-                    emptyTable: `
-                        <div class="empty-search">
-                            <img src="../../assets/img/illustrations/empty-data.png" class="empty-img">
-                            <div class="empty-title">Belum ada data log update</div>
-                            <div class="empty-sub">
-                                Silakan tambahkan log update terlebih dahulu
-                            </div>
-                        </div>
-                    `
-                }
-            });
-            if ($('#stockTable_filter').parent('.table-action-wrapper').length === 0) {
-                $('#stockTable_filter').wrap('<div class="table-action-wrapper"></div>');
+            const dt = updateDataTable();
+
+            if(dt && keep){
+                /* Halaman di luar rentang otomatis dikembalikan DataTable
+                   ke 0, jadi aman walau baris habis. */
+                dt.page.len(keep.length)
+                  .search(keep.keyword)
+                  .page(keep.page)
+                  .draw(false);
             }
-            $('#btnContainer').show().appendTo('.table-action-wrapper');
-            },100);
         });
     }
+
+    /* ---------- REBUILD KETIKA GANTI MOBILE / DESKTOP ----------
+
+       Halaman ini sebelumnya tidak punya handler sama sekali, sehingga tabel
+       yang sudah dibangun dengan dom mobile tidak pernah dibangun ulang -
+       kontrolnya tetap versi mobile padahal lebar jendela sudah berubah. */
+    let updateResizeTimer;
+    window.addEventListener('resize', function(){
+        clearTimeout(updateResizeTimer);
+        updateResizeTimer = setTimeout(function(){
+            if(isUpdateMobile() === updateIsMobile) return;
+            if(!$.fn.DataTable.isDataTable('#stockTable')) return;
+
+            const current = $('#stockTable').DataTable();
+
+            const keep = {
+                page: current.page(),
+                keyword: current.search(),
+                length: current.page.len()
+            };
+
+            current.destroy();
+
+            updateIsMobile = isUpdateMobile();
+
+            const dt = updateDataTable();
+
+            if(dt){
+                dt.page.len(keep.length)
+                  .search(keep.keyword)
+                  .page(keep.page)
+                  .draw(false);
+            }
+        }, 250);
+    });
 
     $(document).ready(function(){
         loadUpdateTable();

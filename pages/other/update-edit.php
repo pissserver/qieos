@@ -176,12 +176,12 @@ $qDetail = mysqli_query($conn, "
 
     </div>
 
-    <div class="text-end mt-4 mb-4">
+    <div class="mp-add-footer">
 
         <button type="submit" class="btn-save">
 
-            <i class="fas fa-save me-1"></i>
-            Update
+            <i class="fas fa-save"></i>
+            Save
 
         </button>
 

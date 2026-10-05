@@ -155,6 +155,17 @@
             gap:15px;
         }
 
+        /* Meta inline (versi + tipe + tanggal) di bawah nama update.
+
+           Hanya tampil di <=575.98px: di mobile kolom Version / Type /
+           Tanggal disembunyikan dan isinya pindah ke baris ini, jadi tidak
+           ada informasi yang hilang. Pola sama dengan .mp-meta di halaman
+           Master (master-product.css) - global disembunyikan, di dalam
+           media query mobile baru diaktifkan. */
+        .mp-meta{
+            display:none;
+        }
+
         .avatar{
             width:50px;
             height:50px;
@@ -406,6 +417,49 @@
             padding:10px 24px;
             font-weight:600;
         }
+
+        /* ============================================================
+           MODAL FORM (generik)
+
+           .mp-add-footer dipakai bersama oleh modal Master, dan di sini
+           disalin agar halaman Update punya tombol Save yang sama persis:
+           desktop rata kanan, mobile jadi baris penuh.
+
+           .mp-add-header / .mp-add-head-text / .mp-add-close / .mp-add-body
+           dipakai oleh <head> modal Tambah & Edit Update supaya tombol X
+           tetap di samping judul, bukan jatuh ke baris sendiri.
+           ============================================================ */
+        .mp-add-footer{
+            margin-top:24px;
+            margin-bottom:16px;
+            text-align:right;
+        }
+
+        .mp-add-footer .btn-save{
+            display:inline-flex;
+            align-items:center;
+            justify-content:center;
+            gap:8px;
+            min-width:132px;
+            height:44px;
+            padding:0 22px;
+            border-radius:10px;
+            font-size:13.5px;
+            font-weight:700;
+            letter-spacing:.01em;
+            box-shadow:0 10px 20px -12px rgba(15,23,42,.8);
+            transition:transform .18s ease, box-shadow .18s ease, background .2s;
+        }
+
+        .mp-add-footer .btn-save i{ font-size:13px; }
+
+        .mp-add-footer .btn-save:hover{
+            color:#fff;
+            transform:translateY(-1px);
+            box-shadow:0 14px 24px -12px rgba(15,23,42,.85);
+        }
+
+        .mp-add-footer .btn-save:active{ transform:translateY(0); }
 
         .modal-backdrop.show{
             opacity:.55 !important;
@@ -753,16 +807,14 @@
 
         }
 
-        /* Scrolling table overflow */
-        @media (max-width: 768px){
+        /* Di mobile tabel TIDAK lagi digulir horizontal.
 
-            .table-mobile{
-                overflow-x: auto;
-                white-space: nowrap;
-                -webkit-overflow-scrolling: touch;
-            }
-
-        }
+           Dulu .table-mobile pakai overflow-x:auto + white-space:nowrap
+           supaya kolom tetap muat di layar sempit. Sekarang di <=575.98px
+           tabel berubah jadi kartu (lihat blok "TABEL -> KARTU" di bawah),
+           jadi nowrap justru bikin nama update yang panjang meluber keluar
+           kartu. Scroll horizontal Desktop/tablet tetap lewat
+           .dataTables_wrapper .col-sm-12:has(> table.dataTable) di atas. */
 
         /* LAYOUT FIX + RESPONSIVE */
         .panel-header{
@@ -798,6 +850,42 @@
 
             .panel-left{
                 width:100%;
+            }
+
+            /* ---------- MODAL TAMBAH / EDIT: TOMBOL X DI SAMPING ---------- */
+            /* Rule .panel-header di atas mengubah header jadi satu kolom,
+               dan .panel-left jadi width:100% - Akibatnya tombol X ikut
+               turun ke baris sendiri, terpisah dari judul modal.
+
+               Di sini dikembalikan ke baris satu: header tetap flex row,
+               .panel-left merebut sisa ruang, tombol X nempel di kanan.
+               Berlaku juga untuk tablet, bukan cuma <=575.98px, supaya
+               posisinya tidak berubah-ubah saat jendela dilebarkan. */
+            #addUpdateModal .panel-header.mp-add-header,
+            #editUpdateModal .panel-header.mp-add-header{
+                flex-direction:row;
+                flex-wrap:nowrap;
+                align-items:center;
+            }
+
+            #addUpdateModal .mp-add-header .panel-left,
+            #editUpdateModal .mp-add-header .panel-left{
+                width:auto;
+                flex:1 1 auto;
+                min-width:0;
+            }
+
+            #addUpdateModal .mp-add-head-text,
+            #editUpdateModal .mp-add-head-text{
+                flex:1;
+                min-width:0;
+            }
+
+            #addUpdateModal .mp-add-close,
+            #editUpdateModal .mp-add-close{
+                flex:0 0 auto;
+                margin:0;
+                align-self:center;
             }
 
             .table-action-wrapper{
@@ -884,10 +972,8 @@
                 width:100% !important;
             }
 
-            #btnAddUpdate{
-                width:100%;
-                justify-content:center;
-            }
+            /* (#btnAddUpdate full width + jaraknya sudah diatur di blok
+               "TABEL -> KARTU DI MOBILE" di bawah) */
 
             .panel-header.my-3.mx-3{
                 margin:12px !important;
@@ -906,5 +992,345 @@
                 width:60px;
                 height:60px;
                 font-size:28px;
+            }
+        }
+
+        /* ============================================================
+           TABEL -> KARTU DI MOBILE  (<= 575.98px)
+
+           Pola identik dengan halaman Master (master-product.css):
+           <thead> disembunyikan, tiap <tr> berubah jadi kartu rounded
+           dengan aksen ungu di sisi kiri, tiap <td> jadi blok. Kolom
+           desktop-only (.mp-col-*) disembunyikan karena isinya sudah
+           dipindah ke .mp-meta di dalam sel pertama.
+
+           Desktop/tablet TIDAK tersentuh - di sana tabel tetap tampil
+           seperti sekarang.
+           ============================================================ */
+        @media (max-width:575.98px){
+
+            #updateTableContainer #stockTable{
+                min-width:0 !important;
+                width:100% !important;
+                border-spacing:0 !important;
+                border-collapse:separate;
+                table-layout:auto !important;
+                margin:0;
+            }
+
+            #updateTableContainer #stockTable thead{
+                display:none;
+            }
+
+            /* .table > :not(:first-child) memberi border-top 2px di tbody */
+            #updateTableContainer #stockTable > tbody,
+            #updateTableContainer #stockTable > tfoot{
+                border-top:0 !important;
+            }
+
+            #updateTableContainer #stockTable tbody{
+                display:flex;
+                flex-direction:column;
+                gap:7px;
+            }
+
+            #updateTableContainer #stockTable tbody tr{
+                display:flex !important;
+                align-items:center;
+                gap:10px;
+                width:100%;
+                margin:0 !important;
+                padding:9px 11px;
+                border-radius:18px;
+                border:1px solid rgba(99,102,241,.14);
+                background:linear-gradient(90deg, rgba(99,102,241,.07), #fff 42%);
+                box-shadow:none;
+                transition:background-color .2s ease, border-color .2s ease;
+                position:relative;
+                overflow:hidden;
+            }
+
+            /* aksen ungu di sisi kiri */
+            #updateTableContainer #stockTable tbody tr::before{
+                content:"";
+                position:absolute;
+                left:0;
+                top:9px;
+                bottom:9px;
+                width:4px;
+                border-radius:0 4px 4px 0;
+                background:linear-gradient(180deg,#818cf8,#7c3aed);
+                box-shadow:none;
+            }
+
+            #updateTableContainer #stockTable tbody tr:hover,
+            #updateTableContainer #stockTable tbody tr:active{
+                transform:none;
+                box-shadow:none;
+            }
+
+            /* matikan efek hover abu-abu (.table-hover) di mobile */
+            #updateTableContainer #stockTable.table-hover > tbody > tr:hover > *,
+            #updateTableContainer #stockTable.table-hover > tbody > tr:hover > td,
+            #updateTableContainer #stockTable.table-hover > tbody > tr:hover > th{
+                box-shadow:none !important;
+                background-color:transparent !important;
+                color:inherit;
+            }
+
+            #updateTableContainer #stockTable tbody td{
+                display:block !important;
+                width:auto !important;
+                border:none !important;
+                padding:0 !important;
+                background:transparent !important;
+                vertical-align:middle;
+            }
+
+            #updateTableContainer #stockTable tbody td:first-child{
+                flex:1 1 auto;
+                min-width:0;
+            }
+
+            /* kolom desktop-only disembunyikan (versi, tipe, tanggal) */
+            #updateTableContainer #stockTable tbody td.mp-col-version,
+            #updateTableContainer #stockTable tbody td.mp-col-type,
+            #updateTableContainer #stockTable tbody td.mp-col-date{
+                display:none !important;
+            }
+
+            /* kolom aksi */
+            #updateTableContainer #stockTable tbody td:last-child{
+                flex:0 0 auto;
+                float:none;
+                margin:0;
+            }
+
+            /* wrap avatar + text */
+            #updateTableContainer .product-wrap{
+                display:flex;
+                align-items:center;
+                gap:10px;
+                min-width:0;
+            }
+
+            #updateTableContainer .product-wrap > div:not(.avatar){
+                flex:1 1 auto;
+                min-width:0;
+            }
+
+            /* avatar jadi ring kecil, sama seperti kartu Master */
+            #updateTableContainer .avatar{
+                width:36px;
+                height:36px;
+                flex:0 0 36px;
+                border-radius:12px;
+                font-size:15px;
+                box-shadow:0 0 0 2px #fff, 0 0 0 3px rgba(99,102,241,.28);
+            }
+
+            #updateTableContainer .product-wrap .fw-bold{
+                font-size:12px;
+                font-weight:700;
+                color:#0f172a;
+                line-height:1.3;
+                margin-bottom:3px;
+                text-transform:capitalize;
+                white-space:normal;
+                overflow-wrap:anywhere;
+            }
+
+            /* meta inline (versi + tipe + tanggal) */
+            #updateTableContainer .mp-meta{
+                display:flex;
+                flex-wrap:wrap;
+                align-items:center;
+                gap:4px 8px;
+                min-width:0;
+            }
+
+            #updateTableContainer .mp-meta small{
+                font-size:9.5px;
+                font-weight:600;
+                letter-spacing:.5px;
+                color:#94a3b8;
+                line-height:1.3;
+                white-space:normal;
+                overflow-wrap:anywhere;
+            }
+
+            /* tombol aksi */
+            #updateTableContainer #stockTable tbody .action-btn{
+                width:32px;
+                height:32px;
+                margin:0;
+                border-radius:10px;
+                font-size:12px;
+            }
+
+            /* empty state: tanpa kartu, tanpa aksen, gambar di tengah */
+            #updateTableContainer #stockTable tbody tr:has(.empty-search){
+                padding:0;
+                background:transparent;
+                border:none;
+                box-shadow:none;
+                overflow:visible;
+                justify-content:center;
+            }
+
+            #updateTableContainer #stockTable tbody tr:has(.empty-search)::before{
+                content:none;
+            }
+
+            #updateTableContainer #stockTable tbody tr:has(.empty-search) > td{
+                flex:1 1 100% !important;
+                width:100% !important;
+                padding:0 !important;
+                border:0 !important;
+            }
+
+            #updateTableContainer #stockTable tbody .empty-search{
+                padding:14px 10px 18px;
+                text-align:center;
+            }
+
+            #updateTableContainer #stockTable tbody .empty-img{
+                display:block;
+                width:120px;
+                margin:0 auto 8px;
+                opacity:.8;
+            }
+
+            #updateTableContainer #stockTable tbody .empty-title{
+                font-size:12.5px;
+                font-weight:700;
+                color:#0f172a;
+                margin-bottom:4px;
+            }
+
+            #updateTableContainer #stockTable tbody .empty-sub{
+                font-size:10.5px;
+                color:#64748b;
+            }
+
+/* ---------- TOMBOL "TAMBAH LOG UPDATE" ----------
+               Jarak antar baris di mobile, mengikuti urutan
+               search -> tombol -> show entries -> kartu:
+
+                   search  ... 10px
+                   tombol  ... 12px
+                   show entries ... (12px dari premium, ke kartu)
+
+               Tanpa jarak eksplisit ini ketiga kontrolnya menempel
+               jadi satu blok dan sulit dipisahkan secara visual. */
+            #updateTableContainer .table-action-wrapper{
+                flex-wrap:nowrap;
+                justify-content:flex-start;
+                gap:10px;
+                margin-bottom:10px;
+            }
+
+            #btnAddUpdate{
+                width:100%;
+                margin:0 0 12px;
+            }
+
+            /* ============================================================
+               MODAL TAMBAH / EDIT
+               ============================================================ */
+
+            /* gutter konten = gutter header, supaya rata kiri-kanan */
+            #addUpdateModal .mp-add-body,
+            #editUpdateModal .mp-add-body{
+                margin:0 !important;
+                padding:12px 12px 0 !important;
+            }
+
+            #addUpdateModal .mp-add-header,
+            #editUpdateModal .mp-add-header{
+                gap:10px;
+                margin:12px 12px 0 !important;
+                padding:12px 14px;
+            }
+
+            #addUpdateModal .mp-add-header .panel-icon,
+            #editUpdateModal .mp-add-header .panel-icon{
+                width:40px;
+                height:40px;
+                border-radius:12px;
+                font-size:15px;
+                flex:0 0 auto;
+            }
+
+            #addUpdateModal .mp-add-header .panel-title,
+            #editUpdateModal .mp-add-header .panel-title{
+                font-size:15px;
+                line-height:1.25;
+            }
+
+            #addUpdateModal .mp-add-header .panel-subtitle,
+            #editUpdateModal .mp-add-header .panel-subtitle{
+                font-size:11px;
+                line-height:1.45;
+                margin-top:2px;
+            }
+
+            /* ---------- BARIS DESKRIPSI ---------- */
+            /* Dulu kolom input (col-md-11) dan tombol hapus (col-md-1)
+               sama-sama 100% lebar di mobile, jadi tombol merah jadi bar
+               penuh di bawah input. Sekarang input merebut sisa ruang dan
+               tombol hapus tetap kotak 42px di sampingnya. */
+            #addUpdateModal .description-row,
+            #editUpdateModal .description-row{
+                display:flex;
+                align-items:stretch;
+                gap:8px;
+                margin-bottom:10px;
+            }
+
+            #addUpdateModal .description-row > div:first-child,
+            #editUpdateModal .description-row > div:first-child{
+                flex:1 1 auto;
+                min-width:0;
+            }
+
+            #addUpdateModal .description-row > div:first-child .input-group-modern,
+            #editUpdateModal .description-row > div:first-child .input-group-modern{
+                margin-bottom:0;
+            }
+
+            #addUpdateModal .description-row > div:last-child,
+            #editUpdateModal .description-row > div:last-child{
+                flex:0 0 46px;
+                width:auto;
+            }
+
+            #addUpdateModal .description-row .btn-danger,
+            #editUpdateModal .description-row .btn-danger{
+                height:42px;
+                border-radius:10px;
+            }
+
+            /* judul section + tombol "Tambah Deskripsi" */
+            #addUpdateModal .d-flex.justify-content-between,
+            #editUpdateModal .d-flex.justify-content-between{
+                flex-wrap:wrap;
+                gap:10px;
+            }
+
+            /* ---------- FOOTER + TOMBOL SAVE ---------- */
+            #addUpdateModal .mp-add-footer,
+            #editUpdateModal .mp-add-footer{
+                display:flex;
+                justify-content:center;
+                margin:16px 0 0;
+                padding:14px 0 18px;
+                border-top:1px solid #e2e8f0;
+                text-align:initial;
+            }
+
+            #addUpdateModal .mp-add-footer .btn-save,
+            #editUpdateModal .mp-add-footer .btn-save{
+                width:100%;
             }
         }
