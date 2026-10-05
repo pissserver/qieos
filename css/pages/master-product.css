@@ -1741,15 +1741,616 @@ textarea.form-control {
         background: #f8fafc !important;
     }
 
-    #productTableContainer .dataTables_length,
-    #productTableContainer .dataTables_info,
-    #customerTableContainer .dataTables_length,
-    #customerTableContainer .dataTables_info,
-    #supplierTableContainer .dataTables_length,
-    #supplierTableContainer .dataTables_info,
-    #userTableContainer .dataTables_length,
-    #userTableContainer .dataTables_info {
-        display: none;
+    /* Panah/ellipsis disabled ikut nge-lift saat di-hover kalau rule
+       hover di atas tidak dikecualikan. */
+    #productTableContainer .dataTables_paginate .page-item.disabled .page-link:hover,
+    #customerTableContainer .dataTables_paginate .page-item.disabled .page-link:hover,
+    #supplierTableContainer .dataTables_paginate .page-item.disabled .page-link:hover,
+    #userTableContainer .dataTables_paginate .page-item.disabled .page-link:hover {
+        transform: none;
+        box-shadow: 0 2px 6px rgba(15, 23, 42, .05) !important;
+    }
+
+    /* margin-left:0 wajib. volt.css punya
+       ".page-item:not(:first-child) .page-link{margin-left:-.0625rem}"
+       yang menarik tiap pil ke kiri 1px supaya saling tumpuk seperti
+       pager bawaan. Pada desain pil terpisah, itu bikin pil overlap 1px
+       dan gap yang dirancang 5px jadi efektif 4px. */
+    #productTableContainer .dataTables_paginate .page-link,
+    #customerTableContainer .dataTables_paginate .page-link,
+    #supplierTableContainer .dataTables_paginate .page-link,
+    #userTableContainer .dataTables_paginate .page-link {
+        margin-left: 0;
+    }
+
+    /* .page-link di rule utama memakai box-shadow:...!important, jadi
+       .page-link:focus bawaan volt tertimpa dan cincin fokus keyboard
+       hilang. Dibuat ulang di sini dengan !important juga. */
+    #productTableContainer .dataTables_paginate .page-link:focus-visible,
+    #customerTableContainer .dataTables_paginate .page-link:focus-visible,
+    #supplierTableContainer .dataTables_paginate .page-link:focus-visible,
+    #userTableContainer .dataTables_paginate .page-link:focus-visible {
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(99, 102, 241, .45) !important;
+    }
+
+    /* "Show n entries" dan baris info TIDAK lagi disembunyikan di mobile.
+
+       Awalnya .dataTables_length untuk produk/customer/user diberi
+       display:none di <=575.98px dengan alasan dropdown-nya terlalu makan
+       ruang. Sekarang dropdownnya tetap berukuran sama dengan halaman lain
+       (40px / radius 12px) dan seluruh barisnya DIPUSATKAN, jadi ruang
+       yang terpakai justru lebih sedikit dibanding versi full-width.
+       Baris info "Menampilkan 1-5 dari 137 produk" juga sudah jadi chip
+       kecil (30px) yang center.
+
+       Jadi blok ini sengaja tidak punya rule apa pun - tidak ada kontrol
+       tabel yang disembunyikan di <=575.98px. Kalau nanti ada kontrol yang
+       memang perlu disembunyikan, buat rule terpisah per halaman dengan
+       catatan alasan yang jelas, jangan menambahkannya ke sini. */
+}
+
+/* ============================================================
+   PAGINASI + BARIS INFO DESKTOP & TABLET
+   (produk + supplier + customer + user)
+
+   Blok premium ini dipakai bersama oleh keempat halaman Master, ditulis
+   dengan :is() supaya tidak perlu mengulang selector empat kali. :is()
+   mengambil specificity argumen paling spesifik - semuanya id - jadi
+   (1,0,0), sama persis seperti kalau selector aslinya ditulis
+   "#productTableContainer ...". Karena itu semua override !important yang
+   saling menimpa (Volt .page-link, blok mobile, .dataTables_length select)
+   tetap berperilaku sama.
+
+   Perbedaan antar halaman tetap ditangani di luar blok ini:
+     - produk: "l" (Show n entries) disembunyikan di <=575.98px
+     - user : search desktop ditaruh di .mu-search-slot (toolbar tabs),
+              bukan di .table-action-wrapper seperti tiga halaman lain
+     - customer: paling simpel, semua mengikuti pola produk
+
+   1. Baris bawah (info + pager) diratakan jadi satu flex row:
+      chip info di kiri, pil pagination di kanan, keduanya vertikal center.
+   2. "Menampilkan 1-5 dari 137" jadi chip pill setinggi pil pagination.
+   3. Bentuk pil pagination sama persis dengan mobile; hanya skalanya
+      dibesar: 34px/12px (mobile 30px/11px). Di layar lebar target sentuh
+      30px bukan masalah, tapi pil segitu terlihat terlalu kecil di samping
+      tabel yang selebar hundreds piksel.
+   4. Baris atas (Show entries + search + tombol Tambah) diratakan dengan
+      perlakuan yang sama seperti baris bawah.
+   ============================================================ */
+@media (min-width: 576px) {
+
+    /* ---------- BARIS BAWAH: info + pager satu baris ----------
+       Default DataTables Bootstrap 5 memecah "i" ke col-md-5 dan "p" ke
+       col-md-7 di dalam .row (lihat dom bawaan dataTables.bootstrap5.js).
+       Kedua kolom itu diturunkan jadi flex child yang lebarnya mengikuti
+       isinya, lalu .row-nya di-align center, jadi chip info dan pil
+       pagination benar-benar satu baris dan tidak lagi turun ke bawah
+       pada lebar 576-767.98px di mana col-sm-12 masih menumpuk.
+
+       flex-wrap TIDAK dikunci nowrap: lebar konten di 576-767.98px cuma
+       ~470px, sedangkan chip info (~215px) + pager simple_numbers (~390px)
+       sudah ~620px. Dengan nowrap, .section-card{overflow:hidden} akan
+       memotong pil pager jadi tidak terlihat. wrap dipakai sebagai
+       jaring pengaman: kalau muat, tetap satu baris; kalau tidak, pager
+       turun ke baris sendiri dan tetap rata kanan lewat margin-left:auto. */
+    :is(#productTableContainer, #supplierTableContainer, #customerTableContainer, #userTableContainer) .dataTables_wrapper > .row:has(.dataTables_info) {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 10px 14px;
+        margin: 18px 0 0;
+    }
+
+    :is(#productTableContainer, #supplierTableContainer, #customerTableContainer, #userTableContainer) .dataTables_wrapper > .row:has(.dataTables_info) > [class*="col-"] {
+        display: flex;
+        align-items: center;
+        flex: 0 1 auto;
+        width: auto;
+        max-width: 100%;
+        padding-left: 0;
+        padding-right: 0;
+    }
+
+    /* Hanya kolom info yang boleh merebut sisa ruang baris; kolom pager
+       menyentuh kanan dan tidak pernah dipaksa memampit. */
+    :is(#productTableContainer, #supplierTableContainer, #customerTableContainer, #userTableContainer) .dataTables_wrapper > .row:has(.dataTables_info) > :has(.dataTables_info) {
+        flex: 1 1 auto;
+        min-width: 0;
+    }
+
+    :is(#productTableContainer, #supplierTableContainer, #customerTableContainer, #userTableContainer) .dataTables_wrapper > .row:has(.dataTables_info) > :last-child {
+        margin-left: auto;
+    }
+
+    /* DataTable menyembunyikan container paging-nya kalau cuma ada 1 halaman,
+       dan infoCallback mengembalikan string kosong kalau tabel kosong. Kalau
+       keduanya terjadi, baris bawah jadi baris kosong - jaraknya
+       dikecilkan agar tidak menyisakan ruang sia-sia. */
+    :is(#productTableContainer, #supplierTableContainer, #customerTableContainer, #userTableContainer) .dataTables_wrapper > .row:not(:has(.mp-info, .page-link)) {
+        margin-top: 0;
+    }
+
+    /* ---------- CHIP INFO "Menampilkan 1-5 dari 137" ---------- */
+    :is(#productTableContainer, #supplierTableContainer, #customerTableContainer, #userTableContainer) .dataTables_info {
+        flex: 1 1 auto;
+        margin: 0;
+        padding: 0;
+        text-align: left;
+    }
+
+    :is(#productTableContainer, #supplierTableContainer, #customerTableContainer, #userTableContainer) .mp-info {
+        display: inline-flex;
+        align-items: center;
+        gap: 9px;
+        height: 34px;
+        padding: 0 14px 0 8px;
+        border-radius: 11px;
+        background: linear-gradient(135deg, #f8fafc, #eef2ff);
+        border: 1px solid #e2e8f0;
+        box-shadow:
+            0 2px 6px rgba(15, 23, 42, .05),
+            inset 0 1px 0 rgba(255, 255, 255, .75);
+        white-space: nowrap;
+    }
+
+    :is(#productTableContainer, #supplierTableContainer, #customerTableContainer, #userTableContainer) .mp-info-ico {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        flex: 0 0 auto;
+        width: 20px;
+        height: 20px;
+        border-radius: 7px;
+        font-size: 10px;
+        color: #fff;
+        background: linear-gradient(135deg, #4f46e5, #6366f1);
+        box-shadow: 0 4px 10px -4px rgba(79, 70, 229, .95);
+    }
+
+    :is(#productTableContainer, #supplierTableContainer, #customerTableContainer, #userTableContainer) .mp-info-txt {
+        font-size: 12px;
+        font-weight: 600;
+        letter-spacing: .1px;
+        color: #64748b;
+    }
+
+    :is(#productTableContainer, #supplierTableContainer, #customerTableContainer, #userTableContainer) .mp-info-txt b {
+        font-weight: 800;
+        color: #0f172a;
+    }
+
+    /* Muncul hanya kalau ada pencarian aktif: "… dari 5 produk | dari 137 produk"
+
+       .mp-info-sub adalah anak LANGSUNG .mp-info (bukan anak .mp-info-txt),
+       jadi jarak ke .mp-info-txt sudah gegeben oleh gap: 9px di .mp-info -
+       karena itu margin-left di sini 0, supaya tidak jadi 17px. */
+    :is(#productTableContainer, #supplierTableContainer, #customerTableContainer, #userTableContainer) .mp-info-sub {
+        margin-left: 0;
+        padding-left: 9px;
+        font-weight: 500;
+        color: #94a3b8;
+        border-left: 1px solid #e2e8f0;
+    }
+
+    /* ---------- LAYOUT PAGER ---------- */
+    :is(#productTableContainer, #supplierTableContainer, #customerTableContainer, #userTableContainer) .dataTables_paginate,
+    :is(#productTableContainer, #supplierTableContainer, #customerTableContainer, #userTableContainer) .dataTables_paginate .pagination {
+        float: none;
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+        align-items: center;
+        gap: 6px;
+        margin: 0;
+        padding: 0;
+    }
+
+    :is(#productTableContainer, #supplierTableContainer, #customerTableContainer, #userTableContainer) .dataTables_paginate {
+        flex: 0 0 auto;
+    }
+
+    :is(#productTableContainer, #supplierTableContainer, #customerTableContainer, #userTableContainer) .dataTables_paginate .page-item {
+        margin: 0 !important;
+    }
+
+    /* ---------- PIL ---------- */
+    /* Lihat blok mobile di atas: volt.css menarik tiap pil 1px ke kiri
+       (.page-item:not(:first-child) .page-link{margin-left:-.0625rem}),
+       jadi harus dinolkan supaya gap 6px benar-benar 6px. */
+    :is(#productTableContainer, #supplierTableContainer, #customerTableContainer, #userTableContainer) .dataTables_paginate .page-link {
+        min-width: 34px;
+        height: 34px;
+        padding: 0 9px;
+        margin-left: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 11px !important;
+        font-size: 12px;
+        font-weight: 700;
+        line-height: 1;
+        color: #475569 !important;
+        background: #fff !important;
+        border: 1px solid #e2e8f0 !important;
+        box-shadow: 0 2px 6px rgba(15, 23, 42, .05) !important;
+        transition: transform .18s ease, box-shadow .18s ease;
+    }
+
+    :is(#productTableContainer, #supplierTableContainer, #customerTableContainer, #userTableContainer) .dataTables_paginate .page-link:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 18px -8px rgba(15, 23, 42, .38) !important;
+    }
+
+    :is(#productTableContainer, #supplierTableContainer, #customerTableContainer, #userTableContainer) .dataTables_paginate .page-item.active .page-link {
+        color: #fff !important;
+        background: linear-gradient(135deg, #4f46e5, #6366f1) !important;
+        border-color: transparent !important;
+        box-shadow: 0 8px 16px -7px rgba(79, 70, 229, .95) !important;
+    }
+
+    :is(#productTableContainer, #supplierTableContainer, #customerTableContainer, #userTableContainer) .dataTables_paginate .page-item.disabled .page-link {
+        color: #94a3b8 !important;
+        background: #f8fafc !important;
+        border-color: #eef2f7 !important;
+    }
+
+    :is(#productTableContainer, #supplierTableContainer, #customerTableContainer, #userTableContainer) .dataTables_paginate .page-item.disabled .page-link:hover {
+        transform: none;
+        box-shadow: 0 2px 6px rgba(15, 23, 42, .05) !important;
+    }
+
+    /* .page-link di rule utama memakai box-shadow:...!important, jadi
+       .page-link:focus bawaan volt tertimpa dan cincin fokus keyboard
+       hilang. Dibuat ulang di sini dengan !important juga. */
+    :is(#productTableContainer, #supplierTableContainer, #customerTableContainer, #userTableContainer) .dataTables_paginate .page-link:focus-visible {
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(99, 102, 241, .45) !important;
+    }
+
+    /* ---------- BARIS ATAS: SHOW ENTRIES + SEARCH + TOMBOL ---------- */
+    /* Default DataTables Bootstrap 5 memecah baris atas jadi
+       <div class="row"><div class="col-sm-12 col-md-6">l</div>
+       <div class="col-sm-12 col-md-6">f</div></div>
+       (lihat string "sDom" di dataTables.bootstrap5.js). Tanpa aturan ini
+       panjang select "Show 5 entries" dan tinggi tombol "Tambah Produk"
+       (46px) bikin kedua kontrol terlihat melayang, dan di 576-767.98px
+       masih menumpuk karena col-sm-12. Disamakan perlakuannya dengan baris
+       bawah: flex row, align center, wrap sebagai jaring pengaman.
+
+       Selector pakai :has(.dataTables_length) supaya tidak menembak baris
+       tengah (.row.dt-row) maupun baris bawah, yang tidak punya "l". */
+    :is(#productTableContainer, #supplierTableContainer, #customerTableContainer, #userTableContainer) .dataTables_wrapper > .row:has(.dataTables_length) {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px 14px;
+        margin: 0 0 16px;
+    }
+
+    :is(#productTableContainer, #supplierTableContainer, #customerTableContainer, #userTableContainer) .dataTables_wrapper > .row:has(.dataTables_length) > [class*="col-"] {
+        display: flex;
+        align-items: center;
+        flex: 0 1 auto;
+        width: auto;
+        max-width: 100%;
+        padding-left: 0;
+        padding-right: 0;
+    }
+
+    /* Kolom kiri (Show entries) tidak boleh melar; kolom kanan (search +
+       tombol) yang merebut sisa ruang dan tetap rata kanan. */
+    :is(#productTableContainer, #supplierTableContainer, #customerTableContainer, #userTableContainer) .dataTables_wrapper > .row:has(.dataTables_length) > :has(.dataTables_length) {
+        flex: 0 0 auto;
+    }
+
+    :is(#productTableContainer, #supplierTableContainer, #customerTableContainer, #userTableContainer) .dataTables_wrapper > .row:has(.dataTables_length) > :last-child {
+        flex: 1 1 auto;
+        justify-content: flex-end;
+        min-width: 0;
+    }
+
+    /* ---------- SELECT "SHOW n ENTRIES" ---------- */
+    :is(#productTableContainer, #supplierTableContainer, #customerTableContainer, #userTableContainer) .dataTables_length {
+        margin: 0;
+        display: flex;
+        align-items: center;
+    }
+
+    :is(#productTableContainer, #supplierTableContainer, #customerTableContainer, #userTableContainer) .dataTables_length label {
+        margin: 0;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 12px;
+        font-weight: 600;
+        color: #64748b;
+        white-space: nowrap;
+    }
+
+    /* Base-nya blok "DATATABLE" di baris ~327 file ini (min-width 75px,
+       height 38px, radius 8px, semua !important). Di sini ditimpa dengan
+       skala yang sama seperti search: 42px / radius 13px, plus chevron
+       sendiri karena volt/Bootstrap tidak menyediakan panah untuk
+       form-select yang di-override height-nya. */
+    :is(#productTableContainer, #supplierTableContainer, #customerTableContainer, #userTableContainer) .dataTables_length select {
+        min-width: 92px !important;
+        height: 42px !important;
+        padding: 0 34px 0 14px !important;
+        border-radius: 13px !important;
+        border: 1px solid #e2e8f0 !important;
+        background-color: #fff !important;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E") !important;
+        background-repeat: no-repeat !important;
+        background-position: right 12px center !important;
+        background-size: 12px 12px !important;
+        -webkit-appearance: none !important;
+        appearance: none !important;
+        font-size: 12.5px;
+        font-weight: 700;
+        color: #0f172a;
+        cursor: pointer;
+        box-shadow: 0 2px 6px rgba(15, 23, 42, .05) !important;
+        transition: border-color .2s ease, box-shadow .2s ease;
+    }
+
+    :is(#productTableContainer, #supplierTableContainer, #customerTableContainer, #userTableContainer) .dataTables_length select:hover {
+        border-color: #c7d2fe !important;
+    }
+
+    :is(#productTableContainer, #supplierTableContainer, #customerTableContainer, #userTableContainer) .dataTables_length select:focus {
+        outline: none;
+        border-color: #a5b4fc !important;
+        box-shadow: 0 0 0 4px rgba(99, 102, 241, .22) !important;
+    }
+
+    /* ---------- SEARCH ---------- */
+    /* Struktur di tablet/desktop: placeProductActions() membungkus
+       #stockTable_filter dengan .table-action-wrapper lalu memasukkan
+       #btnContainer (tombol Tambah Produk) ke dalamnya, jadi search
+       tumbuh mengisi sisa baris dan tombol tetap nempel di kanan. */
+    :is(#productTableContainer, #supplierTableContainer, #customerTableContainer, #userTableContainer) .table-action-wrapper {
+        flex: 1 1 auto;
+        min-width: 0;
+        gap: 10px;
+    }
+
+    :is(#productTableContainer, #supplierTableContainer, #customerTableContainer, #userTableContainer) .table-action-wrapper #stockTable_filter {
+        flex: 1 1 auto;
+        min-width: 0;
+    }
+
+    :is(#productTableContainer, #supplierTableContainer, #customerTableContainer, #userTableContainer) .table-action-wrapper #stockTable_filter input {
+        flex: 1 1 210px;
+        min-width: 170px;
+        max-width: 340px;
+        width: auto !important;
+        height: 42px !important;
+        margin: 0 !important;
+        padding: 0 14px 0 40px !important;
+        border-radius: 13px !important;
+        border: 1px solid transparent !important;
+        background-color: #f1f5f9 !important;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='M20.5 20.5l-4-4'/%3E%3C/svg%3E") !important;
+        background-repeat: no-repeat !important;
+        background-position: 14px center !important;
+        background-size: 16px 16px !important;
+        font-size: 12.5px;
+        color: #0f172a;
+        outline: none;
+        box-shadow: inset 0 1px 2px rgba(15, 23, 42, .04) !important;
+        transition: background-color .2s ease, box-shadow .2s ease;
+    }
+
+    :is(#productTableContainer, #supplierTableContainer, #customerTableContainer, #userTableContainer) .table-action-wrapper #stockTable_filter input::placeholder {
+        color: #94a3b8;
+    }
+
+    :is(#productTableContainer, #supplierTableContainer, #customerTableContainer, #userTableContainer) .table-action-wrapper #stockTable_filter input:focus {
+        background-color: #fff !important;
+        box-shadow:
+            0 0 0 2px #fff,
+            0 0 0 4px rgba(99, 102, 241, .3),
+            0 10px 20px -10px rgba(79, 70, 229, .6) !important;
+    }
+}
+
+/* ============================================================
+   ELLIPSIS "…" DI PAGINASI (mobile, tablet, desktop)
+
+   DataTable merender tombol ellipsis sebagai
+   <li class="paginate_button page-item disabled">
+     <a class="page-link">…</a></li>
+   - class "disabled" yang PERSIS sama dengan panah Sebelumnya/Berikutnya
+   yang sudah tidak aktif (lihat renderer pageButton.bootstrap di
+   dataTables.bootstrap5.js). Kalau dibiarkan apa adanya, "…" jadi pil
+   abu-abu selebar pil biasa dan tidak terbaca sebagai "ada halaman
+   tersembunyi di sini".
+
+   Di sini ellipsis jadi glyph tipis tanpa kotak:
+   - jelas bukan tombol (tidak ada hover, cursor default)
+   - hemat ~20px, membantu baris pager muat di layar 320-360px
+   - tetap setinggi pil sebelahnya karena .pagination pakai
+     align-items:center dan glyph-nya hanya duduk di tengah kotak 30/34px
+
+   :not(.previous):not(.next) untuk memisahkan ellipsis dari panah yang
+   memang disabled. Specificity (1 id + 6 class) di atas rule
+   .page-link mobile maupun desktop/tablet, jadi SATU rule ini cukup untuk
+   ketiga breakpoint tanpa perlu diulang per media query.
+   ============================================================ */
+:is(#productTableContainer, #supplierTableContainer, #customerTableContainer, #userTableContainer) .dataTables_paginate .page-item.disabled:not(.previous):not(.next) .page-link {
+    min-width: 22px;
+    padding: 0 4px;
+    font-size: 15px;
+    font-weight: 700;
+    line-height: 1;
+    color: #a5b4fc !important;
+    background: transparent !important;
+    border-color: transparent !important;
+    box-shadow: none !important;
+    cursor: default;
+}
+
+/* Mobile: rapatkan gap 5px -> 4px. Dengan 9 pil (3 nomor + 2 ellipsis +
+   halaman pertama + halaman terakhir + 2 panah) ini hemat 8px, cukup
+   supaya baris pager tetap satu baris di layar 320px dan tidak wrap. */
+@media (max-width: 575.98px) {
+    :is(#productTableContainer, #supplierTableContainer, #customerTableContainer, #userTableContainer) .dataTables_paginate,
+    :is(#productTableContainer, #supplierTableContainer, #customerTableContainer, #userTableContainer) .dataTables_paginate .pagination {
+        gap: 4px;
+    }
+}
+
+/* ============================================================
+   SHOW ENTRIES + BARIS INFO DI MOBILE
+
+   Dua tingkat:
+
+   1. BARIS INFO ("Menampilkan 1-5 dari 137 produk") -> SEMUA halaman
+      (produk, supplier, customer, user). Di mobile dom-nya memuat "i",
+      jadi baris ini jadi penanda posisi di daftar. Tanpa itu user yang
+      sudah scroll jauh di tabel panjang tidak tahu dia di halaman berapa.
+      Chip-nya sengaja dibuat kecil (30px vs 34px di desktop) supaya
+      tidak makan ruang terlalu banyak di layar 320-360px.
+
+   2. SELECT "SHOW n ENTRIES" -> SEMUA halaman (produk, supplier, customer,
+      user). Kontrolnya DIPUSATKAN, bukan disejajarkan ke kiri/kanan:
+      di layar sempit satu-satunya elemen yang "bersuara" di baris itu
+      adalah label + dropdown-nya, jadi bikin rata tengah jauh lebih
+      rapi dibandingkan menempel ke pinggir. Baris info di bawah tabel
+      juga sudah center, jadi kolom tengahnya konsisten dari atas
+      sampai bawah.
+
+   Karena "dom" mobile dipakai langsung tanpa wrapper row/col bawaan
+   Bootstrap 5, susunan kontrolnya:
+
+      search + tombol "Tambah"     (sudah ada di blok mobile di atas)
+      select "Show n entries" (center)
+      tabel
+      chip info (center)
+      pil pagination
+
+   Chip info memakai kelas .mp-info yang sama dengan desktop, jadi teksnya
+   tidak berbeda antar breakpoint. Bedanya cuma skala + white-space normal
+   supaya bisa wrap kalau layar sempit.
+   ============================================================ */
+@media (max-width: 575.98px) {
+
+    /* ---------- SELECT "SHOW n ENTRIES" ---------- */
+    :is(#productTableContainer, #customerTableContainer, #supplierTableContainer, #userTableContainer) .dataTables_length {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        width: 100%;
+        margin: 0 0 12px;
+    }
+
+    :is(#productTableContainer, #customerTableContainer, #supplierTableContainer, #userTableContainer) .dataTables_length label {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin: 0;
+        font-size: 12px;
+        font-weight: 600;
+        color: #64748b;
+        white-space: nowrap;
+    }
+
+    :is(#productTableContainer, #customerTableContainer, #supplierTableContainer, #userTableContainer) .dataTables_length select {
+        min-width: 104px !important;
+        height: 40px !important;
+        /* Dulu "auto" supaya nempel ke kanan pas justify-content:space-between.
+           Sekarang justify-content:center, jadi margin-left harus 0 - kalau
+           tetap auto, dropdown terdorong ke kanan dan baris tidak center. */
+        margin-left: 0 !important;
+        padding: 0 34px 0 14px !important;
+        border-radius: 12px !important;
+        border: 1px solid #e2e8f0 !important;
+        background-color: #fff !important;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E") !important;
+        background-repeat: no-repeat !important;
+        background-position: right 12px center !important;
+        background-size: 12px 12px !important;
+        -webkit-appearance: none !important;
+        appearance: none !important;
+        font-size: 12.5px;
+        font-weight: 700;
+        color: #0f172a;
+        cursor: pointer;
+        box-shadow: 0 2px 6px rgba(15, 23, 42, .05) !important;
+        transition: border-color .2s ease, box-shadow .2s ease;
+    }
+
+    :is(#productTableContainer, #customerTableContainer, #supplierTableContainer, #userTableContainer) .dataTables_length select:focus {
+        outline: none;
+        border-color: #a5b4fc !important;
+        box-shadow: 0 0 0 4px rgba(99, 102, 241, .22) !important;
+    }
+
+    /* ---------- CHIP INFO ---------- */
+    :is(#productTableContainer, #supplierTableContainer, #customerTableContainer, #userTableContainer) .dataTables_info {
+        margin: 14px 0 0;
+        padding: 0;
+        text-align: center;
+    }
+
+    :is(#productTableContainer, #supplierTableContainer, #customerTableContainer, #userTableContainer) .mp-info {
+        display: inline-flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: center;
+        gap: 6px 8px;
+        max-width: 100%;
+        height: auto;
+        min-height: 30px;
+        padding: 5px 12px 5px 7px;
+        border-radius: 11px;
+        background: linear-gradient(135deg, #f8fafc, #eef2ff);
+        border: 1px solid #e2e8f0;
+        box-shadow:
+            0 2px 6px rgba(15, 23, 42, .05),
+            inset 0 1px 0 rgba(255, 255, 255, .75);
+
+        /* mobile: teks boleh wrap, kalau tidak "dari N produk" akan keluar
+           dari card di layar 320px */
+        white-space: normal;
+    }
+
+    :is(#productTableContainer, #supplierTableContainer, #customerTableContainer, #userTableContainer) .mp-info-ico {
+        flex: 0 0 auto;
+        width: 18px;
+        height: 18px;
+        border-radius: 6px;
+        font-size: 9px;
+        color: #fff;
+        background: linear-gradient(135deg, #4f46e5, #6366f1);
+        box-shadow: 0 4px 10px -4px rgba(79, 70, 229, .95);
+    }
+
+    :is(#productTableContainer, #supplierTableContainer, #customerTableContainer, #userTableContainer) .mp-info-txt {
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: .1px;
+        color: #64748b;
+    }
+
+    :is(#productTableContainer, #supplierTableContainer, #customerTableContainer, #userTableContainer) .mp-info-txt b {
+        font-weight: 800;
+        color: #0f172a;
+    }
+
+    /* Kalau tidak muat satu baris, .mp-info yang membungkus (flex-wrap)
+       menurunkan .mp-info-sub ke baris sendiri. */
+    :is(#productTableContainer, #supplierTableContainer, #customerTableContainer, #userTableContainer) .mp-info-sub {
+        margin-left: 0;
+        padding-left: 0;
+        border-left: 0;
+        font-size: 10.5px;
+        font-weight: 500;
+        color: #94a3b8;
+        white-space: nowrap;
     }
 }
 

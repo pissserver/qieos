@@ -93,50 +93,148 @@ include '../../sessions/session.php';
 
 <?php include '../../script/footscript.php'; ?>
 
+<!-- Pager ringkas + chip info + wrapper search/tombol (helper yang sama
+     dengan master-product.php) -->
+<script src="<?php echo BASE_URL; ?>/script/datatable-compact.js?v=<?php echo filemtime(__DIR__ . '/../../script/datatable-compact.js'); ?>"></script>
+
 <script>
-function loadSupplierTable(){
-    $('#btnContainer').hide().insertBefore('#supplierTableContainer');
-    fetch('master-supplier-table.php')
-    .then(res => res.text())
-    .then(html => {
-        document.getElementById('supplierTableContainer').innerHTML = html;
+    function isSupplierMobile(){
+        return MP_TABLE.isMobile();
+    }
 
-        if($.fn.DataTable.isDataTable('#stockTable')){
-            $('#stockTable').DataTable().destroy();
-        }
+    let supplierIsMobile = isSupplierMobile();
 
-        setTimeout(()=>{
-            const mobile = isSupplierMobile();
-            const options = {
-                pageLength: mobile ? 4 : 5,
-                lengthMenu: mobile ? [[4,5,10,25,50],[4,5,10,25,50]] : [[5,10,25,50],[5,10,25,50]],
-                pagingType: mobile ? "simple_numbers" : "full_numbers",
-                responsive: true,
-                autoWidth: false,
-                language:{
-                    search:"",
-                    searchPlaceholder:"Cari supplier...",
-                    zeroRecords: '<div class="empty-search"><img src="../../assets/img/illustrations/empty-data.png" class="empty-img"><div class="empty-title">Supplier tidak ditemukan</div><div class="empty-sub">Coba gunakan kata kunci lain</div></div>',
-                    emptyTable: '<div class="empty-search"><img src="../../assets/img/illustrations/empty-data.png" class="empty-img"><div class="empty-title">Belum ada data supplier</div><div class="empty-sub">Silakan tambahkan supplier terlebih dahulu</div></div>'
+    function supplierDataTable(){
+        const mobile = isSupplierMobile();
+
+        const options = {
+            /* Panjang halaman SAMA di semua breakpoint (5), dulu mobile 4 -
+               bikin angka "4" muncul di dropdown dan bikin melompat saat
+               layar dirotasi. Daftar opsi juga sama supaya user tidak
+               bingung mana yang aktif. */
+            pageLength: 5,
+            lengthMenu: [[5,10,25,50],[5,10,25,50]],
+
+            /* 3 nomor di mobile, 5 di tablet/desktop + halaman 1 & terakhir
+               dikunci di ujung (lihat script/datatable-compact.js). */
+            pagingType: "mp_compact",
+            searchDelay: 250,
+
+            /* Chip "Menampilkan 1-5 dari 42 supplier" + jumlah asal data saat
+               sedang difilter. Sama persis dengan produk. */
+            infoCallback: MP_TABLE.infoCallback('supplier'),
+
+            /* Opsi "responsive: true" DIHAPUS. Extension Responsive tidak
+               dimuat di headscript.php, jadi nilainya diam-diam diabaikan.
+               Responsif ditangani manual lewat "dom" + .table-responsive-wrap. */
+            autoWidth: false,
+            language:{
+                search:"",
+                searchPlaceholder:"Cari supplier...",
+
+                /* Panah Previous/Next jadi glyph "‹ ›", bukan teks. Alasannya
+                   lebar: pada rentang 9 pil, dua pil TEKS ("Previous"/"Next")
+                   memakan ~150px dari total baris pager, sementara sisa ruang
+                   di layar 320-360px cuma ~290-330px. Makanya teks diganti
+                   glyph. */
+                paginate:{
+                    previous:"&#8249;",  // ‹
+                    next:"&#8250;"       // ›
+                },
+
+                /* Label yang dibacakan screen reader tetap bahasa Indonesia,
+                   jadi aksesibilitas tidak ikut hilang saat glyphnya diganti. */
+                oAria:{
+                    paginate:{
+                        pageLabel:"Halaman {page}",
+                        previous:"Halaman sebelumnya",
+                        next:"Halaman berikutnya"
+                    }
+                },
+
+                zeroRecords: '<div class="empty-search"><img src="../../assets/img/illustrations/empty-data.png" class="empty-img"><div class="empty-title">Supplier tidak ditemukan</div><div class="empty-sub">Coba gunakan kata kunci lain</div></div>',
+                emptyTable: '<div class="empty-search"><img src="../../assets/img/illustrations/empty-data.png" class="empty-img"><div class="empty-title">Belum ada data supplier</div><div class="empty-sub">Silakan tambahkan supplier terlebih dahulu</div></div>'
+            }
+        };
+
+        /* Mobile: "f" search, "l" show entries, "t" tabel, "i" info,
+           "p" pagination. Di produk mobile "l" & "i" sengaja disembunyikan,
+           tapi di supplier keduanya diminta tampil.
+
+           "dom" HANYA di-set untuk mobile (sama seperti produk). Di
+           desktop/tablet default DataTables Bootstrap 5 yang dipakai:
+           "<'row'<'col-sm-12 col-md-6'l><'col-sm-12 col-md-6'f>><'row...>"
+           Wrapper row/col itulah yang menaruh "Show entries" (l) dan
+           search + tombol (f) dalam satu baris di tablet/desktop. Kalau
+           "dom" di-set manual juga di desktop, wrapper tersebut hilang dan
+           search/tombol turun ke baris sendiri - layout premium yang sudah
+           rapi jadi berantakan.
+
+           Karena "dom" mobile dipakai langsung tanpa wrapper row/col, jarak
+           antar kontrol (length di atas tabel, info & pagination di
+           bawahnya) ditulis manual di CSS - lihat blok "SHOW ENTRIES +
+           BARIS INFO DI MOBILE (khusus supplier)" di
+           css/pages/master-product.css. */
+        if(mobile) options.dom = "fltip";
+
+        const dt = $('#stockTable').DataTable(options);
+        dt.columns.adjust();
+        MP_TABLE.placeActions('#stockTable_filter', '#btnContainer');
+        return dt;
+    }
+
+    function loadSupplierTable(){
+        /* --- Ambil state SEBELUM markup ditimpa -------------------------
+           Dulu state tidak disimpan, jadi setiap loadSupplierTable() (setelah
+           tambah / ubah / hapus supplier) tabel lompat balik ke halaman 1 DAN
+           filter pencarian ikut hilang.
+
+           Harus diambil DI SINI: begitu innerHTML diganti, node
+           <table id="stockTable"> lama ikut terbuang. isDataTable() mencari
+           node lewat identitas (o.nTable === t), jadi sesudahnya
+           isDataTable('#stockTable') sudah false dan state-nya hilang. */
+        const prev = $.fn.DataTable.isDataTable('#stockTable')
+            ? $('#stockTable').DataTable()
+            : null;
+
+        const keep = prev ? {
+            page: prev.page(),
+            keyword: prev.search(),
+            length: prev.page.len()
+        } : null;
+
+        $('#btnContainer').hide().insertBefore('#supplierTableContainer');
+
+        fetch('master-supplier-table.php')
+        .then(res => res.text())
+        .then(html => {
+            /* destroy dulu, node lama masih terpasang jadi aman; kalau
+               dibiarkan, instance-nya menumpuk di registry
+               DataTable.settings setiap reload. (Versi lama mengecek
+               isDataTable() SESUDAH innerHTML diganti, sehingga ceknya
+               selalu false dan destroy() tidak pernah jalan.) */
+            if(prev) prev.destroy();
+
+            document.getElementById('supplierTableContainer').innerHTML = html;
+
+            setTimeout(()=>{
+                supplierIsMobile = isSupplierMobile();
+                const dt = supplierDataTable();
+
+                if(keep){
+                    /* Halaman di luar rentang otomatis dikembalikan
+                       DataTable ke 0, jadi aman walau baris habis (mis.
+                       semua hasil filter ikut terhapus). */
+                    dt.page.len(keep.length)
+                      .search(keep.keyword)
+                      .page(keep.page)
+                      .draw(false);
                 }
-            };
-            if(mobile) options.dom = "ftp";
-            $('#stockTable').DataTable(options);
-            $('#stockTable_filter').wrap('<div class="table-action-wrapper"></div>');
-            $('#btnContainer').show().appendTo('.table-action-wrapper');
-        },100);
-    });
-}
+            },100);
+        });
+    }
 
-$(document).ready(function(){ loadSupplierTable(); });
-
-const SUPPLIER_MOBILE_BP = 575.98;
-
-function isSupplierMobile(){
-    return window.innerWidth <= SUPPLIER_MOBILE_BP;
-}
-
-let supplierIsMobile = isSupplierMobile();
+    $(document).ready(function(){ loadSupplierTable(); });
 
 // ADD
 $(document).on('click','#btnAddSupplier',function(){
@@ -187,26 +285,34 @@ $(document).on('click','.deleteSupplierBtn',function(){
 });
 </script>
 <script>
-let supplierResizeTimer;
-window.addEventListener('resize', function(){
-    clearTimeout(supplierResizeTimer);
-    supplierResizeTimer = setTimeout(function(){
-        if(isSupplierMobile() === supplierIsMobile) return;
-        if(!$.fn.DataTable.isDataTable('#stockTable')) return;
-        const current = $('#stockTable').DataTable();
-        const page = current.page();
-        const keyword = current.search();
-        $('#btnContainer').appendTo('#supplierTableContainer');
-        current.destroy();
-        supplierIsMobile = isSupplierMobile();
-        loadSupplierTable();
-        setTimeout(()=>{
-            if($.fn.DataTable.isDataTable('#stockTable')){
-                $('#stockTable').DataTable().search(keyword).page(page).draw(false);
-            }
-        }, 150);
-    }, 250);
-});
+    /* 🔥 REBUILD TABEL KETIKA GANTI MOBILE / DESKTOP
+
+       Versi lama: destroy() -> loadSupplierTable() -> setTimeout 150ms
+       untuk restore state. Itu 2 request fetch + 1 timer dan rawan race
+       (dbl click saat Add/Edit bisa menyisakan request yang lebih lama
+       dan menimpa markup yang baru). Sekarang re-init IN-PLACE: node
+       <table> tidak diganti, jadi tidak ada fetch sama sekali. */
+    let supplierResizeTimer;
+    window.addEventListener('resize', function(){
+        clearTimeout(supplierResizeTimer);
+        supplierResizeTimer = setTimeout(function(){
+            if(isSupplierMobile() === supplierIsMobile) return;
+            if(!$.fn.DataTable.isDataTable('#stockTable')) return;
+
+            const current = $('#stockTable').DataTable();
+            const page = current.page();
+            const keyword = current.search();
+            const length = current.page.len();
+
+            // tombol dikeluarkan dulu supaya tidak ikut hilang bersama wrapper
+            $('#btnContainer').appendTo('#supplierTableContainer');
+            current.destroy();
+
+            supplierIsMobile = isSupplierMobile();
+            const dt = supplierDataTable();
+            dt.page.len(length).search(keyword).page(page).draw(false);
+        }, 250);
+    });
 </script>
 
 </body>

@@ -71,9 +71,9 @@ $d = mysqli_fetch_assoc($q);
 
 </div>
 
-<div class="text-end mt-4 mb-3">
+<div class="mp-add-footer text-end mt-4 mb-3">
     <button type="submit" class="btn-save">
-        <i class="fas fa-save me-1"></i> Save
+        <i class="fas fa-save"></i> Save
     </button>
 </div>
 

@@ -40,6 +40,7 @@ while($prod = mysqli_fetch_assoc($pq)){
         <?php include '../../script/headscript.php'; ?>
 
         <link rel="stylesheet" href="<?php echo BASE_URL; ?>/css/pages/sales-stock.css?v=<?php echo filemtime(__DIR__ . '/../../css/pages/sales-stock.css'); ?>">
+        <link rel="stylesheet" href="<?php echo BASE_URL; ?>/css/pages/history-request-table.css?v=<?php echo filemtime(__DIR__ . '/../../css/pages/history-request-table.css'); ?>">
     </head>
 
     <body>
@@ -142,7 +143,11 @@ while($prod = mysqli_fetch_assoc($pq)){
                         </div>
 
                         <div id="editMode" class="panel-mode">
-                            <div id="history-table"></div>
+                            <div id="history-table">
+                                <div class="text-center py-5">
+                                    <i class="fas fa-spinner fa-spin fa-2x text-secondary"></i>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -223,7 +228,7 @@ while($prod = mysqli_fetch_assoc($pq)){
                 editingRequestId = (mode === 'edit') ? editingRequestId : null;
                 const btn = document.getElementById('submitBtn');
                 if(mode === 'edit'){
-                    btn.innerHTML = '<i class="fas fa-save me-2"></i> Simpan Perubahan';
+                    btn.innerHTML = '<i class="fas fa-save me-2"></i> Save';
                 } else {
                     btn.innerHTML = '<i class="fas fa-paper-plane me-2"></i> Kirim Request';
                     setHeroStatus('draft');
@@ -662,7 +667,7 @@ while($prod = mysqli_fetch_assoc($pq)){
                 .then(html=>{
                     document.getElementById("history-table").innerHTML = html;
 
-                    setTimeout(() => {
+                    requestAnimationFrame(()=>{
 
                         // 🔥 DESTROY DULU
                         if ($.fn.DataTable.isDataTable('#requestHistory')) {
@@ -705,7 +710,7 @@ while($prod = mysqli_fetch_assoc($pq)){
 
                         ht.columns.adjust();
 
-                    }, 100);
+                    });
                 });
             }
 
@@ -737,20 +742,26 @@ while($prod = mysqli_fetch_assoc($pq)){
                 const labelEdit = document.getElementById('labelEdit');
 
                 if (this.checked) {
-                    formMode.classList.remove('active');
-                    editMode.classList.add('active');
                     labelForm.classList.remove('active');
                     labelEdit.classList.add('active');
+
+                    requestAnimationFrame(() => {
+                        formMode.classList.remove('active');
+                        editMode.classList.add('active');
+                    });
 
                     if (!historyLoaded) {
                         historyLoaded = true;
                         loadHistory();
                     }
                 } else {
-                    editMode.classList.remove('active');
-                    formMode.classList.add('active');
                     labelEdit.classList.remove('active');
                     labelForm.classList.add('active');
+
+                    requestAnimationFrame(() => {
+                        editMode.classList.remove('active');
+                        formMode.classList.add('active');
+                    });
                 }
             });
 

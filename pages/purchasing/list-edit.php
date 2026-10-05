@@ -142,7 +142,7 @@ function buildProductOptions($products, $currentName, $currentId){
     <div class="mp-add-footer d-flex justify-content-end gap-2 mt-4 mb-4">
 
         <button type="button"
-                class="btn-save"
+                class="btn-save btn-save-ghost"
                 onclick="addItemEdit()">
             <i class="fas fa-plus"></i>
             Tambah Item

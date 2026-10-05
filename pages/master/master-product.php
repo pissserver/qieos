@@ -228,47 +228,74 @@ include __DIR__ . '/../components/data/stock-status.php';
 
 <?php include '../../script/footscript.php'; ?>
 
-<script>
-    const PRODUCT_MOBILE_BP = 575.98;
+<!-- Pager ringkas + chip info + wrapper search/tombol (dipakai juga
+     oleh master-supplier.php, master-customer.php, & master-user.php) -->
+<script src="<?php echo BASE_URL; ?>/script/datatable-compact.js?v=<?php echo filemtime(__DIR__ . '/../../script/datatable-compact.js'); ?>"></script>
 
+<script>
+    /* Breakpoint, pager, chip info, dan posisi show entries di mobile
+       sekarang milik helper bersama, supaya keempat halaman Master ini
+       tidak bisa berbeda hanya karena salah ketik angka. */
     function isProductMobile(){
-        return window.innerWidth <= PRODUCT_MOBILE_BP;
+        return MP_TABLE.isMobile();
     }
 
     let productIsMobile = isProductMobile();
-
-    /* Tombol "Tambah Produk" & search dimasukkin ke wrapper yang sama.
-       Dipanggil ulang setelah setiap init karena wrapper ikut hilang
-       saat DataTable di-destroy. */
-    function placeProductActions(){
-        const filter = $('#stockTable_filter');
-        if(!filter.length) return;
-
-        if(!filter.parent().hasClass('table-action-wrapper')){
-            filter.wrap('<div class="table-action-wrapper"></div>');
-        }
-
-        $('#btnContainer').show().appendTo(filter.parent());
-    }
 
     function productDataTable(){
         const mobile = isProductMobile();
 
         const options = {
-            pageLength: mobile ? 4 : 5,
-            lengthMenu: mobile
-                ? [[4,5,10,25,50],[4,5,10,25,50]]
-                : [[5,10,25,50],[5,10,25,50]],
+            pageLength: 5,
+            lengthMenu: [[5,10,25,50],[5,10,25,50]],
 
-            /* pager disamakan dengan tabel Stok Kantin (simple_numbers) */
-            pagingType: mobile ? "simple_numbers" : "full_numbers",
+            /* Pager kustom dari script/datatable-compact.js: 3 nomor di
+               mobile, 5 di tablet/desktop, halaman 1 & terakhir selalu
+               dikunci di ujung. Bentuk pil, warna aktif, dan shadow-nya
+               sudah sama persis di semua ukuran layar (lihat blok
+               "PAGINASI + BARIS INFO DESKTOP & TABLET" di
+               master-product.css). */
+            pagingType: "mp_compact",
             searchDelay: 250,
 
-            responsive: true,
+            /* Chip "Menampilkan 1-5 dari 137 produk". Dibuat di helper
+               bersama supaya produk & supplier punya tampilan identik. */
+            infoCallback: MP_TABLE.infoCallback('produk'),
+
+            /* Opsi "responsive: true" DIHAPUS. Opsi itu hanya dibaca oleh
+               extension Responsive (responsive.dataTables.min.js) yang
+               TIDAK dimuat di script/headscript.php - yang ada hanya
+               jquery.dataTables.min.js + dataTables.bootstrap5.min.js.
+               Jadi nilainya diam-diam diabaikan. Responsif di halaman ini
+               ditangani manual: tukar "dom" saat breakpoint mobile
+               (lihat bawah) + .table-responsive-wrap untuk scroll
+               horizontal tabel. */
             autoWidth: false,
             language:{
                 search:"",
                 searchPlaceholder:"Cari produk...",
+
+                /* Panah Previous/Next memakai glyph, bukan teks bawaan.
+                   Alasannya lebar: pada rentang 9 pil, dua pil TEKS
+                   ("Previous"/"Next") memakan ~150px dari total baris pager,
+                   sementara sisa ruang di layar 320-360px cuma ~290-330px.
+                   Makanya teks diganti glyph. Aksesibilitas tidak ikut
+                   hilang: aria-label tetap bahasa Indonesia lewat
+                   oAria.paginate di bawah, jadi pembaca layar tetap
+                   mengumumkan "Halaman sebelumnya". */
+                paginate:{
+                    previous:"&#8249;",  // ‹
+                    next:"&#8250;"       // ›
+                },
+
+                /* Label yang dibacakan screen reader tetap bahasa Indonesia. */
+                oAria:{
+                    paginate:{
+                        pageLabel:"Halaman {page}",
+                        previous:"Halaman sebelumnya",
+                        next:"Halaman berikutnya"
+                    }
+                },
 
                 zeroRecords: `
                     <div class="empty-search">
@@ -294,40 +321,80 @@ include __DIR__ . '/../components/data/stock-status.php';
             order: []
         };
 
-        /* "dom" HANYA di-set untuk mobile. Di desktop/tablet default
+        /* Mobile pakai "fltip": search + show entries + tabel + baris info
+           "Menampilkan 1-5 dari 137 produk" + pagination. "l" dan "i"
+           ikut dirender supaya user bisa menaikkan jumlah baris dan tahu
+           posisinya di daftar tanpa harus scroll ke atas.
+
+           "dom" HANYA di-set untuk mobile. Di desktop/tablet default
            DataTables Bootstrap 5-lah yang dipakai:
            "<'row'<'col-sm-12 col-md-6'l><'col-sm-12 col-md-6'f>><'row...>"
            Wrapper row/col itu yang menaruh "Show entries" (l) dan
            search + tombol (f) dalam satu baris. Kalau "dom" di-set
            manual, wrapper tersebut hilang dan search/tombol turun ke
-           baris sendiri. */
-        if(mobile) options.dom = "ftp";
+           baris sendiri.
+
+           Karena "dom" mobile dipakai langsung tanpa wrapper row/col, jarak
+           antar kontrol (show entries di atas tabel, info & pagination di
+           bawahnya) ditulis manual di CSS - lihat blok "SHOW ENTRIES +
+           BARIS INFO DI MOBILE" di css/pages/master-product.css. */
+        if(mobile) options.dom = "fltip";
 
         const dt = $('#stockTable').DataTable(options);
 
         dt.columns.adjust();
-        placeProductActions();
+        MP_TABLE.placeActions('#stockTable_filter', '#btnContainer');
 
         return dt;
     }
 
     function loadProductTable(){
+        /* --- Ambil state SEBELUM markup ditimpa -------------------------------
+           Dulu state tidak disimpan sama sekali, jadi setiap loadProductTable()
+           (setelah tambah produk / ubah setting batas stok) tabel lompat balik
+           ke halaman 1 DAN filter pencarian ikut hilang.
+
+           Penting diambil di sini: setelah innerHTML diganti, node
+           <table id="stockTable"> yang lama ikut terbuang. isDataTable() mencari
+           node berdasarkan identitas (o.nTable === t), jadi setelah itu
+           isDataTable('#stockTable') sudah false dan state-nya tidak bisa
+           diambil lagi. */
+        const prev = $.fn.DataTable.isDataTable('#stockTable')
+            ? $('#stockTable').DataTable()
+            : null;
+
+        const keep = prev ? {
+            page: prev.page(),
+            keyword: prev.search(),
+            length: prev.page.len()
+        } : null;
+
         $('#btnContainer').hide().insertBefore('#productTableContainer');
 
         fetch('master-product-table.php')
         .then(res => res.text())
         .then(html => {
+            /* destroy dulu, node lama masih terpasang jadi aman; kalau
+               dibiarkan, instance-nya menumpuk di registry
+               DataTable.settings setiap reload. Sesudahnya baris
+               innerHTML = html menghapus node lama itu. */
+            if(prev) prev.destroy();
+
             document.getElementById('productTableContainer').innerHTML = html;
 
-            // Destroy old DataTable first
-            if($.fn.DataTable.isDataTable('#stockTable')){
-                $('#stockTable').DataTable().destroy();
-            }
-
-            // Reinit DataTable
             setTimeout(()=>{
                 productIsMobile = isProductMobile();
-                productDataTable();
+                const dt = productDataTable();
+
+                if(keep){
+                    /* Halaman di luar rentang otomatis dikembalikan
+                       DataTable ke 0, jadi aman walau baris habis (mis.
+                       seluruh hasil filter ikut terhapus). */
+                    dt.page.len(keep.length)
+                      .search(keep.keyword)
+                      .page(keep.page)
+                      .draw(false);
+                }
             },100);
         });
     }

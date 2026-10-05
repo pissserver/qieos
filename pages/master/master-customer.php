@@ -80,47 +80,146 @@
 
 <?php include '../../script/footscript.php'; ?>
 
+<!-- Pager ringkas + chip info + wrapper search/tombol (helper yang sama
+     dengan master-product.php & master-supplier.php) -->
+<script src="<?php echo BASE_URL; ?>/script/datatable-compact.js?v=<?php echo filemtime(__DIR__ . '/../../script/datatable-compact.js'); ?>"></script>
+
 <script>
-function loadCustomerTable(){
-    $('#btnContainer').hide().insertBefore('#customerTableContainer');
-    fetch('master-customer-table.php')
-    .then(res=>res.text())
-    .then(html=>{
-        document.getElementById('customerTableContainer').innerHTML = html;
-        if($.fn.DataTable.isDataTable('#stockTable')){
-            $('#stockTable').DataTable().destroy();
-        }
-        setTimeout(()=>{
-            const mobile = isCustomerMobile();
-            const options = {
-                pageLength: mobile ? 4 : 5,
-                lengthMenu: mobile ? [[4,5,10,25,50],[4,5,10,25,50]] : [[5,10,25,50],[5,10,25,50]],
-                pagingType: mobile ? "simple_numbers" : "full_numbers",
-                responsive:true,
-                autoWidth:false,
-                language:{
-                    search:"",
-                    searchPlaceholder:"Cari customer...",
-                    zeroRecords:'<div class="empty-search"><img src="../../assets/img/illustrations/empty-data.png" class="empty-img"><div class="empty-title">Customer tidak ditemukan</div><div class="empty-sub">Coba gunakan kata kunci lain</div></div>',
-                    emptyTable:'<div class="empty-search"><img src="../../assets/img/illustrations/empty-data.png" class="empty-img"><div class="empty-title">Belum ada data customer</div><div class="empty-sub">Silakan tambahkan customer terlebih dahulu</div></div>'
+    function isCustomerMobile(){
+        return MP_TABLE.isMobile();
+    }
+
+    let customerIsMobile = isCustomerMobile();
+
+    function customerDataTable(){
+        const mobile = isCustomerMobile();
+
+        const options = {
+            /* Panjang halaman SAMA di semua breakpoint (5), dulu mobile 4 -
+               bikin angka "4" muncul di dropdown dan tabel melompat saat
+               layar dirotasi. Daftar opsi juga sama supaya user tidak
+               bingung mana yang aktif. */
+            pageLength: 5,
+            lengthMenu: [[5,10,25,50],[5,10,25,50]],
+
+            /* 3 nomor di mobile, 5 di tablet/desktop + halaman 1 & terakhir
+               dikunci di ujung (lihat script/datatable-compact.js). */
+            pagingType: "mp_compact",
+            searchDelay: 250,
+
+            /* Chip "Menampilkan 1-5 dari 42 customer" + jumlah asal data saat
+               sedang difilter. Sama persis dengan produk & supplier. */
+            infoCallback: MP_TABLE.infoCallback('customer'),
+
+            /* Opsi "responsive: true" DIHAPUS. Extension Responsive tidak
+               dimuat di headscript.php, jadi nilainya diam-diam diabaikan.
+               Responsif ditangani manual lewat "dom" + .table-responsive-wrap. */
+            autoWidth: false,
+            language:{
+                search:"",
+                searchPlaceholder:"Cari customer...",
+
+                /* Panah Previous/Next jadi glyph "‹ ›", bukan teks. Alasannya
+                   lebar: pada rentang 9 pil, dua pil TEKS ("Previous"/"Next")
+                   memakan ~150px dari total baris pager, sementara sisa ruang
+                   di layar 320-360px cuma ~290-330px. Makanya teks diganti
+                   glyph. */
+                paginate:{
+                    previous:"&#8249;",  // ‹
+                    next:"&#8250;"       // ›
+                },
+
+                /* Label yang dibacakan screen reader tetap bahasa Indonesia,
+                   jadi aksesibilitas tidak ikut hilang saat glyphnya diganti. */
+                oAria:{
+                    paginate:{
+                        pageLabel:"Halaman {page}",
+                        previous:"Halaman sebelumnya",
+                        next:"Halaman berikutnya"
+                    }
+                },
+
+                zeroRecords: '<div class="empty-search"><img src="../../assets/img/illustrations/empty-data.png" class="empty-img"><div class="empty-title">Customer tidak ditemukan</div><div class="empty-sub">Coba gunakan kata kunci lain</div></div>',
+                emptyTable: '<div class="empty-search"><img src="../../assets/img/illustrations/empty-data.png" class="empty-img"><div class="empty-title">Belum ada data customer</div><div class="empty-sub">Silakan tambahkan customer terlebih dahulu</div></div>'
+            }
+        };
+
+        /* Mobile: "f" search, "l" show entries, "t" tabel, "i" info,
+           "p" pagination - semuanya dirender supaya user bisa langsung
+           menaikkan jumlah baris dan tahu posisinya di daftar.
+
+           "dom" HANYA di-set untuk mobile. Di desktop/tablet default
+           DataTables Bootstrap 5 yang dipakai:
+           "<'row'<'col-sm-12 col-md-6'l><'col-sm-12 col-md-6'f>><'row...>"
+           Wrapper row/col itulah yang menaruh "Show entries" (l) dan
+           search + tombol (f) dalam satu baris. Kalau "dom" di-set manual
+           juga di desktop, wrapper tersebut hilang dan search/tombol turun
+           ke baris sendiri - layout premium yang sudah rapi jadi berantakan.
+
+           Karena "dom" mobile dipakai langsung tanpa wrapper row/col, jarak
+           antar kontrol (length di atas tabel, info & pagination di
+           bawahnya) ditulis manual di CSS - lihat blok "SHOW ENTRIES +
+           BARIS INFO DI MOBILE" di css/pages/master-product.css. */
+        if(mobile) options.dom = "fltip";
+
+        const dt = $('#stockTable').DataTable(options);
+        dt.columns.adjust();
+        MP_TABLE.placeActions('#stockTable_filter', '#btnContainer');
+        return dt;
+    }
+
+    function loadCustomerTable(){
+        /* --- Ambil state SEBELUM markup ditimpa -------------------------
+           Dulu state tidak disimpan, jadi setiap loadCustomerTable() (setelah
+           tambah / ubah / hapus customer) tabel lompat balik ke halaman 1 DAN
+           filter pencarian ikut hilang.
+
+           Harus diambil DI SINI: begitu innerHTML diganti, node
+           <table id="stockTable"> lama ikut terbuang. isDataTable() mencari
+           node lewat identitas (o.nTable === t), jadi sesudahnya
+           isDataTable('#stockTable') sudah false dan state-nya hilang. */
+        const prev = $.fn.DataTable.isDataTable('#stockTable')
+            ? $('#stockTable').DataTable()
+            : null;
+
+        const keep = prev ? {
+            page: prev.page(),
+            keyword: prev.search(),
+            length: prev.page.len()
+        } : null;
+
+        $('#btnContainer').hide().insertBefore('#customerTableContainer');
+
+        fetch('master-customer-table.php')
+        .then(res => res.text())
+        .then(html => {
+            /* destroy dulu, node lama masih terpasang jadi aman; kalau
+               dibiarkan, instance-nya menumpuk di registry
+               DataTable.settings setiap reload. (Versi lama mengecek
+               isDataTable() SESUDAH innerHTML diganti, sehingga ceknya
+               selalu false dan destroy() tidak pernah jalan.) */
+            if(prev) prev.destroy();
+
+            document.getElementById('customerTableContainer').innerHTML = html;
+
+            setTimeout(()=>{
+                customerIsMobile = isCustomerMobile();
+                const dt = customerDataTable();
+
+                if(keep){
+                    /* Halaman di luar rentang otomatis dikembalikan
+                       DataTable ke 0, jadi aman walau baris habis (mis.
+                       semua hasil filter ikut terhapus). */
+                    dt.page.len(keep.length)
+                      .search(keep.keyword)
+                      .page(keep.page)
+                      .draw(false);
                 }
-            };
-            if(mobile) options.dom = "ftp";
-            $('#stockTable').DataTable(options);
-            $('#stockTable_filter').wrap('<div class="table-action-wrapper"></div>');
-            $('#btnContainer').show().appendTo('.table-action-wrapper');
-        },100);
-    });
-}
-$(document).ready(function(){ loadCustomerTable(); });
+            },100);
+        });
+    }
 
-const CUSTOMER_MOBILE_BP = 575.98;
-
-function isCustomerMobile(){
-    return window.innerWidth <= CUSTOMER_MOBILE_BP;
-}
-
-let customerIsMobile = isCustomerMobile();
+    $(document).ready(function(){ loadCustomerTable(); });
 
 // ADD
 $(document).on('click','#btnAddCustomer',function(){
@@ -169,26 +268,34 @@ $(document).on('click','.deleteCustomerBtn',function(){
 });
 </script>
 <script>
-let customerResizeTimer;
-window.addEventListener('resize', function(){
-    clearTimeout(customerResizeTimer);
-    customerResizeTimer = setTimeout(function(){
-        if(isCustomerMobile() === customerIsMobile) return;
-        if(!$.fn.DataTable.isDataTable('#stockTable')) return;
-        const current = $('#stockTable').DataTable();
-        const page = current.page();
-        const keyword = current.search();
-        $('#btnContainer').appendTo('#customerTableContainer');
-        current.destroy();
-        customerIsMobile = isCustomerMobile();
-        loadCustomerTable();
-        setTimeout(()=>{
-            if($.fn.DataTable.isDataTable('#stockTable')){
-                $('#stockTable').DataTable().search(keyword).page(page).draw(false);
-            }
-        }, 150);
-    }, 250);
-});
+    /* 🔥 REBUILD TABEL KETIKA GANTI MOBILE / DESKTOP
+
+       Versi lama: destroy() -> loadCustomerTable() -> setTimeout 150ms
+       untuk restore state. Itu 2 request fetch + 1 timer dan rawan race
+       (dbl click saat Add/Edit bisa menyisakan request yang lebih lama dan
+       menimpa markup yang baru). Sekarang re-init IN-PLACE: node <table>
+       tidak diganti, jadi tidak ada fetch sama sekali. */
+    let customerResizeTimer;
+    window.addEventListener('resize', function(){
+        clearTimeout(customerResizeTimer);
+        customerResizeTimer = setTimeout(function(){
+            if(isCustomerMobile() === customerIsMobile) return;
+            if(!$.fn.DataTable.isDataTable('#stockTable')) return;
+
+            const current = $('#stockTable').DataTable();
+            const page = current.page();
+            const keyword = current.search();
+            const length = current.page.len();
+
+            // tombol dikeluarkan dulu supaya tidak ikut hilang bersama wrapper
+            $('#btnContainer').appendTo('#customerTableContainer');
+            current.destroy();
+
+            customerIsMobile = isCustomerMobile();
+            const dt = customerDataTable();
+            dt.page.len(length).search(keyword).page(page).draw(false);
+        }, 250);
+    });
 </script>
 </body>
 </html>

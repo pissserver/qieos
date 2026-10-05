@@ -318,7 +318,7 @@ $query = mysqli_query($conn,
 
             btn.disabled = false;
             btn.innerHTML = editingId
-                ? '<i class="fas fa-check-circle"></i> Simpan'
+                ? '<i class="fas fa-save"></i> Save'
                 : '<i class="fas fa-plus-circle"></i> Daftarkan';
         });
 
@@ -329,7 +329,7 @@ $query = mysqli_query($conn,
             document.getElementById('formTenantOwner').value = owner;
             document.getElementById('formTitle').textContent = 'Edit Tenant';
             document.getElementById('formSubtitle').textContent = 'Perbarui informasi tenant';
-            document.getElementById('formSubmitBtn').innerHTML = '<i class="fas fa-check-circle"></i> Simpan';
+            document.getElementById('formSubmitBtn').innerHTML = '<i class="fas fa-save"></i> Save';
 
             // Scroll ke atas
             document.querySelector('.content').scrollTo({ top: 0, behavior: 'smooth' });

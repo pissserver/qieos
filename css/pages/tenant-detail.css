@@ -392,6 +392,44 @@
             font-weight:600;
         }
 
+        /* Footer modal: premium, samakan dengan master-customer */
+        .mp-add-footer{
+            display:flex;
+            justify-content:flex-end;
+            align-items:center;
+            gap:10px;
+            margin-top:24px;
+            padding-top:18px;
+            border-top:1px solid #f1f5f9;
+        }
+
+        .mp-add-footer .btn-save{
+            display:inline-flex;
+            align-items:center;
+            justify-content:center;
+            gap:8px;
+            min-width:132px;
+            height:44px;
+            padding:0 22px;
+            border-radius:10px;
+            font-size:13.5px;
+            font-weight:700;
+            letter-spacing:.01em;
+            box-shadow:0 10px 20px -12px rgba(15,23,42,.8);
+            transition:transform .18s ease, box-shadow .18s ease, background .2s;
+        }
+
+        .mp-add-footer .btn-save i{font-size:13px}
+
+        .mp-add-footer .btn-save:hover{
+            background:linear-gradient(90deg,#334155,#475569);
+            color:#fff;
+            transform:translateY(-1px);
+            box-shadow:0 14px 24px -12px rgba(15,23,42,.85);
+        }
+
+        .mp-add-footer .btn-save:active{transform:translateY(0)}
+
         .modal-backdrop.show{
             opacity:.55 !important;
         }

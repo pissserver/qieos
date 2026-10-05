@@ -165,7 +165,7 @@ include '../../sessions/session.php';
                     <div class="ec-footer-right">
                         <button type="button" class="ec-btn ec-btn-cancel" data-bs-dismiss="modal">Batal</button>
                         <button type="button" class="ec-btn ec-btn-save" id="ecSave">
-                            <i class="fas fa-check"></i> Simpan
+                            <i class="fas fa-save"></i> Save
                         </button>
                     </div>
                 </div>

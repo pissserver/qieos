@@ -150,13 +150,15 @@ include '../../sessions/session.php';
 
 <?php include '../../script/footscript.php'; ?>
 
+<!-- Pager ringkas + chip info (helper yang sama dengan master-product.php,
+     master-supplier.php, & master-customer.php) -->
+<script src="<?php echo BASE_URL; ?>/script/datatable-compact.js?v=<?php echo filemtime(__DIR__ . '/../../script/datatable-compact.js'); ?>"></script>
+
 <script>
     let activeRole = 'administrator';
 
-    const USER_MOBILE_BP = 575.98;
-
     function isUserMobile(){
-        return window.innerWidth <= USER_MOBILE_BP;
+        return MP_TABLE.isMobile();
     }
 
     let userIsMobile = isUserMobile();
@@ -177,17 +179,172 @@ include '../../sessions/session.php';
     window.addEventListener('load', positionIndicator);
     window.addEventListener('resize', positionIndicator);
 
+    // ----- BUILD DATATABLE -----
+    function userDataTable(){
+        const isCashier = activeRole === 'cashier';
+        const mobile = isUserMobile();
+
+        const options = {
+            /* Panjang halaman SAMA di semua breakpoint (5), dulu mobile 4 -
+               angka "4" muncul di dropdown dan tabel melompat saat layar
+               dirotasi. Daftar opsi juga sama supaya tidak bingung mana
+               yang aktif. */
+            pageLength: 5,
+            lengthMenu: [[5,10,25,50],[5,10,25,50]],
+
+            /* 3 nomor di mobile, 5 di tablet/desktop + halaman 1 & terakhir
+               dikunci di ujung (lihat script/datatable-compact.js). */
+            pagingType: "mp_compact",
+            searchDelay: 250,
+
+            /* Chip info ikut menyebut role-nya, jadi "Menampilkan 1-5 dari 3
+               staff kasir" tidak tercampur dengan tab administrator. */
+            infoCallback: MP_TABLE.infoCallback(isCashier ? 'staff kasir' : 'administrator'),
+
+            /* Opsi "responsive: true" DIHAPUS. Extension Responsive tidak
+               dimuat di headscript.php, jadi nilainya diam-diam diabaikan.
+               Responsif ditangani manual lewat "dom" + .table-responsive-wrap. */
+            autoWidth: false,
+            language:{
+                search:"",
+                searchPlaceholder: isCashier ? "Cari staff kasir..." : "Cari administrator...",
+
+                /* Panah Previous/Next jadi glyph "‹ ›", bukan teks. Alasannya
+                   lebar: pada rentang 9 pil, dua pil TEKS ("Previous"/"Next")
+                   memakan ~150px dari total baris pager, sementara sisa ruang
+                   di layar 320-360px cuma ~290-330px. Makanya teks diganti
+                   glyph. */
+                paginate:{
+                    previous:"&#8249;",  // ‹
+                    next:"&#8250;"       // ›
+                },
+
+                /* Label yang dibacakan screen reader tetap bahasa Indonesia,
+                   jadi aksesibilitas tidak ikut hilang saat glyphnya diganti. */
+                oAria:{
+                    paginate:{
+                        pageLabel:"Halaman {page}",
+                        previous:"Halaman sebelumnya",
+                        next:"Halaman berikutnya"
+                    }
+                },
+
+                zeroRecords: `
+                    <div class="empty-search">
+                        <img src="../../assets/img/illustrations/empty-data.png" class="empty-img">
+                        <div class="empty-title">${isCashier ? 'Staff kasir' : 'Administrator'} tidak ditemukan</div>
+                        <div class="empty-sub">
+                            Coba gunakan kata kunci lain
+                        </div>
+                    </div>
+                `,
+
+                emptyTable: `
+                    <div class="empty-search">
+                        <img src="../../assets/img/illustrations/empty-data.png" class="empty-img">
+                        <div class="empty-title">Belum ada data ${isCashier ? 'staff kasir' : 'administrator'}</div>
+                        <div class="empty-sub">
+                            Silakan tambahkan user terlebih dahulu
+                        </div>
+                    </div>
+                `
+            }
+        };
+
+        /* Mobile: "f" search, "l" show entries, "t" tabel, "i" info,
+           "p" pagination - semuanya dirender supaya user bisa menaikkan
+           jumlah baris dan tahu posisinya di daftar.
+
+           "dom" HANYA di-set untuk mobile. Di desktop/tablet default
+           DataTables Bootstrap 5 yang dipakai, dan search tetap dipindah
+           ke toolbar tabs lewat .mu-search-slot (lihat catatan di bawah).
+
+           Karena "dom" mobile dipakai langsung tanpa wrapper row/col, jarak
+           antar kontrol (length di atas tabel, info & pagination di
+           bawahnya) ditulis manual di CSS - lihat blok "SHOW ENTRIES +
+           BARIS INFO DI MOBILE" di css/pages/master-product.css. */
+        if(mobile) options.dom = "fltip";
+
+        /* Sisa #userTable_filter dari init SEBELUMNYA dibuang dulu. Pada
+           halaman lain filter selalu tinggal di dalam wrapper tabel jadi
+           destroy() saja sudah cukup, tapi di sini filter pernah dipindah
+           ke .mu-search-slot (di luar container). Kalau node-nya tertinggal,
+           selector "#userTable_filter" jadi menunjuk dua elemen dan user
+           baru mengetik di kotak yang salah.
+
+           Aman dijalankan sebelum DataTable() karena pada titik ini
+           filter milik init baru BELUM dibuat - semua node yang ada
+           hanyalah sisa. */
+        $('#userTableContainer').find('#userTable_filter').remove();
+        $('.mu-search-slot').find('#userTable_filter').remove();
+
+        const dt = $('#userTable').DataTable(options);
+        dt.columns.adjust();
+
+        /* Search di halaman ini tidak memakai #btnContainer seperti halaman
+           Master lain: tombol "Tambah User" sudah jadi bagian dari toolbar
+           tabs (.mu-toolbar-right), bukan container terpisah.
+
+           - Desktop/tablet: search dipindah ke .mu-search-slot supaya
+             duduk di samping tombol, bukan di dalam wrapper tabel.
+           - Mobile: search tetap di atas tabel full width, dibungkus
+             .table-action-wrapper supaya barisnya rapi. */
+        const $filter = $('#userTable_filter');
+
+        if(mobile){
+            if(!$filter.parent().hasClass('table-action-wrapper')){
+                $filter.wrap('<div class="table-action-wrapper"></div>');
+            }
+        } else {
+            $('.mu-search-slot').empty();
+            $filter.appendTo('.mu-search-slot');
+        }
+
+        return dt;
+    }
+
     // ----- LOAD TABLE -----
     function loadUserTable(role){
+        /* Ganti tab = dataset berbeda. State halaman/pencarian TIDAK boleh
+           ikut terbawa (mis. buka tab kasir di halaman 3 hasil cari
+           "andi", lalu balik ke administrator - hasilnya harus mulai
+           dari awal). Jadi state hanya disimpan kalau role-nya sama,
+           yaitu reload setelah tambah / ubah / hapus. */
+        const sameRole = (role === activeRole);
         activeRole = role;
 
-        // Bersihkan search yang sempat dipindah ke toolbar supaya tidak
-        // tertinggal saat tabel dibangun ulang.
+        /* Ambil state SEBELUM markup ditimpa. Begitu innerHTML diganti,
+           node <table id="userTable"> lama ikut terbuang; isDataTable()
+           mencari node lewat identitas (o.nTable === t) jadi sesudahnya
+           isDataTable('#userTable') sudah false dan state hilang. */
+        const prev = $.fn.DataTable.isDataTable('#userTable')
+            ? $('#userTable').DataTable()
+            : null;
+
+        /* State hanya dipulihkan kalau role-nya sama. Instance-nya sendiri
+           tetap di-destroy di semua kasus - kalau tidak, ganti tab
+           menyisakan instance lama di registry DataTable.settings
+           (menumpuk tiap klik tab). */
+        const keep = (prev && sameRole) ? {
+            page: prev.page(),
+            keyword: prev.search(),
+            length: prev.page.len()
+        } : null;
+
+        // Search yang sempat dipindah ke toolbar harus dibuang lebih dulu,
+        // supaya tidak tertinggal dan tidak dobel saat tabel dibangun ulang.
         $('.mu-search-slot').empty();
 
         fetch('master-user-table.php?role=' + encodeURIComponent(role))
         .then(res => res.text())
         .then(html => {
+            /* destroy dulu, node lama masih terpasang jadi aman; kalau
+               dibiarkan, instance-nya menumpuk di registry
+               DataTable.settings setiap reload. (Versi lama mengecek
+               isDataTable() SESUDAH innerHTML diganti, sehingga ceknya
+               selalu false dan destroy() tidak pernah jalan.) */
+            if(prev) prev.destroy();
+
             const container = document.getElementById('userTableContainer');
             container.innerHTML = html;
 
@@ -200,58 +357,18 @@ include '../../sessions/session.php';
                 if(cc !== null) document.getElementById('countCashier').textContent = cc;
             }
 
-            // Destroy old DataTable
-            if($.fn.DataTable.isDataTable('#userTable')){
-                $('#userTable').DataTable().destroy();
-            }
-
-            const isCashier = role === 'cashier';
-            const mobile = isUserMobile();
-
             setTimeout(()=>{
-                const options = {
-                    pageLength: mobile ? 4 : 5,
-                    lengthMenu: mobile ? [[4,5,10,25,50],[4,5,10,25,50]] : [[5,10,25,50],[5,10,25,50]],
-                    pagingType: mobile ? "simple_numbers" : "full_numbers",
-                    responsive: true,
-                    autoWidth: false,
-                    language:{
-                        search:"",
-                        searchPlaceholder: isCashier ? "Cari staff kasir..." : "Cari administrator...",
+                userIsMobile = isUserMobile();
+                const dt = userDataTable();
 
-                        zeroRecords: `
-                            <div class="empty-search">
-                                <img src="../../assets/img/illustrations/empty-data.png" class="empty-img">
-                                <div class="empty-title">${isCashier ? 'Staff kasir' : 'Administrator'} tidak ditemukan</div>
-                                <div class="empty-sub">
-                                    Coba gunakan kata kunci lain
-                                </div>
-                            </div>
-                        `,
-
-                        emptyTable: `
-                            <div class="empty-search">
-                                <img src="../../assets/img/illustrations/empty-data.png" class="empty-img">
-                                <div class="empty-title">Belum ada data ${isCashier ? 'staff kasir' : 'administrator'}</div>
-                                <div class="empty-sub">
-                                    Silakan tambahkan user terlebih dahulu
-                                </div>
-                            </div>
-                        `
-                    }
-                };
-                if(mobile) options.dom = "ftp";
-                $('#userTable').DataTable(options);
-
-                // Desktop & tablet: search pindah ke toolbar, di samping
-                // tombol Tambah User (posisi awal).
-                // Mobile: search tetap di atas tabel, full width.
-                const $filter = $('#userTable_filter');
-
-                if(mobile){
-                    $filter.wrap('<div class="table-action-wrapper"></div>');
-                } else {
-                    $filter.appendTo('.mu-search-slot');
+                if(keep){
+                    /* Halaman di luar rentang otomatis dikembalikan
+                       DataTable ke 0, jadi aman walau baris habis (mis.
+                       semua hasil filter ikut terhapus). */
+                    dt.page.len(keep.length)
+                      .search(keep.keyword)
+                      .page(keep.page)
+                      .draw(false);
                 }
             },100);
         });
@@ -409,14 +526,30 @@ include '../../sessions/session.php';
     });
 
     // ----- REBUILD TABEL KETIKA GANTI MOBILE / DESKTOP -----
+    /* Re-init IN-PLACE. Versi lama memanggil loadUserTable() sehingga satu
+       perpindahan breakpoint = 1 fetch penuh + rebuild table, dan state
+       (halaman / pencarian / panjang halaman) hilang. Sekarang node
+       <table> tidak diganti, jadi tidak ada fetch sama sekali dan posisi
+       user tetap terjaga. */
     let userResizeTimer;
     window.addEventListener('resize', function(){
         clearTimeout(userResizeTimer);
         userResizeTimer = setTimeout(function(){
             if(isUserMobile() === userIsMobile) return;
             if(!$.fn.DataTable.isDataTable('#userTable')) return;
+
+            const current = $('#userTable').DataTable();
+            const page = current.page();
+            const keyword = current.search();
+            const length = current.page.len();
+
+            // search yang ada di toolbar dibuang dulu supaya tidak dobel
+            $('.mu-search-slot').empty();
+            current.destroy();
+
             userIsMobile = isUserMobile();
-            loadUserTable(activeRole);
+            const dt = userDataTable();
+            dt.page.len(length).search(keyword).page(page).draw(false);
         }, 250);
     });
 </script>

@@ -88,7 +88,7 @@
         }
         .etd-modal-close:hover{background:rgba(239,68,68,.25);color:#fca5a5}
 
-        .etd-modal-body{padding:24px;background:#fff}
+        .etd-modal-body{padding:20px;background:#fff}
 
         .etd-form-group{margin-bottom:18px}
         .etd-label{
@@ -130,14 +130,21 @@
         }
         .etd-btn-cancel:hover{background:#e2e8f0;color:#334155}
         .etd-btn-save{
-            background:linear-gradient(135deg,#f59e0b,#d97706);color:#fff;
-            box-shadow:0 4px 14px rgba(245,158,11,.35);
+            background:linear-gradient(90deg,#1e293b,#334155);color:#fff;
+            min-width:132px;height:44px;
+            padding:0 22px;
+            line-height:1;
+            font-size:13.5px;font-weight:700;letter-spacing:.01em;
+            box-shadow:0 10px 20px -12px rgba(15,23,42,.8);
+            transition:transform .18s ease, box-shadow .18s ease, background .2s;
         }
+        .etd-btn-save i{font-size:13px;line-height:1}
         .etd-btn-save:hover{
-            background:linear-gradient(135deg,#d97706,#b45309);
+            background:linear-gradient(90deg,#334155,#475569);color:#fff;
             transform:translateY(-1px);
-            box-shadow:0 6px 20px rgba(245,158,11,.45);
+            box-shadow:0 14px 24px -12px rgba(15,23,42,.85);
         }
+        .etd-btn-save:active{transform:translateY(0)}
 
         /* ===== RESPONSIVE ===== */
         @media(max-width:991px){
@@ -198,32 +205,41 @@
                 margin-bottom:4px;
             }
 
+            #editPaymentContent .mp-add-footer{
+                flex-direction:column;
+                align-items:stretch;
+                margin-top:16px;
+                padding-top:14px;
+            }
+
             #editPaymentContent .btn-save{
                 width:100%;
+                min-width:0;
                 height:46px;
                 border-radius:12px;
-                font-size:14px;
+                font-size:13.5px;
             }
 
             /* ===== MODAL EDIT TENANT (mobile) ===== */
-            #editTenantModal .etd-modal-body{
+                        #editTenantModal .etd-modal-body{
                 padding:6px 20px 16px;
             }
 
-            #editTenantModal .etd-form-footer .btn-save{
+            #editTenantModal .etd-form-footer .etd-btn-save{
                 display:inline-flex;
                 align-items:center;
                 justify-content:center;
                 gap:8px;
 
                 width:100%;
+                min-width:0;
                 height:46px;
                 padding:0 18px;
                 border-radius:12px;
-                font-size:14px;
+                font-size:13.5px;
             }
 
-            #editTenantModal .etd-form-footer .btn-save i{
+            #editTenantModal .etd-form-footer .etd-btn-save i{
                 font-size:13px;
             }
         }
@@ -255,8 +271,8 @@
                 margin-top:0 !important;
             }
 
-            #editTenantModal .etd-modal-body{
-                padding:4px 32px 16px;
+                        #editTenantModal .etd-modal-body{
+                padding:4px 24px 16px;
             }
         }
     </style>
@@ -518,7 +534,7 @@
                         </div>
 
                         <div class="etd-form-footer">
-                            <button type="submit" class="btn-save">
+                            <button type="submit" class="etd-btn btn-save">
                                 <i class="fas fa-save"></i>
                                 Save
                             </button>
@@ -1060,7 +1076,7 @@
 
         let btn = this.querySelector('.etd-btn-save');
         btn.disabled = true;
-        btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Menyimpan...';
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menyimpan...';
 
         try {
             let res = await fetch('registration-action.php?action=update&id=' + this.editTenantId.value, {
@@ -1099,7 +1115,7 @@
         }
 
         btn.disabled = false;
-        btn.innerHTML = '<i class="fas fa-check-circle me-1"></i> Simpan Perubahan';
+        btn.innerHTML = '<i class="fas fa-save"></i> Save';
     });
 </script>
 

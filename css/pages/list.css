@@ -294,6 +294,52 @@
         font-weight:600;
     }
 
+    /* Tombol footer modal/form: samakan premium dengan master-customer */
+    .mp-add-footer{
+        margin-top:24px;
+        margin-bottom:16px;
+        text-align:right;
+    }
+
+    .mp-add-footer .btn-save{
+        display:inline-flex;
+        align-items:center;
+        justify-content:center;
+        gap:8px;
+        min-width:132px;
+        height:44px;
+        padding:0 22px;
+        border-radius:10px;
+        font-size:13.5px;
+        font-weight:700;
+        letter-spacing:.01em;
+        box-shadow:0 10px 20px -12px rgba(15,23,42,.8);
+        transition:transform .18s ease, box-shadow .18s ease, background .2s;
+    }
+
+    .mp-add-footer .btn-save i{ font-size:13px; }
+
+    .mp-add-footer .btn-save:hover{
+        color:#fff;
+        transform:translateY(-1px);
+        box-shadow:0 14px 24px -12px rgba(15,23,42,.85);
+    }
+
+    .mp-add-footer .btn-save:active{ transform:translateY(0); }
+
+    /* Varian terang untuk tombol sekunder (Tambah Item) */
+    .mp-add-footer .btn-save-ghost{
+        background:#fff;
+        color:#334155;
+        border:1px solid #cbd5e1;
+        box-shadow:0 8px 18px -14px rgba(15,23,42,.8);
+    }
+
+    .mp-add-footer .btn-save-ghost:hover{
+        background:#f1f5f9;
+        color:#0f172a;
+    }
+
     .btn-prev-form{
         background:#334155;
         color:#fff;
@@ -315,63 +361,6 @@
     .btn-prev-form:hover,
     .btn-change-form:hover{
         opacity:.9;
-    }
-
-    /* Baris atas: "Show entries" kiri, search kanan - lurus satu baris.
-       Baris bawah: info kiri, pagination kanan. */
-    .dataTables_wrapper .dt-top{
-        display:flex;
-        align-items:center;
-        justify-content:space-between;
-        flex-wrap:wrap;
-        gap:10px 16px;
-        margin-bottom:18px;
-    }
-
-    .dataTables_wrapper .dt-bot{
-        display:flex;
-        align-items:center;
-        justify-content:space-between;
-        flex-wrap:wrap;
-        gap:10px 16px;
-        margin-top:14px;
-    }
-
-    .dataTables_wrapper .dt-top .dataTables_length,
-    .dataTables_wrapper .dt-top .dataTables_filter{
-        float:none;
-        margin:0;
-        padding-left:0;
-        padding-right:0;
-        text-align:left;
-        flex:0 0 auto;
-        width:auto !important;
-        max-width:100%;
-    }
-
-    .dataTables_wrapper .dt-top .dataTables_filter{
-        text-align:right;
-    }
-
-    .dataTables_wrapper .dt-top .dataTables_filter label{
-        display:inline-flex;
-        align-items:center;
-        margin:0;
-        padding:0;
-        float:none;
-        width:auto;
-        text-align:right;
-        line-height:1;
-    }
-
-    .dataTables_wrapper .dt-bot .dataTables_info{
-        padding-top:0;
-        margin:0;
-        flex:0 0 auto;
-    }
-
-    .dataTables_wrapper .dt-bot .dataTables_paginate{
-        margin-top:0;
     }
 
     /* DATATABLE */
@@ -769,14 +758,14 @@
         }
 
         /* ===== ACTION FORM: tombol full width ===== */
-        .form-actions{
+        .mp-add-footer{
             display:flex;
             flex-direction:column;
             gap:10px;
             margin-top:16px;
         }
 
-        .form-actions .btn-save{
+        .mp-add-footer .btn-save{
             width:100%;
             min-height:46px;
             border-radius:12px;
@@ -900,11 +889,6 @@
         .dataTables_wrapper .dataTables_paginate .page-item.disabled .page-link{
             color:#94a3b8 !important;
             background:#f8fafc !important;
-        }
-
-        .dataTables_wrapper .dataTables_length,
-        .dataTables_wrapper .dataTables_info{
-            display:none;
         }
 
         /* ===== MODAL EDIT: kartu dengan radius, snug di layar kecil ===== */
