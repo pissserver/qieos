@@ -26,14 +26,21 @@
         if ($row['status_payment'] === 'paid') $paid++; else $waiting++;
     }
 
+    // id pesanan terakhir yang dibatalkan: dipakai realtime sync supaya
+    // pembatalan tetap terdeteksi walau jumlah waiting/paid tidak berubah.
+    $cancelledId = 0;
+    $cancelQ = mysqli_query($conn, "SELECT MAX(id) AS max_id FROM orders WHERE status_payment='cancelled'");
+    if ($cancelQ && ($cancelR = mysqli_fetch_assoc($cancelQ))) $cancelledId = (int)$cancelR['max_id'];
+
     header('Content-Type: application/json');
 
     echo json_encode([
-        "latest_id" => (int)$latest['id'],
-        "code"      => $latest['code'],
-        "tanggal"   => $latest['tanggal'],
-        "status"    => $latest['status_payment'],
-        "total"     => $rows,
-        "waiting"   => $waiting,
-        "paid"      => $paid,
+        "latest_id"    => (int)$latest['id'],
+        "code"         => $latest['code'],
+        "tanggal"      => $latest['tanggal'],
+        "status"       => $latest['status_payment'],
+        "total"        => $rows,
+        "waiting"      => $waiting,
+        "paid"         => $paid,
+        "cancelled_id" => $cancelledId,
     ]);

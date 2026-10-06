@@ -249,6 +249,18 @@ switch ($action) {
         break;
     }
 
+    case 'developers': {
+        // Daftar user developer (untuk modal Revisi pesanan)
+        meId();
+        $list = [];
+        $q = $conn->query("SELECT id, fullname FROM users WHERE role = 'developer' ORDER BY id ASC");
+        while ($row = $q->fetch_assoc()) {
+            $list[] = ['id' => (int)$row['id'], 'fullname' => $row['fullname']];
+        }
+        echo json_encode(['developers' => $list]);
+        break;
+    }
+
     case 'unread': {
         heartbeat();
         $me = meId();

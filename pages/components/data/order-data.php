@@ -159,7 +159,7 @@ function mpPagerHtml($page, $totalPage, $span)
                     <?php endif; ?>
 
                     <div class="oc-status <?= $row['status_payment'] === 'paid' ? 's-paid' : 's-wait'; ?>">
-                        <i class="fas <?= $row['status_payment'] === 'paid' ? 'fa-check-circle' : 'fa-spinner fa-spin'; ?>"></i>
+                        <i class="fas <?= $row['status_payment'] === 'paid' ? 'fa-check-circle' : 'fa-hourglass-half'; ?>"></i>
                         <?= $row['status_payment'] == 'paid' ? 'Terbayar' : 'Waiting'; ?>
                     </div>
                 </div>
@@ -180,6 +180,12 @@ function mpPagerHtml($page, $totalPage, $span)
                     </button>
 
                     <?php if ($row['status_payment'] !== 'paid'): ?>
+                        <?php if ($user['role'] === 'staff kasir'): ?>
+                        <button class="btn-soft btn-revisi" onclick="revisiOrder(<?= $row['id']; ?>)">
+                            <i class="fas fa-comment-dots"></i> Revisi
+                        </button>
+                        <?php endif; ?>
+
                         <?php if ($user['role'] === 'developer'): ?>
                         <button class="btn-soft btn-cancel" onclick="cancelOrder(<?= $row['id']; ?>, '<?= $row['code']; ?>')">
                             <i class="fas fa-ban"></i> Cancel

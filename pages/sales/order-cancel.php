@@ -1,6 +1,14 @@
 <?php
     include '../../sessions/session.php';
 
+    if ($user['role'] !== 'developer') {
+        echo json_encode([
+            "status" => "error",
+            "message" => "Akses ditolak"
+        ]);
+        exit;
+    }
+
     if (!isset($_POST['order_id'])) {
         echo json_encode([
             "status" => "error",

@@ -227,6 +227,13 @@ $current_page = 'chat.php';
             var time = '';
             if (last) {
                 var txt = String(last.message).replace(/\s+/g, ' ');
+                if (txt.indexOf('[ORDER_REVISI]') === 0) {
+                    var rv = null;
+                    try { rv = JSON.parse(txt.slice('[ORDER_REVISI]'.length)); } catch (e) {}
+                    txt = 'Revisi pesanan' + (rv && rv.code ? ' ' + rv.code : '') + (rv && rv.note ? ': ' + rv.note : '');
+                } else if (txt.indexOf('[ORDER_CANCELLED:') === 0) {
+                    txt = 'Pesanan telah dibatalkan';
+                }
                 if (txt.length > 32) txt = txt.slice(0, 32) + '...';
                 preview = (last.mine ? 'Kamu: ' : '') + esc(txt);
                 var today = new Date().toISOString().slice(0, 10);
@@ -284,7 +291,71 @@ $current_page = 'chat.php';
         if (nearBottom) { apply(); window.requestAnimationFrame(apply); }
     }
 
+    // Cache status terbaru kartu revisi dari refresh ke server, supaya saat
+    // pesan dirender ulang tombol Cancel yang sudah hilang tidak muncul lagi.
+    var orderLiveStatus = {};
+
     function bubbleHTML(m) {
+        var isCancelled = m.message.indexOf('[ORDER_CANCELLED:') === 0;
+        var isRevisi = !isCancelled && m.message.indexOf('[ORDER_REVISI]') === 0;
+        var myRole = <?php echo json_encode($user['role']); ?>;
+
+        if (isRevisi) {
+            var json = m.message.slice('[ORDER_REVISI]'.length);
+            var order = null;
+            try { order = JSON.parse(json); } catch (e) {}
+            if (order) {
+                var custRow = order.customer ? '<div class="orc-row"><i class="fas fa-user"></i> ' + esc(order.customer) + '</div>' : '';
+                var isDev = myRole === 'developer';
+                var isKasir = myRole === 'staff kasir';
+                var live = orderLiveStatus[order.id];
+                var isCancelledStatus = order.status === 'cancelled' || live === 'cancelled';
+                var isPaidStatus = order.status === 'paid' || live === 'paid';
+
+                var btnDetail = isDev ? '<button type="button" class="orc-btn orc-btn-detail" onclick="showOrderDetailFromChat(' + order.id + ')"><i class="fas fa-eye"></i> Detail Order</button>' : '';
+                var btnCancel = isDev && !isCancelledStatus && !isPaidStatus
+                    ? '<button type="button" class="orc-btn orc-btn-cancel" onclick="cancelOrderFromChat(' + order.id + ',' + m.id + ')"><i class="fas fa-ban"></i> Cancel Order</button>'
+                    : '';
+                var btnDelete = isKasir && !isCancelledStatus
+                    ? '<button type="button" class="orc-btn orc-btn-delete" onclick="deleteRevisiMessage(' + m.id + ')"><i class="fas fa-trash-alt"></i> Hapus Pesan</button>'
+                    : '';
+                
+                var statusClass = isCancelledStatus ? 'is-cancelled' : (isPaidStatus ? 'is-paid' : 'is-wait');
+                var statusText = isCancelledStatus ? 'Dibatalkan' : (isPaidStatus ? 'Terbayar' : 'Menunggu');
+
+                var cardHTML = '<div class="order-revisi-card" data-order-id="' + order.id + '" data-msg-id="' + m.id + '">' +
+                    '<div class="orc-glow"></div><div class="orc-glow orc-glow-2"></div>' +
+                    '<div class="orc-header">' +
+                        '<div class="orc-icon"><i class="fas fa-receipt"></i></div>' +
+                        '<div class="orc-title">Permintaan Revisi</div>' +
+                    '</div>' +
+                    '<div class="orc-body">' +
+                        '<div class="orc-top">' +
+                            '<span class="orc-code">' + esc(order.code) + '</span>' +
+                            '<span class="orc-status ' + statusClass + '">' + statusText + '</span>' +
+                        '</div>' +
+                        '<div class="orc-row"><i class="fas fa-calendar-alt"></i> ' + esc(order.tanggal) + '</div>' +
+                        custRow +
+                        '<div class="orc-total"><i class="fas fa-money-bill-wave"></i> Rp ' + Number(order.total).toLocaleString() + '</div>' +
+                        (order.note ? '<div class="orc-note"><i class="fas fa-info-circle"></i> ' + esc(order.note) + '</div>' : '') +
+                    '</div>' +
+                    '<div class="orc-footer">' + btnDetail + btnCancel + btnDelete + '</div>' +
+                '</div>';
+                return '<div class="chat-msg ' + (m.mine ? 'mine' : 'theirs') + '" data-id="' + m.id + '">' + cardHTML + '</div>';
+            }
+        }
+
+        if (isCancelled) {
+            var json2 = m.message.slice('[ORDER_CANCELLED:'.length, m.message.length - 1);
+            var code = '';
+            try { code = JSON.parse(json2).code; } catch (e) {}
+            var cardHTML = '<div class="order-cancelled-card">' +
+                '<div class="occ-icon"><i class="fas fa-check-circle"></i></div>' +
+                '<div class="occ-text">Pesanan <strong>' + esc(code) + '</strong> telah dibatalkan.</div>' +
+            '</div>';
+            return '<div class="chat-msg ' + (m.mine ? 'mine' : 'theirs') + '" data-id="' + m.id + '">' + cardHTML + '</div>';
+        }
+
         var ticks = '';
         if (m.mine) {
             ticks = m.read_at
@@ -477,6 +548,7 @@ $current_page = 'chat.php';
                     appendMessages(list);
                     refreshReadFromServer();
                 }
+                refreshRevisiCards();
             })
             .catch(function () {});
     }
@@ -570,10 +642,13 @@ $current_page = 'chat.php';
     function sendMessage() {
         var text = textarea.value.trim();
         if (!text || !activeId) return;
-        var btn = document.getElementById('chatSendBtn');
         textarea.value = '';
+        sendRaw(text);
+    }
 
-        fetch(BASE + '?action=send&_=' + Date.now(), {
+    function sendRaw(text) {
+        if (!text || !activeId) return Promise.resolve(null);
+        return fetch(BASE + '?action=send&_=' + Date.now(), {
             method: 'POST',
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
             body: 'with=' + activeId + '&message=' + encodeURIComponent(text)
@@ -585,9 +660,197 @@ $current_page = 'chat.php';
                 appendMessages([data.message]);
                 markMyRead([data.message]);
             }
+            return data;
         })
-        .catch(function () {});
+        .catch(function () { return null; });
     }
+
+    // ===== CANCEL ORDER DARI CHAT (sisi developer) =====
+    window.cancelOrderFromChat = function (orderId, msgId) {
+        if (!activeId) return;
+        var card0 = msgEl.querySelector('.order-revisi-card[data-order-id="' + orderId + '"]');
+        var codeEl = card0 ? card0.querySelector('.orc-code') : null;
+        var code = codeEl ? codeEl.textContent : '#' + orderId;
+
+        chatConfirm({
+            title: 'Batalkan Pesanan?',
+            desc: 'Pesanan ' + code + ' akan dibatalkan dan stok dikembalikan.',
+            okText: 'Batalkan Order'
+        }).then(function (ok) {
+            if (!ok) return;
+
+            // Elemen di-query ulang di dalam callback: DOM bisa sudah
+            // berubah saat modal konfirmasi dibuka.
+            var card = msgEl.querySelector('.order-revisi-card[data-order-id="' + orderId + '"]');
+            var btn = card ? card.querySelector('.orc-btn-cancel') : null;
+            if (!btn) return; // tombol sudah hilang (sudah dicancel pihak lain)
+
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Membatalkan...';
+
+            function restoreBtn() {
+                if (btn.isConnected) {
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fas fa-ban"></i> Cancel Order';
+                }
+            }
+
+            fetch('../sales/order-cancel.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: 'order_id=' + orderId
+            })
+            .then(function (r) { return r.json(); })
+            .then(function (d) {
+                if (d.status !== 'success') {
+                    if (btn && btn.isConnected && btn.querySelector('.fa-spinner')) restoreBtn();
+                    if (typeof QToast === 'function') QToast('Gagal!', d.message || 'Order tidak dapat dibatalkan.', 'error');
+                    refreshRevisiCards();
+                    return;
+                }
+                orderLiveStatus[orderId] = 'cancelled';
+                // Kartu bisa sudah diganti re-render sejak modal dibuka;
+                // update SEMUA kartu untuk order ini supaya tombol tak tersisa.
+                msgEl.querySelectorAll('.order-revisi-card[data-order-id="' + orderId + '"]').forEach(function (c) {
+                    if (!c.isConnected) return;
+                    var st = c.querySelector('.orc-status');
+                    if (st) { st.className = 'orc-status is-cancelled'; st.textContent = 'Dibatalkan'; }
+                    var cb = c.querySelector('.orc-btn-cancel');
+                    if (cb) cb.remove();
+                });
+                // Tombol spinner yang masih menempel (kartu terlepas dari DOM) dikembalikan
+                if (btn && btn.isConnected && btn.querySelector('.fa-spinner')) restoreBtn();
+                if (typeof QToast === 'function') QToast('Berhasil!', 'Pesanan ' + code + ' telah dibatalkan.', 'success');
+                sendRaw('[ORDER_CANCELLED:' + JSON.stringify({ code: code }) + ']');
+                fetchContacts();
+                refreshRevisiCards();
+                // Broadcast ke tab lain (realtime)
+                try { localStorage.setItem('qieos_cancel_ping', orderId + ':' + Date.now()); } catch (e) {}
+            })
+            .catch(function () {
+                if (btn && btn.isConnected && btn.querySelector('.fa-spinner')) restoreBtn();
+                refreshRevisiCards();
+                if (typeof QToast === 'function') QToast('Gagal!', 'Tidak dapat terhubung ke server.', 'error');
+            });
+        });
+    };
+
+    // Realtime lintas tab: cancel di tab lain → kartu ikut update
+    window.addEventListener('storage', function (e) {
+        if (e.key === 'qieos_cancel_ping') {
+            refreshRevisiCards();
+            fetchMessages();
+            fetchContacts();
+        }
+    });
+
+    // ===== DETAIL ORDER DARI CHAT (developer) =====
+    window.showOrderDetailFromChat = function (orderId) {
+        chatConfirm({
+            title: 'Detail Pesanan #' + orderId,
+            desc: 'Memuat detail pesanan...',
+            okText: 'Tutup'
+        });
+        var descEl = document.getElementById('chatModalDesc');
+        if (!descEl) return;
+
+        fetch('../sales/order-detail.php?id=' + orderId)
+            .then(function (r) { return r.json(); })
+            .then(function (d) {
+                if (d.status !== 'success') {
+                    descEl.innerHTML = '<span style="color:#fb7185">Gagal memuat: ' + esc(d.message || 'Error') + '</span>';
+                    return;
+                }
+                var o = d.order;
+                var items = d.items || [];
+                var total = 0;
+                var itemsHTML = '';
+                items.forEach(function (it) {
+                    var sub = it.qty * it.price;
+                    total += sub;
+                    itemsHTML += '<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.06)">' +
+                        '<span style="color:#cbd5e1;font-size:12px">' + esc(it.product_name) + ' x' + it.qty + '</span>' +
+                        '<span style="color:#fff;font-size:12px;font-weight:700">Rp ' + sub.toLocaleString() + '</span>' +
+                    '</div>';
+                });
+                descEl.innerHTML = '<div style="text-align:left;font-size:12.5px;line-height:1.5">' +
+                    '<div style="margin-bottom:10px;color:#94a3b8"><strong style="color:#e0e7ff">' + esc(o.code) + '</strong> · ' + esc(o.tanggal) + '</div>' +
+                    itemsHTML +
+                    '<div style="display:flex;justify-content:space-between;padding:10px 0 0;font-size:14px;font-weight:800">' +
+                        '<span style="color:#a5b4fc">Total</span>' +
+                        '<span style="color:#34d399">Rp ' + total.toLocaleString() + '</span>' +
+                    '</div>' +
+                '</div>';
+            })
+            .catch(function () {
+                descEl.innerHTML = '<span style="color:#fb7185">Tidak dapat terhubung ke server.</span>';
+            });
+    };
+
+    // ===== REFRESH STATUS LIVE KARTU REVISI =====
+    // Payload kartu dibekukan saat pesan dikirim, jadi status dicek ulang
+    // ke server supaya button Cancel/Hapus hilang saat pesanan sudah paid/cancelled.
+    function refreshRevisiCards() {
+        if (!msgEl || !msgEl.querySelector('.order-revisi-card')) return;
+        msgEl.querySelectorAll('.order-revisi-card').forEach(function (card) {
+            var oid = card.getAttribute('data-order-id');
+            // Terminal state + tak ada tombol lagi → skip, tidak ada yang perlu update
+            if (!card.querySelector('.orc-btn-cancel') && !card.querySelector('.orc-btn-delete') &&
+                card.querySelector('.orc-status.is-cancelled')) return;
+
+            fetch('../sales/order-detail.php?id=' + oid + '&_=' + Date.now())
+                .then(function (r) { return r.json(); })
+                .then(function (d) {
+                    if (d.status !== 'success' || !card.isConnected) return;
+                    var st = d.order.status_payment;
+                    orderLiveStatus[oid] = st;
+                    var chip = card.querySelector('.orc-status');
+                    if (chip) {
+                        if (st === 'cancelled') { chip.className = 'orc-status is-cancelled'; chip.textContent = 'Dibatalkan'; }
+                        else if (st === 'paid') { chip.className = 'orc-status is-paid'; chip.textContent = 'Terbayar'; }
+                        else { chip.className = 'orc-status is-wait'; chip.textContent = 'Menunggu'; }
+                    }
+                    if (st === 'cancelled' || st === 'paid') {
+                        var cb = card.querySelector('.orc-btn-cancel');
+                        if (cb) cb.remove();
+                    }
+                    if (st === 'cancelled') {
+                        var db = card.querySelector('.orc-btn-delete');
+                        if (db) db.remove();
+                    }
+                })
+                .catch(function () {});
+        });
+    }
+    setInterval(function () {
+        if (document.visibilityState !== 'hidden') refreshRevisiCards();
+    }, 5000);
+
+    // ===== HAPUS PESAN REVISI (staff kasir) =====
+    window.deleteRevisiMessage = function (msgId) {
+        chatConfirm({
+            title: 'Hapus Permintaan Revisi?',
+            desc: 'Pesan revisi akan dihapus dari percakapan.',
+            okText: 'Hapus'
+        }).then(function (ok) {
+            if (!ok) return;
+            fetch(BASE + '?action=delete&_=' + Date.now(), {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: 'id=' + msgId
+            })
+            .then(function (r) { return r.json(); })
+            .then(function (data) {
+                if (!data.deleted) return;
+                removeMessageFromState(msgId);
+                if (typeof QToast === 'function') QToast('Berhasil!', 'Pesan revisi dihapus.', 'success');
+            })
+            .catch(function () {
+                if (typeof QToast === 'function') QToast('Gagal!', 'Tidak dapat menghapus pesan.', 'error');
+            });
+        });
+    };
+
 
     // ===== DELETE / CLEAR =====
     function closeBubbleMenus() {

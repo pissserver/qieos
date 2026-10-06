@@ -525,6 +525,11 @@ if (!defined('BASE_URL')) {
 
         var title = 'Pesan baru dari ' + (latest.sender_name || 'Pengguna');
         var body = latest.message || '';
+        if (body.indexOf('[ORDER_REVISI]') === 0) {
+            body = 'Permintaan revisi pesanan';
+        } else if (body.indexOf('[ORDER_CANCELLED:') === 0) {
+            body = 'Pesanan telah dibatalkan';
+        }
         if (body.length > 120) body = body.slice(0, 120) + '\u2026';
 
         var url = BASE_URL + '/pages/chat/chat.php?with=' + latest.sender_id;

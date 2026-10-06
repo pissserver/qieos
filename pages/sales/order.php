@@ -173,6 +173,36 @@ include '../../sessions/session.php';
         </div>
     </div>
 
+    <!-- Modal Ajukan Revisi -->
+    <div class="modal fade" id="orderRevisiModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content rv-modal">
+                <div class="rv-head">
+                    <div class="rv-head-icon"><i class="fas fa-comment-dots"></i></div>
+                    <div class="rv-head-text">
+                        <h5 class="rv-head-title">Ajukan Revisi</h5>
+                        <p class="rv-head-sub">Permintaan pembatalan dikirim ke Developer via chat</p>
+                    </div>
+                    <button type="button" class="rv-close" data-bs-dismiss="modal" aria-label="Tutup">
+                        <i class="fas fa-xmark"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="rv-order" id="rvOrderSummary"></div>
+                    <label class="rv-label" for="rvReason">Alasan revisi</label>
+                    <textarea id="rvReason" class="rv-textarea" rows="3" maxlength="300"
+                        placeholder="Contoh: salah input item / qty kurang..."></textarea>
+                </div>
+                <div class="modal-footer rv-footer">
+                    <button type="button" class="rv-btn rv-btn-cancel" data-bs-dismiss="modal">Batal</button>
+                    <button type="button" class="rv-btn rv-btn-send" id="rvSend">
+                        <i class="fas fa-paper-plane"></i> Kirim ke Developer
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <?php include '../../script/footscript.php'; ?>
 
     <script>
@@ -242,7 +272,7 @@ include '../../sessions/session.php';
             fetch('../components/data/get-order-latest.php?_=' + Date.now())
                 .then(res => res.json())
                 .then(data => {
-                    const sig = data.latest_id + '|' + data.waiting + '|' + data.paid;
+                    const sig = data.latest_id + '|' + data.waiting + '|' + data.paid + '|' + (data.cancelled_id || 0);
 
                     if (lastSignature === '') {
                         lastSignature = sig; // baseline, jangan trigger
@@ -262,13 +292,19 @@ include '../../sessions/session.php';
         function refreshOnNewOrder(newId, data) {
             // signature cuma di-update kalau datanya dari poll,
             // kalau event dari tab lain cukup andalkan poll yang akan rekonsiliasi
-            if (newId && data) lastSignature = newId + '|' + data.waiting + '|' + data.paid;
+            if (newId && data) lastSignature = newId + '|' + data.waiting + '|' + data.paid + '|' + (data.cancelled_id || 0);
 
             if (typeof updateOmzet === 'function') updateOmzet();
 
-            // Kalau user sedang di halaman > 1, jangan dipaksa pindah halaman
+            // Kalau user sedang di halaman > 1, jangan paksa pindah halaman.
+            // Tapi tetap refresh halaman sekarang kalau yang berubah hanya status
+            // (mis. order dibatalkan) supaya tombol Cancel hilang real-time.
             if (currentPage > 1) {
-                QToast('Pesanan Baru!', 'Ada pesanan baru di halaman pertama.', 'info');
+                if (newId) {
+                    QToast('Pesanan Baru!', 'Ada pesanan baru di halaman pertama.', 'info');
+                } else {
+                    loadPage(currentPage, { silent: true });
+                }
                 return;
             }
 
@@ -385,6 +421,8 @@ include '../../sessions/session.php';
                             QToast('Berhasil!', 'Pesanan telah dibatalkan.', 'success');
                             refreshOrders(); // update list
                             if (typeof updateOmzet === 'function') updateOmzet(); // update omzet di navbar
+                            // Broadcast ke tab/device lain supaya kartu revisi di chat langsung update
+                            try { localStorage.setItem('qieos_cancel_ping', id + ':' + Date.now()); } catch (e) {}
                         } else {
                             QToast('Gagal!', response.message || 'Terjadi kesalahan saat membatalkan pesanan.', 'error');
                         }
@@ -395,7 +433,112 @@ include '../../sessions/session.php';
 
         let orderDetailModalInstance = null;
         let orderEditModalInstance = null;
+        let orderRevisiModalInstance = null;
         let ecOrderId = null;
+        let rvOrderId = null;
+
+        // ==========================================================
+        // AJUKAN REVISI → kirim pesanan ke chat Developer
+        // Pesanan dikirim sebagai kartu (marker [ORDER_REVISI]) agar
+        // di sisi chat langsung tampil kartu + tombol Cancel.
+        // ==========================================================
+        function revisiOrder(id) {
+            rvOrderId = id;
+            const box = document.getElementById('rvOrderSummary');
+            const btn = document.getElementById('rvSend');
+            const reason = document.getElementById('rvReason');
+            box.innerHTML = '<div class="rv-loading"><i class="fas fa-spinner fa-spin"></i> Memuat pesanan...</div>';
+            reason.value = '';
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-paper-plane"></i> Kirim ke Developer';
+
+            fetch(`order-detail.php?id=${id}`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data.status !== 'success') throw new Error(data.message);
+                    const o = data.order;
+                    box.dataset.order = JSON.stringify({
+                        id: o.id,
+                        code: o.code,
+                        tanggal: o.tanggal,
+                        total: o.total,
+                        status: o.status_payment,
+                        customer: data.customer ? data.customer.name : null,
+                        note: ''
+                    });
+                    box.innerHTML = `
+                        <div class="rv-o-top">
+                            <span class="rv-o-code"><i class="fas fa-file-invoice"></i> ${escHTML(o.code)}</span>
+                            <span class="rv-o-status ${o.status_payment === 'paid' ? 'is-paid' : 'is-wait'}">
+                                ${o.status_payment === 'paid' ? 'Terbayar' : 'Menunggu'}
+                            </span>
+                        </div>
+                        <div class="rv-o-row"><i class="fas fa-calendar-alt"></i> ${escHTML(o.tanggal)}</div>
+                        ${data.customer ? `<div class="rv-o-row"><i class="fas fa-user"></i> ${escHTML(data.customer.name)}</div>` : ''}
+                        <div class="rv-o-total"><i class="fas fa-money-bill-wave"></i> Rp ${Number(o.total).toLocaleString()}</div>`;
+                    if (!orderRevisiModalInstance) {
+                        orderRevisiModalInstance = new bootstrap.Modal(document.getElementById('orderRevisiModal'));
+                    }
+                    orderRevisiModalInstance.show();
+                })
+                .catch(err => QToast('Gagal!', err.message || 'Pesanan tidak ditemukan.', 'error'));
+        }
+
+        function escHTML(s) {
+            let d = document.createElement('div');
+            d.appendChild(document.createTextNode(String(s == null ? '' : s)));
+            return d.innerHTML;
+        }
+
+        function rvSend() {
+            const box = document.getElementById('rvOrderSummary');
+            const reasonEl = document.getElementById('rvReason');
+            const btn = document.getElementById('rvSend');
+            const reason = reasonEl.value.trim();
+
+            if (!reason) {
+                reasonEl.focus();
+                QToast('Alasan kosong!', 'Tulis alasan revisi terlebih dahulu.', 'error');
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Mengirim...';
+
+            fetch('../../pages/chat/chat-api.php?action=developers')
+                .then(r => r.json())
+                .then(d => {
+                    if (!d.developers || !d.developers.length) throw new Error('User developer tidak ditemukan.');
+                    const dev = d.developers[0];
+                    const payload = JSON.parse(box.dataset.order || '{}');
+                    payload.note = reason;
+                    const marker = '[ORDER_REVISI]' + JSON.stringify(payload);
+
+                    return fetch('../../pages/chat/chat-api.php?action=send', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                        body: 'with=' + dev.id + '&message=' + encodeURIComponent(marker)
+                    }).then(r => r.json()).then(res => ({ res: res, dev: dev }));
+                })
+                .then(({ res, dev }) => {
+                    if (!res.sent) throw new Error('Gagal mengirim pesan.');
+                    orderRevisiModalInstance.hide();
+                    QToast('Terkirim!', 'Permintaan revisi dikirim ke ' + dev.fullname + '.', 'success');
+                    setTimeout(() => {
+                        window.location.href = BASE_URL + '/pages/chat/chat.php?with=' + dev.id;
+                    }, 600);
+                })
+                .catch(err => {
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fas fa-paper-plane"></i> Kirim ke Developer';
+                    QToast('Gagal!', err.message || 'Tidak dapat terhubung ke server.', 'error');
+                });
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const rvSendBtn = document.getElementById('rvSend');
+            if (rvSendBtn) rvSendBtn.addEventListener('click', rvSend);
+        });
 
         // ==========================================================
         // EDIT CUSTOMER PESANAN (ganti / hapus nama)
