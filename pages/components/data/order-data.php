@@ -64,12 +64,73 @@ $totalQuery = mysqli_query($conn, "
 $totalData  = mysqli_fetch_assoc($totalQuery)['total'];
 $totalPage  = ceil($totalData / $limit);
 
+// JUMLAH ASAL (sebelum filter pencarian/tanggal) - untuk sub-chip "dari N pesanan"
+$baseQuery = mysqli_query($conn, "
+    SELECT COUNT(*) as total FROM (
+        SELECT * FROM orders
+        WHERE status_payment != 'cancelled'
+        ORDER BY id DESC
+        LIMIT 50
+    ) AS sub
+");
+$baseData = mysqli_fetch_assoc($baseQuery)['total'];
+
 // FORMAT TANGGAL
 function tanggalIndo($date)
 {
     $bulan = [1 => 'Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
     $pecah = explode('-', date('Y-m-d', strtotime($date)));
     return $pecah[2] . ' ' . $bulan[(int)$pecah[1]] . ' ' . $pecah[0];
+}
+
+/* Pager ringkas ala Master (script/datatable-compact.js -> mp_compact):
+   jendela 5 nomor di tablet/desktop, 3 nomor di mobile, halaman 1 &
+   terakhir dikunci di ujung + ellipsis "…" hanya kalau ada halaman yang
+   disembunyikan. Dua versi dirender sekaligus supaya tidak perlu fetch
+   ulang saat layar dirotasi - CSS yang memilih versi mana yang tampil. */
+function mpPagerHtml($page, $totalPage, $span)
+{
+    if ($totalPage < 1) return '';
+    $last = $totalPage;
+    $h = '';
+
+    $h .= '<li class="page-item previous' . ($page <= 1 ? ' disabled' : '') . '">'
+        . '<a class="page-link" href="#" aria-label="Halaman sebelumnya" onclick="loadPage(' . max(1, $page - 1) . ')">&#8249;</a></li>';
+
+    if ($last > 1) {
+        $half = (int) floor(($span - 1) / 2);
+        $startPage = $page - $half;
+        if ($startPage < 1) $startPage = 1;
+        if ($startPage > $last - ($span - 1)) $startPage = $last - ($span - 1);
+        if ($startPage < 1) $startPage = 1;
+        $endPage = min($startPage + $span - 1, $last);
+
+        if ($startPage > 1) {
+            $h .= '<li class="page-item"><a class="page-link" href="#" onclick="loadPage(1)">1</a></li>';
+            if ($startPage > 2) {
+                $h .= '<li class="page-item disabled mp-ellipsis"><span class="page-link" aria-hidden="true">&hellip;</span></li>';
+            }
+        }
+
+        for ($i = $startPage; $i <= $endPage; $i++) {
+            $h .= '<li class="page-item' . ($i == $page ? ' active' : '') . '">'
+                . '<a class="page-link" href="#" onclick="loadPage(' . $i . ')">' . $i . '</a></li>';
+        }
+
+        if ($endPage < $last) {
+            if ($endPage < $last - 1) {
+                $h .= '<li class="page-item disabled mp-ellipsis"><span class="page-link" aria-hidden="true">&hellip;</span></li>';
+            }
+            $h .= '<li class="page-item"><a class="page-link" href="#" onclick="loadPage(' . $last . ')">' . $last . '</a></li>';
+        }
+    } else {
+        $h .= '<li class="page-item active"><a class="page-link" href="#" onclick="loadPage(1)">1</a></li>';
+    }
+
+    $h .= '<li class="page-item next' . ($page >= $totalPage ? ' disabled' : '') . '">'
+        . '<a class="page-link" href="#" aria-label="Halaman berikutnya" onclick="loadPage(' . min($totalPage, $page + 1) . ')">&#8250;</a></li>';
+
+    return $h;
 }
 ?>
 
@@ -135,44 +196,25 @@ function tanggalIndo($date)
     <?php endwhile; ?>
 </div>
 
-<?php if ($totalData > 0): ?>
-    <ul class="pagination justify-content-center" id="pagination">
+<?php if ($totalData > 0):
+    $from = ($page - 1) * $limit + 1;
+    $to   = min($page * $limit, $totalData);
+?>
+    <div id="pagination" class="mp-pager-wrap">
 
-        <!-- PREV -->
-        <li class="page-item <?= ($page == 1) ? 'disabled' : ''; ?>">
-            <a class="page-link" href="#" onclick="loadPage(<?= $page - 1 ?>)">Prev</a>
-        </li>
+        <!-- Chip info: posisi user di daftar (sama dengan halaman Master) -->
+        <span class="mp-info">
+            <span class="mp-info-ico"><i class="fas fa-layer-group"></i></span>
+            <span class="mp-info-txt">Menampilkan <b><?= $from ?></b>&ndash;<b><?= $to ?></b> dari <b><?= $totalData ?></b> pesanan</span>
+            <?php if ($totalData != $baseData): ?>
+                <span class="mp-info-sub">dari <?= $baseData ?> pesanan</span>
+            <?php endif; ?>
+        </span>
 
-        <?php
-        $startPage = max(1, $page - 2);
-        $endPage   = min($totalPage, $page + 2);
+        <!-- Dua salinan pager: desktop 5 nomor / mobile 3 nomor. Yang
+             tampil dipilih CSS (lihat css/pages/order.css). -->
+        <ul class="pagination mp-pager-desktop"><?= mpPagerHtml($page, $totalPage, 5) ?></ul>
+        <ul class="pagination mp-pager-mobile"><?= mpPagerHtml($page, $totalPage, 3) ?></ul>
 
-        if ($startPage > 1) {
-            echo '<li class="page-item"><a class="page-link" onclick="loadPage(1)">1</a></li>';
-            if ($startPage > 2) {
-                echo '<li class="page-item disabled"><span class="page-link">...</span></li>';
-            }
-        }
-
-        for ($i = $startPage; $i <= $endPage; $i++) {
-            $active = ($i == $page) ? 'active' : '';
-            echo '<li class="page-item ' . $active . '">
-                <a class="page-link" onclick="loadPage(' . $i . ')">' . $i . '</a>
-              </li>';
-        }
-
-        if ($endPage < $totalPage) {
-            if ($endPage < $totalPage - 1) {
-                echo '<li class="page-item disabled"><span class="page-link">...</span></li>';
-            }
-            echo '<li class="page-item"><a class="page-link" onclick="loadPage(' . $totalPage . ')">' . $totalPage . '</a></li>';
-        }
-        ?>
-
-        <!-- NEXT -->
-        <li class="page-item <?= ($page == $totalPage) ? 'disabled' : ''; ?>">
-            <a class="page-link" href="#" onclick="loadPage(<?= $page + 1 ?>)">Next</a>
-        </li>
-
-    </ul>
+    </div>
 <?php endif; ?>

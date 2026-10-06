@@ -956,43 +956,214 @@ body {
     }
 
     /* =========================
-    PAGINATION
+    PAGINATION + INFO (sama dengan Master)
+    Ditulis mobile-first persis seperti blok mobile
+    css/pages/master-product.css, lalu di media min-width:576px dinaikkan
+    ke skala tablet/desktop.
     ========================= */
-    .pagination {
+
+    /* Wrapper: chip info di atas pager, keduanya center.
+       id "pagination" dipakai JS order.php untuk toggle tampil/sembunyi. */
+    #pagination.mp-pager-wrap {
         display: flex;
-        gap: 6px;
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+        margin-top: 18px;
+    }
+
+    /* ---------- CHIP INFO "Menampilkan 1-5 dari N pesanan" ---------- */
+    #pagination .mp-info {
+        display: inline-flex;
+        flex-wrap: wrap;
+        align-items: center;
         justify-content: center;
-        margin-top: 22px;
+        gap: 6px 8px;
+        max-width: 100%;
+        height: auto;
+        min-height: 30px;
+        padding: 5px 12px 5px 7px;
+        border-radius: 11px;
+        background: linear-gradient(135deg, #f8fafc, #eef2ff);
+        border: 1px solid #e2e8f0;
+        box-shadow:
+            0 2px 6px rgba(15, 23, 42, .05),
+            inset 0 1px 0 rgba(255, 255, 255, .75);
+        white-space: normal;
     }
 
-    .page-item .page-link {
-        border: 1px solid rgba(15, 23, 42, .08);
-        border-radius: 12px;
-        padding: 8px 16px;
-        background: #fff;
-        color: #334155;
-        font-weight: 600;
-        transition: all .25s;
-        box-shadow: 0 2px 8px rgba(15, 23, 42, .05);
-        cursor: pointer;
-    }
-
-    .page-item.active .page-link {
-        background: linear-gradient(135deg, #6366f1, #8b5cf6);
-        border-color: transparent;
+    #pagination .mp-info-ico {
+        flex: 0 0 auto;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 18px;
+        height: 18px;
+        border-radius: 6px;
+        font-size: 9px;
         color: #fff;
-        box-shadow: 0 6px 16px rgba(99, 102, 241, .35);
+        background: linear-gradient(135deg, #4f46e5, #6366f1);
+        box-shadow: 0 4px 10px -4px rgba(79, 70, 229, .95);
     }
 
-    .page-link:hover {
-        background: #f1f5f9;
-        color: #6366f1;
+    #pagination .mp-info-txt {
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: .1px;
+        color: #64748b;
+    }
+
+    #pagination .mp-info-txt b {
+        font-weight: 800;
+        color: #0f172a;
+    }
+
+    /* Muncul hanya kalau ada pencarian/filter aktif: "… dari N pesanan" */
+    #pagination .mp-info-sub {
+        margin-left: 0;
+        padding-left: 0;
+        border-left: 0;
+        font-size: 10.5px;
+        font-weight: 500;
+        color: #94a3b8;
+        white-space: nowrap;
+    }
+
+    /* ---------- PAGER ---------- */
+    /* Dua salinan dirender (mp-pager-desktop 5 nomor / mp-pager-mobile
+       3 nomor); salah satu disembunyikan sesuai lebar layar supaya tidak
+       ada reload saat rotasi. */
+    #pagination .pagination {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        align-items: center;
+        gap: 4px;
+        margin: 0;
+        padding: 0;
+    }
+
+    #pagination .mp-pager-desktop { display: none; }
+    #pagination .mp-pager-mobile { display: flex; }
+
+    #pagination .page-item {
+        margin: 0 !important;
+    }
+
+    /* volt.css punya .page-item:not(:first-child) .page-link{margin-left:-.0625rem}
+       yang menarik pil ke kiri 1px; dinolkan supaya gap 4px benar-benar 4px. */
+    #pagination .page-item .page-link {
+        min-width: 30px;
+        height: 30px;
+        padding: 0 8px;
+        margin-left: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 10px !important;
+        font-size: 11px;
+        font-weight: 700;
+        line-height: 1;
+        color: #475569 !important;
+        background: #fff !important;
+        border: 1px solid #e2e8f0 !important;
+        box-shadow: 0 2px 6px rgba(15, 23, 42, .05) !important;
+        transition: transform .18s ease, box-shadow .18s ease;
+        cursor: pointer;
+        text-decoration: none;
+    }
+
+    #pagination .page-item .page-link:hover {
         transform: translateY(-1px);
+        box-shadow: 0 6px 12px -6px rgba(15, 23, 42, .35) !important;
     }
 
-    .page-item.disabled .page-link {
-        opacity: .45;
+    #pagination .page-item.active .page-link {
+        color: #fff !important;
+        background: linear-gradient(135deg, #4f46e5, #6366f1) !important;
+        border-color: transparent !important;
+        box-shadow: 0 8px 16px -7px rgba(79, 70, 229, .95) !important;
+    }
+
+    /* Panah ‹ › yang disabled ikut nge-lift saat hover kalau tidak dikecualikan */
+    #pagination .page-item.disabled .page-link {
+        color: #94a3b8 !important;
+        background: #f8fafc !important;
+        border-color: #eef2f7 !important;
         pointer-events: none;
+    }
+
+    #pagination .page-item.disabled .page-link:hover {
+        transform: none;
+        box-shadow: 0 2px 6px rgba(15, 23, 42, .05) !important;
+    }
+
+    /* Ellipsis "…" jadi glyph tipis tanpa kotak, sama seperti Master */
+    #pagination .page-item.disabled.mp-ellipsis .page-link {
+        min-width: 22px;
+        padding: 0 4px;
+        font-size: 15px;
+        font-weight: 700;
+        color: #a5b4fc !important;
+        background: transparent !important;
+        border-color: transparent !important;
+        box-shadow: none !important;
+        cursor: default;
+    }
+
+    /* .page-link memakai box-shadow !important, jadi cincin fokus keyboard
+       hilang; dibuat ulang dengan !important juga. */
+    #pagination .page-item .page-link:focus-visible {
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(99, 102, 241, .45) !important;
+    }
+
+    /* ---------- TABLET & DESKTOP: skala lebih besar ---------- */
+    @media (min-width: 576px) {
+        #pagination.mp-pager-wrap {
+            gap: 10px;
+            margin-top: 22px;
+        }
+
+        #pagination .mp-info {
+            flex-wrap: nowrap;
+            height: 34px;
+            min-height: 34px;
+            padding: 0 14px 0 8px;
+            gap: 9px;
+        }
+
+        #pagination .mp-info-ico {
+            width: 20px;
+            height: 20px;
+            border-radius: 7px;
+            font-size: 10px;
+        }
+
+        #pagination .mp-info-txt { font-size: 12px; }
+
+        #pagination .mp-info-sub {
+            padding-left: 9px;
+            border-left: 1px solid #e2e8f0;
+        }
+
+        #pagination .mp-pager-desktop { display: flex; }
+        #pagination .mp-pager-mobile { display: none; }
+
+        #pagination .pagination { gap: 6px; }
+
+        #pagination .page-item .page-link {
+            min-width: 34px;
+            height: 34px;
+            padding: 0 9px;
+            border-radius: 11px !important;
+            font-size: 12px;
+        }
+
+        #pagination .page-item .page-link:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 18px -8px rgba(15, 23, 42, .38) !important;
+        }
     }
 
     /* CARD responsive - compact kecil */
@@ -1017,17 +1188,6 @@ body {
             flex:1;
             justify-content:center;
             min-width:0;
-        }
-
-        .pagination{
-            flex-wrap:wrap;
-            gap:4px;
-            max-width:100%;
-        }
-
-        .page-item .page-link{
-            padding:8px 13px;
-            font-size:13px;
         }
     }
 
