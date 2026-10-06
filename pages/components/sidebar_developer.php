@@ -140,3 +140,10 @@
         <span class="sidebar-text">Update</span>
     </a>
 </li>
+
+<li class="nav-item <?= ($current_page == 'guide.php') ? 'active' : ''; ?>">
+    <a href="<?php echo BASE_URL; ?>/pages/other/guide.php" class="nav-link" data-tooltip="Guide">
+        <span class="sidebar-icon"><i class="fas fa-book"></i></span>
+        <span class="sidebar-text">Guide</span>
+    </a>
+</li>

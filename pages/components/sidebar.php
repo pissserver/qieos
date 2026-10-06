@@ -254,6 +254,13 @@
                         <span class="sidebar-text">Update</span>
                     </a>
                 </li>
+
+                <li class="nav-item <?= ($current_page == 'guide.php') ? 'active' : ''; ?>">
+                    <a href="<?php echo BASE_URL; ?>/pages/other/guide.php" class="nav-link" data-tooltip="Guide">
+                        <span class="sidebar-icon"><i class="fas fa-book"></i></span>
+                        <span class="sidebar-text">Guide</span>
+                    </a>
+                </li>
             <?php } ?>
 
             <?php if ($user['role'] == 'staff kasir') { ?>
@@ -318,6 +325,13 @@
                     <a href="<?php echo BASE_URL; ?>/pages/other/update.php" class="nav-link" data-tooltip="Update">
                         <span class="sidebar-icon"><i class="fas fa-rocket"></i></span>
                         <span class="sidebar-text">Update</span>
+                    </a>
+                </li>
+
+                <li class="nav-item <?= ($current_page == 'guide.php') ? 'active' : ''; ?>">
+                    <a href="<?php echo BASE_URL; ?>/pages/other/guide.php" class="nav-link" data-tooltip="Guide">
+                        <span class="sidebar-icon"><i class="fas fa-book"></i></span>
+                        <span class="sidebar-text">Guide</span>
                     </a>
                 </li>
             <?php } ?>
