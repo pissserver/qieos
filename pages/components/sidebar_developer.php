@@ -147,3 +147,10 @@
         <span class="sidebar-text">Guide</span>
     </a>
 </li>
+
+<li class="nav-item <?= ($current_page == 'flow-database.php') ? 'active' : ''; ?>">
+    <a href="<?php echo BASE_URL; ?>/pages/other/flow-database.php" class="nav-link" data-tooltip="Flow & Database">
+        <span class="sidebar-icon"><i class="fas fa-sitemap"></i></span>
+        <span class="sidebar-text">Flow & Database</span>
+    </a>
+</li>
