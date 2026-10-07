@@ -87,6 +87,57 @@
 
     }
 
+    .summary{
+        margin:3px 0;
+    }
+
+    .tbl{
+        margin:4px 0;
+    }
+
+    .tbl-row{
+        display:flex;
+        align-items:center;
+        padding:2px 0;
+        font-size:11px;
+        gap:4px;
+    }
+
+    .tbl-row.zebra{
+        background:#f0f0f0;
+    }
+
+    .tbl-head{
+        font-weight:bold;
+        border-top:1px dashed #000;
+        border-bottom:1px dashed #000;
+    }
+
+    .tbl-c-no{
+        width:10%;
+        flex:0 0 10%;
+    }
+
+    .tbl-c-code{
+        flex:1 1 42%;
+        overflow:hidden;
+        text-overflow:ellipsis;
+        white-space:nowrap;
+    }
+
+    .tbl-c-staff{
+        flex:0 0 26%;
+        overflow:hidden;
+        text-overflow:ellipsis;
+        white-space:nowrap;
+    }
+
+    .tbl-c-amount{
+        flex:0 0 22%;
+        text-align:right;
+        font-weight:bold;
+    }
+
     .row{
 
         display:flex;

@@ -87,60 +87,53 @@ $avg = $totalPayment ? ($grandTotal / $totalPayment) : 0;
             <span><?= date('d/m/Y'); ?></span>
         </div>
 
-        <div class="row">
-            <span>Total Pembayaran</span>
-            <span><?= $totalPayment; ?></span>
-        </div>
-
         <hr>
 
-        <?php foreach($data as $d){ ?>
-            <div class="item">
-
-                <div class="code">
-                    <?= $d['tenant_name']; ?>
-                </div>
-
-                <div class="date">
-                    <?= date('d/m/Y',strtotime($d['payment_date'])); ?>
-                </div>
-
-                <div class="staff">
-                    <?= $d['fullname']; ?>
-                </div>
-
-                <div class="amount">
-                    Rp <?= number_format($d['cost_payment'],0,',','.'); ?>
-                </div>
-
+        <!-- RINGKASAN DI ATAS: angka kunci langsung terlihat -->
+        <div class="summary">
+            <div class="row">
+                <span>Total Pembayaran</span>
+                <span><?= number_format($totalPayment,0,',','.'); ?></span>
             </div>
 
-            <hr>
-        <?php } ?>
+            <div class="row">
+                <span>Pembayaran</span>
+                <span>Rp <?= number_format($grandTotal,0,',','.'); ?></span>
+            </div>
 
-        <div class="summary">
             <div class="row">
                 <span>Rata-rata</span>
                 <span>Rp <?= number_format($avg,0,',','.'); ?></span>
             </div>
-
-            <hr>
-
-            <div class="row grand">
-                <span>GRAND TOTAL</span>
-                <span>Rp <?= number_format($grandTotal,0,',','.'); ?></span>
-            </div>
-
-            <hr>
-
-            <div class="footer">
-
-                Laporan dibuat oleh<br>
-                <strong>QIEOS Point Of Sales</strong>
-
-            </div>
         </div>
-    
+
+        <hr>
+
+        <!-- TABEL RINGKAS: satu pembayaran = satu baris -->
+        <div class="tbl">
+            <div class="tbl-row tbl-head">
+                <span class="tbl-c-no">No</span>
+                <span class="tbl-c-name">Tenant</span>
+                <span class="tbl-c-staff">Kasir</span>
+                <span class="tbl-c-amount">Total</span>
+            </div>
+
+            <?php $no = 1; foreach($data as $d){ ?>
+                <div class="tbl-row<?= ($no % 2) ? ' zebra' : '' ?>">
+                    <span class="tbl-c-no"><?= $no++; ?></span>
+                    <span class="tbl-c-name" title="<?= htmlspecialchars($d['tenant_name'] ?: '', ENT_QUOTES); ?>"><?= htmlspecialchars($d['tenant_name'] ?: '-'); ?></span>
+                    <span class="tbl-c-staff"><?= htmlspecialchars($d['fullname'] ?: '-'); ?></span>
+                    <span class="tbl-c-amount"><?= number_format($d['cost_payment'],0,',','.'); ?></span>
+                </div>
+            <?php } ?>
+        </div>
+
+        <div class="footer">
+
+            Laporan dibuat oleh<br>
+            <strong>QIEOS Point Of Sales</strong>
+
+        </div>
     </div>
 
     <script>
