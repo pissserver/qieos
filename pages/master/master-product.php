@@ -63,6 +63,12 @@ include __DIR__ . '/../components/data/stock-status.php';
                             <i class="fas fa-plus me-2"></i>
                             Tambah Produk
                         </button>
+                        <button type="button" class="btn mu-add-btn mu-add-btn-import" id="btnImportProduct">
+                            <i class="fas fa-file-import me-2"></i>Import
+                        </button>
+                        <a class="btn mu-add-btn mu-add-btn-export" href="master-product-export.php">
+                            <i class="fas fa-file-export me-2"></i>Export
+                        </a>
                     </div>
 
                     <!-- TABLE -->
@@ -137,6 +143,65 @@ include __DIR__ . '/../components/data/stock-status.php';
                 </div>
 
                 <div class="mt-2 px-5 mp-add-body" id="addProductContent"></div>
+            </div>
+        </div>
+    </div>
+
+<!-- IMPORT MODAL -->
+    <div class="modal fade" id="importProductModal" tabindex="-1">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content stock-panel border-0">
+
+                <div class="panel-header panel-dark my-3 mx-3 mp-add-header">
+                    <div class="panel-left">
+                        <div class="panel-icon">
+                            <i class="fas fa-file-import"></i>
+                        </div>
+
+                        <div class="mp-add-head-text">
+                            <div class="panel-title">
+                                Import Produk
+                            </div>
+                            <div class="panel-subtitle">
+                                Import data produk dari file Excel
+                            </div>
+                        </div>
+                    </div>
+
+                    <button class="btn-close btn-close-white mp-add-close" data-bs-dismiss="modal"></button>
+                </div>
+
+                <div class="mt-2 px-5 mp-add-body import-modal-body">
+                    <div class="import-guide">
+                        <p><i class="fas fa-info-circle"></i> Unduh template, isi daftar produk, lalu unggah kembali file tersebut.</p>
+                        <p>Kolom <b>code</b> (Kode), <b>name</b> (Nama), <b>category</b> (Kategori), dan <b>sell_price</b> (Harga Jual) wajib diisi; <b>unit</b> boleh kosong. Kategori dipilih dari dropdown Excel. Batas stok menipis mengikuti pengaturan global, foto &amp; supplier diinput manual di detail produk. Baris yang diawali <code>#</code> (mis. baris contoh) dilewati otomatis dan produk dengan kode yang sama tidak diimport dua kali.</p>
+                    </div>
+
+                    <a href="master-product-template.php" class="btn mu-add-btn mu-add-btn-template">
+                        <i class="fas fa-file-download me-2"></i>Download Template
+                    </a>
+
+                    <form id="importProductForm" enctype="multipart/form-data">
+                        <label class="import-dropzone" id="importDropzone" for="importProductFile">
+                            <input type="file" id="importProductFile" name="file" accept=".xlsx,.xls" hidden>
+                            <i class="fas fa-cloud-upload-alt import-drop-ico"></i>
+                            <div class="import-drop-title">Klik untuk <span>pilih file</span> Excel</div>
+                            <div class="import-drop-sub">Format .xlsx / .xls &middot; maksimal 5MB</div>
+                        </label>
+                        <div class="import-fileinfo d-none" id="importFileInfo">
+                            <i class="fas fa-file-excel"></i>
+                            <span id="importFileName"></span>
+                            <button type="button" class="import-file-remove" id="importFileRemove" aria-label="Hapus file">
+                                <i class="fas fa-xmark"></i>
+                            </button>
+                        </div>
+                        <div class="mp-add-footer">
+                            <button type="submit" class="btn-save" id="btnImportSubmit">
+                                <i class="fas fa-upload"></i> Import Sekarang
+                            </button>
+                        </div>
+                    </form>
+                </div>
             </div>
         </div>
     </div>
@@ -800,6 +865,64 @@ include __DIR__ . '/../components/data/stock-status.php';
         })
         .catch(() => {
             QToast('Error', 'Gagal memproses tambah data', 'error');
+        });
+    });
+</script>
+<script>
+    // IMPORT
+    $(document).on('click','#btnImportProduct',function(){
+        $('#importProductModal').modal('show');
+    });
+    $(document).on('change','#importProductFile',function(){
+        let f=this.files && this.files[0];
+        if(!f) return;
+        $('#importFileName').text(f.name);
+        $('#importFileInfo').removeClass('d-none');
+        $('#importDropzone').addClass('d-none');
+    });
+    $(document).on('click','#importFileRemove',function(){
+        $('#importProductFile').val('');
+        $('#importFileInfo').addClass('d-none');
+        $('#importDropzone').removeClass('d-none');
+    });
+    $('#importProductModal').on('hidden.bs.modal',function(){
+        $('#importProductForm')[0].reset();
+        $('#importProductFile').val('');
+        $('#importFileInfo').addClass('d-none');
+        $('#importDropzone').removeClass('d-none');
+    });
+    $(document).on('submit','#importProductForm',function(e){
+        e.preventDefault();
+        let f = document.getElementById('importProductFile').files && document.getElementById('importProductFile').files[0];
+        if(!f){ QToast('Perhatian','Pilih file Excel terlebih dahulu','warning'); return; }
+
+        let formData=new FormData(this);
+        let btn=document.getElementById('btnImportSubmit');
+        let oldHtml=btn.innerHTML;
+        btn.disabled=true;
+        btn.innerHTML='<i class="fas fa-spinner fa-spin"></i> Mengimpor...';
+
+        fetch('master-product-import.php',{method:'POST',body:formData})
+        .then(res=>res.json()).then(res=>{
+            btn.disabled=false;
+            btn.innerHTML=oldHtml;
+            if(res.status==='success'){
+                $('#importProductModal').modal('hide');
+                let msg=res.inserted+' produk berhasil diimport';
+                if(res.duplicated>0) msg+=', '+res.duplicated+' duplikat dilewati';
+                if(res.errors && res.errors.length>0) msg+=' ('+res.errors.length+' baris gagal)';
+                QToast('Import Selesai',msg,'success');
+                if(res.errors && res.errors.length>0){
+                    console.warn('Baris gagal:',res.errors);
+                }
+                loadProductTable();
+            }
+            else{ QToast('Gagal',res.message||'Terjadi kesalahan saat import','error'); }
+        })
+        .catch(()=>{
+            btn.disabled=false;
+            btn.innerHTML=oldHtml;
+            QToast('Error','Gagal memproses import','error');
         });
     });
 </script>

@@ -295,9 +295,14 @@ include '../../sessions/session.php';
             if(!$filter.parent().hasClass('table-action-wrapper')){
                 $filter.wrap('<div class="table-action-wrapper"></div>');
             }
+            // Mobile: search dulu, tombol di bawahnya (satu baris di dalam
+            // .table-action-wrapper yang menyusun kolom full width).
+            $('#btnAddUser').appendTo($filter.parent());
         } else {
             $('.mu-search-slot').empty();
             $filter.appendTo('.mu-search-slot');
+            // Keluar dari mobile: kembalikan tombol ke toolbar tabs.
+            $('#btnAddUser').appendTo('.mu-toolbar-right');
         }
 
         return dt;

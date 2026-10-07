@@ -7,6 +7,7 @@ include '../../sessions/session.php';
             <th>Nama Supplier</th>
             <th class="text-center">Telepon</th>
             <th class="text-center">Alamat</th>
+            <th class="text-center">Catatan</th>
             <th class="text-center">Aksi</th>
         </tr>
     </thead>
@@ -25,6 +26,7 @@ include '../../sessions/session.php';
                     <div class="mp-meta mp-meta-col">
                         <small class="text-muted"><i class="fas fa-phone me-1"></i><?= htmlspecialchars($d['phone'] ?: '-') ?></small>
                         <small class="text-muted"><i class="fas fa-location-dot me-1"></i><?= htmlspecialchars($d['address'] ?: '-') ?></small>
+                        <small class="text-muted"><i class="fas fa-sticky-note me-1"></i><?= htmlspecialchars($d['note'] ?: '-') ?></small>
                     </div>
                 </div>
             </div>
@@ -34,6 +36,9 @@ include '../../sessions/session.php';
         </td>
         <td class="text-center mp-col-address">
             <span class="stock-badge stock-success"><?= htmlspecialchars($d['address'] ?: '-') ?></span>
+        </td>
+        <td class="text-center mp-col-note">
+            <span class="stock-badge stock-empty"><?= htmlspecialchars($d['note'] ?: '-') ?></span>
         </td>
         <td class="text-center">
             <button class="action-btn btn-edit editSupplierBtn" data-id="<?= $d['id'] ?>"><i class="fas fa-edit"></i></button>

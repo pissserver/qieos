@@ -30,6 +30,12 @@
                         <button type="button" class="btn mu-add-btn" id="btnAddCustomer">
                             <i class="fas fa-plus me-2"></i>Tambah Customer
                         </button>
+                        <button type="button" class="btn mu-add-btn mu-add-btn-import" id="btnImportCustomer">
+                            <i class="fas fa-file-import me-2"></i>Import
+                        </button>
+                        <a class="btn mu-add-btn mu-add-btn-export" href="master-customer-export.php">
+                            <i class="fas fa-file-export me-2"></i>Export
+                        </a>
                     </div>
                     <div class="table-responsive-wrap" id="customerTableContainer"></div>
                 </div>
@@ -52,6 +58,55 @@
                     <button class="btn-close btn-close-white mp-add-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="mt-2 px-5 mp-add-body" id="addCustomerContent"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- IMPORT MODAL -->
+    <div class="modal fade" id="importCustomerModal" tabindex="-1">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content stock-panel border-0">
+                <div class="panel-header panel-dark my-3 mx-3 mp-add-header">
+                    <div class="panel-left">
+                        <div class="panel-icon"><i class="fas fa-file-import"></i></div>
+                        <div class="mp-add-head-text">
+                            <div class="panel-title">Import Customer</div>
+                            <div class="panel-subtitle">Import data customer dari file Excel</div>
+                        </div>
+                    </div>
+                    <button class="btn-close btn-close-white mp-add-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="mt-2 px-5 mp-add-body import-modal-body">
+                    <div class="import-guide">
+                        <p><i class="fas fa-info-circle"></i> Unduh template, isi daftar customer, lalu unggah kembali file tersebut.</p>
+                        <p>Kolom <b>name</b> (Nama) wajib diisi, kolom <b>phone</b> (No. Telepon) boleh kosong. Baris yang diawali <code>#</code> (mis. baris contoh) dilewati otomatis dan customer dengan nama yang sama tidak diimport dua kali.</p>
+                    </div>
+
+                    <a href="master-customer-template.php" class="btn mu-add-btn mu-add-btn-template">
+                        <i class="fas fa-file-download me-2"></i>Download Template
+                    </a>
+
+                    <form id="importCustomerForm" enctype="multipart/form-data">
+                        <label class="import-dropzone" id="importDropzone" for="importCustomerFile">
+                            <input type="file" id="importCustomerFile" name="file" accept=".xlsx,.xls" hidden>
+                            <i class="fas fa-cloud-upload-alt import-drop-ico"></i>
+                            <div class="import-drop-title">Klik untuk <span>pilih file</span> Excel</div>
+                            <div class="import-drop-sub">Format .xlsx / .xls &middot; maksimal 5MB</div>
+                        </label>
+                        <div class="import-fileinfo d-none" id="importFileInfo">
+                            <i class="fas fa-file-excel"></i>
+                            <span id="importFileName"></span>
+                            <button type="button" class="import-file-remove" id="importFileRemove" aria-label="Hapus file">
+                                <i class="fas fa-xmark"></i>
+                            </button>
+                        </div>
+                        <div class="mp-add-footer">
+                            <button type="submit" class="btn-save" id="btnImportSubmit">
+                                <i class="fas fa-upload"></i> Import Sekarang
+                            </button>
+                        </div>
+                    </form>
+                </div>
             </div>
         </div>
     </div>
@@ -235,6 +290,63 @@ $(document).on('submit','#addCustomerForm',function(e){
         if(res.status==='success'){ QToast('Berhasil','Customer berhasil ditambahkan','success'); $('#addCustomerModal').modal('hide'); loadCustomerTable(); }
         else{ QToast('Gagal',res.message||'Terjadi kesalahan','error'); }
     }).catch(()=>{ QToast('Error','Gagal memproses','error'); });
+});
+
+// IMPORT
+$(document).on('click','#btnImportCustomer',function(){
+    $('#importCustomerModal').modal('show');
+});
+$(document).on('change','#importCustomerFile',function(){
+    let f=this.files && this.files[0];
+    if(!f) return;
+    $('#importFileName').text(f.name);
+    $('#importFileInfo').removeClass('d-none');
+    $('#importDropzone').addClass('d-none');
+});
+$(document).on('click','#importFileRemove',function(){
+    $('#importCustomerFile').val('');
+    $('#importFileInfo').addClass('d-none');
+    $('#importDropzone').removeClass('d-none');
+});
+$('#importCustomerModal').on('hidden.bs.modal',function(){
+    $('#importCustomerForm')[0].reset();
+    $('#importCustomerFile').val('');
+    $('#importFileInfo').addClass('d-none');
+    $('#importDropzone').removeClass('d-none');
+});
+$(document).on('submit','#importCustomerForm',function(e){
+    e.preventDefault();
+    let f = document.getElementById('importCustomerFile').files && document.getElementById('importCustomerFile').files[0];
+    if(!f){ QToast('Perhatian','Pilih file Excel terlebih dahulu','warning'); return; }
+
+    let formData=new FormData(this);
+    let btn=document.getElementById('btnImportSubmit');
+    let oldHtml=btn.innerHTML;
+    btn.disabled=true;
+    btn.innerHTML='<i class="fas fa-spinner fa-spin"></i> Mengimpor...';
+
+    fetch('master-customer-import.php',{method:'POST',body:formData})
+    .then(res=>res.json()).then(res=>{
+        btn.disabled=false;
+        btn.innerHTML=oldHtml;
+        if(res.status==='success'){
+            $('#importCustomerModal').modal('hide');
+            let msg=res.inserted+' customer berhasil diimport';
+            if(res.duplicated>0) msg+=', '+res.duplicated+' duplikat dilewati';
+            if(res.errors && res.errors.length>0) msg+=' ('+res.errors.length+' baris gagal)';
+            QToast('Import Selesai',msg,'success');
+            if(res.errors && res.errors.length>0){
+                console.warn('Baris gagal:',res.errors);
+            }
+            loadCustomerTable();
+        }
+        else{ QToast('Gagal',res.message||'Terjadi kesalahan saat import','error'); }
+    })
+    .catch(()=>{
+        btn.disabled=false;
+        btn.innerHTML=oldHtml;
+        QToast('Error','Gagal memproses import','error');
+    });
 });
 
 // EDIT

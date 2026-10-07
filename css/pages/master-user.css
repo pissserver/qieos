@@ -951,6 +951,14 @@ textarea.form-control { height: 65px; }
         margin-left: 0;
     }
 
+    /* Mobile: tombol Tambah User dipindah JS ke bawah kotak search
+       (di dalam .table-action-wrapper). Toolbar kanan sengaja
+       disembunyikan supaya tidak menyisakan strip kosong di bawah tabs -
+       tombol tidak hilang, tinggalnya pindah lokasi. */
+    .mu-toolbar-right {
+        display: none;
+    }
+
     .mu-search-slot {
         display: none;
     }
