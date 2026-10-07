@@ -208,48 +208,865 @@
 }
 
 @media (max-width: 575.98px) {
-    #reportAllSummaryCard,
-    #reportProductSummaryCard,
-    #reportCategorySummaryCard,
-    #reportCashierSummaryCard,
-    #reportBestSummaryCard,
-    #reportSummarySummaryCard,
-    #reportOmzetSummaryCard,
-    #reportExpenseSummaryCard,
-    #reportProfitSummaryCard,
-    #reportMarginSummaryCard {
-        padding: 14px 16px !important;
-        border-radius: 12px !important;
+
+    /* ===========================
+    MOBILE PHONES (halaman laporan penjualan)
+    ===========================*/
+
+    /* Semua aturan di-scope ke .report-sales-card (row #mainContent)
+       supaya tidak merembet ke halaman lain yang ikut meng-import
+       css ini (#reportTableAll, #reportXSummaryCard dipakai juga di
+       report-tenant). Desktop & tablet tidak tersentuh.
+
+       Pola kartu mengikuti halaman laporan tenant (.report-tenant-card). */
+
+    /* ---------- JARING PENGAMAN ---------- */
+
+    .report-sales-card{
+        overflow-x: hidden;
     }
 
-    #reportAllSummaryCard .d-flex,
-    #reportProductSummaryCard .d-flex,
-    #reportCategorySummaryCard .d-flex,
-    #reportCashierSummaryCard .d-flex,
-    #reportBestSummaryCard .d-flex,
-    #reportSummarySummaryCard .d-flex,
-    #reportOmzetSummaryCard .d-flex,
-    #reportExpenseSummaryCard .d-flex,
-    #reportProfitSummaryCard .d-flex,
-    #reportMarginSummaryCard .d-flex {
+    .report-sales-card .col-lg-3{
+        margin-bottom: 14px;
+    }
+
+    /* ---------- SUBTAB (jenis laporan) ---------- */
+
+    /* menu horizontal yang terscroll -> grid 2 kolom simetris */
+    .report-sales-card .report-menu{
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+        overflow: visible;
+        margin-bottom: 0;
         flex-direction: column;
-        align-items: flex-start !important;
-        gap: 12px !important;
     }
 
-    #totalAllAmountLabel,
-    #totalProductAmountLabel,
-    #totalCategoryAmountLabel,
-    #totalCashierAmountLabel,
-    #totalBestAmountLabel,
-    #totalSummaryAmountLabel,
-    #totalOmzetAmountLabel,
-    #totalExpenseAmountLabel,
-    #totalProfitAmountLabel,
-    #totalMarginAmountLabel {
+    .report-menu-group{
+        grid-column: 1 / -1;
+    }
+
+    .report-sales-card .report-menu-group:not(:first-child){
+        margin-top: 8px;
+    }
+
+    .report-sales-card .report-menu-item{
+        min-width: 0;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        gap: 8px;
+        padding: 14px 12px;
+        border-radius: 16px;
+    }
+
+    .report-sales-card .report-menu-item:hover{
+        transform: none;
+        border-color: #c7d2fe;
+    }
+
+    .report-sales-card .report-menu-item i{
+        width: 44px;
+        height: 44px;
+        font-size: 18px;
+        border-radius: 12px;
+    }
+
+    .report-sales-card .report-menu-item h6{
+        font-size: 13px;
+        margin: 0;
+    }
+
+    .report-sales-card .report-menu-item small{
+        font-size: 11px;
+        line-height: 1.4;
+        margin-top: 2px;
+    }
+
+    /* ---------- PANEL HEADER RINGKAS ---------- */
+
+    .report-sales-card .panel-header{
+        padding: 14px 16px;
+        border-radius: 14px;
+    }
+
+    .report-sales-card .panel-icon{
+        width: 44px;
+        height: 44px;
+        font-size: 17px;
+        border-radius: 12px;
+    }
+
+    .report-sales-card .panel-title{
+        font-size: 15px;
+    }
+
+    .report-sales-card .panel-subtitle{
+        font-size: 12px;
+    }
+
+    /* ---------- KARTU DATA (minimal) ---------- */
+
+    .report-sales-card .table-responsive{
+        overflow: visible !important;
+    }
+
+    .report-sales-card #reportTableSummary,
+    .report-sales-card #reportTableOmzet,
+    .report-sales-card #reportTableExpense,
+    .report-sales-card #reportTableProfit,
+    .report-sales-card #reportTableMargin,
+    .report-sales-card #reportTableAll,
+    .report-sales-card #reportTableProduct,
+    .report-sales-card #reportTableCategory,
+    .report-sales-card #reportTableCashier,
+    .report-sales-card #reportTableBest{
+
+        border-collapse: separate;
+        border-spacing: 0 8px;
+        margin-bottom: 0;
+        width: 100%;
+
+    }
+
+    .report-sales-card #reportTableSummary thead,
+    .report-sales-card #reportTableOmzet thead,
+    .report-sales-card #reportTableExpense thead,
+    .report-sales-card #reportTableProfit thead,
+    .report-sales-card #reportTableMargin thead,
+    .report-sales-card #reportTableAll thead,
+    .report-sales-card #reportTableProduct thead,
+    .report-sales-card #reportTableCategory thead,
+    .report-sales-card #reportTableCashier thead,
+    .report-sales-card #reportTableBest thead{
+        display: none;
+    }
+
+    /* setiap baris data -> kartu putih (3 kolom grid);
+       baris kosong dikecualikan (td:only-child) supaya tetap
+       table-row dan kartu kosong bisa di-tengah penuh */
+    .report-sales-card #reportTableSummary tbody tr:not(:has(td:only-child)),
+    .report-sales-card #reportTableOmzet tbody tr:not(:has(td:only-child)),
+    .report-sales-card #reportTableExpense tbody tr:not(:has(td:only-child)),
+    .report-sales-card #reportTableProfit tbody tr:not(:has(td:only-child)),
+    .report-sales-card #reportTableMargin tbody tr:not(:has(td:only-child)),
+    .report-sales-card #reportTableAll tbody tr:not(:has(td:only-child)),
+    .report-sales-card #reportTableProduct tbody tr:not(:has(td:only-child)),
+    .report-sales-card #reportTableCategory tbody tr:not(:has(td:only-child)),
+    .report-sales-card #reportTableCashier tbody tr:not(:has(td:only-child)),
+    .report-sales-card #reportTableBest tbody tr:not(:has(td:only-child)){
+
+        display: grid;
+        gap: 3px 10px;
+        align-items: center;
+        padding: 10px 12px;
+        background: #fff;
+        border: 1px solid #eef2f7;
+        border-radius: 12px;
+
+    }
+
+    /* sel: bersih dari border/padding volt & bootstrap */
+    .report-sales-card #reportTableSummary tbody td,
+    .report-sales-card #reportTableOmzet tbody td,
+    .report-sales-card #reportTableExpense tbody td,
+    .report-sales-card #reportTableProfit tbody td,
+    .report-sales-card #reportTableMargin tbody td,
+    .report-sales-card #reportTableAll tbody td,
+    .report-sales-card #reportTableProduct tbody td,
+    .report-sales-card #reportTableCategory tbody td,
+    .report-sales-card #reportTableCashier tbody td,
+    .report-sales-card #reportTableBest tbody td{
+
+        border: none !important;
+        padding: 0 !important;
+        text-align: left !important;
+        min-width: 0;
+
+    }
+
+    /* nomor urut: teks sederhana (pengecualian: tabel terlaris memakai
+       rank-badge, lihat bagian bawah) */
+    .report-sales-card #reportTableSummary tbody td:nth-child(1),
+    .report-sales-card #reportTableOmzet tbody td:nth-child(1),
+    .report-sales-card #reportTableExpense tbody td:nth-child(1),
+    .report-sales-card #reportTableProfit tbody td:nth-child(1),
+    .report-sales-card #reportTableMargin tbody td:nth-child(1),
+    .report-sales-card #reportTableAll tbody td:nth-child(1),
+    .report-sales-card #reportTableProduct tbody td:nth-child(1),
+    .report-sales-card #reportTableCategory tbody td:nth-child(1),
+    .report-sales-card #reportTableCashier tbody td:nth-child(1){
+
+        font-size: 11px;
+        color: #94a3b8;
+        font-weight: 600;
+
+    }
+
+    /* sel judul (nama/kode/form): track 1fr wajib min-width:0 */
+    .report-sales-card #reportTableSummary tbody td:nth-child(2),
+    .report-sales-card #reportTableExpense tbody td:nth-child(3),
+    .report-sales-card #reportTableMargin tbody td:nth-child(2),
+    .report-sales-card #reportTableAll tbody td:nth-child(2),
+    .report-sales-card #reportTableProduct tbody td:nth-child(3),
+    .report-sales-card #reportTableCategory tbody td:nth-child(2),
+    .report-sales-card #reportTableCashier tbody td:nth-child(2),
+    .report-sales-card #reportTableBest tbody td:nth-child(2){
+
+        font-size: 13px;
+        font-weight: 600;
+        color: #0f172a;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        min-width: 0;
+        max-width: 100%;
+
+    }
+
+    /* sel jumlah menonjol */
+    .report-sales-card #reportTableSummary tbody td:nth-child(4),
+    .report-sales-card #reportTableOmzet tbody td:nth-child(6),
+    .report-sales-card #reportTableExpense tbody td:nth-child(5),
+    .report-sales-card #reportTableProfit tbody td:nth-child(5),
+    .report-sales-card #reportTableMargin tbody td:nth-child(7),
+    .report-sales-card #reportTableAll tbody td:nth-child(5),
+    .report-sales-card #reportTableProduct tbody td:nth-child(6),
+    .report-sales-card #reportTableCategory tbody td:nth-child(5),
+    .report-sales-card #reportTableCashier tbody td:nth-child(4),
+    .report-sales-card #reportTableBest tbody td:nth-child(5){
+
+        color: #4f46e5;
+        font-size: 13px;
+        font-weight: 700;
+        white-space: nowrap;
+
+    }
+
+    /* tanggal & teks sekunder */
+    .report-sales-card #reportTableSummary tbody td:nth-child(3),
+    .report-sales-card #reportTableOmzet tbody td:nth-child(2),
+    .report-sales-card #reportTableExpense tbody td:nth-child(2),
+    .report-sales-card #reportTableProfit tbody td:nth-child(2),
+    .report-sales-card #reportTableAll tbody td:nth-child(3),
+    .report-sales-card #reportTableProduct tbody td:nth-child(2),
+    .report-sales-card #reportTableCategory tbody td:nth-child(3),
+    .report-sales-card #reportTableCashier tbody td:nth-child(3),
+    .report-sales-card #reportTableBest tbody td:nth-child(3){
+
+        font-size: 11.5px;
+        color: #94a3b8;
+
+    }
+
+    /* sel berlabel kecil (kunci ke laporan masing-masing) */
+    .report-sales-card #reportTableSummary tbody td:nth-child(3),
+    .report-sales-card #reportTableExpense tbody td:nth-child(4),
+    .report-sales-card #reportTableProfit tbody td:nth-child(3),
+    .report-sales-card #reportTableProfit tbody td:nth-child(4),
+    .report-sales-card #reportTableMargin tbody td:nth-child(3),
+    .report-sales-card #reportTableMargin tbody td:nth-child(4),
+    .report-sales-card #reportTableMargin tbody td:nth-child(5),
+    .report-sales-card #reportTableMargin tbody td:nth-child(6),
+    .report-sales-card #reportTableAll tbody td:nth-child(4),
+    .report-sales-card #reportTableProduct tbody td:nth-child(4),
+    .report-sales-card #reportTableProduct tbody td:nth-child(5),
+    .report-sales-card #reportTableCategory tbody td:nth-child(4),
+    .report-sales-card #reportTableBest tbody td:nth-child(4){
+
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        flex-wrap: wrap;
+        white-space: normal;
+
+    }
+
+    /* label kecil di dalam sel tersebut */
+    .report-sales-card #reportTableSummary tbody td:nth-child(3)::before{
+        content: 'Ket';
+    }
+
+    .report-sales-card #reportTableExpense tbody td:nth-child(4)::before{
+        content: 'Item';
+    }
+
+    .report-sales-card #reportTableProfit tbody td:nth-child(3)::before{
+        content: 'Omzet';
+    }
+
+    .report-sales-card #reportTableProfit tbody td:nth-child(4)::before{
+        content: 'Pengeluaran';
+    }
+
+    .report-sales-card #reportTableMargin tbody td:nth-child(3)::before{
+        content: 'Terjual';
+    }
+
+    .report-sales-card #reportTableMargin tbody td:nth-child(4)::before{
+        content: 'Beli';
+    }
+
+    .report-sales-card #reportTableMargin tbody td:nth-child(5)::before{
+        content: 'Jual';
+    }
+
+    .report-sales-card #reportTableMargin tbody td:nth-child(6)::before{
+        content: 'Margin';
+    }
+
+    .report-sales-card #reportTableAll tbody td:nth-child(4)::before{
+        content: 'Kasir';
+    }
+
+    .report-sales-card #reportTableProduct tbody td:nth-child(4)::before{
+        content: 'Qty';
+    }
+
+    .report-sales-card #reportTableProduct tbody td:nth-child(5)::before{
+        content: 'Harga';
+    }
+
+    .report-sales-card #reportTableCategory tbody td:nth-child(4)::before{
+        content: 'Qty';
+    }
+
+    .report-sales-card #reportTableBest tbody td:nth-child(4)::before{
+        content: 'Qty';
+    }
+
+    .report-sales-card #reportTableSummary tbody td:nth-child(3)::before,
+    .report-sales-card #reportTableExpense tbody td:nth-child(4)::before,
+    .report-sales-card #reportTableProfit tbody td:nth-child(3)::before,
+    .report-sales-card #reportTableProfit tbody td:nth-child(4)::before,
+    .report-sales-card #reportTableMargin tbody td:nth-child(3)::before,
+    .report-sales-card #reportTableMargin tbody td:nth-child(4)::before,
+    .report-sales-card #reportTableMargin tbody td:nth-child(5)::before,
+    .report-sales-card #reportTableMargin tbody td:nth-child(6)::before,
+    .report-sales-card #reportTableAll tbody td:nth-child(4)::before,
+    .report-sales-card #reportTableProduct tbody td:nth-child(4)::before,
+    .report-sales-card #reportTableProduct tbody td:nth-child(5)::before,
+    .report-sales-card #reportTableCategory tbody td:nth-child(4)::before,
+    .report-sales-card #reportTableBest tbody td:nth-child(4)::before{
+
+        font-size: 10px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: .4px;
+        color: #94a3b8;
+
+    }
+
+    .report-sales-card #reportTableSummary tbody td:nth-child(3),
+    .report-sales-card #reportTableExpense tbody td:nth-child(4),
+    .report-sales-card #reportTableProfit tbody td:nth-child(3),
+    .report-sales-card #reportTableProfit tbody td:nth-child(4),
+    .report-sales-card #reportTableMargin tbody td:nth-child(3),
+    .report-sales-card #reportTableMargin tbody td:nth-child(4),
+    .report-sales-card #reportTableMargin tbody td:nth-child(5),
+    .report-sales-card #reportTableMargin tbody td:nth-child(6),
+    .report-sales-card #reportTableAll tbody td:nth-child(4),
+    .report-sales-card #reportTableProduct tbody td:nth-child(4),
+    .report-sales-card #reportTableProduct tbody td:nth-child(5),
+    .report-sales-card #reportTableCategory tbody td:nth-child(4),
+    .report-sales-card #reportTableBest tbody td:nth-child(4){
+
+        font-size: 11.5px;
+        color: #475569;
+
+    }
+
+    /* status badge lebih kecil & flat */
+    .report-sales-card .status-paid,
+    .report-sales-card .status-unpaid,
+    .report-sales-card .status-partial{
+
+        padding: 3px 9px;
+        font-size: 11px;
+
+    }
+
+    /* ========== LAYOUT GRID PER TABEL ========== */
+
+    /* Ringkasan Keuangan: No|Komponen+Jumlah, Keterangan di bawah */
+    .report-sales-card #reportTableSummary tbody tr{
+        grid-template-columns: auto minmax(0, 1fr) auto;
+        grid-template-areas:
+            "no name amount"
+            "no note note";
+    }
+
+    .report-sales-card #reportTableSummary tbody td:nth-child(1){ grid-area: no; }
+    .report-sales-card #reportTableSummary tbody td:nth-child(2){ grid-area: name; }
+    .report-sales-card #reportTableSummary tbody td:nth-child(3){ grid-area: note; }
+    .report-sales-card #reportTableSummary tbody td:nth-child(4){ grid-area: amount; justify-self: end; }
+
+    /* Omzet Harian: No | Tanggal + Omzet, statistik mini di bawah */
+    .report-sales-card #reportTableOmzet tbody tr{
+        grid-template-columns: auto minmax(0, 1fr) auto auto;
+        grid-template-areas:
+            "no date omzet omzet"
+            "no s1 s2 s3";
+    }
+
+    .report-sales-card #reportTableOmzet tbody td:nth-child(1){ grid-area: no; }
+    .report-sales-card #reportTableOmzet tbody td:nth-child(2){ grid-area: date; }
+    .report-sales-card #reportTableOmzet tbody td:nth-child(3){ grid-area: s1; }
+    .report-sales-card #reportTableOmzet tbody td:nth-child(4){ grid-area: s2; }
+    .report-sales-card #reportTableOmzet tbody td:nth-child(5){ grid-area: s3; }
+    .report-sales-card #reportTableOmzet tbody td:nth-child(6){ grid-area: omzet; justify-self: end; }
+
+    .report-sales-card #reportTableOmzet tbody td:nth-child(3)::before{ content: 'Pesanan'; }
+    .report-sales-card #reportTableOmzet tbody td:nth-child(4)::before{ content: 'Bayar'; }
+    .report-sales-card #reportTableOmzet tbody td:nth-child(5)::before{ content: 'Waiting'; }
+
+    .report-sales-card #reportTableOmzet tbody td:nth-child(3),
+    .report-sales-card #reportTableOmzet tbody td:nth-child(4),
+    .report-sales-card #reportTableOmzet tbody td:nth-child(5){
+
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        white-space: nowrap;
+        font-size: 11px;
+        color: #64748b;
+
+    }
+
+    .report-sales-card #reportTableOmzet tbody td:nth-child(3)::before,
+    .report-sales-card #reportTableOmzet tbody td:nth-child(4)::before,
+    .report-sales-card #reportTableOmzet tbody td:nth-child(5)::before{
+
+        font-size: 10px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: .4px;
+        color: #94a3b8;
+
+    }
+
+    /* Pengeluaran: No | Form + Total, Tanggal + Item di bawah */
+    .report-sales-card #reportTableExpense tbody tr{
+        grid-template-columns: auto minmax(0, 1fr) auto;
+        grid-template-areas:
+            "no form amount"
+            "no date items";
+    }
+
+    .report-sales-card #reportTableExpense tbody td:nth-child(1){ grid-area: no; }
+    .report-sales-card #reportTableExpense tbody td:nth-child(2){ grid-area: date; }
+    .report-sales-card #reportTableExpense tbody td:nth-child(3){ grid-area: form; }
+    .report-sales-card #reportTableExpense tbody td:nth-child(4){ grid-area: items; }
+    .report-sales-card #reportTableExpense tbody td:nth-child(5){ grid-area: amount; justify-self: end; }
+
+    /* Laba & Rugi: No | Tanggal + Status, Laba menonjol, breakdown di bawah */
+    .report-sales-card #reportTableProfit tbody tr{
+        grid-template-columns: auto minmax(0, 1fr) auto;
+        grid-template-areas:
+            "no date status"
+            "no profit profit"
+            "no omz exp";
+    }
+
+    .report-sales-card #reportTableProfit tbody td:nth-child(1){ grid-area: no; }
+    .report-sales-card #reportTableProfit tbody td:nth-child(2){ grid-area: date; }
+    .report-sales-card #reportTableProfit tbody td:nth-child(3){ grid-area: omz; }
+    .report-sales-card #reportTableProfit tbody td:nth-child(4){ grid-area: exp; }
+    .report-sales-card #reportTableProfit tbody td:nth-child(5){ grid-area: profit; justify-self: end; }
+    .report-sales-card #reportTableProfit tbody td:nth-child(6){ grid-area: status; justify-self: end; }
+
+    .report-sales-card #reportTableProfit tbody td:nth-child(5){
+        font-size: 13px;
+    }
+
+    /* Margin: No | Produk + Keuntungan, detail harga di bawah */
+    .report-sales-card #reportTableMargin tbody tr{
+        grid-template-columns: auto minmax(0, 1fr) auto;
+        grid-template-areas:
+            "no product amount"
+            "no qty margin"
+            "no buy sell";
+    }
+
+    .report-sales-card #reportTableMargin tbody td:nth-child(1){ grid-area: no; }
+    .report-sales-card #reportTableMargin tbody td:nth-child(2){ grid-area: product; }
+    .report-sales-card #reportTableMargin tbody td:nth-child(3){ grid-area: qty; }
+    .report-sales-card #reportTableMargin tbody td:nth-child(4){ grid-area: buy; }
+    .report-sales-card #reportTableMargin tbody td:nth-child(5){ grid-area: sell; }
+    .report-sales-card #reportTableMargin tbody td:nth-child(6){ grid-area: margin; }
+    .report-sales-card #reportTableMargin tbody td:nth-child(7){ grid-area: amount; justify-self: end; }
+
+    /* Semua Transaksi: No | Kode + Status, detail di bawah */
+    .report-sales-card #reportTableAll tbody tr{
+        grid-template-columns: auto minmax(0, 1fr) auto;
+        grid-template-areas:
+            "no code status"
+            "no date cashier"
+            "no total total";
+    }
+
+    .report-sales-card #reportTableAll tbody td:nth-child(1){ grid-area: no; }
+    .report-sales-card #reportTableAll tbody td:nth-child(2){ grid-area: code; }
+    .report-sales-card #reportTableAll tbody td:nth-child(3){ grid-area: date; }
+    .report-sales-card #reportTableAll tbody td:nth-child(4){ grid-area: cashier; }
+    .report-sales-card #reportTableAll tbody td:nth-child(5){ grid-area: total; justify-self: end; }
+    .report-sales-card #reportTableAll tbody td:nth-child(6){ grid-area: status; justify-self: end; }
+
+    /* Per Produk: No | Kode + Subtotal, Tanggal + Harga + Qty di bawah */
+    .report-sales-card #reportTableProduct tbody tr{
+        grid-template-columns: auto minmax(0, 1fr) auto;
+        grid-template-areas:
+            "no code amount"
+            "no date price"
+            "no qty qty";
+    }
+
+    .report-sales-card #reportTableProduct tbody td:nth-child(1){ grid-area: no; }
+    .report-sales-card #reportTableProduct tbody td:nth-child(2){ grid-area: date; }
+    .report-sales-card #reportTableProduct tbody td:nth-child(3){ grid-area: code; }
+    .report-sales-card #reportTableProduct tbody td:nth-child(4){ grid-area: qty; }
+    .report-sales-card #reportTableProduct tbody td:nth-child(5){ grid-area: price; }
+    .report-sales-card #reportTableProduct tbody td:nth-child(6){ grid-area: amount; justify-self: end; }
+
+    /* Per Kategori: No | Produk + Omzet, Kode + Qty di bawah */
+    .report-sales-card #reportTableCategory tbody tr{
+        grid-template-columns: auto minmax(0, 1fr) auto;
+        grid-template-areas:
+            "no name amount"
+            "no code qty";
+    }
+
+    .report-sales-card #reportTableCategory tbody td:nth-child(1){ grid-area: no; }
+    .report-sales-card #reportTableCategory tbody td:nth-child(2){ grid-area: name; }
+    .report-sales-card #reportTableCategory tbody td:nth-child(3){ grid-area: code; }
+    .report-sales-card #reportTableCategory tbody td:nth-child(4){ grid-area: qty; }
+    .report-sales-card #reportTableCategory tbody td:nth-child(5){ grid-area: amount; justify-self: end; }
+
+    /* Per Kasir: No | Kode + Status, Tanggal + Total di bawah */
+    .report-sales-card #reportTableCashier tbody tr{
+        grid-template-columns: auto minmax(0, 1fr) auto;
+        grid-template-areas:
+            "no code status"
+            "no date amount";
+    }
+
+    .report-sales-card #reportTableCashier tbody td:nth-child(1){ grid-area: no; }
+    .report-sales-card #reportTableCashier tbody td:nth-child(2){ grid-area: code; }
+    .report-sales-card #reportTableCashier tbody td:nth-child(3){ grid-area: date; }
+    .report-sales-card #reportTableCashier tbody td:nth-child(4){ grid-area: amount; justify-self: end; }
+    .report-sales-card #reportTableCashier tbody td:nth-child(5){ grid-area: status; justify-self: end; }
+
+    /* Produk Terlaris: rank-badge + Produk + Omzet, Kategori + Qty di bawah */
+    .report-sales-card #reportTableBest tbody tr{
+        grid-template-columns: auto minmax(0, 1fr) auto;
+        grid-template-areas:
+            "no name amount"
+            "no cat qty";
+    }
+
+    .report-sales-card #reportTableBest tbody td:nth-child(1){ grid-area: no; }
+    .report-sales-card #reportTableBest tbody td:nth-child(2){ grid-area: name; }
+    .report-sales-card #reportTableBest tbody td:nth-child(3){ grid-area: cat; }
+    .report-sales-card #reportTableBest tbody td:nth-child(4){ grid-area: qty; }
+    .report-sales-card #reportTableBest tbody td:nth-child(5){ grid-area: amount; justify-self: end; }
+
+    .report-sales-card .rank-badge{
+        width: 26px;
+        height: 26px;
+        font-size: 11px;
+        border-radius: 8px;
+    }
+
+    /* ---------- BARIS KOSONG / LOADING ---------- */
+
+    /* satu sel penuh -> kartu dasbor; volt memberi
+       .table td white-space:nowrap, wajib wrap di sini */
+    .report-sales-card #reportTableSummary tbody tr > td:only-child,
+    .report-sales-card #reportTableOmzet tbody tr > td:only-child,
+    .report-sales-card #reportTableExpense tbody tr > td:only-child,
+    .report-sales-card #reportTableProfit tbody tr > td:only-child,
+    .report-sales-card #reportTableMargin tbody tr > td:only-child,
+    .report-sales-card #reportTableAll tbody tr > td:only-child,
+    .report-sales-card #reportTableProduct tbody tr > td:only-child,
+    .report-sales-card #reportTableCategory tbody tr > td:only-child,
+    .report-sales-card #reportTableCashier tbody tr > td:only-child,
+    .report-sales-card #reportTableBest tbody tr > td:only-child{
+
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        background: #fff;
+        border: 1px dashed #e2e8f0;
+        border-radius: 12px;
+        box-shadow: none;
+        padding: 22px 16px !important;
+        text-align: center !important;
+        white-space: normal;
+        overflow-wrap: break-word;
+        word-break: break-word;
+
+    }
+
+    /* puck center isi loading-box & isi report_empty (ikon + teks) */
+    .report-sales-card #reportTableSummary tbody tr > td:only-child .loading-box,
+    .report-sales-card #reportTableOmzet tbody tr > td:only-child .loading-box,
+    .report-sales-card #reportTableExpense tbody tr > td:only-child .loading-box,
+    .report-sales-card #reportTableProfit tbody tr > td:only-child .loading-box,
+    .report-sales-card #reportTableMargin tbody tr > td:only-child .loading-box,
+    .report-sales-card #reportTableAll tbody tr > td:only-child .loading-box,
+    .report-sales-card #reportTableProduct tbody tr > td:only-child .loading-box,
+    .report-sales-card #reportTableCategory tbody tr > td:only-child .loading-box,
+    .report-sales-card #reportTableCashier tbody tr > td:only-child .loading-box,
+    .report-sales-card #reportTableBest tbody tr > td:only-child .loading-box{
+
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        width: 100%;
+        height: auto;
+        min-height: 0;
+        padding: 0;
+
+    }
+
+    .report-sales-card #reportTableSummary .loading-box i,
+    .report-sales-card #reportTableOmzet .loading-box i,
+    .report-sales-card #reportTableExpense .loading-box i,
+    .report-sales-card #reportTableProfit .loading-box i,
+    .report-sales-card #reportTableMargin .loading-box i,
+    .report-sales-card #reportTableAll .loading-box i,
+    .report-sales-card #reportTableProduct .loading-box i,
+    .report-sales-card #reportTableCategory .loading-box i,
+    .report-sales-card #reportTableCashier .loading-box i,
+    .report-sales-card #reportTableBest .loading-box i{
+
+        font-size: 26px;
+        margin-bottom: 8px;
+
+    }
+
+    .report-sales-card #reportTableSummary .loading-box h5,
+    .report-sales-card #reportTableOmzet .loading-box h5,
+    .report-sales-card #reportTableExpense .loading-box h5,
+    .report-sales-card #reportTableProfit .loading-box h5,
+    .report-sales-card #reportTableMargin .loading-box h5,
+    .report-sales-card #reportTableAll .loading-box h5,
+    .report-sales-card #reportTableProduct .loading-box h5,
+    .report-sales-card #reportTableCategory .loading-box h5,
+    .report-sales-card #reportTableCashier .loading-box h5,
+    .report-sales-card #reportTableBest .loading-box h5{
+
+        font-size: 13px;
+        margin-bottom: 3px;
+
+    }
+
+    .report-sales-card #reportTableSummary .loading-box span,
+    .report-sales-card #reportTableOmzet .loading-box span,
+    .report-sales-card #reportTableExpense .loading-box span,
+    .report-sales-card #reportTableProfit .loading-box span,
+    .report-sales-card #reportTableMargin .loading-box span,
+    .report-sales-card #reportTableAll .loading-box span,
+    .report-sales-card #reportTableProduct .loading-box span,
+    .report-sales-card #reportTableCategory .loading-box span,
+    .report-sales-card #reportTableCashier .loading-box span,
+    .report-sales-card #reportTableBest .loading-box span{
+
+        font-size: 12px;
+        max-width: 300px;
+        white-space: normal;
+
+    }
+
+    /* isi baris kosong dari AJAX (report_empty: ikon inbox + teks) */
+    .report-sales-card #reportTableSummary tbody tr > td:only-child .fa-inbox,
+    .report-sales-card #reportTableOmzet tbody tr > td:only-child .fa-inbox,
+    .report-sales-card #reportTableExpense tbody tr > td:only-child .fa-inbox,
+    .report-sales-card #reportTableProfit tbody tr > td:only-child .fa-inbox,
+    .report-sales-card #reportTableMargin tbody tr > td:only-child .fa-inbox,
+    .report-sales-card #reportTableAll tbody tr > td:only-child .fa-inbox,
+    .report-sales-card #reportTableProduct tbody tr > td:only-child .fa-inbox,
+    .report-sales-card #reportTableCategory tbody tr > td:only-child .fa-inbox,
+    .report-sales-card #reportTableCashier tbody tr > td:only-child .fa-inbox,
+    .report-sales-card #reportTableBest tbody tr > td:only-child .fa-inbox{
+
+        font-size: 26px;
+        margin-bottom: 8px;
+        color: #94a3b8;
+
+    }
+
+    .report-sales-card #reportTableSummary tbody tr > td:only-child div,
+    .report-sales-card #reportTableOmzet tbody tr > td:only-child div,
+    .report-sales-card #reportTableExpense tbody tr > td:only-child div,
+    .report-sales-card #reportTableProfit tbody tr > td:only-child div,
+    .report-sales-card #reportTableMargin tbody tr > td:only-child div,
+    .report-sales-card #reportTableAll tbody tr > td:only-child div,
+    .report-sales-card #reportTableProduct tbody tr > td:only-child div,
+    .report-sales-card #reportTableCategory tbody tr > td:only-child div,
+    .report-sales-card #reportTableCashier tbody tr > td:only-child div,
+    .report-sales-card #reportTableBest tbody tr > td:only-child div{
+
+        font-size: 12px;
+        color: #94a3b8;
+
+    }
+
+    /* ---------- FILTER & TOMBOL ---------- */
+
+    .report-sales-card .report-filter .d-flex.align-items-end{
+
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 6px;
+
+    }
+
+    .report-sales-card .report-filter .d-flex.align-items-end .btn{
+
+        flex: 1 1 calc(50% - 5px);
+        min-width: 120px;
+        margin-right: 0 !important;
+        margin-left: 0 !important;
+
+    }
+
+    /* ---------- RINGKASAN (money stat) ---------- */
+
+    .report-sales-card .money-grid{
+        padding: 14px 10px;
+        border-radius: 18px;
+    }
+
+    .report-sales-card .money-stat{
+        padding: 16px 14px;
+        min-height: 0;
+        gap: 12px;
+        border-radius: 16px;
+    }
+
+    .report-sales-card .money-stat-icon{
+        width: 42px;
+        height: 42px;
+        font-size: 17px;
+        border-radius: 12px;
+    }
+
+    .report-sales-card .money-stat h5{
+        font-size: 19px;
+    }
+
+    .report-sales-card .money-stat small{
+        font-size: 10px;
+    }
+
+    .report-sales-card .money-stat span{
+        font-size: 11px;
+    }
+
+    /* ---------- KARTU TOTAL (simetris, center) ---------- */
+
+    .report-sales-card #reportAllSummaryCard,
+    .report-sales-card #reportProductSummaryCard,
+    .report-sales-card #reportCategorySummaryCard,
+    .report-sales-card #reportCashierSummaryCard,
+    .report-sales-card #reportBestSummaryCard,
+    .report-sales-card #reportSummarySummaryCard,
+    .report-sales-card #reportOmzetSummaryCard,
+    .report-sales-card #reportExpenseSummaryCard,
+    .report-sales-card #reportProfitSummaryCard,
+    .report-sales-card #reportMarginSummaryCard{
+
+        padding: 18px 14px !important;
+        border-radius: 16px !important;
+        text-align: center;
+
+    }
+
+    .report-sales-card #reportAllSummaryCard .d-flex,
+    .report-sales-card #reportProductSummaryCard .d-flex,
+    .report-sales-card #reportCategorySummaryCard .d-flex,
+    .report-sales-card #reportCashierSummaryCard .d-flex,
+    .report-sales-card #reportBestSummaryCard .d-flex,
+    .report-sales-card #reportSummarySummaryCard .d-flex,
+    .report-sales-card #reportOmzetSummaryCard .d-flex,
+    .report-sales-card #reportExpenseSummaryCard .d-flex,
+    .report-sales-card #reportProfitSummaryCard .d-flex,
+    .report-sales-card #reportMarginSummaryCard .d-flex{
+
+        flex-direction: column;
+        align-items: center !important;
+        justify-content: center;
+        gap: 14px !important;
+        text-align: center;
+
+    }
+
+    .report-sales-card #reportAllSummaryCard .d-flex > div:first-child,
+    .report-sales-card #reportProductSummaryCard .d-flex > div:first-child,
+    .report-sales-card #reportCategorySummaryCard .d-flex > div:first-child,
+    .report-sales-card #reportCashierSummaryCard .d-flex > div:first-child,
+    .report-sales-card #reportBestSummaryCard .d-flex > div:first-child,
+    .report-sales-card #reportSummarySummaryCard .d-flex > div:first-child,
+    .report-sales-card #reportOmzetSummaryCard .d-flex > div:first-child,
+    .report-sales-card #reportExpenseSummaryCard .d-flex > div:first-child,
+    .report-sales-card #reportProfitSummaryCard .d-flex > div:first-child,
+    .report-sales-card #reportMarginSummaryCard .d-flex > div:first-child{
+
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+        text-align: center;
+        width: 100%;
+
+    }
+
+    /* chip qty + amount di kartu produk/kategori/terlaris tetap sebaris */
+    .report-sales-card #reportProductSummaryCard .d-flex > div:last-child,
+    .report-sales-card #reportCategorySummaryCard .d-flex > div:last-child,
+    .report-sales-card #reportBestSummaryCard .d-flex > div:last-child{
+
+        flex-direction: row;
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 10px;
+
+    }
+
+    .report-sales-card #totalAllAmountLabel,
+    .report-sales-card #totalProductAmountLabel,
+    .report-sales-card #totalCategoryAmountLabel,
+    .report-sales-card #totalCashierAmountLabel,
+    .report-sales-card #totalBestAmountLabel,
+    .report-sales-card #totalSummaryAmountLabel,
+    .report-sales-card #totalOmzetAmountLabel,
+    .report-sales-card #totalExpenseAmountLabel,
+    .report-sales-card #totalProfitAmountLabel,
+    .report-sales-card #totalMarginAmountLabel{
+
         width: 100%;
         text-align: center;
-        font-size: 16px !important;
-        padding: 10px 16px !important;
+        font-size: 18px !important;
+        padding: 11px 24px !important;
+        border-radius: 12px !important;
+
     }
+
+    .report-sales-card #totalProductQtyLabel,
+    .report-sales-card #totalCategoryQtyLabel,
+    .report-sales-card #totalBestQtyLabel{
+
+        font-size: 12px;
+
+    }
+
+    /* kartu panel memakai padding lebih ringkas */
+    .report-sales-card .section-card{
+        padding: 16px;
+    }
+
 }

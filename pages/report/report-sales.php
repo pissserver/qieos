@@ -19,7 +19,7 @@
 
     <div class="container-fluid px-0 mt-5">
 
-        <div id="mainContent" class="row mb-5">
+        <div id="mainContent" class="row mb-5 report-sales-card">
 
             <!-- Sidebar -->
             <div class="col-lg-3">
