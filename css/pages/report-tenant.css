@@ -257,29 +257,9 @@
             margin-bottom:15px;
         }
 
-        /* SUMMARY CARD RESPONSIF */
-        @media (max-width: 575.98px) {
-            #reportAllSummaryCard,
-            #reportSingleSummaryCard {
-                padding: 14px 16px !important;
-                border-radius: 12px !important;
-            }
-
-            #reportAllSummaryCard .d-flex,
-            #reportSingleSummaryCard .d-flex {
-                flex-direction: column;
-                align-items: flex-start !important;
-                gap: 12px !important;
-            }
-
-            #totalAllAmountLabel,
-            #totalSingleAmountLabel {
-                width: 100%;
-                text-align: center;
-                font-size: 16px !important;
-                padding: 10px 16px !important;
-            }
-        }
+        /* (ringkasan total pembayaran di-mobile dipindah ke bawah
+           dan di-scope .report-tenant-card agar tidak mengubah laporan
+           penjualan yang meng-@import css ini) */
         /* PANEL */
             
         .panel-header{
@@ -915,6 +895,424 @@
                 align-items:flex-start;
 
                 gap:15px;
+
+            }
+
+        }
+
+        /* ===========================
+        MOBILE PHONES (halaman laporan tenant)
+        ===========================*/
+
+        /* Semua aturan di-scope ke .report-tenant-tabs (toggle atas) dan
+           .report-tenant-card (panel) supaya tidak merembet ke halaman lain
+           yang meng-@import css ini:
+           - report-sales.css memakai id tabel & summary yang sama
+             (#reportTableAll, #reportAllSummaryCard)
+           - tenant-detail.php memakai komponen .payment-tabs yang sama.
+           Desktop & tablet tidak tersentuh. */
+
+        @media (max-width: 575.98px) {
+
+            /* ---------- TOGGLE HEADER ATAS (payment tabs) ---------- */
+
+            /* container putih di atas jadi lebih ringkas */
+            .report-tenant-tabs{
+                padding: 14px;
+                border-radius: 18px;
+            }
+
+            .report-tenant-tabs .payment-tabs{
+
+                padding: 5px;
+                gap: 6px;
+                border-radius: 14px;
+
+            }
+
+            .report-tenant-tabs .payment-tab{
+
+                flex: 1 1 0;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                gap: 7px;
+                padding: 12px 8px;
+                border-radius: 11px;
+                font-size: 12.5px;
+                font-weight: 700;
+                white-space: nowrap;
+                min-width: 0;
+
+            }
+
+            .report-tenant-tabs .payment-tab i{
+                margin: 0;
+                font-size: 13px;
+            }
+
+            /* ---------- JARAK PANEL SUBTAB & PANEL DATA ---------- */
+
+            /* jaring pengaman: tidak boleh ada satupun yang
+               melebihi lebar layar (mencegah geser ke kanan) */
+            .report-tenant-card{
+                overflow-x: hidden;
+            }
+
+            .report-tenant-card .col-lg-3{
+                margin-bottom: 14px;
+            }
+
+            /* ---------- SUBTAB (jenis laporan) ---------- */
+
+            /* menu horizontal yang terscroll -> grid 2 kolom simetris,
+               hilangkan overflow supaya efek hover tidak terpotong */
+            .report-tenant-card .report-menu{
+
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 10px;
+                overflow: visible;
+                margin-bottom: 0;
+
+            }
+
+            .report-tenant-card .report-menu-item{
+
+                min-width: 0;
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+                gap: 8px;
+                padding: 14px 12px;
+                border-radius: 16px;
+
+            }
+
+            .report-tenant-card .report-menu-item:hover{
+
+                transform: none;
+                border-color: #c7d2fe;
+
+            }
+
+            .report-tenant-card .report-menu-item i{
+
+                width: 44px;
+                height: 44px;
+                font-size: 18px;
+                border-radius: 12px;
+
+            }
+
+            .report-tenant-card .report-menu-item h6{
+                font-size: 13px;
+                margin: 0;
+            }
+
+            .report-tenant-card .report-menu-item small{
+                font-size: 11px;
+                line-height: 1.4;
+                margin-top: 2px;
+            }
+
+            /* panel header ringkas */
+            .report-tenant-card .panel-header{
+                padding: 14px 16px;
+                border-radius: 14px;
+            }
+
+            .report-tenant-card .panel-icon{
+                width: 44px;
+                height: 44px;
+                font-size: 17px;
+                border-radius: 12px;
+            }
+
+            .report-tenant-card .panel-title{
+                font-size: 15px;
+            }
+
+            .report-tenant-card .panel-subtitle{
+                font-size: 12px;
+            }
+
+            /* ---------- KARTU DATA (minimal) ---------- */
+
+            /* matikan scrollbar dari .table-responsive di mobile
+               (thead disembunyikan, baris dijadikan kartu, jadi
+               tidak ada yang bisa di-scroll) */
+            .report-tenant-card .table-responsive{
+                overflow: visible !important;
+            }
+
+            .report-tenant-card #reportTableAll,
+            .report-tenant-card #reportTableSingle{
+
+                border-collapse: separate;
+                border-spacing: 0 8px;
+                margin-bottom: 0;
+
+            }
+
+            .report-tenant-card #reportTableAll thead,
+            .report-tenant-card #reportTableSingle thead{
+                display: none;
+            }
+
+            .report-tenant-card #reportTableAll tbody tr:not(.report-empty-row):not(:has(.loading-box)),
+            .report-tenant-card #reportTableSingle tbody tr:not(.report-empty-row):not(:has(.loading-box)){
+
+                display: grid;
+                grid-template-columns: auto 1fr auto;
+                gap: 3px 10px;
+                align-items: center;
+                padding: 10px 12px;
+                background: #fff;
+                border: 1px solid #eef2f7;
+                border-radius: 12px;
+
+            }
+
+            /* Semua Tenant: No | Nama+Tanggal | Status+Jumlah */
+            .report-tenant-card #reportTableAll tbody tr:not(.report-empty-row):not(:has(.loading-box)){
+
+                grid-template-areas:
+                    "no name status"
+                    "no date amount";
+
+            }
+
+            /* Per Tenant: No | Tanggal | Status atas, Jumlah bawah */
+            .report-tenant-card #reportTableSingle tbody tr:not(.report-empty-row):not(:has(.loading-box)){
+
+                grid-template-areas:
+                    "no date status"
+                    "no amount amount";
+
+            }
+
+            .report-tenant-card #reportTableAll tbody td,
+            .report-tenant-card #reportTableSingle tbody td{
+
+                border: none !important;
+                padding: 0 !important;
+                text-align: left !important;
+                min-width: 0;
+
+            }
+
+            .report-tenant-card #reportTableAll tbody td:nth-child(1){ grid-area:no; }
+            .report-tenant-card #reportTableAll tbody td:nth-child(2){ grid-area:name; }
+            .report-tenant-card #reportTableAll tbody td:nth-child(3){ grid-area:date; }
+            .report-tenant-card #reportTableAll tbody td:nth-child(4){ grid-area:amount; text-align: right !important; }
+            .report-tenant-card #reportTableAll tbody td:nth-child(5){ grid-area:status; justify-self:end; }
+
+            .report-tenant-card #reportTableSingle tbody td:nth-child(1){ grid-area:no; }
+            .report-tenant-card #reportTableSingle tbody td:nth-child(2){ grid-area:date; }
+            .report-tenant-card #reportTableSingle tbody td:nth-child(3){ grid-area:amount; text-align: right !important; }
+            .report-tenant-card #reportTableSingle tbody td:nth-child(4){ grid-area:status; justify-self:end; }
+
+            /* Nomor urut: teks sederhana tanpa lingkaran */
+            .report-tenant-card #reportTableAll tbody td:nth-child(1),
+            .report-tenant-card #reportTableSingle tbody td:nth-child(1){
+
+                font-size: 11px;
+                color: #94a3b8;
+                font-weight: 600;
+
+            }
+
+            /* Nama tenant (track 1fr: wajib min-width:0 supaya
+               ellipsis jalan & kartu tidak melebar ke kanan) */
+            .report-tenant-card #reportTableAll tbody td:nth-child(2){
+
+                font-size: 13px;
+                font-weight: 600;
+                color: #0f172a;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                min-width: 0;
+                max-width: 100%;
+
+            }
+
+            /* Tanggal */
+            .report-tenant-card #reportTableAll tbody td:nth-child(3),
+            .report-tenant-card #reportTableSingle tbody td:nth-child(2){
+
+                font-size: 11.5px;
+                color: #94a3b8;
+
+            }
+
+            /* Jumlah menonjol */
+            .report-tenant-card #reportTableAll tbody td:nth-child(4),
+            .report-tenant-card #reportTableSingle tbody td:nth-child(3){
+
+                color: #4f46e5;
+                font-size: 13px;
+                font-weight: 700;
+                white-space: nowrap;
+
+            }
+
+            /* Status badge lebih kecil & flat */
+            .report-tenant-card .status-paid,
+            .report-tenant-card .status-unpaid,
+            .report-tenant-card .status-partial{
+
+                padding: 3px 9px;
+                font-size: 11px;
+
+            }
+
+            /* Baris kosong tetap satu sel penuh.
+   Catatan: tr ber-display:table-row tidak bisa menampilkan
+   border-radius/border, sehingga efek kartu dipindah ke td-nya
+   (jadikan block) dan tr hanya menyediakan jarak antar kartu. */
+            .report-tenant-card #reportTableAll tbody tr.report-empty-row,
+            .report-tenant-card #reportTableSingle tbody tr.report-empty-row,
+            .report-tenant-card #reportTableAll tbody tr:has(.loading-box),
+            .report-tenant-card #reportTableSingle tbody tr:has(.loading-box){
+
+                background: transparent;
+                border: none;
+                box-shadow: none;
+
+            }
+
+            .report-tenant-card #reportTableAll tbody tr.report-empty-row td,
+            .report-tenant-card #reportTableSingle tbody tr.report-empty-row td,
+            .report-tenant-card #reportTableAll tbody tr:has(.loading-box) td,
+            .report-tenant-card #reportTableSingle tbody tr:has(.loading-box) td{
+
+                display: block;
+                width: 100%;
+                background: #fff;
+                border: 1px dashed #e2e8f0;
+                border-radius: 12px;
+                box-shadow: none;
+                padding: 18px 16px !important;
+                text-align: center !important;
+
+                /* volt memberi .table td white-space:nowrap;
+                   kartu status kosong harus bisa wrap + pecah kata */
+                white-space: normal;
+                overflow-wrap: break-word;
+                word-break: break-word;
+
+            }
+
+            /* loading-box dikompres agar tidak meninggikan kartu kosong */
+            .report-tenant-card #reportTableAll tbody .loading-box,
+            .report-tenant-card #reportTableSingle tbody .loading-box{
+
+                height: auto;
+                min-height: 0;
+                padding: 0;
+
+            }
+
+            .report-tenant-card #reportTableAll tbody .loading-box i,
+            .report-tenant-card #reportTableSingle tbody .loading-box i{
+
+                font-size: 26px;
+                margin-bottom: 8px;
+
+            }
+
+            .report-tenant-card #reportTableAll tbody .loading-box h5,
+            .report-tenant-card #reportTableSingle tbody .loading-box h5{
+
+                font-size: 13px;
+                margin-bottom: 3px;
+
+            }
+
+            .report-tenant-card #reportTableAll tbody .loading-box span,
+            .report-tenant-card #reportTableSingle tbody .loading-box span{
+
+                font-size: 12px;
+                max-width: 300px;
+                white-space: normal;
+
+            }
+
+            /* Tombol Export & Print tersusun dua kolom agar tidak
+               meluber */
+            .report-tenant-card .report-filter .d-flex.align-items-end{
+
+                flex-wrap: wrap;
+                gap: 10px;
+                margin-top: 6px;
+
+            }
+
+            .report-tenant-card .report-filter .d-flex.align-items-end .btn{
+
+                flex: 1 1 calc(50% - 5px);
+                min-width: 120px;
+                margin-right: 0 !important;
+                margin-left: 0 !important;
+
+            }
+
+            /* Kartu panel memakai padding lebih ringkas */
+            .report-tenant-card .section-card{
+                padding: 16px;
+            }
+
+            /* ---------- KARTU TOTAL PEMBAYARAN (simetris) ---------- */
+
+            .report-tenant-card #reportAllSummaryCard,
+            .report-tenant-card #reportSingleSummaryCard{
+
+                padding: 18px 14px !important;
+                border-radius: 16px !important;
+                text-align: center;
+
+            }
+
+            /* kolom isi -> susun vertikal, semua di tengah */
+            .report-tenant-card #reportAllSummaryCard .d-flex,
+            .report-tenant-card #reportSingleSummaryCard .d-flex{
+
+                flex-direction: column;
+                align-items: center !important;
+                justify-content: center;
+                gap: 14px !important;
+                text-align: center;
+
+            }
+
+            /* ikon + teks keterangan disusun vertikal, tengah */
+            .report-tenant-card #reportAllSummaryCard .d-flex > div:first-child,
+            .report-tenant-card #reportSingleSummaryCard .d-flex > div:first-child{
+
+                flex-direction: column;
+                align-items: center;
+                gap: 10px;
+                text-align: center;
+                width: 100%;
+
+            }
+
+            .report-tenant-card #reportAllSummaryCard .d-flex > div:first-child div:last-child,
+            .report-tenant-card #reportSingleSummaryCard .d-flex > div:first-child div:last-child{
+                text-align: center;
+            }
+
+            /* nilai total dipusatkan */
+            .report-tenant-card #totalAllAmountLabel,
+            .report-tenant-card #totalSingleAmountLabel{
+
+                width: 100%;
+                text-align: center;
+                font-size: 18px !important;
+                padding: 11px 24px !important;
+                border-radius: 12px !important;
 
             }
 

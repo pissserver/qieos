@@ -61,7 +61,7 @@ if ($query && mysqli_num_rows($query) > 0) {
     }
 } else {
     ?>
-<tr>
+<tr class="report-empty-row">
     <td colspan="5" class="text-center py-4 text-muted">
         <i class="fas fa-file-invoice-dollar mb-2 style-2x" style="font-size:24px;"></i>
         <div>Tidak ada data pembayaran pada periode ini.</div>

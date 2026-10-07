@@ -20,7 +20,7 @@
     <div class="container-fluid px-0 mt-5">
         <div class="row">
             <div class="col-md-12">
-                <div class="detail-container mb-5">
+                <div class="detail-container mb-5 report-tenant-tabs">
 
                     <div class="payment-tabs">
 
@@ -44,7 +44,7 @@
         </div>
 
         <!-- Main Content -->
-        <div id="mainContent" class="row mt-n2 mb-5">
+        <div id="mainContent" class="row mt-n2 mb-5 report-tenant-card">
 
             <!-- Sidebar -->
             <div class="col-lg-3">

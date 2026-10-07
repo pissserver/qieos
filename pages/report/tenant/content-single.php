@@ -44,13 +44,12 @@
                         $qTenant = mysqli_query($conn,"
                             SELECT *
                             FROM tenants
-                            WHERE id != '$d[tenant_id]'
-                            AND status = 'active'
+                            WHERE status = 'active'
                             ORDER BY tenant_name ASC
                         ");
 
                         while($tenant = mysqli_fetch_assoc($qTenant)){
-                            echo '<option value="'.$tenant['id'].'">'.$tenant['tenant_name'].'</option>';
+                            echo '<option value="'.htmlspecialchars($tenant['id']).'">'.htmlspecialchars($tenant['tenant_name']).'</option>';
                         }
                     ?>
 
@@ -87,11 +86,11 @@
             <div class="col-md-2 d-flex align-items-end">
 
                 <button class="btn btn-success me-2 w-100" onclick="printExcel('single')">
-                    <i class="fas fa-file-excel"></i>
+                    <i class="fas fa-file-excel me-1"></i> Excel
                 </button>
 
                 <button class="btn btn-danger w-100" onclick="printPDF('single')">
-                    <i class="fas fa-file-pdf"></i>
+                    <i class="fas fa-file-pdf me-1"></i> PDF
                 </button>
 
             </div>

@@ -62,7 +62,7 @@ if ($query && mysqli_num_rows($query) > 0) {
     }
 } else {
     ?>
-<tr>
+<tr class="report-empty-row">
     <td colspan="4" class="text-center py-4 text-muted">
         <i class="fas fa-calendar-alt mb-2" style="font-size:24px;"></i>
         <div>Tidak ada data pembayaran untuk tenant pada periode ini.</div>
