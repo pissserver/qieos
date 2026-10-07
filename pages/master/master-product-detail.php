@@ -164,6 +164,9 @@ $hid = $isAdditional ? ' style="display:none"' : '';
             <div class="hero-photo">
                 <?php if($photo): ?>
                     <img src="<?= $photo ?>" alt="<?= $name ?>">
+                    <button type="button" class="btn-photo-delete" id="btnDeletePhoto" title="Hapus foto produk">
+                        <i class="fas fa-trash"></i>
+                    </button>
                 <?php else: ?>
                     <div class="hero-photo-placeholder"><i class="fas fa-box-open"></i><span>Tidak ada foto</span></div>
                 <?php endif; ?>
@@ -842,6 +845,7 @@ document.getElementById('editProductForm').addEventListener('submit', function(e
                                 placeholder.outerHTML = '<img src="' + ev.target.result + '" alt="' + newName + '">';
                             }
                         }
+                        syncDeletePhotoButton(true);
                     };
                     reader.readAsDataURL(photoFile);
                 }
@@ -893,6 +897,87 @@ document.getElementById('btnDeleteProduct').addEventListener('click', function()
     });
 });
 
+// DELETE PHOTO — tombol trash di pojok foto produk
+function currentProductId(){
+    var idInput = document.querySelector('#editProductForm input[name="id"]');
+    if(idInput) return idInput.value;
+    var delBtn = document.getElementById('btnDeleteProduct');
+    return delBtn ? delBtn.getAttribute('data-id') : '';
+}
+
+function showHeroPhotoPlaceholder(){
+    var wrap = document.querySelector('.hero-photo');
+    if(!wrap) return;
+    var img = wrap.querySelector('img');
+    if(img) img.remove();
+    var ph = wrap.querySelector('.hero-photo-placeholder');
+    if(!ph){
+        ph = document.createElement('div');
+        ph.className = 'hero-photo-placeholder';
+        ph.innerHTML = '<i class="fas fa-box-open"></i><span>Tidak ada foto</span>';
+        wrap.appendChild(ph);
+    }
+    syncDeletePhotoButton(false);
+}
+
+function syncDeletePhotoButton(has){
+    var wrap = document.querySelector('.hero-photo');
+    if(!wrap) return;
+    var btn = document.getElementById('btnDeletePhoto');
+    if(has){
+        if(!btn){
+            btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'btn-photo-delete';
+            btn.id = 'btnDeletePhoto';
+            btn.title = 'Hapus foto produk';
+            btn.innerHTML = '<i class="fas fa-trash"></i>';
+            wrap.appendChild(btn);
+        }
+        // Pasang listener sekali saja, baik tombol berasal dari PHP maupun dibuat JS
+        if(!btn.dataset.bound){
+            btn.addEventListener('click', onDeletePhotoClick);
+            btn.dataset.bound = '1';
+        }
+        btn.style.display = '';
+    } else if(btn){
+        btn.style.display = 'none';
+    }
+}
+
+function onDeletePhotoClick(){
+    var id = currentProductId();
+    QConfirm('Hapus Foto?', 'Foto produk ini akan dihapus dan tidak bisa dikembalikan.', {
+        confirmText: 'Hapus',
+        icon: 'fa-trash-can',
+        confirmClass: 'q-confirm-btn-danger',
+        iconClass: 'q-confirm-icon-danger'
+    }).then(function(ok){
+        if(!ok) return;
+        fetch('master-product-action.php?action=delete_photo', {
+            method: 'POST',
+            body: new URLSearchParams({ id: id })
+        })
+        .then(function(res){ return res.json(); })
+        .then(function(res){
+            if(res.status === 'success'){
+                showHeroPhotoPlaceholder();
+                var prev = document.getElementById('editPhotoPreview');
+                if(prev) prev.innerHTML = '<i class="fas fa-camera"></i>';
+                var op = document.querySelector('#editProductForm input[name="old_photo"]');
+                if(op) op.remove();
+                QToast('Terhapus', 'Foto produk berhasil dihapus', 'success');
+            } else {
+                QToast('Gagal', res.message || 'Terjadi kesalahan', 'error');
+            }
+        })
+        .catch(function(){ QToast('Error', 'Gagal memproses hapus foto', 'error'); });
+    });
+}
+
+// Sinkronkan kondisi tombol saat halaman pertama dimuat (true bila ada foto)
+syncDeletePhotoButton(!!(document.querySelector('.hero-photo img')));
+
 // QUICK PRODUCT SEARCH — AJAX tanpa reload
 (function(){
     var input = document.getElementById('quickProductSearch');
@@ -910,6 +995,9 @@ document.getElementById('btnDeleteProduct').addEventListener('click', function()
         if(item.photo){
             if(heroImg){ heroImg.src = item.photo; heroImg.alt = item.name; }
             else if(heroPh){ heroPh.outerHTML = '<img src="' + item.photo + '" alt="' + item.name + '" style="width:100%;height:100%;object-fit:cover;">'; }
+            syncDeletePhotoButton(true);
+        } else {
+            showHeroPhotoPlaceholder();
         }
 
         // Hero info
@@ -990,8 +1078,12 @@ document.getElementById('btnDeleteProduct').addEventListener('click', function()
 
         // Update photo preview
         var photoPrev = document.getElementById('editPhotoPreview');
-        if(photoPrev && item.photo){
-            photoPrev.innerHTML = '<img src="' + item.photo + '" alt="Preview">';
+        if(photoPrev){
+            if(item.photo){
+                photoPrev.innerHTML = '<img src="' + item.photo + '" alt="Preview">';
+            } else {
+                photoPrev.innerHTML = '<i class="fas fa-camera"></i>';
+            }
         }
 
         // Delete button

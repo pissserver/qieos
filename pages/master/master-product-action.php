@@ -219,6 +219,38 @@ if($action === 'update'){
     exit;
 }
 
+// DELETE PHOTO
+if($action === 'delete_photo'){
+
+    $id = isset($_POST['id']) ? (int)$_POST['id'] : 0;
+
+    if($id <= 0){
+        echo json_encode(['status'=>'error', 'message'=>'ID tidak valid']);
+        exit;
+    }
+
+    $r = mysqli_query($conn, "SELECT photo FROM products WHERE id = $id");
+    $row = $r ? mysqli_fetch_assoc($r) : null;
+    $photoName = $row ? basename(trim($row['photo'])) : '';
+
+    $q = mysqli_query($conn, "UPDATE products SET photo = '' WHERE id = $id");
+
+    if(!$q){
+        echo json_encode(['status'=>'error', 'message'=>'Gagal menghapus foto']);
+        exit;
+    }
+
+    if($photoName !== ''){
+        $oldPath = '../../assets/img/products/' . $photoName;
+        if(file_exists($oldPath)){
+            @unlink($oldPath);
+        }
+    }
+
+    echo json_encode(['status'=>'success']);
+    exit;
+}
+
 // SAVE GLOBAL DEFAULT (batas stok menipis)
 if($action === 'save_low_stock_default'){
 

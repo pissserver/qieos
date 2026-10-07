@@ -938,6 +938,43 @@ body {
     letter-spacing: .1em;
 }
 
+/* Tombol hapus foto — pojok kanan atas foto, tampil di desktop/tablet/mobile */
+.btn-photo-delete {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    z-index: 5;
+    width: 38px;
+    height: 38px;
+    border: none;
+    border-radius: 12px;
+    background: rgba(15, 23, 42, .55);
+    -webkit-backdrop-filter: blur(8px);
+    backdrop-filter: blur(8px);
+    color: #fca5a5;
+    font-size: 14px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, .3);
+    transition: background .2s ease, color .2s ease, transform .2s ease;
+}
+
+.btn-photo-delete:hover {
+    background: rgba(239, 68, 68, .9);
+    color: #fff;
+    transform: scale(1.07);
+}
+
+@media (max-width: 575px) {
+    .btn-photo-delete {
+        width: 44px;
+        height: 44px;
+        font-size: 16px;
+    }
+}
+
 .hero-info {
     flex: 1;
     padding: 48px;
