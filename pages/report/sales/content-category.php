@@ -33,6 +33,7 @@
                     <option value="minuman">Minuman</option>
                     <option value="jajanan">Jajanan</option>
                     <option value="pelengkap">Pelengkap</option>
+                    <option value="additional">Additional</option>
                 </select>
             </div>
 

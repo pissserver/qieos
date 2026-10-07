@@ -656,7 +656,7 @@
     .report-sales-card #reportTableExpense tbody td:nth-child(1){ grid-area: no; }
     .report-sales-card #reportTableExpense tbody td:nth-child(2){ grid-area: date; }
     .report-sales-card #reportTableExpense tbody td:nth-child(3){ grid-area: form; }
-    .report-sales-card #reportTableExpense tbody td:nth-child(4){ grid-area: items; }
+    .report-sales-card #reportTableExpense tbody td:nth-child(4){ grid-area: items; justify-self: end; }
     .report-sales-card #reportTableExpense tbody td:nth-child(5){ grid-area: amount; justify-self: end; }
 
     /* Laba & Rugi: No | Tanggal + Status, Laba menonjol, breakdown di bawah */
@@ -724,7 +724,7 @@
     .report-sales-card #reportTableProduct tbody td:nth-child(1){ grid-area: no; }
     .report-sales-card #reportTableProduct tbody td:nth-child(2){ grid-area: date; }
     .report-sales-card #reportTableProduct tbody td:nth-child(3){ grid-area: code; }
-    .report-sales-card #reportTableProduct tbody td:nth-child(4){ grid-area: qty; }
+    .report-sales-card #reportTableProduct tbody td:nth-child(4){ grid-area: qty; justify-self: end; }
     .report-sales-card #reportTableProduct tbody td:nth-child(5){ grid-area: price; }
     .report-sales-card #reportTableProduct tbody td:nth-child(6){ grid-area: amount; justify-self: end; }
 
@@ -739,7 +739,7 @@
     .report-sales-card #reportTableCategory tbody td:nth-child(1){ grid-area: no; }
     .report-sales-card #reportTableCategory tbody td:nth-child(2){ grid-area: name; }
     .report-sales-card #reportTableCategory tbody td:nth-child(3){ grid-area: code; }
-    .report-sales-card #reportTableCategory tbody td:nth-child(4){ grid-area: qty; }
+    .report-sales-card #reportTableCategory tbody td:nth-child(4){ grid-area: qty; justify-self: end; }
     .report-sales-card #reportTableCategory tbody td:nth-child(5){ grid-area: amount; justify-self: end; }
 
     /* Per Kasir: No | Kode + Status, Tanggal + Total di bawah */
@@ -767,7 +767,7 @@
     .report-sales-card #reportTableBest tbody td:nth-child(1){ grid-area: no; }
     .report-sales-card #reportTableBest tbody td:nth-child(2){ grid-area: name; }
     .report-sales-card #reportTableBest tbody td:nth-child(3){ grid-area: cat; }
-    .report-sales-card #reportTableBest tbody td:nth-child(4){ grid-area: qty; }
+    .report-sales-card #reportTableBest tbody td:nth-child(4){ grid-area: qty; justify-self: end; }
     .report-sales-card #reportTableBest tbody td:nth-child(5){ grid-area: amount; justify-self: end; }
 
     .report-sales-card .rank-badge{
