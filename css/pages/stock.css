@@ -1134,7 +1134,7 @@
                 min-width:0;
             }
 
-            .product-wrap > div{
+            .product-wrap > div:not(.product-icon){
                 min-width:0;
                 flex:1 1 auto;
             }
@@ -1280,7 +1280,7 @@
                 min-width:0;
             }
 
-            .product-wrap > div{
+            .product-wrap > div:not(.product-icon){
                 flex:1 1 auto;
                 min-width:0;
             }

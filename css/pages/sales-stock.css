@@ -1308,7 +1308,7 @@
     }
 
     .sales-stock-card .mt-4.px-4{
-        padding:12px 12px 0 !important;
+        padding:12px 12px 18px !important;
         margin-top:0 !important;
         background:#fff;
     }
@@ -1526,7 +1526,7 @@
     }
 
     .sales-stock-card .product-icon{
-        font-size:14px;
+        font-size:16px;
         display:flex;
         align-items:center;
         justify-content:center;
