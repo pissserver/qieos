@@ -144,7 +144,7 @@ $query = mysqli_query($conn,
     <main class="content" style="height:100vh;overflow-y:auto;overflow-x:hidden;">
         <?php include '../components/navbar.php'; ?>
 
-        <div class="container-fluid px-0 mt-5 mb-5">
+        <div class="container-fluid px-0 mt-5 mb-4">
 
             <!-- FORM PENDAFTARAN + SEARCH di header -->
             <div class="section-card mb-5">

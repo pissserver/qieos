@@ -18,7 +18,7 @@ include '../../sessions/session.php';
 <main class="content">
 <?php include '../components/navbar.php'; ?>
 
-<div class="container-fluid px-0 mt-4">
+<div class="container-fluid px-0">
     <div class="row">
         <div class="col-md-12">
 

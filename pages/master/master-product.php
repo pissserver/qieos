@@ -21,7 +21,7 @@ include __DIR__ . '/../components/data/stock-status.php';
 <main class="content">
 <?php include '../components/navbar.php'; ?>
 
-<div class="container-fluid px-0 mt-4">
+<div class="container-fluid px-0">
 
     <div class="row">
         <div class="col-md-12 mb-3">
@@ -82,7 +82,7 @@ include __DIR__ . '/../components/data/stock-status.php';
 
     <!-- RACIKAN / COMBINE PRODUK -->
     <div class="row master-product-last-row">
-        <div class="col-md-12 mb-5">
+        <div class="col-md-12">
             <div class="section-card mb-4 combine-panel">
                 <div class="panel-header panel-primary combine-header">
                     <div class="panel-left">

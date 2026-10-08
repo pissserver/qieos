@@ -44,7 +44,7 @@
         </div>
 
         <!-- Main Content -->
-        <div id="mainContent" class="row mt-n2 mb-5 report-tenant-card">
+        <div id="mainContent" class="row mt-n2 mb-4 report-tenant-card">
 
             <!-- Sidebar -->
             <div class="col-lg-3">

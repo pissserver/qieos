@@ -59,7 +59,7 @@
                 </div>
 
                 <!-- HISTORY -->
-                <div class="section-card transfer-history-card mb-5">
+                <div class="section-card transfer-history-card mb-4">
                     <div class="panel-header panel-primary">
                         <div class="panel-left">
                             <div class="panel-icon">

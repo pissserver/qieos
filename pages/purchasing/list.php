@@ -41,7 +41,7 @@ while($p = mysqli_fetch_assoc($qProd)){
 
 <div class="container-fluid px-0 mt-5">
     <!-- FORM -->
-    <div class="section-card mb-5">
+    <div class="section-card mb-4">
         <div class="panel-header panel-primary">
             <div class="panel-left">
                 <div class="panel-icon">
@@ -74,7 +74,7 @@ while($p = mysqli_fetch_assoc($qProd)){
             <div class="stock-body">
 
                 <div id="formMode" class="panel-mode active">
-<form id="form-stock"
+        <form id="form-stock"
                             action="list-action.php?action=store"
                             method="POST">
 

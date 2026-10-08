@@ -65,7 +65,7 @@ if($cq){
             ['additional', '➕', 'Additional'],
         ]; ?>
 
-        <div class="container-fluid px-0 mt-5 mb-5">
+        <div class="container-fluid px-0 mt-5 mb-4">
 
             <!-- ===== HERO: TITLE + SEARCH + SORT (satu panel premium) ===== -->
             <div class="catalog-hero mb-4">

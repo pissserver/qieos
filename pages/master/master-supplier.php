@@ -18,10 +18,10 @@ include '../../sessions/session.php';
 <main class="content">
 <?php include '../components/navbar.php'; ?>
 
-<div class="container-fluid px-0 mt-4">
+<div class="container-fluid px-0">
 
     <div class="row">
-        <div class="col-md-12 mb-5">
+        <div class="col-md-12">
             <div class="section-card mb-4 mt-4">
                 <div class="panel-header panel-primary">
                     <div class="panel-left">

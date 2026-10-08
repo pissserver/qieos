@@ -389,7 +389,7 @@
 
     <div class="row">
         <div class="col-md-12">
-            <div class="detail-container mb-5">
+            <div class="detail-container mb-4">
 
                 <!-- <div class="fifo-title">
                     <i class="fas fa-wallet text-primary"></i>

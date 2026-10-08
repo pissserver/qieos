@@ -50,7 +50,7 @@ while($prod = mysqli_fetch_assoc($pq)){
         <main class="content">
             <?php include '../components/navbar.php'; ?>
 
-            <div class="container-fluid px-0 mt-4 mb-5">
+            <div class="container-fluid px-0 mt-4 mb-4">
                 <!-- REQUEST / HISTORY -->
                 <div class="section-card request-stock-card mb-4 mt-5">
                     <div class="panel-header panel-primary">

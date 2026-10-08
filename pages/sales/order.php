@@ -18,7 +18,7 @@ include '../../sessions/session.php';
     <main class="content">
         <?php include '../components/navbar.php'; ?>
 
-        <div class="container-fluid px-0 mt-5 mb-5">
+        <div class="container-fluid px-0 mt-5 mb-4">
 
             <!-- ===== HERO: TITLE + SEARCH + DATE RANGE (satu panel premium) ===== -->
             <div class="order-hero mb-4">
