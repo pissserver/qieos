@@ -980,7 +980,13 @@
 
     /* Di halaman chat, navbar desktop disembunyikan agar chat
        memenuhi layar (di mobile sudah ada top bar sendiri) */
-    #chatPage .premium-navbar{
+#chatPage .premium-navbar{
+        display: none !important;
+    }
+
+    /* Sembunyikan marquee notifikasi stok di mobile agar tidak
+       menutupi area chat */
+    #chatPage .stock-alert{
         display: none !important;
     }
 

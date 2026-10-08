@@ -59,6 +59,13 @@ if (!defined('BASE_URL')) {
             <span class="cart-badge chat-unread-badge d-none" id="chatBadge">0</span>
         </a>
 
+        <!-- STOCK NOTIFICATION -->
+        <div class="premium-action-btn stock-notif-btn" id="stockNotifBtn" role="button" tabindex="0" aria-label="Notifikasi Stok">
+            <i class="fas fa-bell"></i>
+            <span class="cart-badge stock-notif-badge d-none" id="stockNotifBadge">0</span>
+            <span class="stock-notif-ring d-none" id="stockNotifRing"></span>
+        </div>
+
         <?php if ($user['role'] == 'developer' || $user['role'] == 'staff kasir') { ?>
         
         <!-- CART -->
@@ -123,6 +130,63 @@ if (!defined('BASE_URL')) {
         </div>
 
 <?php } ?>
+
+
+        <!-- PROFILE -->
+        <div class="dropdown" style="position: relative; z-index: 1050;">
+
+            <a href="#"
+                class="text-decoration-none"
+                data-bs-toggle="dropdown"
+                data-bs-auto-close="true">
+
+                <div class="premium-profile">
+
+                    <img
+                        src="<?php echo $user['photo'] ? BASE_URL . '/assets/img/uploads/' . $user['photo'] : BASE_URL . '/assets/img/default-avatar.jpg'; ?>"
+                        class="premium-avatar">
+
+                    <div class="premium-user">
+
+                        <div class="premium-name">
+                            <?php echo $user['fullname'] != '' ? $user['fullname'] : $_SESSION['username']; ?>
+                        </div>
+
+                        <div class="premium-role">
+                            <?= ucwords(strtolower($user['role'])) ?>
+                        </div>
+
+                    </div>
+
+                    <i class="fas fa-chevron-down text-white premium-chevron"></i>
+
+                </div>
+
+            </a>
+
+            <div class="dropdown-menu dropdown-menu-end premium-dropdown">
+
+                <a class="dropdown-item"
+                href="<?php echo BASE_URL; ?>/pages/profile/profile.php">
+                    <i class="fas fa-user-circle"></i>
+                    <span>Profil</span>
+                </a>
+
+                <div class="dropdown-divider"></div>
+
+                <a class="dropdown-item text-danger"
+                href="<?php echo BASE_URL; ?>/sessions/logout.php">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Sign Out</span>
+                </a>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</nav>
 
 <!-- Global Search Overlay -->
 <div class="search-overlay" id="searchOverlay">
@@ -318,7 +382,11 @@ if (!defined('BASE_URL')) {
     }
 
     window._goSearchItem = function(idx){
-        if(allItems[idx]) window.location.href = allItems[idx];
+        if(allItems[idx]){
+            var q = input.value.trim();
+            if(q) addRecent(q);
+            window.location.href = allItems[idx];
+        }
     };
 
     window.openSearch = function(){
@@ -414,62 +482,6 @@ if (!defined('BASE_URL')) {
     renderRecent();
 })();
 </script>
-
-        <!-- PROFILE -->
-        <div class="dropdown" style="position: relative; z-index: 1050;">
-
-            <a href="#"
-                class="text-decoration-none"
-                data-bs-toggle="dropdown"
-                data-bs-auto-close="true">
-
-                <div class="premium-profile">
-
-                    <img
-                        src="<?php echo $user['photo'] ? BASE_URL . '/assets/img/uploads/' . $user['photo'] : BASE_URL . '/assets/img/default-avatar.jpg'; ?>"
-                        class="premium-avatar">
-
-                    <div class="premium-user">
-
-                        <div class="premium-name">
-                            <?php echo $user['fullname'] != '' ? $user['fullname'] : $_SESSION['username']; ?>
-                        </div>
-
-                        <div class="premium-role">
-                            <?= ucwords(strtolower($user['role'])) ?>
-                        </div>
-
-                    </div>
-
-                    <i class="fas fa-chevron-down text-white premium-chevron"></i>
-
-                </div>
-
-            </a>
-
-            <div class="dropdown-menu dropdown-menu-end premium-dropdown">
-
-                <a class="dropdown-item"
-                href="<?php echo BASE_URL; ?>/pages/profile/profile.php">
-                    <i class="fas fa-user-circle"></i>
-                    <span>Profil</span>
-                </a>
-
-                <div class="dropdown-divider"></div>
-
-                <a class="dropdown-item text-danger"
-                href="<?php echo BASE_URL; ?>/sessions/logout.php">
-                    <i class="fas fa-sign-out-alt"></i>
-                    <span>Sign Out</span>
-                </a>
-
-            </div>
-
-        </div>
-
-    </div>
-
-</nav>
 
 <!-- Modal Cart -->
 <div class="modal fade" id="cartModal" tabindex="-1">
@@ -1195,3 +1207,199 @@ if (!defined('BASE_URL')) {
 </script>
 
 <?php } ?>
+
+<!-- STOCK NOTIFICATION: Dropdown + Toast -->
+<div class="stock-notif-dropdown" id="stockNotifDropdown" aria-hidden="true">
+    <div class="snd-header">
+        <div class="snd-header-left">
+            <span class="snd-header-icon"><i class="fas fa-boxes-stacked"></i></span>
+            <div>
+                <div class="snd-title">Notifikasi Stok</div>
+                <div class="snd-subtitle" id="sndSubtitle">Memuat...</div>
+            </div>
+        </div>
+        <span class="snd-count" id="sndCount">0</span>
+    </div>
+    <div class="snd-body" id="sndBody">
+        <div class="snd-loading"><span class="snd-spinner"></span> Memuat data stok...</div>
+    </div>
+</div>
+
+<div class="stock-alert" id="stockToast" aria-hidden="true">
+    <div class="sta-icon"><i class="fas fa-triangle-exclamation"></i></div>
+    <div class="sta-track"><div class="sta-runner" id="stockToastText"></div></div>
+    <button type="button" class="sta-close" id="stockToastClose" aria-label="Tutup"><i class="fas fa-times"></i></button>
+</div>
+
+<script>
+(function(){
+    var btns = document.querySelectorAll('.stock-notif-btn');
+    var dropdown = document.getElementById('stockNotifDropdown');
+    var sndSubtitle = document.getElementById('sndSubtitle');
+    var sndCount = document.getElementById('sndCount');
+    var sndBody = document.getElementById('sndBody');
+    var toast = document.getElementById('stockToast');
+    var toastText = document.getElementById('stockToastText');
+    var toastTimer = null;
+    var dismissedUntil = 0;
+    var activeBtn = null;
+
+    var roleLabel = '<?php echo $user['role'] === 'staff kasir' ? 'Stok kantin menipis/ habis' : 'Stok gudang menipis/ habis'; ?>';
+
+    function escapeHtml(t){
+        var d = document.createElement('div');
+        d.appendChild(document.createTextNode(t));
+        return d.innerHTML;
+    }
+
+    function fetchStock(cb){
+        fetch('<?php echo BASE_URL; ?>/pages/components/data/stock-notification-api.php', { cache: 'no-store' })
+        .then(function(r){ return r.json(); })
+        .then(function(data){ if(data.status === 'success') cb(data.items); })
+        .catch(function(){});
+    }
+
+    function renderList(items){
+        if(!items.length){
+            sndBody.innerHTML = '<div class="snd-empty"><i class="fas fa-circle-check"></i><div>Semua stok aman</div></div>';
+            return;
+        }
+        var html = '';
+        items.forEach(function(it){
+            var st = it.status === 'habis'
+                ? '<span class="snd-st st-habis"><i class="fas fa-circle-xmark"></i> Habis</span>'
+                : '<span class="snd-st st-menipis"><i class="fas fa-triangle-exclamation"></i> Menipis</span>';
+            html += '<div class="snd-item">'
+                + '<div class="snd-item-icon"><i class="fas fa-cube"></i></div>'
+                + '<div class="snd-item-info">'
+                + '<div class="snd-item-name">' + escapeHtml(it.name) + '</div>'
+                + '<div class="snd-item-meta">' + escapeHtml(it.code) + ' &middot; sisa ' + it.stock + ' / min ' + it.low_stock + '</div>'
+                + '</div>'
+                + st
+                + '</div>';
+        });
+        sndBody.innerHTML = html;
+    }
+
+    function buildAlertText(items){
+        var habis = items.filter(function(i){ return i.status === 'habis'; });
+        var menipis = items.filter(function(i){ return i.status === 'menipis'; });
+        var seg = [];
+        if(habis.length){
+            seg.push('<span class="sta-badge"><i class="fas fa-circle-xmark"></i> <b>' + habis.length + ' produk habis</b></span> ' + habis.map(function(i){ return '<span class="sta-prod">' + escapeHtml(i.name) + '</span> (sisa ' + i.stock + ')'; }).join(' &nbsp;&bull;&nbsp; '));
+        }
+        if(menipis.length){
+            seg.push('<span class="sta-badge"><i class="fas fa-triangle-exclamation"></i> <b>' + menipis.length + ' produk menipis</b></span> ' + menipis.map(function(i){ return '<span class="sta-prod">' + escapeHtml(i.name) + '</span> (sisa ' + i.stock + ')'; }).join(' &nbsp;&bull;&nbsp; '));
+        }
+        return seg.join(' &nbsp;&nbsp;&nbsp; ');
+    }
+
+    function showToast(items){
+        if(!items || !items.length){ hideToast(); return; }
+        if(Date.now() < dismissedUntil) return;
+        var txt = buildAlertText(items);
+        toastText.innerHTML = '<span class="sta-msg">' + txt + '</span><span class="sta-msg">' + txt + '</span>';
+        toast.classList.add('show');
+        toast.setAttribute('aria-hidden', 'false');
+        if(toastTimer){ clearTimeout(toastTimer); toastTimer = null; }
+    }
+
+    function hideToast(){
+        toast.classList.remove('show');
+        toast.setAttribute('aria-hidden', 'true');
+        if(toastTimer){ clearTimeout(toastTimer); toastTimer = null; }
+    }
+
+    function update(items){
+        var count = items.length;
+        if(count > 0){
+            document.querySelectorAll('.stock-notif-badge').forEach(function(b){
+                b.textContent = count > 99 ? '99+' : count;
+                b.classList.remove('d-none');
+            });
+            document.querySelectorAll('.stock-notif-ring').forEach(function(r){
+                r.classList.remove('d-none');
+            });
+            btns.forEach(function(b){ b.classList.add('has-critical'); });
+            showToast(items);
+        } else {
+            document.querySelectorAll('.stock-notif-badge').forEach(function(b){
+                b.classList.add('d-none');
+            });
+            document.querySelectorAll('.stock-notif-ring').forEach(function(r){
+                r.classList.add('d-none');
+            });
+            btns.forEach(function(b){ b.classList.remove('has-critical'); });
+            hideToast();
+        }
+
+        sndSubtitle.textContent = roleLabel;
+        sndCount.textContent = count;
+        renderList(items);
+    }
+
+    document.getElementById('stockToastClose').addEventListener('click', function(){
+        dismissedUntil = Date.now() + 10 * 60 * 1000;
+        hideToast();
+    });
+
+    function setDropdownPos(btn){
+        var r = btn.getBoundingClientRect();
+        var w = Math.min(400, window.innerWidth - 24);
+        var left = r.left + r.width / 2 - w / 2;
+        left = Math.max(12, Math.min(left, window.innerWidth - w - 12));
+        var arrowX = r.left + r.width / 2 - left;
+        arrowX = Math.max(16, Math.min(arrowX, w - 16));
+        dropdown.style.width = w + 'px';
+        dropdown.style.left = left + 'px';
+        dropdown.style.top = (r.bottom + 12) + 'px';
+        dropdown.style.setProperty('--arrow-x', arrowX + 'px');
+    }
+
+    function closeDropdown(){
+        dropdown.classList.remove('open');
+        dropdown.setAttribute('aria-hidden', 'true');
+        activeBtn = null;
+    }
+
+    btns.forEach(function(btn){
+        btn.addEventListener('click', function(e){
+            e.stopPropagation();
+            var willOpen = !dropdown.classList.contains('open');
+            if(willOpen){
+                activeBtn = btn;
+                setDropdownPos(btn);
+                dropdown.classList.add('open');
+            } else {
+                closeDropdown();
+            }
+            dropdown.setAttribute('aria-hidden', willOpen ? 'false' : 'true');
+        });
+    });
+
+    window.addEventListener('resize', function(){
+        if(dropdown.classList.contains('open') && activeBtn) setDropdownPos(activeBtn);
+    });
+
+    document.addEventListener('scroll', function(){
+        if(dropdown.classList.contains('open')) closeDropdown();
+    }, true);
+
+    document.addEventListener('click', function(e){
+        if(dropdown.classList.contains('open')){
+            var hit = dropdown.contains(e.target);
+            btns.forEach(function(b){ if(b.contains(e.target)) hit = true; });
+            if(!hit) closeDropdown();
+        }
+    });
+
+    document.addEventListener('keydown', function(e){
+        if(e.key === 'Escape' && dropdown.classList.contains('open')){
+            closeDropdown();
+        }
+    });
+
+    fetchStock(update);
+    setInterval(function(){ fetchStock(update); }, 120000);
+})();
+</script>

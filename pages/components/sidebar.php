@@ -26,12 +26,12 @@
 <div class="sidebar-tooltip" id="sidebarTooltip"></div>
 
 <!-- Mobile Top Navbar -->
-<nav class="navbar navbar-dark navbar-theme-primary px-3 d-lg-none" style="gap:8px;">
+<nav class="navbar navbar-dark navbar-theme-primary px-3 d-lg-none" style="gap:6px;flex-wrap:nowrap;">
     <a class="navbar-brand d-flex align-items-center gap-2" href="<?php echo BASE_URL; ?>/pages/dashboard.php">
-        <img src="<?php echo BASE_URL; ?>/assets/img/brand/qieos.png" alt="Qieos Logo" style="height: 40px; width: auto;" />
+        <img src="<?php echo BASE_URL; ?>/assets/img/brand/qieos.png" alt="Qieos Logo" style="height: 32px; width: auto;" />
     </a>
     </a>
-    <div class="d-flex align-items-center gap-2 ms-auto">
+    <div class="d-flex align-items-center gap-1 ms-auto">
         <button class="mobile-nav-btn" onclick="openSearch()" aria-label="Search" style="width:38px;height:38px;border-radius:10px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.1);color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:14px;">
             <i class="fas fa-search"></i>
         </button>
@@ -43,11 +43,18 @@
             <i class="fas fa-comments"></i>
             <span class="cart-badge chat-unread-badge d-none" style="min-width:16px;height:16px;font-size:9px;padding:2px 4px;top:-4px;right:-4px;">0</span>
         </a>
+        <button type="button" class="mobile-nav-btn stock-notif-btn stock-notif-btn-mobile" id="stockNotifBtnMobile" aria-label="Notifikasi Stok" style="width:38px;height:38px;border-radius:10px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.1);color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:14px;position:relative;">
+            <i class="fas fa-bell"></i>
+            <span class="cart-badge stock-notif-badge d-none" style="min-width:16px;height:16px;font-size:9px;padding:2px 4px;top:-4px;right:-4px;">0</span>
+            <span class="stock-notif-ring d-none"></span>
+        </button>
+        <span style="width:1px;height:22px;background:rgba(255,255,255,.18);margin:0 10px;"></span>
         <button
             class="navbar-toggler"
             type="button"
             id="mobileSidebarToggle"
-            aria-label="Toggle navigation">
+            aria-label="Toggle navigation"
+            style="width:38px;height:38px;padding:0;border-radius:10px;border:1px solid rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;">
             <span class="navbar-toggler-icon"></span>
         </button>
     </div>
