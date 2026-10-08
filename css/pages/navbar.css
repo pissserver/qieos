@@ -2487,7 +2487,7 @@ PREMIUM NAVBAR V3
     position:relative;
     overflow:hidden;
     border-radius:14px;
-    margin:0 0 16px;
+    margin:0 0 6px;
     background:
         linear-gradient(90deg,#0f172a 0%,#450a0a 40%,#7f1d1d 65%,#0f172a 100%);
     border:1px solid rgba(239,68,68,.35);
@@ -2551,6 +2551,17 @@ PREMIUM NAVBAR V3
 }
 .stock-alert:hover .sta-runner{animation-play-state:paused}
 
+/* Jarak seragam banner -> konten saat notif stok tampil (semua halaman & device) */
+main.content.has-stock-alert > .container-fluid.mt-4,
+main.content.has-stock-alert > .container-fluid.mt-3,
+main.content.has-stock-alert > .row.mt-4,
+main.content.has-stock-alert > .row.mt-5,
+main.content.has-stock-alert > .row.mt-3,
+main.content.has-stock-alert > .dash-hdr{
+    margin-top:24px;
+    transform:translateY(0) !important;
+}
+
 .sta-msg{
     display:inline-block;
     white-space:nowrap;
@@ -2598,7 +2609,7 @@ PREMIUM NAVBAR V3
 @media (max-width: 640px) {
     .stock-alert{
         border-radius:12px;
-        margin:0 0 12px;
+        margin:0 0 6px;
     }
     .sta-icon{width:30px;height:30px;margin:5px 8px 5px 10px;font-size:12px}
     .sta-msg{font-size:11.5px;padding-right:30px}

@@ -1308,10 +1308,18 @@ if (!defined('BASE_URL')) {
         toast.classList.remove('show');
         toast.setAttribute('aria-hidden', 'true');
         if(toastTimer){ clearTimeout(toastTimer); toastTimer = null; }
+        try{
+            var mc = document.querySelector('main.content');
+            if(mc) mc.classList.remove('has-stock-alert');
+        }catch(e){}
     }
 
     function update(items){
         var count = items.length;
+        try{
+            var mc = document.querySelector('main.content');
+            if(mc) mc.classList.toggle('has-stock-alert', count > 0);
+        }catch(e){}
         if(count > 0){
             document.querySelectorAll('.stock-notif-badge').forEach(function(b){
                 b.textContent = count > 99 ? '99+' : count;
