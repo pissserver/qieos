@@ -148,8 +148,8 @@ if (!isset($_SESSION['welcome_shown'])) {
 
         // CHARTS ROW 1
         h+='<div class="g21">';
-        h+=dcc('Pendapatan vs Pengeluaran','Perbandingan 6 bulan terakhir','fa-chart-bar','c1',270,'<div class="lg"><span><i style="background:#818cf8"></i>Pendapatan</span><span><i style="background:#fb7185"></i>Pengeluaran</span></div>');
-        h+='<div class="dc fi"><div class="dc-h"><div><div class="dc-t">Status Pesanan</div><div class="dc-s">Periode filter aktif</div></div><div class="dc-i"><i class="fas fa-chart-pie"></i></div></div><div id="c2" style="height:140px"></div>';
+        h+=dcc('Pendapatan vs Pengeluaran','Perbandingan 6 bulan terakhir','fa-chart-bar','c1',270,'<div class="lg"><span><i style="background:#818cf8"></i>Pendapatan</span><span><i style="background:#fb7185"></i>Pengeluaran</span></div>','th-indigo');
+        h+='<div class="dc fi th-violet"><div class="dc-h"><div><div class="dc-t">Status Pesanan</div><div class="dc-s">Periode filter aktif</div></div><div class="dc-i"><i class="fas fa-chart-pie"></i></div></div><div id="c2" style="height:140px"></div>';
         h+='<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:10px;margin-top:14px">';
         h+=msInd('Dibayar',s.paid,'#34d399','#10b981');
         h+=msInd('Pending',s.waiting,'#fbbf24','#f59e0b');
@@ -158,8 +158,8 @@ if (!isset($_SESSION['welcome_shown'])) {
 
         // CHARTS ROW 2 + TABLE
         h+='<div class="g11">';
-        h+=dcc('Omzet 7 Hari','Pendapatan harian minggu ini','fa-chart-line','c3',220);
-        h+='<div class="dc fi"><div class="dc-h"><div><div class="dc-t">Pesanan Terbaru</div><div class="dc-s">Transaksi terakhir masuk</div></div><div class="dc-i"><i class="fas fa-receipt"></i></div></div>';
+        h+=dcc('Omzet 7 Hari','Pendapatan harian minggu ini','fa-chart-line','c3',220,'','th-emerald');
+        h+='<div class="dc fi th-amber"><div class="dc-h"><div><div class="dc-t">Pesanan Terbaru</div><div class="dc-s">Transaksi terakhir masuk</div></div><div class="dc-i"><i class="fas fa-receipt"></i></div></div>';
         if(!d.recent_orders.length) h+='<div class="de"><i class="fas fa-receipt"></i>Belum ada pesanan</div>';
         else d.recent_orders.forEach(function(o){
             var bc=o.status_payment==='paid'?'b-p':o.status_payment==='waiting'?'b-w':'b-c';
@@ -169,14 +169,14 @@ if (!isset($_SESSION['welcome_shown'])) {
 
         // BOTTOM TABLES
         h+='<div class="g11">';
-        h+='<div class="dc fi"><div class="dc-h"><div><div class="dc-t">Produk Terlaris</div><div class="dc-s">Top 5 berdasarkan revenue</div></div><div class="dc-i"><i class="fas fa-trophy"></i></div></div>';
+        h+='<div class="dc fi th-rose"><div class="dc-h"><div><div class="dc-t">Produk Terlaris</div><div class="dc-s">Top 5 berdasarkan revenue</div></div><div class="dc-i"><i class="fas fa-trophy"></i></div></div>';
         if(!d.top_products.length) h+='<div class="de"><i class="fas fa-box"></i>Belum ada data</div>';
         else{var r=1;d.top_products.forEach(function(p){
             h+='<div class="ri"><div class="rk">'+(r++)+'</div><div class="ri-n" style="font-weight:600;color:var(--q-text)">'+p.name+'</div><div class="ct">'+p.category+'</div><div class="ri-a">'+rp(p.rev)+'</div></div>';
         });}
         h+='</div>';
 
-        h+='<div class="dc fi"><div class="dc-h"><div><div class="dc-t">List Pembelian Terakhir</div><div class="dc-s">Riwayat pengadaan barang</div></div><div class="dc-i"><i class="fas fa-clipboard-list"></i></div></div>';
+        h+='<div class="dc fi th-sky"><div class="dc-h"><div><div class="dc-t">List Pembelian Terakhir</div><div class="dc-s">Riwayat pengadaan barang</div></div><div class="dc-i"><i class="fas fa-clipboard-list"></i></div></div>';
         if(!d.recent_list_purchases.length) h+='<div class="de"><i class="fas fa-truck"></i>Belum ada pembelian</div>';
         else d.recent_list_purchases.forEach(function(p){
             var dt=new Date(p.date_list).toLocaleDateString('id-ID',{day:'numeric',month:'short',year:'numeric'});
@@ -214,8 +214,8 @@ if (!isset($_SESSION['welcome_shown'])) {
         return'<div class="scs fi"><div class="scs-top"><div><div class="scs-lbl">'+label+'</div><div class="scs-val">'+val+'</div></div><div class="scs-ic '+ic+'"><i class="fas '+icon+'"></i></div></div><div class="scs-bar"><div class="scs-bar-fill '+(ic==='ic-indigo'?'bar-indigo':ic==='ic-cyan'?'bar-cyan':'bar-violet')+'" data-w="'+pct+'%"></div></div></div>';
     }
 
-    function dcc(title,sub,icon,id,h,extra){
-        return'<div class="dc fi"><div class="dc-h"><div><div class="dc-t">'+title+'</div><div class="dc-s">'+sub+'</div></div><div class="dc-i"><i class="fas '+icon+'"></i></div></div><div id="'+id+'" style="height:'+h+'px"></div>'+(extra||'')+'</div>';
+    function dcc(title,sub,icon,id,h,extra,cls){
+        return'<div class="dc fi '+(cls||'')+'"><div class="dc-h"><div><div class="dc-t">'+title+'</div><div class="dc-s">'+sub+'</div></div><div class="dc-i"><i class="fas '+icon+'"></i></div></div><div id="'+id+'" style="height:'+h+'px"></div>'+(extra||'')+'</div>';
     }
 
     function msInd(label,val,bgColor,dotColor){
