@@ -20,6 +20,7 @@ include __DIR__ . '/../components/data/stock-status.php';
         p.code,
         p.unit,
         p.photo,
+        p.low_stock,
         COALESCE(SUM(pi.remaining_qty),0) stock
     FROM products p
     LEFT JOIN purchase_items pi

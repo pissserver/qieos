@@ -1,7 +1,5 @@
 <?php
 include '../../sessions/session.php';
-include __DIR__ . '/../components/data/stock-status.php';
-$lowStockDefault = get_low_stock_default($conn);
 ?>
 
 <form id="addProductForm" enctype="multipart/form-data">
@@ -107,12 +105,30 @@ $lowStockDefault = get_low_stock_default($conn);
                     type="number"
                     name="low_stock"
                     class="form-control"
-                    placeholder="Batas Stok Menipis"
-                    value="<?= (int)$lowStockDefault ?>"
+                    placeholder="Batas Stok Menipis Gudang"
+                    value="0"
                     min="0">
             </div>
             <small class="text-muted d-block mb-3 ms-5" style="font-size:11px;">
-                Stok di bawah batas ini berstatus Menipis, 0 = Habis. Kosongkan sudah terisi default dari pengaturan.
+                Batas stok gudang: di bawah batas ini berstatus Menipis, 0 = hanya Habis saat stok 0. Isi sesuai kebutuhan produk.
+            </small>
+        </div>
+
+        <div class="col-md-12" id="addFieldLowStockKantin">
+            <div class="input-group-modern">
+                <div class="input-icon">
+                    <i class="fas fa-store"></i>
+                </div>
+                <input
+                    type="number"
+                    name="low_stock_kantin"
+                    class="form-control"
+                    placeholder="Batas Stok Menipis Kantin"
+                    value="0"
+                    min="0">
+            </div>
+            <small class="text-muted d-block mb-3 ms-5" style="font-size:11px;">
+                Batas stok kantin: di bawah batas ini berstatus Menipis, 0 = hanya Habis saat stok 0. Isi sesuai kebutuhan produk.
             </small>
         </div>
 

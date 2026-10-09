@@ -2819,6 +2819,25 @@ body {
     box-shadow: 0 8px 20px rgba(244, 63, 94, .35);
 }
 
+/* Badge status per layer (gudang / kantin) di dalam kotak stok */
+.ov-layer-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    margin-top: 7px;
+    padding: 2px 9px;
+    border-radius: 999px;
+    font-size: 10px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    line-height: 1.5;
+}
+.ov-layer-status i { font-size: 9px; }
+.ov-ls-ready { background: #d1fae5; color: #047857; }
+.ov-ls-menipis { background: #fef3c7; color: #b45309; }
+.ov-ls-habis { background: #ffe4e6; color: #be123c; }
+
 @media (max-width: 991px) {
     .stock-ov-row { grid-template-columns: repeat(2, 1fr); }
 }

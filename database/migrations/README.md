@@ -47,3 +47,5 @@ dijalankan di server tersebut.
 | `006_purchases_list_migration.sql` | Gabung daftar belanja ke `purchases` |
 | `007_stock_ledger_sales.sql` | Ledger pergerakan stok (balance/transfer/sale/return) |
 | `008_order_details_customer.sql` | Relasi `order_details.customer_id` ke `customers` (sebelum `qty`) |
+| `009_low_stock_kantin_default.sql` | Default global batas stok menipis kantin (`low_stock_kantin_default`) |
+| `010_products_low_stock_kantin.sql` | Kolom `low_stock_kantin` per-produk (fallback ke default global) |

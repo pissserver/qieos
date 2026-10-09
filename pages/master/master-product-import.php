@@ -1,6 +1,5 @@
 <?php
 include '../../sessions/session.php';
-include __DIR__ . '/../components/data/stock-status.php';
 header('Content-Type: application/json');
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -66,8 +65,6 @@ if ($q) {
     }
 }
 
-$lowStockDefault = get_low_stock_default($conn);
-
 $inserted   = 0;
 $duplicated = 0;
 $rowErrors  = array();
@@ -81,9 +78,11 @@ for ($i = $headerRow + 1; $i < count($rows); $i++) {
     $category  = trim(isset($r[2]) ? (string)$r[2] : '');
     $priceRaw  = trim(isset($r[3]) ? (string)$r[3] : '');
     $unit      = trim(isset($r[4]) ? (string)$r[4] : '');
+    $lowRaw    = trim(isset($r[5]) ? (string)$r[5] : '');
+    $lowKanRaw = trim(isset($r[6]) ? (string)$r[6] : '');
 
     // Baris kosong -> dilewati
-    if ($code === '' && $name === '' && $category === '' && $priceRaw === '' && $unit === '') {
+    if ($code === '' && $name === '' && $category === '' && $priceRaw === '' && $unit === '' && $lowRaw === '' && $lowKanRaw === '') {
         continue;
     }
     // Baris catatan / contoh (diawali '#') -> dilewati
@@ -126,6 +125,25 @@ for ($i = $headerRow + 1; $i < count($rows); $i++) {
     }
     $priceSql = number_format((float)$priceRaw, 2, '.', '');
 
+    // low_stock & low_stock_kantin: numerik >= 0, default 0 jika kosong
+    $lowStock = 0;
+    if ($lowRaw !== '') {
+        if (!is_numeric($lowRaw) || (float)$lowRaw < 0) {
+            $rowErrors[] = 'Baris ' . $rowNo . ': low_stock harus angka >= 0';
+            continue;
+        }
+        $lowStock = max(0, (int)$lowRaw);
+    }
+
+    $lowStockKantin = 0;
+    if ($lowKanRaw !== '') {
+        if (!is_numeric($lowKanRaw) || (float)$lowKanRaw < 0) {
+            $rowErrors[] = 'Baris ' . $rowNo . ': low_stock_kantin harus angka >= 0';
+            continue;
+        }
+        $lowStockKantin = max(0, (int)$lowKanRaw);
+    }
+
     // Cek duplikat kode (terhadap data aktif + baris lain di file ini)
     $key = strtolower($code);
     if (isset($existing[$key]) || isset($seen[$key])) {
@@ -140,8 +158,8 @@ for ($i = $headerRow + 1; $i < count($rows); $i++) {
     $cunit      = mysqli_real_escape_string($conn, $unit);
     $unitSql    = $unit === '' ? 'NULL' : "'$cunit'";
 
-    // low_stock mengikuti pengaturan global; foto/starred/catalog pakai default
-    $ok = mysqli_query($conn, "INSERT INTO products (code, name, category, sell_price, unit, low_stock, created_at) VALUES ('$ccode', '$cname', '$ccategory', $priceSql, $unitSql, $lowStockDefault, NOW())");
+    // low_stock & low_stock_kantin per-produk; foto/starred/catalog pakai default
+    $ok = mysqli_query($conn, "INSERT INTO products (code, name, category, sell_price, unit, low_stock, low_stock_kantin, created_at) VALUES ('$ccode', '$cname', '$ccategory', $priceSql, $unitSql, $lowStock, $lowStockKantin, NOW())");
     if ($ok) {
         $inserted++;
     } else {

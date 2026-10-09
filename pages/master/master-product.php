@@ -43,14 +43,6 @@ include __DIR__ . '/../components/data/stock-status.php';
                         </div>
                     </div>
 
-                    <button
-                        type="button"
-                        class="btn btn-stock-global"
-                        id="btnStockSetting"
-                        title="Atur batas stok menipis default untuk semua produk baru">
-                        <i class="fas fa-gauge-high me-2"></i>
-                        Batas Stok Global
-                    </button>
                 </div>
 
                 <div class="mt-4 px-4">
@@ -174,7 +166,7 @@ include __DIR__ . '/../components/data/stock-status.php';
                 <div class="mt-2 px-5 mp-add-body import-modal-body">
                     <div class="import-guide">
                         <p><i class="fas fa-info-circle"></i> Unduh template, isi daftar produk, lalu unggah kembali file tersebut.</p>
-                        <p>Kolom <b>code</b> (Kode), <b>name</b> (Nama), <b>category</b> (Kategori), dan <b>sell_price</b> (Harga Jual) wajib diisi; <b>unit</b> boleh kosong. Kategori dipilih dari dropdown Excel. Batas stok menipis mengikuti pengaturan global, foto &amp; supplier diinput manual di detail produk. Baris yang diawali <code>#</code> (mis. baris contoh) dilewati otomatis dan produk dengan kode yang sama tidak diimport dua kali.</p>
+                        <p>Kolom <b>code</b> (Kode), <b>name</b> (Nama), <b>category</b> (Kategori), dan <b>sell_price</b> (Harga Jual) wajib diisi; <b>unit</b> boleh kosong. Kategori dipilih dari dropdown Excel. Kolom <b>low_stock</b> (batas menipis gudang) dan <b>low_stock_kantin</b> (batas menipis kantin) diisi angka (0 diperbolehkan); foto &amp; supplier diinput manual di detail produk. Baris yang diawali <code>#</code> (mis. baris contoh) dilewati otomatis dan produk dengan kode yang sama tidak diimport dua kali.</p>
                     </div>
 
                     <a href="master-product-template.php" class="btn mu-add-btn mu-add-btn-template">
@@ -231,59 +223,6 @@ include __DIR__ . '/../components/data/stock-status.php';
                 </div>
 
                 <div class="mt-2 px-5 combine-modal-body" id="combineFormContent"></div>
-            </div>
-        </div>
-    </div>
-
-<!-- STOCK SETTING MODAL -->
-    <div class="modal fade" id="stockSettingModal" tabindex="-1">
-        <div class="modal-dialog modal-md modal-dialog-centered">
-            <div class="modal-content stock-panel border-0">
-
-                <div class="panel-header panel-dark my-3 mx-3 mp-add-header" id="stockSettingHeader">
-                    <div class="panel-left">
-                        <div class="panel-icon">
-                            <i class="fas fa-gauge-high"></i>
-                        </div>
-
-                        <div class="mp-add-head-text">
-                            <div class="panel-title">
-                                Batas Stok Global
-                            </div>
-                            <div class="panel-subtitle">
-                                Default batas stok menipis untuk produk baru
-                            </div>
-                        </div>
-                    </div>
-
-                    <button class="btn-close btn-close-white mp-add-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
-                </div>
-
-                <div class="mt-2 px-5 mp-add-body">
-                    <label class="form-label"><i class="fas fa-gauge-high me-1"></i> Batas Stok Menipis (default)</label>
-                    <div class="input-group-modern">
-                        <div class="input-icon">
-                            <i class="fas fa-gauge-high"></i>
-                        </div>
-                        <input
-                            type="number"
-                            id="lowStockDefaultInput"
-                            class="form-control"
-                            value="<?= (int)get_low_stock_default($conn) ?>"
-                            min="0">
-                    </div>
-                    <small class="text-muted d-block" style="font-size:11px;">
-                        Status stok: 0 = Habis, 1 s/d batas = Menipis, di atas batas = Ready. Produk lama memakai batasnya sendiri, produk baru memakai nilai ini.
-                    </small>
-
-                    <div class="mp-add-footer">
-                        <button type="button" class="btn btn-cancel" data-bs-dismiss="modal">Batal</button>
-                        <button type="button" class="btn btn-save" id="btnSaveStockSetting">
-                            <i class="fas fa-save"></i>
-                            Save
-                        </button>
-                    </div>
-                </div>
             </div>
         </div>
     </div>
@@ -542,7 +481,7 @@ include __DIR__ . '/../components/data/stock-status.php';
         if(!content) return;
         const cat = content.querySelector('select[name="category"]');
         if(!cat) return;
-        const ids = ['addFieldUnit','addFieldLowStock','addFieldSupplier'];
+        const ids = ['addFieldUnit','addFieldLowStock','addFieldLowStockKantin','addFieldSupplier'];
         const toggle = function(){
             const isAdd = (cat.value || '').toLowerCase() === 'additional';
             ids.forEach(id => {
@@ -926,38 +865,6 @@ include __DIR__ . '/../components/data/stock-status.php';
         });
     });
 </script>
-<script>
-    // Setting default batas stok menipis
-    $(document).on('click','#btnStockSetting',function(){
-        $('#stockSettingModal').modal('show');
-    });
-
-    $(document).on('click','#btnSaveStockSetting',function(){
-        var val = $('#lowStockDefaultInput').val();
-        var btn = $(this).prop('disabled', true);
-
-        fetch('master-product-action.php?action=save_low_stock_default', {
-            method:'POST',
-            body: new URLSearchParams({ low_stock_default: val })
-        })
-        .then(res => res.json())
-        .then(res => {
-            btn.prop('disabled', false);
-            if(res.status === 'success'){
-                QToast('Berhasil', 'Default batas stok diperbarui', 'success');
-                $('#stockSettingModal').modal('hide');
-                loadProductTable();
-            } else {
-                QToast('Gagal', res.message || 'Terjadi kesalahan', 'error');
-            }
-        })
-        .catch(() => {
-            btn.prop('disabled', false);
-            QToast('Error', 'Gagal menyimpan pengaturan', 'error');
-        });
-    });
-</script>
-
 <script>
 // ===== RACIKAN / COMBINE PRODUK =====
 function escHtml(s){

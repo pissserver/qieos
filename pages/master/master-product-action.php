@@ -2,7 +2,6 @@
 error_reporting(0);
 ini_set('display_errors', '0');
 include __DIR__ . '/../../sessions/session.php';
-include __DIR__ . '/../components/data/stock-status.php';
 
 header('Content-Type: application/json');
 header('Cache-Control: no-store, no-cache, must-revalidate');
@@ -101,7 +100,8 @@ if($action === 'store'){
     $priceRaw     = isset($_POST['price']) ? $_POST['price'] : '';
     $price        = $priceRaw === '' ? -1 : (int)$priceRaw;
     $unit         = mysqli_real_escape_string($conn, trim(isset($_POST['unit']) ? $_POST['unit'] : ''));
-    $lowStock     = isset($_POST['low_stock']) && $_POST['low_stock'] !== '' ? max(0, (int)$_POST['low_stock']) : get_low_stock_default($conn);
+    $lowStock     = isset($_POST['low_stock']) && $_POST['low_stock'] !== '' ? max(0, (int)$_POST['low_stock']) : 0;
+    $lowStockKantin = isset($_POST['low_stock_kantin']) && $_POST['low_stock_kantin'] !== '' ? max(0, (int)$_POST['low_stock_kantin']) : 0;
     $supplierIds  = normalizeSupplierIds(isset($_POST['supplier_id']) ? $_POST['supplier_id'] : '');
 
     // Harga 0 rupiah diperbolehkan (produk gratisan); hanya nilai negatif yang ditolak
@@ -132,11 +132,12 @@ if($action === 'store'){
     $isAdd = strtolower(trim($category)) === 'additional';
     $unitSql   = ($unit === '' || $isAdd) ? 'NULL' : "'$unit'";
     $lowStockSql = $isAdd ? 'NULL' : $lowStock;
+    $lowStockKantinSql = $isAdd ? 'NULL' : $lowStockKantin;
     if($isAdd){ $supplierIds = []; }
 
     $q = mysqli_query($conn,"
-        INSERT INTO products (code, name, category, unit, sell_price, low_stock, photo, created_at)
-        VALUES ('$code', '$name', '$category', $unitSql, $price, $lowStockSql, '$photoName', NOW())
+        INSERT INTO products (code, name, category, unit, sell_price, low_stock, low_stock_kantin, photo, created_at)
+        VALUES ('$code', '$name', '$category', $unitSql, $price, $lowStockSql, $lowStockKantinSql, '$photoName', NOW())
     ");
 
     if($q){
@@ -159,7 +160,8 @@ if($action === 'update'){
     $priceRaw     = isset($_POST['price']) ? $_POST['price'] : '';
     $price        = $priceRaw === '' ? -1 : (int)$priceRaw;
     $unit         = mysqli_real_escape_string($conn, trim(isset($_POST['unit']) ? $_POST['unit'] : ''));
-    $lowStock     = isset($_POST['low_stock']) && $_POST['low_stock'] !== '' ? max(0, (int)$_POST['low_stock']) : get_low_stock_default($conn);
+    $lowStock     = isset($_POST['low_stock']) && $_POST['low_stock'] !== '' ? max(0, (int)$_POST['low_stock']) : 0;
+    $lowStockKantin = isset($_POST['low_stock_kantin']) && $_POST['low_stock_kantin'] !== '' ? max(0, (int)$_POST['low_stock_kantin']) : 0;
     $oldPhoto     = isset($_POST['old_photo']) ? $_POST['old_photo'] : '';
     $supplierIds  = normalizeSupplierIds(isset($_POST['supplier_id']) ? $_POST['supplier_id'] : '');
 
@@ -199,11 +201,12 @@ if($action === 'update'){
     $isAdd = strtolower(trim($category)) === 'additional';
     $unitSql   = ($unit === '' || $isAdd) ? 'NULL' : "'$unit'";
     $lowStockSql = $isAdd ? 'NULL' : $lowStock;
+    $lowStockKantinSql = $isAdd ? 'NULL' : $lowStockKantin;
     if($isAdd){ $supplierIds = []; }
 
     $q = mysqli_query($conn,"
         UPDATE products
-        SET code='$code', name='$name', category='$category', sell_price=$price, unit=$unitSql, low_stock=$lowStockSql, photo='$photoName'
+        SET code='$code', name='$name', category='$category', sell_price=$price, unit=$unitSql, low_stock=$lowStockSql, low_stock_kantin=$lowStockKantinSql, photo='$photoName'
         WHERE id = $id
     ");
 
@@ -248,27 +251,6 @@ if($action === 'delete_photo'){
     }
 
     echo json_encode(['status'=>'success']);
-    exit;
-}
-
-// SAVE GLOBAL DEFAULT (batas stok menipis)
-if($action === 'save_low_stock_default'){
-
-    $val = isset($_POST['low_stock_default']) && $_POST['low_stock_default'] !== ''
-        ? max(0, (int)$_POST['low_stock_default'])
-        : get_low_stock_default($conn);
-
-    $q = mysqli_query($conn, "
-        INSERT INTO app_settings (name, value)
-        VALUES ('low_stock_default', '$val')
-        ON DUPLICATE KEY UPDATE value = '$val'
-    ");
-
-    if($q){
-        echo json_encode(['status'=>'success', 'value'=>$val]);
-    }else{
-        echo json_encode(['status'=>'error', 'message'=>'Gagal menyimpan pengaturan']);
-    }
     exit;
 }
 

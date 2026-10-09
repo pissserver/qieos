@@ -9,20 +9,21 @@ $items = [];
 
 if ($role === 'staff kasir') {
     $query = "
-        SELECT t.id, t.code, t.name, t.low_stock, t.stock
+        SELECT t.id, t.code, t.name, t.low_stock, t.low_stock_kantin, t.stock
         FROM (
             SELECT 
                 p.id,
                 p.code,
                 p.name,
                 p.low_stock,
+                p.low_stock_kantin,
                 COALESCE(SUM(ss.qty), 0) as stock
             FROM products p
             INNER JOIN sales_stock ss ON ss.product_id = p.id
             WHERE p.category != 'Additional'
             GROUP BY p.id
         ) t
-        WHERE t.stock <= IFNULL(t.low_stock, (SELECT value FROM app_settings WHERE name='low_stock_default' LIMIT 1))
+        WHERE t.stock <= IFNULL(t.low_stock_kantin, 0)
         ORDER BY t.stock ASC, t.name ASC
     ";
 } else {
@@ -41,7 +42,7 @@ if ($role === 'staff kasir') {
             WHERE p.category != 'Additional'
             GROUP BY p.id
         ) t
-        WHERE t.stock <= IFNULL(t.low_stock, (SELECT value FROM app_settings WHERE name='low_stock_default' LIMIT 1))
+        WHERE t.stock <= IFNULL(t.low_stock, 0)
         ORDER BY t.stock ASC, t.name ASC
     ";
 }
@@ -51,7 +52,11 @@ $result = mysqli_query($conn, $query);
 if ($result) {
     while ($row = mysqli_fetch_assoc($result)) {
         $stock = (int)$row['stock'];
-        $lowStock = resolve_product_low_stock($conn, $row);
+        // Staff kasir (kantin) memakai batas kantin per-produk;
+        // role lain (gudang) memakai low_stock per-produk.
+        $lowStock = ($role === 'staff kasir')
+            ? resolve_product_low_stock_kantin($conn, $row)
+            : resolve_product_low_stock($conn, $row);
         
         $status = 'menipis';
         if ($stock <= 0) {

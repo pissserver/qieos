@@ -26,7 +26,7 @@ if($q === ''){
 $safeQ = $conn->real_escape_string($q);
 
 $query = $conn->query("
-    SELECT id, code, name, category, sell_price, unit, photo, created_at
+    SELECT id, code, name, category, sell_price, unit, low_stock, low_stock_kantin, photo, created_at
     FROM products
     WHERE deleted_at IS NULL AND (name LIKE '%$safeQ%' OR code LIKE '%$safeQ%' OR category LIKE '%$safeQ%')
     ORDER BY name ASC
@@ -49,10 +49,13 @@ if($query && $query->num_rows > 0){
             $totalTrans = (int)$od->fetch_assoc()['total_od'];
         }
 
-        // Stok & status
+        // Stok & status (gudang & kantin punya batas menipis masing-masing)
         $stock = get_product_stock($conn, $d['id']);
         $lowStock = resolve_product_low_stock($conn, $d);
+        $lowStockKantin = resolve_product_low_stock_kantin($conn, $d);
         $stStatus = product_status_view($stock['total'], $lowStock);
+        $stGudang = product_status_view($stock['gudang'], $lowStock);
+        $stKantin = product_status_view($stock['kantin'], $lowStockKantin);
 
         // Suppliers (multi) dari tabel relasi product_supplier
         $supplierName = '-';
@@ -91,13 +94,16 @@ if($query && $query->num_rows > 0){
             'totalTransaksi' => $totalTrans,
             'totalTransaksiFormatted' => number_format($totalTrans, 0, ',', '.'),
             'lowStock' => (int)$lowStock,
+            'lowStockKantin' => (int)$lowStockKantin,
             'stockGudang' => $stock['gudang'],
             'stockKantin' => $stock['kantin'],
             'stockTotal' => $stock['total'],
             'stockGudangFormatted' => number_format($stock['gudang'], 0, ',', '.'),
             'stockKantinFormatted' => number_format($stock['kantin'], 0, ',', '.'),
             'stockTotalFormatted' => number_format($stock['total'], 0, ',', '.'),
-            'stockStatus' => $stStatus
+            'stockStatus' => $stStatus,
+            'stockGudangStatus' => $stGudang,
+            'stockKantinStatus' => $stKantin
         ];
     }
 }

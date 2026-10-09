@@ -1,5 +1,6 @@
 <?php
     include '../../sessions/session.php';
+    include __DIR__ . '/../components/data/stock-status.php';
 
     $q = mysqli_query($conn,"
     SELECT
@@ -9,6 +10,8 @@
         p.unit,
         p.photo,
         p.catalog,
+        p.low_stock,
+        p.low_stock_kantin,
         COALESCE(SUM(s.qty),0) AS qty
     FROM sales_stock s
     JOIN products p
@@ -36,25 +39,16 @@
 
     <?php
         $stock = (int)$d['qty'];
+        $lowStock = resolve_product_low_stock_kantin($conn, $d);
+        $status = product_status_view($stock, $lowStock);
 
-        if($stock <= 0){
-            $statusText='Habis';
-            $statusClass='st-habis';
-            $statusIcon='fa-circle-xmark';
-        }elseif($stock <= 50){
-            $statusText='Menipis';
-            $statusClass='st-menipis';
-            $statusIcon='fa-triangle-exclamation';
-        }else{
-            $statusText='Ready';
-            $statusClass='st-ready';
-            $statusIcon='fa-circle-check';
-        }
+        $statusText = $status['label'];
+        $statusClass = $status['css'];
+        $statusIcon = $status['icon'];
+        $statusKey = $status['key'];
 
         $unit = !empty($d['unit']) ? strtoupper($d['unit']) : '-';
         $isActive = ($d['catalog'] === 'active');
-
-        $statusKey = substr($statusClass, 3);
     ?>
 
     <tr class="stock-row row-st-<?= $statusKey ?> <?= $isActive ? 'catalog-active' : '' ?>" id="row-<?= $d['id'] ?>">

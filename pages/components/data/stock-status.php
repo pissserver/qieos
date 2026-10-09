@@ -4,33 +4,24 @@
 // - Stok Kantin  : SUM(sales_stock.qty) per produk
 // - Total Stok   : gudang + kantin
 // - Status       : 0 = Habis, >0 s/d batas = Menipis, > batas = Ready
-//   Batas menipis diambil dari products.low_stock, fallback ke app_settings.low_stock_default
+//   Batas menipis murni per-produk:
+//   - Layer gudang : products.low_stock
+//   - Layer kantin : products.low_stock_kantin
 
-if(!function_exists('get_low_stock_default')){
+if(!function_exists('resolve_product_low_stock')){
 
-    function get_low_stock_default($conn){
-        static $default = null;
-        if($default !== null) return $default;
-        $default = 5;
-        $r = @mysqli_query($conn, "SELECT value FROM app_settings WHERE name = 'low_stock_default' LIMIT 1");
-        if($r && mysqli_num_rows($r) > 0){
-            $row = mysqli_fetch_assoc($r);
-            $val = (int)$row['value'];
-            if($val >= 0) $default = $val;
-        }
-        return $default;
+    // Batas menipis layer gudang sebuah produk (murni kolom per-produk)
+    function resolve_product_low_stock($conn, $d){
+        return isset($d['low_stock']) ? max(0, (int)$d['low_stock']) : 0;
     }
 
 }
 
-if(!function_exists('resolve_product_low_stock')){
+if(!function_exists('resolve_product_low_stock_kantin')){
 
-    // Batas menipis sebuah produk (pakai nilai kolom, fallback ke default global)
-    function resolve_product_low_stock($conn, $d){
-        if(isset($d['low_stock']) && $d['low_stock'] !== null && $d['low_stock'] !== ''){
-            return max(0, (int)$d['low_stock']);
-        }
-        return get_low_stock_default($conn);
+    // Batas menipis layer kantin sebuah produk (murni kolom per-produk)
+    function resolve_product_low_stock_kantin($conn, $d){
+        return isset($d['low_stock_kantin']) ? max(0, (int)$d['low_stock_kantin']) : 0;
     }
 
 }
