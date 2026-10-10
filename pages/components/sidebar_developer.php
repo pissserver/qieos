@@ -56,13 +56,6 @@
     </a>
 </li>
 
-<li class="nav-item <?= ($current_page == 'mutation.php') ? 'active' : ''; ?>">
-    <a href="<?php echo BASE_URL; ?>/pages/stock/mutation.php" class="nav-link" data-tooltip="Mutasi Stok">
-        <span class="sidebar-icon"><i class="fas fa-truck-ramp-box"></i></span>
-        <span class="sidebar-text">Mutasi Stok</span>
-    </a>
-</li>
-
 <li class="nav-item <?= ($current_page == 'transfer.php') ? 'active' : ''; ?>">
     <a href="<?php echo BASE_URL; ?>/pages/stock/transfer.php" class="nav-link" data-tooltip="Transfer Gudang">
         <span class="sidebar-icon"><i class="fas fa-exchange-alt"></i></span>

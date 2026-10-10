@@ -74,10 +74,6 @@ $D['stok-gudang'] = g('fa-warehouse', 'Stok Gudang', $base . '/pages/stock/stock
     'Monitoring stok gudang dengan metode FIFO (First In, First Out) per layer, lengkap dengan histori masuk & keluar.',
     array('Lihat total stok & per layer FIFO', 'Deteksi stok menipis (low stock)', 'Riwayat barang keluar & masuk'));
 
-$D['mutasi-stok'] = g('fa-truck-ramp-box', 'Mutasi Stok', $base . '/pages/stock/mutation.php', $A,
-    'Pencatatan mutasi / perpindahan stok antar lokasi, misalnya dari gudang menuju kantin.',
-    array('Pilih lokasi asal & tujuan', 'Catat jumlah & catatan mutasi', 'Stok kedua sisi ter-update otomatis'));
-
 $D['transfer-gudang'] = g('fa-exchange-alt', 'Transfer Gudang', $base . '/pages/stock/transfer.php', $A,
     'Transfer stok antar gudang. Stok pengirim berkurang, stok penerima bertambah, keduanya terekam rapi.',
     array('Pilih gudang asal & tujuan', 'Update stok dua sisi otomatis', 'Riwayat transfer tersimpan'));
@@ -132,7 +128,7 @@ switch ($role) {
         $sections['UMUM'] = array('dashboard', 'pencarian', 'whatsnew', 'chat', 'keranjang', 'omzet', 'profil');
         $sections['MASTER'] = array('master-produk', 'master-supplier', 'master-customer', 'master-user');
         $sections['PURCHASING'] = array('daftar-belanja', 'input-pembelian');
-        $sections['GUDANG STOK'] = array('stok-gudang', 'mutasi-stok', 'transfer-gudang');
+        $sections['GUDANG STOK'] = array('stok-gudang', 'transfer-gudang');
         $sections['KANTIN'] = array('stok-kantin', 'katalog', 'pesanan');
         $sections['TENANT'] = array('tenant');
         $sections['REKAP'] = array('rekap');
@@ -144,7 +140,7 @@ switch ($role) {
         $sections['UMUM'] = array('dashboard', 'pencarian', 'whatsnew', 'chat', 'profil');
         $sections['MASTER'] = array('master-produk', 'master-supplier', 'master-customer', 'master-user');
         $sections['PURCHASING'] = array('daftar-belanja', 'input-pembelian');
-        $sections['GUDANG STOK'] = array('stok-gudang', 'mutasi-stok', 'transfer-gudang');
+        $sections['GUDANG STOK'] = array('stok-gudang', 'transfer-gudang');
         $sections['TENANT'] = array('tenant');
         $sections['LAPORAN'] = array('laporan-penjualan', 'laporan-tenant');
         $sections['LAINNYA'] = array('update', 'guide');
@@ -163,7 +159,7 @@ switch ($role) {
 // ubah item yang belum tersedia sesuai role -> "segera hadir"
 $segera = array(
     'administrator' => array('master-produk', 'master-supplier', 'master-customer', 'daftar-belanja',
-        'input-pembelian', 'stok-gudang', 'mutasi-stok', 'transfer-gudang', 'laporan-penjualan'),
+        'input-pembelian', 'stok-gudang', 'transfer-gudang', 'laporan-penjualan'),
     'staff kasir'   => array('master-customer', 'stok-kantin', 'katalog', 'pesanan'),
 );
 

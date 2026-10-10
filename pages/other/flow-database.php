@@ -18,7 +18,6 @@ $pages = array(
     'daftar-belanja'    => array($base . '/pages/purchasing/list.php', 'list'),
     'input-pembelian'   => array($base . '/pages/purchasing/purchase.php', 'purchase'),
     'stok-gudang'       => array($base . '/pages/stock/stock.php', 'stock'),
-    'mutasi-stok'       => array($base . '/pages/stock/mutation.php', 'mutation'),
     'transfer-gudang'   => array($base . '/pages/stock/transfer.php', 'transfer'),
     'stok-kantin'       => array($base . '/pages/sales/sales-stock.php', 'sales-stock'),
     'katalog'           => array($base . '/pages/sales/catalog.php', 'catalog'),
@@ -32,7 +31,7 @@ $pages = array(
 );
 $roleLive = array(
     'developer' => array('master-product', 'master-supplier', 'master-customer', 'master-user',
-        'daftar-belanja', 'input-pembelian', 'stok-gudang', 'mutasi-stok', 'transfer-gudang',
+        'daftar-belanja', 'input-pembelian', 'stok-gudang', 'transfer-gudang',
         'stok-kantin', 'katalog', 'pesanan', 'tenant', 'rekap',
         'laporan-penjualan', 'laporan-tenant', 'chat', 'update'),
     'administrator' => array('master-user', 'tenant', 'laporan-tenant', 'chat', 'update'),
@@ -103,7 +102,7 @@ $phases = array(
             array(
                 'title' => 'Transfer / Mutasi Stok',
                 'desc' => 'Stok gudang dipindahkan ke kantin (atau antar lokasi). Stok pengirim berkurang, stok penerima bertambah, keduanya terekam di ledger.',
-                'pages' => array('mutasi-stok', 'transfer-gudang'),
+                'pages' => array('transfer-gudang'),
                 'tables' => array('sales_stock'),
             ),
             array(
@@ -389,7 +388,7 @@ function labels($key) {
         'master-product' => 'Master Produk', 'master-supplier' => 'Master Supplier',
         'master-customer' => 'Master Customer', 'master-user' => 'Master User',
         'daftar-belanja' => 'Daftar Belanja', 'input-pembelian' => 'Input Pembelian',
-        'stok-gudang' => 'Stok Gudang', 'mutasi-stok' => 'Mutasi Stok',
+        'stok-gudang' => 'Stok Gudang',
         'transfer-gudang' => 'Transfer Gudang', 'stok-kantin' => 'Stok Kantin',
         'katalog' => 'Katalog Produk', 'pesanan' => 'Pesanan',
         'tenant' => 'Tenant', 'rekap' => 'Penjualan & Tenant',

@@ -51,17 +51,39 @@ include '../../sessions/session.php';
             </div>
         </div>
 
-        <!-- DETAIL FIFO -->
+        <!-- MUTASI STOK -->
         <div class="col-lg-6 col-md-12 fifo-panel-col">
             <div class="fifo-container">
 
                 <div class="fifo-title">
                     <span class="fifo-icon">
-                        <i class="fas fa-layer-group"></i>
+                        <i class="fas fa-arrow-right-arrow-left"></i>
                     </span>
                     <div class="fifo-title-text">
-                        <h5 class="mb-0">Layer FIFO</h5>
-                        <small>Detail stok per batch pembelian</small>
+                        <h5 class="mb-0">Mutasi Stok</h5>
+                        <small>Pergerakan stok gudang &amp; kantin per produk</small>
+                    </div>
+                </div>
+
+                <div class="mutasi-toolbar">
+                    <div class="mutasi-tabs" role="tablist" aria-label="Jenis mutasi">
+                        <button type="button" class="mutasi-tab is-active" data-tab="gudang" role="tab" aria-selected="true">
+                            <i class="fas fa-warehouse"></i>
+                            <span>Stok Gudang</span>
+                        </button>
+                        <button type="button" class="mutasi-tab" data-tab="kantin" role="tab" aria-selected="false">
+                            <i class="fas fa-store"></i>
+                            <span>Stok Kantin</span>
+                        </button>
+                    </div>
+
+                    <div class="mutasi-period">
+                        <label class="mutasi-period-label"><i class="far fa-calendar"></i> Periode</label>
+                        <div class="mutasi-period-fields">
+                            <input type="date" id="mutasiFrom" aria-label="Tanggal mulai">
+                            <span class="mutasi-period-sep">&ndash;</span>
+                            <input type="date" id="mutasiTo" aria-label="Tanggal akhir">
+                        </div>
                     </div>
                 </div>
 
@@ -70,12 +92,12 @@ include '../../sessions/session.php';
                     <div class="fifo-empty">
 
                         <div class="fifo-empty-icon">
-                            <i class="fas fa-box-open"></i>
+                            <i class="fas fa-arrow-right-arrow-left"></i>
                         </div>
 
                         <div class="fifo-empty-title">Belum ada detail</div>
                         <div class="fifo-empty-sub">
-                            Klik salah satu produk di samping untuk melihat detail FIFO
+                            Klik salah satu produk di samping untuk melihat mutasi stok
                         </div>
 
                     </div>
@@ -89,20 +111,58 @@ include '../../sessions/session.php';
 </div>
 </main>
 
+<!-- ============================ MODAL DETAIL LAYER FIFO ============================ -->
+<div class="fifo-modal" id="fifoModal" aria-hidden="true">
+    <div class="fifo-modal-backdrop" data-fifo-close></div>
+
+    <div class="fifo-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="fifoModalName">
+        <div class="fifo-modal-head">
+            <div class="fifo-modal-product">
+                <img class="fifo-modal-img" id="fifoModalImg" alt="" hidden>
+                <span class="fifo-modal-icon" id="fifoModalIcon"><i class="fas fa-box-open"></i></span>
+                <div class="fifo-modal-meta">
+                    <div class="fifo-modal-name" id="fifoModalName">Detail FIFO</div>
+                    <div class="fifo-modal-code" id="fifoModalCode">Layer stok per batch pembelian</div>
+                </div>
+            </div>
+
+            <button type="button" class="fifo-modal-close" data-fifo-close aria-label="Tutup">
+                <i class="fas fa-xmark"></i>
+            </button>
+        </div>
+
+        <div class="fifo-modal-body dt-premium" id="fifoModalBody">
+            <!-- Loaded via AJAX -->
+        </div>
+    </div>
+</div>
+
 <?php include '../../script/footscript.php'; ?>
 
     <script src="<?php echo BASE_URL; ?>/script/datatable-compact.js?v=<?php echo filemtime(__DIR__ . '/../../script/datatable-compact.js'); ?>"></script>
 
 <script>
-    /* Breakpoint, pager, dan chip info sekarang milik helper bersama
-       script/datatable-compact.js, sama seperti Master & Purchasing. Jadi
-       angka 575.98 tidak lagi ditulis ulang di file ini - kalau suatu saat
-       berubah, cukup diubah satu tempat. */
+    /* Breakpoint, pager, dan chip info milik helper bersama
+       script/datatable-compact.js, sama seperti Master & Purchasing. */
     function isStockMobile(){
         return MP_TABLE.isMobile();
     }
 
     let stockIsMobile = isStockMobile();
+
+    function loadingHTML(title){
+        return `
+            <div class="fifo-loading">
+                <div class="fifo-loading-icon">
+                    <i class="fa-solid fa-layer-group"></i>
+                </div>
+                <div class="fifo-loading-title">${title}</div>
+                <div class="fifo-loading-bar"><span></span></div>
+            </div>
+        `;
+    }
+
+    /* ============================ TABEL STOK GUDANG ============================ */
 
     function stockDataTable(){
         const mobile = isStockMobile();
@@ -114,13 +174,7 @@ include '../../sessions/session.php';
             /* Pager kustom dari script/datatable-compact.js: 3 nomor di
                mobile, 5 di tablet/desktop, halaman 1 & terakhir dikunci di
                dua ujung, dan "…" hanya muncul kalau memang ada nomor yang
-               disembunyikan. Bentuk pil & warnanya sudah diatur di
-               css/components/datatable-premium.css.
-
-               DULU mobile memakai "simple_numbers" dengan pageLength 4,
-               sekarang keduanya disamakan supaya urutan pil (panah, 1 2 3,
-               elipsis, halaman terakhir, panah) persis sama dengan Master,
-               Purchasing, dan Mutasi. */
+               disembunyikan. */
             pagingType: "mp_compact",
 
             /* Chip "Menampilkan 1-5 dari 137 produk", plus
@@ -129,29 +183,19 @@ include '../../sessions/session.php';
 
             searchDelay: 250,
 
-            /* Opsi "responsive: true" DIHAPUS. Opsi itu hanya dibaca oleh
-               extension Responsive (responsive.dataTables.min.js) yang
-               TIDAK dimuat di script/headscript.php - yang ada hanya
-               jquery.dataTables.min.js + dataTables.bootstrap5.min.js,
-               jadi nilainya diam-diam diabaikan. Responsif di halaman ini
-               ditangani manual: tukar "dom" saat breakpoint mobile
-               (lihat bawah) + overflow-x pada kolom tabel. */
+            /* Responsif ditangani manual: tukar "dom" saat breakpoint mobile
+               (lihat bawah) + overflow-x pada kolom tabel. Extension
+               Responsive tidak dimuat di headscript.php. */
             autoWidth: false,
             language:{
                 search:"",
                 searchPlaceholder:"Cari produk...",
 
-                /* Panah Previous/Next memakai glyph, bukan teks "Previous".
-                   Pada rentang 9 pil, dua pil teks memakan ~150px dari baris
-                   pager sementara sisa ruang di layar 320-360px cuma
-                   ~290-330px. Aksesibilitas tetap terjaga: aria-label
-                   dibacakan bahasa Indonesia lewat oAria.paginate di bawah. */
                 paginate:{
                     previous:"&#8249;",  // ‹
                     next:"&#8250;"       // ›
                 },
 
-                /* Label yang dibacakan screen reader tetap bahasa Indonesia. */
                 oAria:{
                     paginate:{
                         pageLabel:"Halaman {page}",
@@ -178,26 +222,9 @@ include '../../sessions/session.php';
             }
         };
 
-        /* Mobile pakai "fltip": search + show entries + tabel + baris info chip +
-           pagination. "l" dan "i" ikut dirender supaya user bisa menaikkan
-           jumlah baris dan tahu posisinya di daftar tanpa scroll ke atas.
-
-           DULU mobile memakai dom "ftp" (tanpa "l" & "i") plus rule
-           "#stockTableContainer .dataTables_length/_info{display:none}" di
-           css/pages/stock.css, sehingga Show n entries dan baris info
-           disembunyikan di layar kecil. Sekarang keduanya tampil, sama
-           seperti Master & Purchasing.
-
-           "dom" HANYA di-set untuk mobile. Di desktop/tablet TIDAK di-set,
-           sama seperti Master & Purchasing, jadi wrapper .row + .col-*
-           bawaan DataTables Bootstrap 5 yang dipakai:
-
-             <'row'<'col-sm-12 col-md-6'l><'col-sm-12 col-md-6'f>><'row dt-row'
-             <'col-sm-12'tr>><'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>
-
-           Wrapper itu yang bikin css/components/datatable-premium.css bisa
-           meratakan baris atas (Show n entries kiri + search kanan) dan
-           baris bawah (chip info kiri + pagination kanan). */
+        /* "dom" HANYA di-set untuk mobile. Di desktop/tablet dibiarkan
+           default supaya wrapper .row + .col-* bawaan DataTables Bootstrap 5
+           yang dipakai css/components/datatable-premium.css. */
         if(mobile) options.dom = "fltip";
 
         const dt = $('#stockTable').DataTable(options);
@@ -207,12 +234,9 @@ include '../../sessions/session.php';
     }
 
     function loadStockTable(){
-        /* --- Ambil state SEBELUM markup ditimpa -------------------------------
-           Penting diambil di sini: setelah innerHTML diganti, node
-           <table id="stockTable"> yang lama ikut terbuang. isDataTable()
-           mencari node berdasarkan identitas (o.nTable === t), jadi
-           sesudah itu isDataTable('#stockTable') sudah false dan
-           state-nya tidak bisa diambil lagi. */
+        /* Ambil state SEBELUM markup ditimpa: sesudah innerHTML diganti, node
+           <table id="stockTable"> lama ikut terbuang dan state-nya tidak bisa
+           diambil lagi. */
         const prev = $.fn.DataTable.isDataTable('#stockTable')
             ? $('#stockTable').DataTable()
             : null;
@@ -226,14 +250,6 @@ include '../../sessions/session.php';
         fetch('stock-table.php')
         .then(res=>res.text())
         .then(html=>{
-            /* destroy dulu, node lama masih terpasang jadi aman. Kalau
-               dibiarkan, instance-nya menumpuk di registry
-               DataTable.settings setiap reload. Sesudahnya baris
-               innerHTML = html menghapus node lama itu.
-
-               DULU urutannya terbalik (innerHTML dulu, destroy belakangan)
-               sehingga isDataTable() selalu false dan tidak ada yang
-               pernah ikut di-destroy. */
             if(prev) prev.destroy();
 
             document.getElementById('stockTableContainer').innerHTML = html;
@@ -244,17 +260,12 @@ include '../../sessions/session.php';
                 const dt = stockDataTable();
 
                 if(keep){
-                    /* Halaman di luar rentang otomatis dikembalikan
-                       DataTable ke 0, jadi aman walau baris habis (mis.
-                       seluruh hasil filter ikut terhapus). */
                     dt.page.len(keep.length)
                       .search(keep.keyword)
                       .page(keep.page)
                       .draw(false);
                 }
 
-                /* Baris yang sedang aktif harus disorot ulang karena
-                   markup-nya baru, bukan hasil filter yang sama. */
                 if(window.activeStockId){
                     highlightActiveRow(window.activeStockId);
                 }
@@ -262,112 +273,266 @@ include '../../sessions/session.php';
         });
     }
 
-    // Rebuild tabel saat ganti mobile/desktop
-    let stockResizeTimer;
-    window.addEventListener('resize', function(){
-        clearTimeout(stockResizeTimer);
-        stockResizeTimer = setTimeout(function(){
-            if(isStockMobile() === stockIsMobile) return;
-            if(!$.fn.DataTable.isDataTable('#stockTable')) return;
+    /* ============================ PANEL MUTASI STOK ============================ */
 
-            const current = $('#stockTable').DataTable();
-            const page = current.page();
-            const keyword = current.search();
-            const length = current.page.len();
-
-            // Highlight baris yang sedang aktif supaya tidak hilang saat tabel dibangun ulang
-            const activeId = window.activeStockId;
-
-            current.destroy();
-
-            stockIsMobile = isStockMobile();
-            const dt = stockDataTable();
-            dt.page.len(length)
-              .search(keyword)
-              .page(page)
-              .draw(false);
-
-            /* Panel detail FIFO juga harus dibangun ulang supaya search,
-               Show n entries, chip info, dan pager-nya ikut pindah mode.
-               Di-re-init in-place (tanpa fetch) supaya isi panel tidak
-               berkedip kosong. Kalau belum ada detail yang dimuat atau
-               markup-nya yang empty state, dilewati saja. */
-            const detailTable = document.getElementById('tableStock');
-            if(detailTable && $.fn.dataTable.isDataTable(detailTable)){
-                const currentDetail = $(detailTable).DataTable();
-                const detailKeep = {
-                    page: currentDetail.page(),
-                    keyword: currentDetail.search(),
-                    length: currentDetail.page.len()
-                };
-
-                currentDetail.destroy();
-
-                const rebuilt = stockDetailDataTable();
-                if(rebuilt){
-                    rebuilt.page.len(detailKeep.length)
-                            .search(detailKeep.keyword)
-                            .page(detailKeep.page)
-                            .draw(false);
-                }
-            }
-
-            // Restore highlight
-            if(activeId){
-                highlightActiveRow(activeId);
-            }
-        }, 250);
-    });
-
-    // Track active row dan highlight
     window.activeStockId = null;
-    window.fifoRequestToken = 0;
-    window.fifoLoaded = false;
+    window.mutasiToken = 0;
+    window.mutasiTab = 'gudang';
+
+    function pad2(n){ return n < 10 ? '0' + n : '' + n; }
+
+    function toDateInput(d){
+        return d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate());
+    }
+
+    function defaultFromDate(){
+        const now = new Date();
+        return toDateInput(new Date(now.getFullYear(), now.getMonth(), 1));
+    }
+
+    function defaultToDate(){
+        return toDateInput(new Date());
+    }
 
     function highlightActiveRow(id){
         $('.stock-row').removeClass('stock-row-active');
-        const row = $('.stock-row[onclick*="loadDetail(' + id + ')"]');
+        const row = $('.stock-row[data-id="' + id + '"]');
         if(row.length){
             row.addClass('stock-row-active');
         }
     }
 
-    $(document).ready(function(){
-        loadStockTable();
-    });
+    function loadDetail(row){
+        if(!row) return;
+        const id = row.getAttribute('data-id');
+        if(!id) return;
 
-    /* Opsi tabel detail FIFO. Dipisah jadi fungsi supaya bisa dipakai lagi oleh
-       handler resize - panel ini ikut perlu dibangun ulang ketika pindah
-       mobile <-> desktop, kalau tidak kontrolnya (search, Show n entries,
-       chip info, pager) tetap dalam mode yang lama. */
-    function stockDetailOptions(){
-        const detailOptions = {
+        window.activeStockId = id;
+        highlightActiveRow(id);
+
+        loadMutasi();
+    }
+
+    function destroyMutasiTables(){
+        document.querySelectorAll('#fifo-detail .table-mutasi').forEach(function(t){
+            if($.fn.DataTable.isDataTable(t)){
+                $(t).DataTable().destroy();
+            }
+        });
+    }
+
+    function loadMutasi(){
+        const id = window.activeStockId;
+        if(!id) return;
+
+        const wrap = document.getElementById('fifo-detail');
+        const token = ++window.mutasiToken;
+
+        destroyMutasiTables();
+        wrap.classList.remove('fifo-enter');
+        wrap.innerHTML = loadingHTML('Memuat mutasi stok');
+
+        const from = $('#mutasiFrom').val() || defaultFromDate();
+        const to   = $('#mutasiTo').val()   || defaultToDate();
+
+        fetch('stock-mutasi.php?id=' + encodeURIComponent(id)
+            + '&from=' + encodeURIComponent(from)
+            + '&to=' + encodeURIComponent(to))
+        .then(res => res.text())
+        .then(html => {
+            if(window.mutasiToken !== token) return;
+
+            wrap.innerHTML = html;
+
+            applyMutasiTab(window.mutasiTab);
+            initPaneTable(window.mutasiTab);
+
+            wrap.classList.add('fifo-enter');
+            requestAnimationFrame(() => {
+                requestAnimationFrame(() => {
+                    wrap.classList.remove('fifo-enter');
+                });
+            });
+        });
+    }
+
+    function applyMutasiTab(tab){
+        window.mutasiTab = tab;
+
+        document.querySelectorAll('#fifo-detail .mutasi-pane').forEach(function(p){
+            p.classList.toggle('is-active', p.getAttribute('data-pane') === tab);
+        });
+
+        document.querySelectorAll('.mutasi-tab').forEach(function(b){
+            const on = b.getAttribute('data-tab') === tab;
+            b.classList.toggle('is-active', on);
+            b.setAttribute('aria-selected', on ? 'true' : 'false');
+        });
+    }
+
+    /* Opsi tabel riwayat mutasi. Dipisah jadi fungsi supaya dipakai ulang
+       oleh handler resize + saat pindah tab (in-place, tanpa fetch). */
+    function mutasiTableOptions(){
+        const options = {
             pageLength: 10,
-            /* Panel detail tetap 10 baris (bukan 5 seperti tabel utama)
-               supaya FIFO yang banyak tetap terbaca tanpa banyak scroll.
-               Dropdown-nya hanya menawarkan angka yang masuk akal untuk
-               panel selebar ini. */
             lengthMenu: [[10,25,50],[10,25,50]],
             searching: true,
 
-            /* Pager + chip info yang sama dengan tabel utama, supaya panel
-               kanan tidak terlihat seperti tabel kelas dua. */
             pagingType: "mp_compact",
-            infoCallback: MP_TABLE.infoCallback('batch FIFO'),
+            infoCallback: MP_TABLE.infoCallback('riwayat'),
 
-            /* Opsi "responsive: !mobile" DIHAPUS. Extension Responsive tidak
-               dimuat di script/headscript.php, jadi nilainya selalu
-               diabaikan. Card mode mobile di panel ini dikerjakan sendiri
-               oleh css/pages/stock-detail.css, cukup dengan menukar "dom". */
             autoWidth: false,
             ordering: false,
             language: {
                 search: "",
-                searchPlaceholder:"Cari detail...",
+                searchPlaceholder: "Cari riwayat...",
 
                 paginate: {
-                    previous:"&#8249;",  // ‹
-                    next:"&#8250;"       // ›
+                    previous: "&#8249;",
+                    next: "&#8250;"
+                },
+
+                oAria: {
+                    paginate: {
+                        pageLabel: "Halaman {page}",
+                        previous: "Halaman sebelumnya",
+                        next: "Halaman berikutnya"
+                    }
+                },
+
+                zeroRecords: `
+                    <div class="empty-search">
+                        <img src="../../assets/img/illustrations/empty-data.png" class="empty-img" style="width:200px;">
+                        <div class="empty-title">Belum ada pergerakan</div>
+                        <div class="empty-sub">Tidak ada mutasi pada rentang tanggal ini</div>
+                    </div>
+                `,
+
+                emptyTable: `
+                    <div class="empty-search">
+                        <img src="../../assets/img/illustrations/empty-data.png" class="empty-img" style="width:200px;">
+                        <div class="empty-title">Belum ada pergerakan</div>
+                        <div class="empty-sub">Tidak ada mutasi pada rentang tanggal ini</div>
+                    </div>
+                `
+            }
+        };
+
+        if(isStockMobile()) options.dom = "fltip";
+
+        return options;
+    }
+
+    function initPaneTable(tab){
+        const pane = document.querySelector('#fifo-detail .mutasi-pane[data-pane="' + tab + '"]');
+        if(!pane) return;
+
+        const table = pane.querySelector('.table-mutasi');
+        if(!table) return;
+
+        if(!$.fn.DataTable.isDataTable(table)){
+            $(table).DataTable(mutasiTableOptions());
+        } else {
+            $(table).DataTable().columns.adjust().draw(false);
+        }
+    }
+
+    /* ============================ MODAL DETAIL FIFO ============================ */
+
+    window.fifoModalToken = 0;
+
+    function openFifo(row){
+        if(!row) return;
+
+        const id    = row.getAttribute('data-id');
+        const name  = row.getAttribute('data-name') || 'Detail FIFO';
+        const code  = row.getAttribute('data-code') || '';
+
+        document.getElementById('fifoModalName').textContent = name;
+        document.getElementById('fifoModalCode').textContent = code || 'Layer stok per batch pembelian';
+
+        const img = document.getElementById('fifoModalImg');
+        const icon = document.getElementById('fifoModalIcon');
+        const photo = row.getAttribute('data-photo') || '';
+
+        if(photo){
+            img.src = BASE_URL + '/assets/img/products/' + photo;
+            img.alt = name;
+            img.hidden = false;
+            icon.hidden = true;
+        } else {
+            img.hidden = true;
+            icon.hidden = false;
+        }
+
+        document.getElementById('fifoModal').classList.add('is-open');
+        document.getElementById('fifoModal').setAttribute('aria-hidden', 'false');
+        document.body.classList.add('fifo-modal-open');
+
+        loadFifo(id);
+    }
+
+    function loadFifo(id){
+        const body = document.getElementById('fifoModalBody');
+        const token = ++window.fifoModalToken;
+
+        if($.fn.DataTable.isDataTable('#tableStock')){
+            $('#tableStock').DataTable().destroy();
+        }
+
+        body.innerHTML = loadingHTML('Memuat layer FIFO');
+
+        fetch('stock-detail.php?id=' + encodeURIComponent(id))
+        .then(res => res.text())
+        .then(html => {
+            if(window.fifoModalToken !== token) return;
+
+            body.innerHTML = html;
+
+            const table = document.getElementById('tableStock');
+            if(table){
+                if($.fn.DataTable.isDataTable(table)){
+                    $(table).DataTable().destroy();
+                }
+                $(table).DataTable(stockDetailOptions());
+            }
+        });
+    }
+
+    function closeFifo(){
+        const modal = document.getElementById('fifoModal');
+        if(!modal) return;
+
+        modal.classList.remove('is-open');
+        modal.setAttribute('aria-hidden', 'true');
+        document.body.classList.remove('fifo-modal-open');
+
+        if($.fn.DataTable.isDataTable('#tableStock')){
+            $('#tableStock').DataTable().destroy();
+        }
+
+        document.getElementById('fifoModalBody').innerHTML = '';
+    }
+
+    /* Opsi tabel detail FIFO di dalam modal. */
+    function stockDetailOptions(){
+        const detailOptions = {
+            pageLength: 10,
+            lengthMenu: [[10,25,50],[10,25,50]],
+            searching: true,
+
+            pagingType: "mp_compact",
+            infoCallback: MP_TABLE.infoCallback('layer'),
+
+            autoWidth: false,
+            ordering: false,
+            language: {
+                search: "",
+                searchPlaceholder:"Cari layer...",
+
+                paginate: {
+                    previous:"&#8249;",
+                    next:"&#8250;"
                 },
 
                 oAria: {
@@ -387,109 +552,88 @@ include '../../sessions/session.php';
             }
         };
 
-        /* Sama seperti tabel utama: "dom" hanya di-set untuk mobile.
-           Di desktop/tablet dibiarkan default supaya wrapper .row + .col-*
-           bawaan Bootstrap 5 yang dipakai
-           css/components/datatable-premium.css.
-
-           DULU "l" & "i" tidak ada di mobile (dom "ftp") dan
-           css/pages/stock-detail.css menyembunyikan
-           "#tableStock_wrapper .dataTables_length/_info". Sekarang keduanya
-           tampil supaya panel ini serasi dengan tabel utama. */
         if(isStockMobile()) detailOptions.dom = "fltip";
 
         return detailOptions;
     }
 
-    function stockDetailDataTable(){
-        const table = document.getElementById('tableStock');
-        if(!table) return null;
+    /* ============================ EVENTS ============================ */
 
-        const dt = $(table).DataTable(stockDetailOptions());
-        dt.columns.adjust();
+    // Pindah tab panel mutasi
+    $(document).on('click', '.mutasi-tab', function(){
+        const tab = $(this).data('tab');
+        applyMutasiTab(tab);
+        initPaneTable(tab);
+    });
 
-        return dt;
-    }
+    // Ganti periode -> muat ulang panel
+    let mutasiPeriodTimer;
+    $(document).on('change', '#mutasiFrom, #mutasiTo', function(){
+        if(!window.activeStockId) return;
+        clearTimeout(mutasiPeriodTimer);
+        mutasiPeriodTimer = setTimeout(loadMutasi, 150);
+    });
 
-    function loadDetail(id){
-
-        // Abaikan klik ulang pada baris yang sama
-        if (String(window.activeStockId) === String(id) && window.fifoLoaded) return;
-
-        // Highlight row yang diklik
-        window.activeStockId = id;
-        highlightActiveRow(id);
-
-        const wrap = document.getElementById('fifo-detail');
-
-        // Token request: mencegah respons lama menimpa data baru
-        // saat user klik beberapa baris dengan cepat
-        const token = ++window.fifoRequestToken;
-        window.fifoLoaded = false;
-
-        // Reset animasi masuk supaya tidak numpuk dengan request sebelumnya
-        wrap.classList.remove('fifo-enter');
-
-        // Tutup DataTable lama SEBELUM DOM diganti agar tidak menyisakan
-        // wrapper/Styling yang bentrok dengan markup baru
-        if ($.fn.DataTable.isDataTable('#tableStock')) {
-            $('#tableStock').DataTable().destroy();
+    // Tutup modal FIFO
+    $(document).on('click', '[data-fifo-close]', closeFifo);
+    $(document).on('keydown', function(e){
+        if(e.key === 'Escape' && document.getElementById('fifoModal').classList.contains('is-open')){
+            closeFifo();
         }
+    });
 
-        // Loading state langsung tampil tanpa jeda supaya tidak terasa "nunggu".
-        // Content lama dicabut seketika, jadi tidak ada data lama yang
-        // tertinggal kalau user klik baris lain sebelum request selesai.
-        wrap.innerHTML = `
-            <div class="fifo-loading">
-                <div class="fifo-loading-icon">
-                    <i class="fa-solid fa-layer-group"></i>
-                </div>
-                <div class="fifo-loading-title">Memuat detail FIFO</div>
-                <div class="fifo-loading-bar"><span></span></div>
-            </div>
-        `;
+    // Rebuild tabel saat ganti mobile/desktop
+    let stockResizeTimer;
+    window.addEventListener('resize', function(){
+        clearTimeout(stockResizeTimer);
+        stockResizeTimer = setTimeout(function(){
+            if(isStockMobile() === stockIsMobile) return;
+            stockIsMobile = isStockMobile();
 
-        fetch('stock-detail.php?id=' + encodeURIComponent(id))
-        .then(res => res.text())
-        .then(html => {
+            // 1) tabel utama
+            if($.fn.DataTable.isDataTable('#stockTable')){
+                const current = $('#stockTable').DataTable();
+                const page = current.page();
+                const keyword = current.search();
+                const length = current.page.len();
 
-            // Abaikan respons yang sudah basi
-            if (window.fifoRequestToken !== token) return;
+                current.destroy();
 
-            wrap.innerHTML = html;
-
-            // Empty state dirender sebagai markup terpisah, bukan baris tabel,
-            // jadi tidak ada sisa styling tabel yang ikut terbawa
-            const table = document.getElementById('tableStock');
-
-            const done = () => {
-                if (window.fifoRequestToken !== token) return;
-                window.fifoLoaded = true;
-
-                wrap.classList.add('fifo-enter');
-                requestAnimationFrame(() => {
-                    requestAnimationFrame(() => {
-                        wrap.classList.remove('fifo-enter');
-                    });
-                });
-            };
-
-            if(!table){
-                done();
-                return;
+                const dt = stockDataTable();
+                dt.page.len(length)
+                  .search(keyword)
+                  .page(page)
+                  .draw(false);
             }
 
-            if($.fn.dataTable.isDataTable(table)){
-                $(table).DataTable().destroy();
+            // 2) tabel riwayat panel mutasi
+            document.querySelectorAll('#fifo-detail .table-mutasi').forEach(function(t){
+                if($.fn.DataTable.isDataTable(t)) $(t).DataTable().destroy();
+            });
+            if(window.activeStockId) initPaneTable(window.mutasiTab);
+
+            // 3) tabel layer FIFO di modal
+            const modal = document.getElementById('fifoModal');
+            if(modal && modal.classList.contains('is-open')){
+                const t = document.getElementById('tableStock');
+                if(t){
+                    if($.fn.DataTable.isDataTable(t)) $(t).DataTable().destroy();
+                    $(t).DataTable(stockDetailOptions());
+                }
             }
 
-            stockDetailDataTable();
+            if(window.activeStockId){
+                highlightActiveRow(window.activeStockId);
+            }
+        }, 250);
+    });
 
-            done();
+    $(document).ready(function(){
+        $('#mutasiFrom').val(defaultFromDate());
+        $('#mutasiTo').val(defaultToDate());
 
-        });
-
-    }
+        loadStockTable();
+    });
 </script>
 
 </body>

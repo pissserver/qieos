@@ -211,13 +211,6 @@
                     </a>
                 </li>
 
-                <li class="nav-item <?= ($current_page == 'mutation.php' || ($current_page == 'coming-soon.php' && $menu == 'mutation')) ? 'active' : ''; ?>">
-                    <a href="<?php echo BASE_URL; ?>/pages/coming-soon.php?menu=mutation" class="nav-link" data-tooltip="Mutasi Stok">
-                        <span class="sidebar-icon"><i class="fas fa-truck-ramp-box"></i></span>
-                        <span class="sidebar-text">Mutasi Stok</span>
-                    </a>
-                </li>
-
                 <li class="nav-item <?= ($current_page == 'transfer.php' || ($current_page == 'coming-soon.php' && $menu == 'transfer')) ? 'active' : ''; ?>">
                     <a href="<?php echo BASE_URL; ?>/pages/coming-soon.php?menu=transfer" class="nav-link" data-tooltip="Transfer Gudang">
                         <span class="sidebar-icon"><i class="fas fa-exchange-alt"></i></span>

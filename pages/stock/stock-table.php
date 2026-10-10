@@ -40,7 +40,11 @@ include __DIR__ . '/../components/data/stock-status.php';
     ?>
 
     <tr class="stock-row"
-        onclick="loadDetail(<?= $d['id'] ?>)">
+        data-id="<?= (int)$d['id'] ?>"
+        data-name="<?= htmlspecialchars($d['name']) ?>"
+        data-code="<?= htmlspecialchars($d['code']) ?>"
+        data-photo="<?= htmlspecialchars(!empty($d['photo']) ? $d['photo'] : '') ?>"
+        onclick="loadDetail(this)">
 
         <td>
             <div class="product-wrap">
@@ -87,10 +91,20 @@ include __DIR__ . '/../components/data/stock-status.php';
         </td>
 
         <td class="text-center">
-            <span class="st-badge <?= $status['css'] ?>">
-                <i class="fas <?= $status['icon'] ?>"></i>
-                <?= $status['label'] ?>
-            </span>
+            <div class="status-actions">
+                <span class="st-badge <?= $status['css'] ?>">
+                    <i class="fas <?= $status['icon'] ?>"></i>
+                    <?= $status['label'] ?>
+                </span>
+
+                <button type="button" class="row-mutasi-btn"
+                    onclick="event.stopPropagation(); openFifo(this.closest('tr'));"
+                    aria-label="Lihat detail layer FIFO <?= htmlspecialchars($d['name']) ?>"
+                    title="Detail layer FIFO">
+                    <i class="fas fa-layer-group"></i>
+                    <span>FIFO</span>
+                </button>
+            </div>
         </td>
     </tr>
 
