@@ -459,6 +459,31 @@
     vertical-align: middle;
 }
 
+/* Notifikasi daftar produk bahan: hanya stok kantin */
+.combine-stock-note {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin: 10px 0 14px;
+    padding: 10px 14px;
+    border-radius: 12px;
+    background: #eef2ff;
+    border: 1px solid #e0e7ff;
+    color: #4338ca;
+    font-size: 12px;
+    line-height: 1.45;
+}
+
+.combine-stock-note i {
+    color: #6366f1;
+    margin-top: 2px;
+    flex-shrink: 0;
+}
+
+.combine-stock-note b {
+    font-weight: 800;
+}
+
 /* --- Sticky bar total harga --- */
 .combine-sticky-total {
     display: flex;

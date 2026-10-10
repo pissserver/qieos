@@ -2,21 +2,6 @@
 error_reporting(0);
 include __DIR__ . '/../../sessions/session.php';
 
-// Daftar produk aktif untuk dipilih sebagai bahan racikan
-$products = [];
-$q = mysqli_query($conn, "
-    SELECT id, name, code, COALESCE(sell_price, 0) AS sell_price, COALESCE(unit, '') AS unit, COALESCE(category, '') AS category
-    FROM products
-    WHERE deleted_at IS NULL
-    ORDER BY name ASC
-");
-if($q){
-    while($row = mysqli_fetch_assoc($q)){
-        $products[] = $row;
-    }
-}
-$productJson = json_encode($products);
-
 // Mode edit: prefill nama + bahan racikan yang dipilih
 $editCombo = null;
 $editId    = isset($_GET['id']) ? (int)$_GET['id'] : 0;
@@ -32,6 +17,40 @@ if($editId > 0){
         $editCombo = ['id' => (int)$combo['id'], 'name' => $combo['name'], 'items' => $pids];
     }
 }
+$editPids   = $editCombo ? $editCombo['items'] : [];
+$editPidSet = array_flip($editPids);
+
+// Daftar produk aktif untuk dipilih sebagai bahan racikan.
+// HANYA produk yang tersedia di stok kantin yang ditampilkan
+// (stok kantin = penjumlahan qty di sales_stock). Produk yang sudah
+// terpilih pada racikan yang sedang diedit tetap disertakan walaupun
+// stok kantinnya kosong, supaya bahan yang sudah dipilih tidak hilang.
+$products = [];
+$q = mysqli_query($conn, "
+    SELECT
+        p.id, p.name, p.code,
+        COALESCE(p.sell_price, 0) AS sell_price,
+        COALESCE(p.unit, '') AS unit,
+        COALESCE(p.category, '') AS category,
+        COALESCE(ss.v, 0) AS kantin
+    FROM products p
+    LEFT JOIN (
+        SELECT product_id, SUM(qty) AS v
+        FROM sales_stock
+        GROUP BY product_id
+    ) ss ON ss.product_id = p.id
+    WHERE p.deleted_at IS NULL
+    ORDER BY p.name ASC
+");
+if($q){
+    while($row = mysqli_fetch_assoc($q)){
+        $row['kantin'] = max(0, (int)$row['kantin']);
+        if($row['kantin'] > 0 || isset($editPidSet[$row['id']])){
+            $products[] = $row;
+        }
+    }
+}
+$productJson = json_encode($products);
 $editJson = $editCombo ? json_encode($editCombo) : 'null';
 ?>
 
@@ -64,6 +83,14 @@ $editJson = $editCombo ? json_encode($editCombo) : 'null';
 <div class="section-title">
     Pilih Produk
     <span class="combine-count" id="combineCount">0 bahan</span>
+</div>
+
+<div class="combine-stock-note">
+    <i class="fas fa-circle-info"></i>
+    <div>
+        <b>Hanya produk yang tersedia di stok kantin</b> yang dapat dipilih sebagai bahan racikan.
+        Produk yang belum tersedia di stok kantin tidak ditampilkan dalam daftar.
+    </div>
 </div>
 
 <div id="combineItems"></div>

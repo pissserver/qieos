@@ -50,12 +50,35 @@
 
         // Ambil semua detail order
         $detail = mysqli_query($conn, "
-            SELECT product_id, qty
+            SELECT id, product_id, product_combo_id, qty
             FROM order_details
             WHERE order_id = $order_id
         ");
 
         while ($row = mysqli_fetch_assoc($detail)) {
+
+            // Detail racikan: product_id NULL -> kembalikan stok kantin
+            // seluruh bahan penyusunnya.
+            if ($row['product_id'] === null) {
+                $comboId  = (int)$row['product_combo_id'];
+                $comboQty = (int)$row['qty'];
+
+                if($comboId > 0 && $comboQty > 0){
+                    $ingq = mysqli_query($conn, "
+                        SELECT product_id, COALESCE(qty, 1) AS qty
+                        FROM product_combo_items
+                        WHERE combo_id = $comboId
+                    ");
+                    while($ingq && $ing = mysqli_fetch_assoc($ingq)){
+                        $restore = max(1, (int)$ing['qty']) * $comboQty;
+                        mysqli_query($conn, "
+                            INSERT INTO sales_stock (product_id, qty, type)
+                            VALUES (" . (int)$ing['product_id'] . ", $restore, 'return')
+                        ");
+                    }
+                }
+                continue;
+            }
 
             mysqli_query($conn, "
                 INSERT INTO sales_stock (product_id, qty, type)

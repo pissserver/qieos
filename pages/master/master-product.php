@@ -896,7 +896,10 @@ function combineRowHtml(selectedId){
     for(var i = 0; i < COMBINE.products.length; i++){
         var p = COMBINE.products[i];
         var sel = String(p.id) === String(selectedId) ? ' selected' : '';
-        var label = p.name + (p.code ? ' (' + p.code + ')' : '') + ' \u2014 ' + rupiahN(p.sell_price) + (p.unit ? ' / ' + p.unit : '');
+        var stk = Number(p.kantin) || 0;
+        var label = p.name + (p.code ? ' (' + p.code + ')' : '') +
+            ' \u2014 ' + rupiahN(p.sell_price) + (p.unit ? ' / ' + p.unit : '') +
+            ' \u00b7 Stok Kantin ' + stk.toLocaleString('id-ID');
         opts += '<option value="' + p.id + '"' + sel + '>' + escHtml(label) + '</option>';
     }
     // 'required' sengaja tidak dipakai: select2 menyembunyikan <select> asli
