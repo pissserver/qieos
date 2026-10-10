@@ -70,11 +70,11 @@ $D['input-pembelian'] = g('fa-cart-plus', 'Input Pembelian', $base . '/pages/pur
     'Pencatatan pembelian dari supplier. Stok gudang bertambah otomatis sesuai data pembelian.',
     array('Pilih supplier & produk', 'Harga beli & qty langsung masuk stok', 'Histori pembelian tersimpan lengkap'));
 
-$D['stok-gudang'] = g('fa-warehouse', 'Stok Gudang', $base . '/pages/stock/stock.php', $A,
+$D['stok-gudang'] = g('fa-warehouse', 'Detail Stok', $base . '/pages/stock/stock.php', $A,
     'Monitoring stok gudang dengan metode FIFO (First In, First Out) per layer, lengkap dengan histori masuk & keluar.',
     array('Lihat total stok & per layer FIFO', 'Deteksi stok menipis (low stock)', 'Riwayat barang keluar & masuk'));
 
-$D['transfer-gudang'] = g('fa-exchange-alt', 'Transfer Gudang', $base . '/pages/stock/transfer.php', $A,
+$D['transfer-gudang'] = g('fa-exchange-alt', 'Transfer Stok', $base . '/pages/stock/transfer.php', $A,
     'Transfer stok antar gudang. Stok pengirim berkurang, stok penerima bertambah, keduanya terekam rapi.',
     array('Pilih gudang asal & tujuan', 'Update stok dua sisi otomatis', 'Riwayat transfer tersimpan'));
 
@@ -128,7 +128,7 @@ switch ($role) {
         $sections['UMUM'] = array('dashboard', 'pencarian', 'whatsnew', 'chat', 'keranjang', 'omzet', 'profil');
         $sections['MASTER'] = array('master-produk', 'master-supplier', 'master-customer', 'master-user');
         $sections['PURCHASING'] = array('daftar-belanja', 'input-pembelian');
-        $sections['GUDANG STOK'] = array('stok-gudang', 'transfer-gudang');
+        $sections['STOK ACTION'] = array('transfer-gudang', 'stok-gudang');
         $sections['KANTIN'] = array('stok-kantin', 'katalog', 'pesanan');
         $sections['TENANT'] = array('tenant');
         $sections['REKAP'] = array('rekap');
@@ -140,7 +140,7 @@ switch ($role) {
         $sections['UMUM'] = array('dashboard', 'pencarian', 'whatsnew', 'chat', 'profil');
         $sections['MASTER'] = array('master-produk', 'master-supplier', 'master-customer', 'master-user');
         $sections['PURCHASING'] = array('daftar-belanja', 'input-pembelian');
-        $sections['GUDANG STOK'] = array('stok-gudang', 'transfer-gudang');
+        $sections['STOK ACTION'] = array('transfer-gudang', 'stok-gudang');
         $sections['TENANT'] = array('tenant');
         $sections['LAPORAN'] = array('laporan-penjualan', 'laporan-tenant');
         $sections['LAINNYA'] = array('update', 'guide');
@@ -176,7 +176,7 @@ $groupColors = array(
     'UMUM'        => '#4f46e5,#6366f1',
     'MASTER'      => '#0284c7,#0ea5e9',
     'PURCHASING'  => '#0d9488,#14b8a6',
-    'GUDANG STOK' => '#7c3aed,#8b5cf6',
+    'STOK ACTION' => '#7c3aed,#8b5cf6',
     'KANTIN'      => '#d97706,#f59e0b',
     'TENANT'      => '#db2777,#ec4899',
     'REKAP'       => '#0891b2,#22d3ee',

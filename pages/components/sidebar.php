@@ -201,20 +201,20 @@
                     </a>
                 </li>
 
-                <!-- GUDANG STOK (SUMBER BARANG / FIFO) -->
-                <li class="nav-title">GUDANG STOK</li>
+                <!-- STOK ACTION (SUMBER BARANG / FIFO) -->
+                <li class="nav-title">STOK ACTION</li>
 
-                <li class="nav-item <?= ($current_page == 'stock.php' || ($current_page == 'coming-soon.php' && $menu == 'stock')) ? 'active' : ''; ?>">
-                    <a href="<?php echo BASE_URL; ?>/pages/coming-soon.php?menu=stock" class="nav-link" data-tooltip="Stok Gudang">
-                        <span class="sidebar-icon"><i class="fas fa-warehouse"></i></span>
-                        <span class="sidebar-text">Stok Gudang</span>
+                <li class="nav-item <?= ($current_page == 'transfer.php' || ($current_page == 'coming-soon.php' && $menu == 'transfer')) ? 'active' : ''; ?>">
+                    <a href="<?php echo BASE_URL; ?>/pages/coming-soon.php?menu=transfer" class="nav-link" data-tooltip="Transfer Stok">
+                        <span class="sidebar-icon"><i class="fas fa-exchange-alt"></i></span>
+                        <span class="sidebar-text">Transfer Stok</span>
                     </a>
                 </li>
 
-                <li class="nav-item <?= ($current_page == 'transfer.php' || ($current_page == 'coming-soon.php' && $menu == 'transfer')) ? 'active' : ''; ?>">
-                    <a href="<?php echo BASE_URL; ?>/pages/coming-soon.php?menu=transfer" class="nav-link" data-tooltip="Transfer Gudang">
-                        <span class="sidebar-icon"><i class="fas fa-exchange-alt"></i></span>
-                        <span class="sidebar-text">Transfer Gudang</span>
+                <li class="nav-item <?= ($current_page == 'stock.php' || ($current_page == 'coming-soon.php' && $menu == 'stock')) ? 'active' : ''; ?>">
+                    <a href="<?php echo BASE_URL; ?>/pages/coming-soon.php?menu=stock" class="nav-link" data-tooltip="Detail Stok">
+                        <span class="sidebar-icon"><i class="fas fa-warehouse"></i></span>
+                        <span class="sidebar-text">Detail Stok</span>
                     </a>
                 </li>
 

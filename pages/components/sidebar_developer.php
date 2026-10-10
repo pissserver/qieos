@@ -46,20 +46,20 @@
     </a>
 </li>
 
-<!-- GUDANG STOK (SUMBER BARANG / FIFO) -->
-<li class="nav-title">GUDANG STOK</li>
+<!-- STOK ACTION (SUMBER BARANG / FIFO) -->
+<li class="nav-title">STOK ACTION</li>
 
-<li class="nav-item <?= ($current_page == 'stock.php') ? 'active' : ''; ?>">
-    <a href="<?php echo BASE_URL; ?>/pages/stock/stock.php" class="nav-link" data-tooltip="Stok Gudang">
-        <span class="sidebar-icon"><i class="fas fa-warehouse"></i></span>
-        <span class="sidebar-text">Stok Gudang</span>
+<li class="nav-item <?= ($current_page == 'transfer.php') ? 'active' : ''; ?>">
+    <a href="<?php echo BASE_URL; ?>/pages/stock/transfer.php" class="nav-link" data-tooltip="Transfer Stok">
+        <span class="sidebar-icon"><i class="fas fa-exchange-alt"></i></span>
+        <span class="sidebar-text">Transfer Stok</span>
     </a>
 </li>
 
-<li class="nav-item <?= ($current_page == 'transfer.php') ? 'active' : ''; ?>">
-    <a href="<?php echo BASE_URL; ?>/pages/stock/transfer.php" class="nav-link" data-tooltip="Transfer Gudang">
-        <span class="sidebar-icon"><i class="fas fa-exchange-alt"></i></span>
-        <span class="sidebar-text">Transfer Gudang</span>
+<li class="nav-item <?= ($current_page == 'stock.php') ? 'active' : ''; ?>">
+    <a href="<?php echo BASE_URL; ?>/pages/stock/stock.php" class="nav-link" data-tooltip="Detail Stok">
+        <span class="sidebar-icon"><i class="fas fa-warehouse"></i></span>
+        <span class="sidebar-text">Detail Stok</span>
     </a>
 </li>
 

@@ -61,7 +61,7 @@ $manifest = [
             "icons" => [["src" => BASE_URL . "/assets/img/brand/icon-192.png", "sizes" => "192x192"]]
         ],
         [
-            "name" => "Stok Gudang",
+            "name" => "Detail Stok",
             "short_name" => "Stok",
             "url" => BASE_URL . "/pages/stock/stock.php",
             "icons" => [["src" => BASE_URL . "/assets/img/brand/icon-192.png", "sizes" => "192x192"]]

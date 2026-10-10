@@ -3,7 +3,7 @@
 <!doctype html>
 <html>
     <head>
-        <title>Transfer Gudang - Qieos</title>
+        <title>Transfer Stok - Qieos</title>
         <?php include '../../script/headscript.php'; ?>
 
 <link rel="stylesheet" href="<?php echo BASE_URL; ?>/css/pages/history-request-table.css?v=<?php echo filemtime(__DIR__ . '/../../css/pages/history-request-table.css'); ?>">

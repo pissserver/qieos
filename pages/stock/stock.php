@@ -6,7 +6,7 @@ include '../../sessions/session.php';
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>Stok Gudang - Qieos</title>
+    <title>Detail Stok - Qieos</title>
     <?php include '../../script/headscript.php'; ?>
 
     <link rel="stylesheet" href="<?php echo BASE_URL; ?>/css/pages/stock.css?v=<?php echo filemtime(__DIR__ . '/../../css/pages/stock.css'); ?>">
@@ -33,10 +33,10 @@ include '../../sessions/session.php';
 
                         <div>
                             <div class="panel-title">
-                                Stok Gudang
+                                Detail Stok
                             </div>
                             <div class="panel-subtitle">
-                                List stok produk siap transfer ke penjualan
+                                Rincian persediaan produk per batch (FIFO)
                             </div>
                         </div>
                     </div>

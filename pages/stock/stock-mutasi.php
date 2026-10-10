@@ -157,6 +157,10 @@ foreach($rowsG as $i => $r){
     $rowsG[$i]['saldo'] = $saldoG;
 }
 
+/* Tampilkan terbaru di atas: saldo tetap saldo saat event terjadi,
+   hanya urutan baris yang dibalik. */
+$rowsG = array_reverse($rowsG);
+
 /* ==================== KANTIN ==================== */
 $kAwal   = mutasi_scalar($conn, "SELECT COALESCE(SUM(qty),0) FROM sales_stock WHERE product_id = $id AND created_at < '$startTs'");
 $kMasuk  = mutasi_scalar($conn, "SELECT COALESCE(SUM(qty),0) FROM sales_stock WHERE product_id = $id AND type IN ('transfer','return') AND created_at BETWEEN '$startTs' AND '$endTs'");
@@ -192,6 +196,9 @@ while($qk && $r = mysqli_fetch_assoc($qk)){
         'saldo'  => $saldoK
     ];
 }
+
+/* Tampilkan terbaru di atas (saldo tetap per-event saat dibangun). */
+$rowsK = array_reverse($rowsK);
 ?>
 <div class="mutasi-product">
     <div class="mutasi-product-info">

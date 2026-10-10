@@ -25,6 +25,7 @@ while($d = mysqli_fetch_assoc($q)){
 }
 
 $hasRow = !empty($rows);
+$rowNum = 0;
 
 $bulan = [
     1 => 'Januari','Februari','Maret','April','Mei','Juni',
@@ -69,6 +70,7 @@ $bulan = [
             <?php foreach($rows as $d): ?>
 
                 <?php
+                    $rowNum++;
                     $tgl = strtotime($d['date']);
                     $tanggal = date('d', $tgl).' '.$bulan[(int)date('m',$tgl)].' '.date('Y',$tgl);
 
@@ -76,7 +78,7 @@ $bulan = [
                     $form = $d['form'] ? $d['form'] : '-';
                 ?>
 
-                <tr>
+                <tr<?= $rowNum === 1 ? ' class="fifo-first"' : '' ?>>
 
                     <!-- TANGGAL + FORM -->
                     <td>
@@ -91,6 +93,14 @@ $bulan = [
                                 <i class="fa-solid fa-file-lines"></i>
                                 <?= htmlspecialchars($form) ?>
                             </div>
+
+                            <?php if($rowNum === 1): ?>
+                                <!-- Batch tertua: digunakan/dihabiskan terlebih dahulu (FIFO) -->
+                                <div class="fifo-use-tag" title="Batch tertua, digunakan terlebih dahulu (FIFO)">
+                                    <i class="fa-solid fa-fire"></i>
+                                    Digunakan Terlebih Dahulu
+                                </div>
+                            <?php endif; ?>
 
                         </div>
                     </td>
