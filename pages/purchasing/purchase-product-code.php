@@ -2,7 +2,7 @@
 include '../../sessions/session.php';
 
 $q = mysqli_query($conn, "
-    SELECT DISTINCT p.code, p.name, p.category, p.sell_price, pi.unit
+    SELECT DISTINCT p.code, p.name, p.category, p.sell_price, pi.unit_stock
     FROM products p
     LEFT JOIN purchase_items pi ON p.id = pi.product_id
     ORDER BY name ASC

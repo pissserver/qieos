@@ -7,7 +7,7 @@ SELECT
     p.code,
     p.category,
     COALESCE(SUM(pi.remaining_qty),0) AS stock,
-    GROUP_CONCAT(DISTINCT pi.unit) AS units
+    GROUP_CONCAT(DISTINCT pi.unit_stock) AS units
 FROM products p
 LEFT JOIN purchase_items pi 
     ON pi.product_id = p.id

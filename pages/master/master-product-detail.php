@@ -15,7 +15,7 @@ if(!$d){
 
 // Hitung jumlah pembelian (semua item, kecuali yang di-soft-delete)
 $qi = mysqli_query($conn,"
-    SELECT COALESCE(SUM(pi.qty),0) AS total_qty
+    SELECT COALESCE(SUM(pi.qty_stock),0) AS total_qty
     FROM purchase_items pi
     INNER JOIN purchases p ON p.id = pi.purchase_id AND p.deleted_at IS NULL
     WHERE pi.product_id = {$d['id']}

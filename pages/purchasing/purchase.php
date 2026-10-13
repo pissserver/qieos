@@ -10,7 +10,7 @@ $qForms = mysqli_query($conn,"
         AND pi.deleted_at IS NULL
     WHERE p.deleted_at IS NULL
       AND pi.qty_buy IS NOT NULL
-      AND pi.qty IS NULL
+      AND pi.qty_stock IS NULL
     ORDER BY p.date DESC, p.id DESC
 ");
 

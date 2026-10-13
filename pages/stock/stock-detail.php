@@ -5,11 +5,11 @@ $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 
 $q = mysqli_query($conn, "
     SELECT 
-        pi.qty,
+        pi.qty_stock,
         pi.remaining_qty,
         p.date,
-        pi.unit,
-        pi.price,
+        pi.unit_stock,
+        pi.price_unit,
         p.form
     FROM purchase_items pi
     LEFT JOIN purchases p ON p.id = pi.purchase_id
@@ -109,7 +109,7 @@ $bulan = [
                     <td>
                         <span class="badge-qty">
                             <span class="badge-label">Masuk</span>
-                            <span class="badge-value"><?= (int)$d['qty'] ?> <?= htmlspecialchars($d['unit']) ?></span>
+                            <span class="badge-value"><?= (int)$d['qty_stock'] ?> <?= htmlspecialchars($d['unit_stock']) ?></span>
                         </span>
                     </td>
 
@@ -117,7 +117,7 @@ $bulan = [
                     <td>
                         <span class="badge-remain">
                             <span class="badge-label">Sisa</span>
-                            <span class="badge-value"><?= (int)$remaining ?> <?= htmlspecialchars($d['unit']) ?></span>
+                            <span class="badge-value"><?= (int)$remaining ?> <?= htmlspecialchars($d['unit_stock']) ?></span>
                         </span>
                     </td>
 
@@ -125,7 +125,7 @@ $bulan = [
                     <td>
                         <span class="badge-price">
                             <span class="badge-label">Harga Beli</span>
-                            <span class="badge-value">Rp <?= number_format($d['price'], 0, ',', '.') ?></span>
+                            <span class="badge-value">Rp <?= number_format($d['price_unit'], 0, ',', '.') ?></span>
                         </span>
                     </td>
 

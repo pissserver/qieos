@@ -11,8 +11,8 @@ $q = mysqli_query($conn,"
         pi.id AS item_id,
         COALESCE(products.name, '') AS name,
         products.unit AS unit,
-        pi.qty,
-        pi.price,
+        pi.qty_stock,
+        pi.price_unit,
         pi.qty_buy,
         pi.unit_buy,
         pi.price_buy
@@ -99,7 +99,7 @@ while($d = mysqli_fetch_assoc($q)){
                        placeholder="Qty"
                        min="0"
                        required
-                       value="<?= $it['qty'] !== null ? $it['qty'] : '' ?>">
+                       value="<?= $it['qty_stock'] !== null ? $it['qty_stock'] : '' ?>">
             </div>
 
             <div class="input-group-modern">
@@ -122,7 +122,7 @@ while($d = mysqli_fetch_assoc($q)){
                        placeholder="Harga beli"
                        min="0"
                        required
-                       value="<?= $it['price'] !== null ? $it['price'] : '' ?>">
+                       value="<?= $it['price_unit'] !== null ? $it['price_unit'] : '' ?>">
             </div>
         </div>
 

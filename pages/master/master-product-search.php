@@ -40,7 +40,7 @@ if($query && $query->num_rows > 0){
         // Stats (total qty beli keseluruhan, kecuali soft-delete; total terjual dari order_details)
         $totalQty = 0;
         $totalTrans = 0;
-        $pi = @$conn->query("SELECT COALESCE(SUM(pi.qty),0) as tq FROM purchase_items pi INNER JOIN purchases p ON p.id = pi.purchase_id AND p.deleted_at IS NULL WHERE pi.product_id = {$d['id']} AND pi.deleted_at IS NULL");
+        $pi = @$conn->query("SELECT COALESCE(SUM(pi.qty_stock),0) as tq FROM purchase_items pi INNER JOIN purchases p ON p.id = pi.purchase_id AND p.deleted_at IS NULL WHERE pi.product_id = {$d['id']} AND pi.deleted_at IS NULL");
         if($pi && $pi->num_rows > 0){
             $totalQty = (int)$pi->fetch_assoc()['tq'];
         }

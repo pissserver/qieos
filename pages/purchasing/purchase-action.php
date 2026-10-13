@@ -52,7 +52,7 @@
 
         /* FIFO layer */
         mysqli_query($conn, "INSERT INTO purchase_items
-        (purchase_id,product_id,qty,unit,remaining_qty,price)
+        (purchase_id,product_id,qty_stock,unit_stock,remaining_qty,price_unit)
         VALUES ($purchase_id,$product_id,$qty,'$unit',$qty,$buy_price)");
 
         echo json_encode([
@@ -94,10 +94,10 @@
             $update = mysqli_query($conn,"
                 UPDATE purchase_items pi
                 JOIN products pr ON pr.id = pi.product_id
-                SET pi.qty = '$qty',
-                    pi.unit = pr.unit,
+                SET pi.qty_stock = '$qty',
+                    pi.unit_stock = pr.unit,
                     pi.remaining_qty = '$qty',
-                    pi.price = '$price'
+                    pi.price_unit = '$price'
                 WHERE pi.id = '$item_id'
                   AND pi.purchase_id = '$purchase_id'
                   AND pi.deleted_at IS NULL
@@ -198,10 +198,10 @@
             mysqli_query($conn,"
                 UPDATE purchase_items
                 SET product_id='{$p['id']}',
-                    qty='$qty',
+                    qty_stock='$qty',
                     remaining_qty='$qty',
-                    unit='$unit',
-                    price='$buy_price'
+                    unit_stock='$unit',
+                    price_unit='$buy_price'
                 WHERE purchase_id='$id'
             ");
         } else {
@@ -216,10 +216,10 @@
             mysqli_query($conn,"
                 UPDATE purchase_items
                 SET product_id='$product_id',
-                    qty='$qty',
+                    qty_stock='$qty',
                     remaining_qty='$qty',
-                    unit='$unit',
-                    price='$buy_price'
+                    unit_stock='$unit',
+                    price_unit='$buy_price'
                 WHERE purchase_id='$id'
             ");
         }

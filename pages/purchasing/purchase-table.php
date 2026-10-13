@@ -9,8 +9,8 @@ SELECT
     purchases.created_at,
 
     GROUP_CONCAT(products.name SEPARATOR ', ') as products,
-    COUNT(CASE WHEN purchase_items.qty IS NOT NULL AND purchase_items.deleted_at IS NULL THEN 1 END) as total_item,
-    COUNT(CASE WHEN purchase_items.deleted_at IS NULL AND purchase_items.remaining_qty < purchase_items.qty THEN 1 END) as used_item
+    COUNT(CASE WHEN purchase_items.qty_stock IS NOT NULL AND purchase_items.deleted_at IS NULL THEN 1 END) as total_item,
+    COUNT(CASE WHEN purchase_items.deleted_at IS NULL AND purchase_items.remaining_qty < purchase_items.qty_stock THEN 1 END) as used_item
 
 FROM purchases
 
@@ -26,7 +26,7 @@ WHERE purchases.deleted_at IS NULL
       FROM purchase_items pi2
       WHERE pi2.purchase_id = purchases.id
         AND pi2.deleted_at IS NULL
-        AND pi2.qty IS NOT NULL
+        AND pi2.qty_stock IS NOT NULL
   )
 
 GROUP BY purchases.id

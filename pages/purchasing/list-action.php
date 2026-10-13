@@ -6,6 +6,7 @@
         $product_ids = isset($_POST['product_id']) ? $_POST['product_id'] : [];
         $qtys_buy    = isset($_POST['qty_buy']) ? $_POST['qty_buy'] : [];
         $units_buy   = isset($_POST['unit_buy']) ? $_POST['unit_buy'] : [];
+        $unit_prices = isset($_POST['unit_price']) ? $_POST['unit_price'] : [];
         $prices_buy  = isset($_POST['price_buy']) ? $_POST['price_buy'] : [];
 
         $qLast = mysqli_query($conn,"SELECT MAX(CAST(REPLACE(form, 'FORM-', '') AS UNSIGNED)) AS last_num FROM purchases");
@@ -23,14 +24,19 @@
 
             $qty_buy   = mysqli_real_escape_string($conn, isset($qtys_buy[$i]) ? $qtys_buy[$i] : 0);
             $unit_buy  = mysqli_real_escape_string($conn, isset($units_buy[$i]) ? $units_buy[$i] : '');
+            $unit_price = isset($unit_prices[$i]) && $unit_prices[$i] !== ''
+                ? (float)$unit_prices[$i]
+                : null;
             $price_buy = isset($prices_buy[$i]) && $prices_buy[$i] !== ''
                 ? (float)$prices_buy[$i]
                 : 0;
 
+            $unit_price_sql = $unit_price === null ? 'NULL' : $unit_price;
+
             mysqli_query($conn, "INSERT INTO purchase_items
-                (purchase_id, product_id, qty_buy, unit_buy, price_buy)
+                (purchase_id, product_id, qty_buy, unit_buy, price_unit, price_buy)
                 VALUES
-                ($purchase_id, $product_id, $qty_buy, '$unit_buy', $price_buy)");
+                ($purchase_id, $product_id, $qty_buy, '$unit_buy', $unit_price_sql, $price_buy)");
         }
 
         echo json_encode([
@@ -50,12 +56,17 @@ if ($_GET['action'] == 'update') {
 
         // item lama milik form ini, urut sesuai id
         $qOld = mysqli_query($conn,"
-            SELECT id, qty
+            SELECT id, qty_stock
             FROM purchase_items
             WHERE purchase_id = '$id'
               AND deleted_at IS NULL
             ORDER BY id ASC
         ");
+
+        if(!$qOld){
+            echo json_encode(['status' => 'error', 'msg' => 'Gagal membaca data: ' . mysqli_error($conn)]);
+            exit;
+        }
 
         $old_items = [];
         while($r = mysqli_fetch_assoc($qOld)){
@@ -64,7 +75,7 @@ if ($_GET['action'] == 'update') {
 
         // stok sudah dipakai -> daftar belanja tidak boleh diubah
         foreach($old_items as $r){
-            if($r['qty'] !== null){
+            if($r['qty_stock'] !== null){
                 echo json_encode([
                     'status' => 'error',
                     'msg' => 'Daftar belanja sudah dipakai sebagai stok, tidak dapat diubah'
@@ -77,6 +88,7 @@ if ($_GET['action'] == 'update') {
         $product_ids  = isset($_POST['product_id']) ? $_POST['product_id'] : [];
         $qtys_buy     = isset($_POST['qty_buy']) ? $_POST['qty_buy'] : [];
         $units_buy    = isset($_POST['unit_buy']) ? $_POST['unit_buy'] : [];
+        $unit_prices  = isset($_POST['unit_price']) ? $_POST['unit_price'] : [];
         $prices_buy   = isset($_POST['price_buy']) ? $_POST['price_buy'] : [];
 
         // id item yang valid & milik form ini
@@ -99,9 +111,14 @@ if ($_GET['action'] == 'update') {
 
             $qty_buy   = isset($qtys_buy[$key]) ? mysqli_real_escape_string($conn, $qtys_buy[$key]) : 0;
             $unit_buy  = isset($units_buy[$key]) ? mysqli_real_escape_string($conn, $units_buy[$key]) : '';
+            $unit_price = isset($unit_prices[$key]) && $unit_prices[$key] !== ''
+                ? (float)$unit_prices[$key]
+                : null;
             $price_buy = isset($prices_buy[$key]) && $prices_buy[$key] !== ''
                 ? (float)$prices_buy[$key]
                 : 0;
+
+            $unit_price_sql = $unit_price === null ? 'NULL' : $unit_price;
 
             if ($item_id > 0) {
                 // update baris yang sama, qty/remaining_qty tidak disentuh
@@ -110,6 +127,7 @@ if ($_GET['action'] == 'update') {
                     SET product_id = '$product_id',
                         qty_buy    = '$qty_buy',
                         unit_buy   = '$unit_buy',
+                        price_unit = $unit_price_sql,
                         price_buy  = '$price_buy'
                     WHERE id = '$item_id'
                       AND purchase_id = '$id'
@@ -123,12 +141,14 @@ if ($_GET['action'] == 'update') {
                         product_id,
                         qty_buy,
                         unit_buy,
+                        price_unit,
                         price_buy
                     ) VALUES(
                         '$id',
                         '$product_id',
                         '$qty_buy',
                         '$unit_buy',
+                        $unit_price_sql,
                         $price_buy
                     )
                 ");
@@ -175,8 +195,13 @@ if ($_GET['action'] == 'update') {
             FROM purchase_items
             WHERE purchase_id = '$id'
               AND deleted_at IS NULL
-              AND qty IS NOT NULL
+              AND qty_stock IS NOT NULL
         ");
+
+        if(!$qUsed){
+            echo json_encode(['status' => 'error', 'msg' => 'Gagal membaca data: ' . mysqli_error($conn)]);
+            exit;
+        }
 
         $dUsed = mysqli_fetch_assoc($qUsed);
 

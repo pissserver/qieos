@@ -84,7 +84,7 @@ while($p = mysqli_fetch_assoc($qProd)){
 
                             <div class="item-row row mb-3">
 
-                                <div class="col-md-4 item-product">
+                                <div class="col-md-3 item-product">
                                     <div class="input-group-modern">
                                         <div class="input-icon input-icon-product">
                                             <i class="fas fa-box"></i>
@@ -128,7 +128,20 @@ while($p = mysqli_fetch_assoc($qProd)){
                                     </div>
                                 </div>
 
-                                <div class="col-md-4 item-price">
+                                <div class="col-md-2">
+                                    <div class="input-group-modern">
+                                        <div class="input-icon input-icon-price">
+                                            <i class="fas fa-wallet"></i>
+                                        </div>
+                                        <input type="number"
+                                            name="unit_price[]"
+                                            class="form-control"
+                                            placeholder="Harga Satuan"
+                                            min="0">
+                                    </div>
+                                </div>
+
+                                <div class="col-md-3 item-price">
                                     <div class="input-group-modern">
                                         <div class="input-icon input-icon-price">
                                             <i class="fas fa-wallet"></i>
@@ -136,7 +149,7 @@ while($p = mysqli_fetch_assoc($qProd)){
                                         <input type="number"
                                             name="price_buy[]"
                                             class="form-control"
-                                            placeholder="Total Harga (Rp)"
+                                            placeholder="Total Harga Produk"
                                             min="0">
                                     </div>
                                 </div>
@@ -270,7 +283,7 @@ while($p = mysqli_fetch_assoc($qProd)){
         let row = document.createElement('div');
         row.className = 'item-row row mb-3';
         row.innerHTML = `
-            <div class="col-md-4 item-product">
+            <div class="col-md-3 item-product">
                 <div class="input-group-modern">
                     <div class="input-icon input-icon-product"><i class="fas fa-box"></i></div>
                     <select name="product_id[]" class="form-control product-select" placeholder="Nama Produk" required>
@@ -290,10 +303,16 @@ while($p = mysqli_fetch_assoc($qProd)){
                     <input type="text" name="unit_buy[]" class="form-control" placeholder="Satuan" required>
                 </div>
             </div>
-            <div class="col-md-4 item-price">
+            <div class="col-md-2 item-unit-price">
                 <div class="input-group-modern">
                     <div class="input-icon input-icon-price"><i class="fas fa-wallet"></i></div>
-                    <input type="number" name="price_buy[]" class="form-control" placeholder="Harga" min="0">
+                    <input type="number" name="unit_price[]" class="form-control" placeholder="Harga Satuan" min="0">
+                </div>
+            </div>
+            <div class="col-md-3 item-price">
+                <div class="input-group-modern">
+                    <div class="input-icon input-icon-price"><i class="fas fa-wallet"></i></div>
+                    <input type="number" name="price_buy[]" class="form-control" placeholder="Total Harga Produk" min="0">
                 </div>
             </div>
         `;
@@ -597,7 +616,7 @@ while($p = mysqli_fetch_assoc($qProd)){
         let html = `
             <div class="item-row row mb-3">
 
-                <div class="col-md-4 item-product">
+                <div class="col-md-3 item-product">
                     <div class="input-group-modern">
                         <div class="input-icon input-icon-product">
                             <i class="fas fa-box"></i>
@@ -638,7 +657,20 @@ while($p = mysqli_fetch_assoc($qProd)){
                     </div>
                 </div>
 
-                <div class="col-md-3 item-price">
+                <div class="col-md-2 item-unit-price">
+                    <div class="input-group-modern">
+                        <div class="input-icon input-icon-price">
+                            <i class="fas fa-wallet"></i>
+                        </div>
+                        <input type="number"
+                            name="unit_price[]"
+                            class="form-control"
+                            placeholder="Harga Satuan"
+                            min="0">
+                    </div>
+                </div>
+
+                <div class="col-md-2 item-price">
                     <div class="input-group-modern">
                         <div class="input-icon input-icon-price">
                             <i class="fas fa-wallet"></i>
@@ -646,7 +678,7 @@ while($p = mysqli_fetch_assoc($qProd)){
                         <input type="number"
                             name="price_buy[]"
                             class="form-control"
-                            placeholder="Harga"
+                            placeholder="Total Harga Produk"
                             min="0">
                     </div>
                 </div>
@@ -682,7 +714,7 @@ while($p = mysqli_fetch_assoc($qProd)){
                     name="item_id[]"
                     value="">
 
-                <div class="col-md-4 item-product">
+                <div class="col-md-3 item-product">
                     <div class="input-group-modern">
                         <div class="input-icon input-icon-product">
                             <i class="fas fa-box"></i>
@@ -724,7 +756,21 @@ while($p = mysqli_fetch_assoc($qProd)){
                     </div>
                 </div>
 
-                <div class="col-md-3 item-price">
+                <div class="col-md-2 item-unit-price">
+                    <div class="input-group-modern">
+                        <div class="input-icon input-icon-price">
+                            <i class="fas fa-wallet"></i>
+                        </div>
+                        <input type="number"
+                            name="unit_price[]"
+                            class="form-control"
+                            placeholder="Harga Satuan"
+                            min="0"
+                            value="">
+                    </div>
+                </div>
+
+                <div class="col-md-2 item-price">
                     <div class="input-group-modern">
                         <div class="input-icon input-icon-price">
                             <i class="fas fa-wallet"></i>
@@ -732,7 +778,7 @@ while($p = mysqli_fetch_assoc($qProd)){
                         <input type="number"
                             name="price_buy[]"
                             class="form-control"
-                            placeholder="Harga"
+                            placeholder="Total Harga Produk"
                             min="0"
                             value="">
                     </div>

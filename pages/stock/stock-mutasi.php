@@ -10,7 +10,7 @@ include '../../sessions/session.php';
    riwayat pergerakan.
 
    Sumber data:
-   - Gudang : purchase_items.qty (masuk) & sales_stock type 'transfer'
+   - Gudang : purchase_items.qty_stock (masuk) & sales_stock type 'transfer'
               (keluar ke kantin).
    - Kantin : ledger sales_stock (balance/transfer/sale/return).
    ============================================================ */
@@ -94,9 +94,9 @@ function mutasi_rows_html($rows, $bulan){
 }
 
 /* ==================== GUDANG ==================== */
-$gMasukBefore  = mutasi_scalar($conn, "SELECT COALESCE(SUM(pi.qty),0) FROM purchase_items pi JOIN purchases p ON p.id = pi.purchase_id WHERE pi.product_id = $id AND pi.deleted_at IS NULL AND p.deleted_at IS NULL AND p.date < '$from'");
+$gMasukBefore  = mutasi_scalar($conn, "SELECT COALESCE(SUM(pi.qty_stock),0) FROM purchase_items pi JOIN purchases p ON p.id = pi.purchase_id WHERE pi.product_id = $id AND pi.deleted_at IS NULL AND p.deleted_at IS NULL AND p.date < '$from'");
 $gKeluarBefore = mutasi_scalar($conn, "SELECT COALESCE(SUM(qty),0) FROM sales_stock WHERE product_id = $id AND type = 'transfer' AND created_at < '$startTs'");
-$gMasuk        = mutasi_scalar($conn, "SELECT COALESCE(SUM(pi.qty),0) FROM purchase_items pi JOIN purchases p ON p.id = pi.purchase_id WHERE pi.product_id = $id AND pi.deleted_at IS NULL AND p.deleted_at IS NULL AND p.date BETWEEN '$from' AND '$to'");
+$gMasuk        = mutasi_scalar($conn, "SELECT COALESCE(SUM(pi.qty_stock),0) FROM purchase_items pi JOIN purchases p ON p.id = pi.purchase_id WHERE pi.product_id = $id AND pi.deleted_at IS NULL AND p.deleted_at IS NULL AND p.date BETWEEN '$from' AND '$to'");
 $gKeluar       = mutasi_scalar($conn, "SELECT COALESCE(SUM(qty),0) FROM sales_stock WHERE product_id = $id AND type = 'transfer' AND created_at BETWEEN '$startTs' AND '$endTs'");
 
 $gAwal  = max(0, $gMasukBefore - $gKeluarBefore);
@@ -105,7 +105,7 @@ $gAkhir = max(0, $gAwal + $gMasuk - $gKeluar);
 $rowsG = [];
 
 $qp = mysqli_query($conn, "
-    SELECT p.date AS tgl, p.form AS form, COALESCE(SUM(pi.qty),0) AS qty
+    SELECT p.date AS tgl, p.form AS form, COALESCE(SUM(pi.qty_stock),0) AS qty
     FROM purchase_items pi
     JOIN purchases p ON p.id = pi.purchase_id
     WHERE pi.product_id = $id

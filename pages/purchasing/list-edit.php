@@ -10,6 +10,7 @@ $q = mysqli_query($conn,"
         COALESCE(products.name, '') AS name,
         pi.qty_buy,
         pi.unit_buy,
+        pi.price_unit,
         pi.price_buy
     FROM purchases pr
     LEFT JOIN purchase_items pi
@@ -67,7 +68,7 @@ function buildProductOptions($products, $currentName, $currentId){
                    name="item_id[]"
                    value="<?= $d['item_id'] ?>">
 
-            <div class="col-md-4 item-product">
+            <div class="col-md-3 item-product">
                 <div class="input-group-modern">
                     <div class="input-icon input-icon-product">
                         <i class="fas fa-box"></i>
@@ -108,7 +109,21 @@ function buildProductOptions($products, $currentName, $currentId){
                 </div>
             </div>
 
-            <div class="col-md-3 item-price">
+            <div class="col-md-2 item-unit-price">
+                <div class="input-group-modern">
+                    <div class="input-icon input-icon-price">
+                        <i class="fas fa-wallet"></i>
+                    </div>
+                    <input type="number"
+                           name="unit_price[]"
+                           class="form-control"
+                           placeholder="Harga Satuan"
+                           min="0"
+                           value="<?= $d['price_unit'] !== null && $d['price_unit'] !== '' ? (int)$d['price_unit'] : '' ?>">
+                </div>
+            </div>
+
+            <div class="col-md-2 item-price">
                 <div class="input-group-modern">
                     <div class="input-icon input-icon-price">
                         <i class="fas fa-wallet"></i>
@@ -116,7 +131,7 @@ function buildProductOptions($products, $currentName, $currentId){
                     <input type="number"
                            name="price_buy[]"
                            class="form-control"
-                           placeholder="Harga"
+                           placeholder="Total Harga Produk"
                            min="0"
                            value="<?= $d['price_buy'] !== null && $d['price_buy'] !== '' ? (int)$d['price_buy'] : '' ?>">
                 </div>

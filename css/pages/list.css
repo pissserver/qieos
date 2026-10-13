@@ -665,6 +665,7 @@
 
         /* produk & harga melebar penuh */
         .item-row.row > .item-product,
+        .item-row.row > .item-unit-price,
         .item-row.row > .item-price{
             grid-column:1 / -1;
         }
@@ -692,6 +693,19 @@
         .item-row .form-control,
         .item-row .select2-container--default .select2-selection--single{
             height:42px;
+        }
+
+        .item-row .item-product .select2-container--default .select2-selection--single{
+            height:40px;
+        }
+
+        .item-row .item-product .select2-container--default .select2-selection--single .select2-selection__rendered{
+            line-height:38px;
+            font-size:12.5px;
+        }
+
+        .item-row .item-product .select2-container--default .select2-selection--single .select2-selection__clear{
+            line-height:38px;
         }
 
         .item-row .select2-container--default .select2-selection--single .select2-selection__rendered,
@@ -1033,4 +1047,20 @@
     .select2-container--default .select2-results__option[aria-selected="true"]{
         background:#e8edf5;
         color:var(--text);
+    }
+
+    /* Select2 produk sedikit lebih ringkas dari input lain */
+    .item-row .item-product .select2-container--default .select2-selection--single{
+        height:38px;
+        border-radius:8px;
+    }
+
+    .item-row .item-product .select2-container--default .select2-selection--single .select2-selection__rendered{
+        line-height:36px;
+        font-size:13px;
+        padding-left:11px;
+    }
+
+    .item-row .item-product .select2-container--default .select2-selection--single .select2-selection__clear{
+        line-height:36px;
     }

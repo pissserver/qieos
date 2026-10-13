@@ -8,7 +8,7 @@ $q = mysqli_query($conn,"
         p.date,
         COUNT(pi.id) AS total_items,
         COALESCE(SUM(pi.price_buy), 0) AS total_price,
-        MAX(CASE WHEN pi.qty IS NOT NULL THEN 1 ELSE 0 END) AS used_flag
+        MAX(CASE WHEN pi.qty_stock IS NOT NULL THEN 1 ELSE 0 END) AS used_flag
     FROM purchases p
     LEFT JOIN purchase_items pi
         ON p.id = pi.purchase_id
