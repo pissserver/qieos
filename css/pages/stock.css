@@ -928,6 +928,13 @@
             flex:1 1 auto;
         }
 
+        /* Panel Detail Stok: tinggi mengikuti kontennya sendiri, TIDAK
+           meregang mengikuti tinggi panel Mutasi Stok di sebelahnya */
+        .stock-panel-col .section-card{
+            flex:0 0 auto;
+            height:auto;
+        }
+
         /* Jarak atas seragam di desktop & tablet */
         @media (min-width:576px){
             .stock-panel-col .section-card,

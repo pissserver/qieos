@@ -24,7 +24,7 @@ include '../../sessions/session.php';
     <div class="row stock-layout">
         <!-- STOK GUDANG -->
         <div class="col-lg-6 col-md-12 stock-panel-col">
-            <div class="section-card h-100">
+            <div class="section-card">
                 <div class="panel-header panel-primary">
                     <div class="panel-left">
                         <div class="panel-icon">

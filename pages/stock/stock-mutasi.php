@@ -103,9 +103,10 @@ $gAwal  = max(0, $gMasukBefore - $gKeluarBefore);
 $gAkhir = max(0, $gAwal + $gMasuk - $gKeluar);
 
 $rowsG = [];
+$gIdx = 0;
 
 $qp = mysqli_query($conn, "
-    SELECT p.date AS tgl, p.form AS form, COALESCE(SUM(pi.qty_stock),0) AS qty
+    SELECT p.date AS tgl, p.created_at AS ts, p.form AS form, COALESCE(SUM(pi.qty_stock),0) AS qty
     FROM purchase_items pi
     JOIN purchases p ON p.id = pi.purchase_id
     WHERE pi.product_id = $id
@@ -113,42 +114,52 @@ $qp = mysqli_query($conn, "
       AND p.deleted_at IS NULL
       AND p.date BETWEEN '$from' AND '$to'
     GROUP BY p.id
-    ORDER BY p.date ASC, p.id ASC
+    ORDER BY p.created_at ASC, p.id ASC
 ");
 while($qp && $r = mysqli_fetch_assoc($qp)){
     $rowsG[] = [
         'tgl'    => $r['tgl'],
+        'ts'     => $r['ts'],
         'title'  => 'Pembelian Masuk',
         'sub'    => $r['form'] ? $r['form'] : '',
         'masuk'  => (int)$r['qty'],
         'keluar' => 0,
-        'saldo'  => 0
+        'saldo'  => 0,
+        'idx'    => $gIdx++
     ];
 }
 
 $qt = mysqli_query($conn, "
-    SELECT DATE(created_at) AS tgl, COALESCE(SUM(qty),0) AS qty
+    SELECT created_at AS ts, DATE(created_at) AS tgl, qty
     FROM sales_stock
     WHERE product_id = $id
       AND type = 'transfer'
       AND created_at BETWEEN '$startTs' AND '$endTs'
-    GROUP BY DATE(created_at)
-    ORDER BY tgl ASC
+    ORDER BY created_at ASC, id ASC
 ");
 while($qt && $r = mysqli_fetch_assoc($qt)){
     $rowsG[] = [
         'tgl'    => $r['tgl'],
+        'ts'     => $r['ts'],
         'title'  => 'Transfer ke Kantin',
         'sub'    => '',
         'masuk'  => 0,
         'keluar' => (int)$r['qty'],
-        'saldo'  => 0
+        'saldo'  => 0,
+        'idx'    => $gIdx++
     ];
 }
 
+/* Urut kronologis memakai waktu kejadian ASLI (created_at), bukan
+   menebak "pembelian dulu baru transfer". 'idx' jadi tie-breaker
+   karena usort PHP < 8 TIDAK stabil. Dengan begitu array_reverse di
+   bawah menghasilkan: kejadian terbaru di atas + saldo berjalan yang
+   benar sesuai urutan waktu (mis. Pembelian Masuk setelah Transfer
+   = saldo transfer + qty, bukan saldo lama + qty). */
 usort($rowsG, function($a, $b){
-    if($a['tgl'] === $b['tgl']) return 0;
-    return ($a['tgl'] < $b['tgl']) ? -1 : 1;
+    if($a['ts'] !== $b['ts']) return ($a['ts'] < $b['ts']) ? -1 : 1;
+    if($a['idx'] === $b['idx']) return 0;
+    return ($a['idx'] < $b['idx']) ? -1 : 1;
 });
 
 $saldoG = $gAwal;
