@@ -16,7 +16,6 @@ $pages = array(
     'master-customer'   => array($base . '/pages/master/master-customer.php', 'master-customer'),
     'master-user'       => array($base . '/pages/master/master-user.php', 'master-user'),
     'daftar-belanja'    => array($base . '/pages/purchasing/list.php', 'list'),
-    'input-pembelian'   => array($base . '/pages/purchasing/purchase.php', 'purchase'),
     'stok-gudang'       => array($base . '/pages/stock/stock.php', 'stock'),
     'transfer-gudang'   => array($base . '/pages/stock/transfer.php', 'transfer'),
     'stok-kantin'       => array($base . '/pages/sales/sales-stock.php', 'sales-stock'),
@@ -31,7 +30,7 @@ $pages = array(
 );
 $roleLive = array(
     'developer' => array('master-product', 'master-supplier', 'master-customer', 'master-user',
-        'daftar-belanja', 'input-pembelian', 'stok-gudang', 'transfer-gudang',
+        'daftar-belanja', 'stok-gudang', 'transfer-gudang',
         'stok-kantin', 'katalog', 'pesanan', 'tenant', 'rekap',
         'laporan-penjualan', 'laporan-tenant', 'chat', 'update'),
     'administrator' => array('master-user', 'tenant', 'laporan-tenant', 'chat', 'update'),
@@ -82,9 +81,9 @@ $phases = array(
                 'tables' => array('purchases', 'purchase_items'),
             ),
             array(
-                'title' => 'Input Pembelian',
+                'title' => 'Konfirmasi Belanja Jadi Stok',
                 'desc' => 'Saat barang datang dari supplier, konfirmasi pembelian. Qty & harga beli aktual tercatat dan stok gudang bertambah otomatis.',
-                'pages' => array('input-pembelian'),
+                'pages' => array('daftar-belanja'),
                 'tables' => array('purchases', 'purchase_items', 'sales_stock'),
             ),
             array(
@@ -387,7 +386,7 @@ function labels($key) {
     $m = array(
         'master-product' => 'Master Produk', 'master-supplier' => 'Master Supplier',
         'master-customer' => 'Master Customer', 'master-user' => 'Master User',
-        'daftar-belanja' => 'Daftar Belanja', 'input-pembelian' => 'Input Pembelian',
+        'daftar-belanja' => 'Belanja & Restock',
         'stok-gudang' => 'Detail Stok',
         'transfer-gudang' => 'Transfer Stok', 'stok-kantin' => 'Stok Kantin',
         'katalog' => 'Katalog Produk', 'pesanan' => 'Pesanan',

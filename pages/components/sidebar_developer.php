@@ -29,25 +29,15 @@
     </a>
 </li>
 
-<!-- PEMBELIAN STOK -->
-<li class="nav-title">PURCHASING</li>
-
-<li class="nav-item <?= ($current_page == 'list.php') ? 'active' : ''; ?>">
-    <a href="<?php echo BASE_URL; ?>/pages/purchasing/list.php" class="nav-link" data-tooltip="Daftar Belanja">
-        <span class="sidebar-icon"><i class="fas fa-file-alt"></i></span>
-        <span class="sidebar-text">Daftar Belanja</span>
-    </a>
-</li>
-
-<li class="nav-item <?= ($current_page == 'purchase.php') ? 'active' : ''; ?>">
-    <a href="<?php echo BASE_URL; ?>/pages/purchasing/purchase.php" class="nav-link" data-tooltip="Input Pembelian">
-        <span class="sidebar-icon"><i class="fas fa-cart-plus"></i></span>
-        <span class="sidebar-text">Input Pembelian</span>
-    </a>
-</li>
-
 <!-- STOK ACTION (SUMBER BARANG / FIFO) -->
 <li class="nav-title">STOK ACTION</li>
+
+<li class="nav-item <?= ($current_page == 'list.php') ? 'active' : ''; ?>">
+    <a href="<?php echo BASE_URL; ?>/pages/purchasing/list.php" class="nav-link" data-tooltip="Belanja & Restock">
+        <span class="sidebar-icon"><i class="fas fa-cart-shopping"></i></span>
+        <span class="sidebar-text">Belanja & Restock</span>
+    </a>
+</li>
 
 <li class="nav-item <?= ($current_page == 'transfer.php') ? 'active' : ''; ?>">
     <a href="<?php echo BASE_URL; ?>/pages/stock/transfer.php" class="nav-link" data-tooltip="Transfer Stok">

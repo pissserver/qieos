@@ -52,7 +52,7 @@ $D['master-produk'] = g('fa-boxes-stacked', 'Master Produk', $base . '/pages/mas
 
 $D['master-supplier'] = g('fa-truck', 'Master Supplier', $base . '/pages/master/master-supplier.php', $A,
     'Kelola data supplier / pemasok barang untuk mendukung proses pembelian dan pengisian stok.',
-    array('Simpan profil lengkap supplier', 'Tandai status aktif / nonaktif', 'Terhubung dengan form Input Pembelian'));
+    array('Simpan profil lengkap supplier', 'Tandai status aktif / nonaktif', 'Terhubung dengan daftar belanja'));
 
 $D['master-customer'] = g('fa-users', 'Master Customer', $base . '/pages/master/master-customer.php', $A,
     'Kelola data customer pembeli di kantin: nama, kontak, hingga riwayat transaksi tiap customer.',
@@ -62,13 +62,9 @@ $D['master-user'] = g('fa-users-cog', 'Master User', $base . '/pages/master/mast
     'Kelola akun pengguna sistem beserta perannya: developer, administrator, dan staff kasir.',
     array('Buat akun & tentukan role', 'Reset / ubah kata sandi', 'Kontrol akses tiap role ke menu'));
 
-$D['daftar-belanja'] = g('fa-file-alt', 'Daftar Belanja', $base . '/pages/purchasing/list.php', $A,
+$D['daftar-belanja'] = g('fa-cart-shopping', 'Belanja & Restock', $base . '/pages/purchasing/list.php', $A,
     'Daftar rencana / request pembelian barang. Memantau status dari draft hingga barang masuk.',
     array('Buat daftar belanja baru', 'Pantau status & prioritas', 'Lanjutkan menjadi pembelian'));
-
-$D['input-pembelian'] = g('fa-cart-plus', 'Input Pembelian', $base . '/pages/purchasing/purchase.php', $A,
-    'Pencatatan pembelian dari supplier. Stok gudang bertambah otomatis sesuai data pembelian.',
-    array('Pilih supplier & produk', 'Harga beli & qty langsung masuk stok', 'Histori pembelian tersimpan lengkap'));
 
 $D['stok-gudang'] = g('fa-warehouse', 'Detail Stok', $base . '/pages/stock/stock.php', $A,
     'Monitoring stok gudang dengan metode FIFO (First In, First Out) per layer, lengkap dengan histori masuk & keluar.',
@@ -127,8 +123,7 @@ switch ($role) {
     case 'developer':
         $sections['UMUM'] = array('dashboard', 'pencarian', 'whatsnew', 'chat', 'keranjang', 'omzet', 'profil');
         $sections['MASTER'] = array('master-produk', 'master-supplier', 'master-customer', 'master-user');
-        $sections['PURCHASING'] = array('daftar-belanja', 'input-pembelian');
-        $sections['STOK ACTION'] = array('transfer-gudang', 'stok-gudang');
+        $sections['STOK ACTION'] = array('daftar-belanja', 'transfer-gudang', 'stok-gudang');
         $sections['KANTIN'] = array('stok-kantin', 'katalog', 'pesanan');
         $sections['TENANT'] = array('tenant');
         $sections['REKAP'] = array('rekap');
@@ -139,8 +134,7 @@ switch ($role) {
     case 'administrator':
         $sections['UMUM'] = array('dashboard', 'pencarian', 'whatsnew', 'chat', 'profil');
         $sections['MASTER'] = array('master-produk', 'master-supplier', 'master-customer', 'master-user');
-        $sections['PURCHASING'] = array('daftar-belanja', 'input-pembelian');
-        $sections['STOK ACTION'] = array('transfer-gudang', 'stok-gudang');
+        $sections['STOK ACTION'] = array('daftar-belanja', 'transfer-gudang', 'stok-gudang');
         $sections['TENANT'] = array('tenant');
         $sections['LAPORAN'] = array('laporan-penjualan', 'laporan-tenant');
         $sections['LAINNYA'] = array('update', 'guide');
@@ -159,7 +153,7 @@ switch ($role) {
 // ubah item yang belum tersedia sesuai role -> "segera hadir"
 $segera = array(
     'administrator' => array('master-produk', 'master-supplier', 'master-customer', 'daftar-belanja',
-        'input-pembelian', 'stok-gudang', 'transfer-gudang', 'laporan-penjualan'),
+        'stok-gudang', 'transfer-gudang', 'laporan-penjualan'),
     'staff kasir'   => array('master-customer', 'stok-kantin', 'katalog', 'pesanan'),
 );
 
@@ -175,8 +169,7 @@ if (isset($segera[$role])) {
 $groupColors = array(
     'UMUM'        => '#4f46e5,#6366f1',
     'MASTER'      => '#0284c7,#0ea5e9',
-    'PURCHASING'  => '#0d9488,#14b8a6',
-    'STOK ACTION' => '#7c3aed,#8b5cf6',
+    'STOK ACTION' => '#0d9488,#14b8a6',
     'KANTIN'      => '#d97706,#f59e0b',
     'TENANT'      => '#db2777,#ec4899',
     'REKAP'       => '#0891b2,#22d3ee',

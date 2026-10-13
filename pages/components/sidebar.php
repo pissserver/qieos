@@ -184,25 +184,15 @@
                     </a>
                 </li>
 
-                <!-- PEMBELIAN STOK -->
-                <li class="nav-title">PURCHASING</li>
-
-                <li class="nav-item <?= ($current_page == 'list.php' || ($current_page == 'coming-soon.php' && $menu == 'list')) ? 'active' : ''; ?>">
-                    <a href="<?php echo BASE_URL; ?>/pages/coming-soon.php?menu=list" class="nav-link" data-tooltip="Daftar Belanja">
-                        <span class="sidebar-icon"><i class="fas fa-file-alt"></i></span>
-                        <span class="sidebar-text">Daftar Belanja</span>
-                    </a>
-                </li>
-
-                <li class="nav-item <?= ($current_page == 'purchase.php' || ($current_page == 'coming-soon.php' && $menu == 'purchase')) ? 'active' : ''; ?>">
-                    <a href="<?php echo BASE_URL; ?>/pages/coming-soon.php?menu=purchase" class="nav-link" data-tooltip="Input Pembelian">
-                        <span class="sidebar-icon"><i class="fas fa-cart-plus"></i></span>
-                        <span class="sidebar-text">Input Pembelian</span>
-                    </a>
-                </li>
-
                 <!-- STOK ACTION (SUMBER BARANG / FIFO) -->
                 <li class="nav-title">STOK ACTION</li>
+
+                <li class="nav-item <?= ($current_page == 'list.php' || ($current_page == 'coming-soon.php' && $menu == 'list')) ? 'active' : ''; ?>">
+                    <a href="<?php echo BASE_URL; ?>/pages/coming-soon.php?menu=list" class="nav-link" data-tooltip="Belanja &amp; Restock">
+                        <span class="sidebar-icon"><i class="fas fa-cart-shopping"></i></span>
+                        <span class="sidebar-text">Belanja &amp; Restock</span>
+                    </a>
+                </li>
 
                 <li class="nav-item <?= ($current_page == 'transfer.php' || ($current_page == 'coming-soon.php' && $menu == 'transfer')) ? 'active' : ''; ?>">
                     <a href="<?php echo BASE_URL; ?>/pages/coming-soon.php?menu=transfer" class="nav-link" data-tooltip="Transfer Stok">
