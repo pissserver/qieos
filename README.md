@@ -171,7 +171,7 @@ qieos/
 │   ├── master/              # Master data (produk, supplier, customer) & master user
 │   ├── other/               # Modul update & changelog
 │   ├── profile/             # Pengelolaan profil user
-│   ├── purchasing/          # Modul daftar belanja & input pembelian
+│   ├── stock/              # Belanja & Restock, transfer & detail stok
 │   ├── recap/               # Rekap harian penjualan & tenant
 │   ├── report/              # Laporan penjualan & tenant (PDF & Excel)
 │   ├── sales/               # Modul POS (katalog, pesanan, checkout, stok kasir)

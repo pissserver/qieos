@@ -2,17 +2,17 @@
    DATATABLE PREMIUM (bersama)
 
    Menyeragamkan search, "Show n entries", baris info, dan pagination
-   pada halaman Purchasing (#purchase-table di list.php & purchase.php).
+   pada halaman Belanja & Restock (#purchase-table di restock.php).
 
    Nilainya dibuat SALINAN dari blok premium di
-   css/pages/master-product.css supaya Purchasing tampil persis sama
+   css/pages/master-product.css supaya halaman ini tampil persis sama
    dengan Master. CATATAN: file ini BELUM dimuat oleh 4 halaman Master -
    Master masih dilayani oleh master-product.css. Kalau nanti file ini
    ikut dipakai Master, blok premium di master-product.css harus
    dihapus agar tidak dobel.
 
    Kontainer tabel yang memakai file ini:
-      - Purchasing: #purchase-table (list.php & purchase.php)
+      - Belanja & Restock: #purchase-table (restock.php)
       - Master    : #productTableContainer, #supplierTableContainer,
                     #customerTableContainer, #userTableContainer
 
@@ -193,7 +193,7 @@
     /* ---------- SEARCH ----------
        Di halaman Master, search + tombol "Tambah" dibungkus
        .table-action-wrapper (oleh MP_TABLE.placeActions). Halaman
-       purchasing tidak punya tombol, jadi search-nya berdiri sendiri -
+       Belanja & Restock tidak punya tombol, jadi search-nya berdiri sendiri -
        gaya input-nya tetap sama persis. */
     .dt-premium .dataTables_wrapper .table-action-wrapper {
         flex: 1 1 auto;

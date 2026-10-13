@@ -187,8 +187,8 @@
                 <!-- STOK ACTION (SUMBER BARANG / FIFO) -->
                 <li class="nav-title">STOK ACTION</li>
 
-                <li class="nav-item <?= ($current_page == 'list.php' || ($current_page == 'coming-soon.php' && $menu == 'list')) ? 'active' : ''; ?>">
-                    <a href="<?php echo BASE_URL; ?>/pages/coming-soon.php?menu=list" class="nav-link" data-tooltip="Belanja &amp; Restock">
+                <li class="nav-item <?= ($current_page == 'restock.php' || ($current_page == 'coming-soon.php' && $menu == 'restock')) ? 'active' : ''; ?>">
+                    <a href="<?php echo BASE_URL; ?>/pages/coming-soon.php?menu=restock" class="nav-link" data-tooltip="Belanja &amp; Restock">
                         <span class="sidebar-icon"><i class="fas fa-cart-shopping"></i></span>
                         <span class="sidebar-text">Belanja &amp; Restock</span>
                     </a>

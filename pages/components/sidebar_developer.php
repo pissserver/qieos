@@ -32,8 +32,8 @@
 <!-- STOK ACTION (SUMBER BARANG / FIFO) -->
 <li class="nav-title">STOK ACTION</li>
 
-<li class="nav-item <?= ($current_page == 'list.php') ? 'active' : ''; ?>">
-    <a href="<?php echo BASE_URL; ?>/pages/purchasing/list.php" class="nav-link" data-tooltip="Belanja & Restock">
+<li class="nav-item <?= ($current_page == 'restock.php') ? 'active' : ''; ?>">
+    <a href="<?php echo BASE_URL; ?>/pages/stock/restock.php" class="nav-link" data-tooltip="Belanja & Restock">
         <span class="sidebar-icon"><i class="fas fa-cart-shopping"></i></span>
         <span class="sidebar-text">Belanja & Restock</span>
     </a>

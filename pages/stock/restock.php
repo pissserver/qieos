@@ -22,10 +22,10 @@ while($p = mysqli_fetch_assoc($qProd)){
 <?php include '../../script/headscript.php'; ?>
 
 <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet">
-<link rel="stylesheet" href="<?php echo BASE_URL; ?>/css/pages/list.css?v=<?= filemtime(__DIR__ . '/../../css/pages/list.css') ?>">
+<link rel="stylesheet" href="<?php echo BASE_URL; ?>/css/pages/restock.css?v=<?= filemtime(__DIR__ . '/../../css/pages/restock.css') ?>">
 
 <!-- Search + Show entries + baris info + pagination premium.
-     WAJIB setelah css/pages/list.css: file ini menimpa gaya dasar
+     WAJIB setelah css/pages/restock.css: file ini menimpa gaya dasar
      DataTables di file halaman. Dipakai juga oleh 4 halaman Master. -->
 <link rel="stylesheet" href="<?php echo BASE_URL; ?>/css/components/datatable-premium.css?v=<?= filemtime(__DIR__ . '/../../css/components/datatable-premium.css') ?>">
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
@@ -75,7 +75,7 @@ while($p = mysqli_fetch_assoc($qProd)){
 
                 <div id="formMode" class="panel-mode active">
         <form id="form-stock"
-                            action="list-action.php?action=store"
+                            action="restock-action.php?action=store"
                             method="POST">
 
                         <input type="hidden" name="form_number" value="<?= $formNumber ?>">
@@ -128,7 +128,7 @@ while($p = mysqli_fetch_assoc($qProd)){
                                     </div>
                                 </div>
 
-                                <div class="col-md-2">
+                                <div class="col-md-2 item-unit-price">
                                     <div class="input-group-modern">
                                         <div class="input-icon input-icon-price">
                                             <i class="fas fa-wallet"></i>
@@ -216,6 +216,58 @@ while($p = mysqli_fetch_assoc($qProd)){
             </div>
 
             <div class="mt-2 px-5 mp-add-body" id="editPurchaseContent"></div>
+        </div>
+    </div>
+</div>
+
+<!-- RESTOCK MODAL (validasi & restock) -->
+<div class="modal fade" id="restockModal" tabindex="-1">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content restock-modal-content border-0">
+
+            <div class="restock-modal-header">
+                <div class="restock-modal-head-left">
+                    <div class="restock-modal-icon">
+                        <i class="fas fa-truck-ramp-box"></i>
+                    </div>
+
+                    <div class="restock-modal-head-text">
+                        <div class="restock-modal-title">Validasi &amp; Restock</div>
+                        <div class="restock-modal-subtitle">
+                            Periksa daftar belanja sebelum menambah stok gudang
+                        </div>
+                    </div>
+                </div>
+
+                <button class="btn-close btn-close-white restock-modal-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="restock-modal-body" id="restockContent"></div>
+
+            <div class="restock-processing" id="restockProcessing" hidden>
+                <div class="rp-ring">
+                    <i class="fas fa-truck-ramp-box"></i>
+                </div>
+                <div class="rp-text" id="rpText">Memvalidasi daftar belanja...</div>
+                <div class="rp-sub">Qty masuk ke Qty Stock, Remaining Qty &amp; Unit Stock</div>
+
+                <div class="rp-steps">
+                    <div class="rp-step" data-step="0">
+                        <span class="rp-step-ico"><i class="fas fa-list-check"></i></span>
+                        <span class="rp-step-title">Memvalidasi daftar belanja</span>
+                    </div>
+                    <div class="rp-step" data-step="1">
+                        <span class="rp-step-ico"><i class="fas fa-boxes-stacked"></i></span>
+                        <span class="rp-step-title">Menambahkan ke stok gudang</span>
+                    </div>
+                    <div class="rp-step" data-step="2">
+                        <span class="rp-step-ico"><i class="fas fa-lock"></i></span>
+                        <span class="rp-step-title">Mengunci data restock</span>
+                    </div>
+                </div>
+
+                <div class="rp-progress"><span id="rpBarFill"></span></div>
+            </div>
         </div>
     </div>
 </div>
@@ -552,7 +604,7 @@ while($p = mysqli_fetch_assoc($qProd)){
             length: prev.page.len()
         } : null;
 
-        fetch('list-table.php')
+        fetch('restock-table.php')
         .then(res => res.text())
         .then(html => {
             /* destroy dulu, node lama masih terpasang jadi aman. Kalau
@@ -827,7 +879,7 @@ while($p = mysqli_fetch_assoc($qProd)){
             </div>
         `;
 
-        fetch('list-edit.php?id=' + id)
+        fetch('restock-edit.php?id=' + id)
         .then(res => res.text())
         .then(html => {
             document.getElementById('editPurchaseContent').innerHTML = html;
@@ -843,7 +895,7 @@ while($p = mysqli_fetch_assoc($qProd)){
         let formData = new FormData(this);
         let id = formData.get('id');
 
-        fetch('list-action.php?action=update&id='+id,{
+        fetch('restock-action.php?action=update&id='+id,{
             method:'POST',
             body:formData
         })
@@ -870,6 +922,168 @@ while($p = mysqli_fetch_assoc($qProd)){
         });
     });
 
+    // RESTOCK (validasi) MODAL
+    $(document).on('click','.restockPurchaseBtn',function(){
+
+        let id = $(this).data('id');
+
+        $('#restockModal').modal('show');
+
+        document.getElementById('restockContent').innerHTML = `
+            <div class="text-center py-5">
+                <i class="fas fa-spinner fa-spin fa-2x text-secondary"></i>
+            </div>
+        `;
+
+        fetch('restock-view.php?id=' + id)
+        .then(res => res.text())
+        .then(html => {
+            document.getElementById('restockContent').innerHTML = html;
+        });
+
+    });
+
+    // Validasi & Restock Action
+    $(document).on('submit','#restockValidateForm',function(e){
+        e.preventDefault();
+
+        let form = $(this);
+        let formData = new FormData(this);
+
+        let btn = form.find('.btn-validate-restock');
+        btn.prop('disabled', true).addClass('is-loading');
+        btn.find('span').text('Memproses...');
+        btn.find('i').attr('class', 'fas fa-circle-notch fa-spin');
+
+        let processing = $('#restockProcessing');
+        let rpText = $('#rpText');
+        let rpSteps = $('.rp-step', processing);
+        let rpBar = $('#rpBarFill');
+
+        let DUR = 4800;
+        let phaseMs = DUR / 3;
+        let started = Date.now();
+
+        rpSteps.removeClass('is-running is-done is-waiting').addClass('is-waiting');
+        rpBar.css('width', '0%');
+
+        let stepTitles = [
+            'Memvalidasi daftar belanja...',
+            'Menambahkan ke Stok Gudang...',
+            'Mengunci data restock...'
+        ];
+
+        function runPhase(i){
+            if(i > 0){
+                rpSteps.eq(i - 1).removeClass('is-running').addClass('is-done');
+            }
+            rpSteps.eq(i).removeClass('is-waiting').addClass('is-running');
+            rpBar.css('width', Math.round(((i + 1) / 3) * 100) + '%');
+            rpText.text(stepTitles[i]);
+        }
+
+        processing.prop('hidden', false);
+        runPhase(0);
+
+        let timers = [];
+        for(let i = 1; i < 3; i++){
+            timers.push(setTimeout(function(){ if(i < 3) runPhase(i); }, phaseMs * i));
+        }
+
+        timers.push(setTimeout(function(){
+            rpSteps.eq(2).removeClass('is-running').addClass('is-done');
+            rpBar.css('width', '100%');
+            rpText.text('Selesai');
+        }, DUR));
+
+        function cancelTimers(){
+            timers.forEach(clearTimeout);
+        }
+
+        fetch('restock-action.php?action=validate',{
+            method:'POST',
+            body:formData
+        })
+        .then(res => res.json())
+        .then(res => {
+
+            let remain = Math.max(0, DUR - (Date.now() - started));
+
+            setTimeout(function(){
+
+                cancelTimers();
+
+                if(res.status === 'success'){
+
+                    processing.prop('hidden', true);
+
+                    // Animasi data masuk ke field qty stock / remaining qty / unit stock
+                    let fields = form.find('.rv-field');
+                    fields.each(function(i){
+                        let el = $(this);
+                        let val = el.attr('data-value');
+
+                        setTimeout(function(){
+                            if(val !== undefined && val !== ''){
+                                el.text(val).addClass('is-filled');
+                            } else {
+                                el.text('—').addClass('is-filled');
+                            }
+                        }, i * 140);
+                    });
+
+                    let fillDone = (fields.length * 140) + 350;
+
+                    setTimeout(function(){
+
+                        // Ganti tombol validasi dengan alert permanen
+                        form.find('.restock-view-footer').html(`
+                            <div class="restock-alert-done">
+                                <i class="fas fa-shield-halved"></i>
+                                <span>Data sudah masuk ke stok gudang dan tidak dapat diubah.</span>
+                            </div>
+                        `);
+
+                        form.find('.restock-notice').addClass('restock-notice-done')
+                            .html(`
+                                <i class="fas fa-circle-check"></i>
+                                <div>
+                                    <strong>Sudah direstock.</strong>
+                                    Data sudah masuk ke <b>Stok Gudang</b> dan tidak dapat diubah lagi.
+                                </div>
+                            `);
+
+                        QToast('Berhasil', res.msg || 'Restock berhasil', 'success');
+
+                        loadPurchaseTable();
+
+                    }, fillDone);
+
+                }else{
+
+                    processing.prop('hidden', true);
+
+                    btn.prop('disabled', false).removeClass('is-loading');
+                    btn.find('span').text('Validasi & Restock');
+                    btn.find('i').attr('class', 'fas fa-circle-check');
+
+                    QToast('Gagal', res.msg || 'Terjadi kesalahan', 'error');
+
+                }
+
+            }, remain);
+
+        })
+        .catch(() => {
+            cancelTimers();
+            processing.prop('hidden', true);
+            btn.prop('disabled', false).removeClass('is-loading');
+            btn.find('span').text('Validasi & Restock');
+            btn.find('i').attr('class', 'fas fa-circle-check');
+            QToast('Error', 'Gagal memproses restock', 'error');
+        });
+    });
+
     // Delete Action
     $(document).on('click','.deletePurchaseBtn',function(){
 
@@ -883,7 +1097,7 @@ while($p = mysqli_fetch_assoc($qProd)){
 
         QConfirm('Hapus Daftar Belanja?', 'Daftar belanja tanggal ' + formattedDate + ' akan dihapus permanen.', {confirmText:'Hapus', icon:'fa-trash-can', confirmClass:'q-confirm-btn-danger', iconClass:'q-confirm-icon-danger'}).then(function(ok){
             if(ok){
-                fetch('list-action.php?action=destroy', {
+                fetch('restock-action.php?action=destroy', {
                     method: 'POST',
                     body: new URLSearchParams({ id: id })
                 })
@@ -915,7 +1129,7 @@ while($p = mysqli_fetch_assoc($qProd)){
             year: 'numeric'
         });
 
-        fetch('list-action.php?action=get_print&id=' + id)
+        fetch('restock-action.php?action=get_print&id=' + id)
             .then(res => res.json())
             .then(res => {
 

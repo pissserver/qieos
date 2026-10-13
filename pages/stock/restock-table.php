@@ -21,7 +21,7 @@ $q = mysqli_query($conn,"
 ");
 ?>
 
-<link rel="stylesheet" href="<?php echo BASE_URL; ?>/css/pages/list-table.css?v=<?php echo filemtime(__DIR__ . '/../../css/pages/list-table.css'); ?>">
+<link rel="stylesheet" href="<?php echo BASE_URL; ?>/css/pages/restock-table.css?v=<?php echo filemtime(__DIR__ . '/../../css/pages/restock-table.css'); ?>">
 
 <table id="purchaseTable" class="table table-hover align-middle">
 <thead>
@@ -38,7 +38,7 @@ $q = mysqli_query($conn,"
 <?php
     while($d=mysqli_fetch_assoc($q)): 
 ?>
-<tr class="purchase-row">
+<tr class="purchase-row<?= (int)$d['used_flag'] === 1 ? ' is-restocked' : '' ?>">
 
     <!-- ID -->
     <td>
@@ -55,7 +55,7 @@ $q = mysqli_query($conn,"
 
                 <!-- ringkasan tambahan, hanya tampil di mobile -->
                 <div class="mp-meta">
-                    <span class="mp-meta-item">
+                    <span class="mp-meta-item mp-meta-item-date">
                         <i class="fas fa-calendar-alt"></i>
                         <?= date('d M Y', strtotime($d['date'])) ?>
                     </span>
@@ -64,8 +64,14 @@ $q = mysqli_query($conn,"
                         <?= $d['total_items'] ?> item
                     </span>
 
+                    <?php if((int)$d['used_flag'] === 1): ?>
+                    <span class="mp-meta-item mp-meta-chip-restocked">
+                        <i class="fas fa-circle-check"></i>
+                        Stok masuk
+                    </span>
+                    <?php endif; ?>
+
                     <span class="mp-meta-total">
-                        <i class="fas fa-money-bill"></i>
                         <span class="mp-meta-total-value">
                             Rp <?= number_format($d['total_price'], 0, ',', '.') ?>
                         </span>
@@ -120,6 +126,22 @@ $q = mysqli_query($conn,"
                 data-date="<?= $d['date'] ?>">
                 <i class="fas fa-print"></i>
             </button>
+
+            <?php if((int)$d['used_flag'] === 0): ?>
+            <button class="action-btn btn-restock restockPurchaseBtn"
+                data-id="<?= $d['id'] ?>"
+                data-date="<?= $d['date'] ?>"
+                title="Validasi & Restock ke stok gudang">
+                <i class="fas fa-truck-ramp-box"></i>
+            </button>
+            <?php else: ?>
+            <button class="action-btn btn-restocked restockPurchaseBtn"
+                data-id="<?= $d['id'] ?>"
+                data-date="<?= $d['date'] ?>"
+                title="Sudah direstock ke stok gudang">
+                <i class="fas fa-circle-check"></i>
+            </button>
+            <?php endif; ?>
 
         </div>
     </td>

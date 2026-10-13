@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 include '../../sessions/session.php';
 $role       = $user['role'];
 $base       = BASE_URL;
@@ -15,7 +15,7 @@ $pages = array(
     'master-supplier'   => array($base . '/pages/master/master-supplier.php', 'master-supplier'),
     'master-customer'   => array($base . '/pages/master/master-customer.php', 'master-customer'),
     'master-user'       => array($base . '/pages/master/master-user.php', 'master-user'),
-    'daftar-belanja'    => array($base . '/pages/purchasing/list.php', 'list'),
+    'restock'    => array($base . '/pages/stock/restock.php', 'restock'),
     'stok-gudang'       => array($base . '/pages/stock/stock.php', 'stock'),
     'transfer-gudang'   => array($base . '/pages/stock/transfer.php', 'transfer'),
     'stok-kantin'       => array($base . '/pages/sales/sales-stock.php', 'sales-stock'),
@@ -30,7 +30,7 @@ $pages = array(
 );
 $roleLive = array(
     'developer' => array('master-product', 'master-supplier', 'master-customer', 'master-user',
-        'daftar-belanja', 'stok-gudang', 'transfer-gudang',
+        'restock', 'stok-gudang', 'transfer-gudang',
         'stok-kantin', 'katalog', 'pesanan', 'tenant', 'rekap',
         'laporan-penjualan', 'laporan-tenant', 'chat', 'update'),
     'administrator' => array('master-user', 'tenant', 'laporan-tenant', 'chat', 'update'),
@@ -77,13 +77,13 @@ $phases = array(
             array(
                 'title' => 'Buat Daftar Belanja',
                 'desc' => 'Administrator merencanakan pembelian: pilih produk yang mau dibeli beserta rencana jumlah & harga sebelum barang benar-benar dibeli.',
-                'pages' => array('daftar-belanja'),
+                'pages' => array('restock'),
                 'tables' => array('purchases', 'purchase_items'),
             ),
             array(
                 'title' => 'Konfirmasi Belanja Jadi Stok',
                 'desc' => 'Saat barang datang dari supplier, konfirmasi pembelian. Qty & harga beli aktual tercatat dan stok gudang bertambah otomatis.',
-                'pages' => array('daftar-belanja'),
+                'pages' => array('restock'),
                 'tables' => array('purchases', 'purchase_items', 'sales_stock'),
             ),
             array(
@@ -386,7 +386,7 @@ function labels($key) {
     $m = array(
         'master-product' => 'Master Produk', 'master-supplier' => 'Master Supplier',
         'master-customer' => 'Master Customer', 'master-user' => 'Master User',
-        'daftar-belanja' => 'Belanja & Restock',
+        'restock' => 'Belanja & Restock',
         'stok-gudang' => 'Detail Stok',
         'transfer-gudang' => 'Transfer Stok', 'stok-kantin' => 'Stok Kantin',
         'katalog' => 'Katalog Produk', 'pesanan' => 'Pesanan',

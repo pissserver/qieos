@@ -240,6 +240,83 @@ if ($_GET['action'] == 'update') {
         exit;
     }
 
+    // Validasi & Restock: daftar belanja dijadikan stok gudang (FIFO layer)
+    if ($_GET['action'] == 'validate') {
+
+        $id = (int)$_POST['id'];
+
+        if ($id <= 0) {
+            echo json_encode(['status' => 'error', 'msg' => 'Data tidak valid']);
+            exit;
+        }
+
+        $qCek = mysqli_query($conn,"
+            SELECT COUNT(*) AS total
+            FROM purchases
+            WHERE id = '$id'
+              AND deleted_at IS NULL
+        ");
+
+        $dCek = $qCek ? mysqli_fetch_assoc($qCek) : null;
+        if (!$dCek || (int)$dCek['total'] === 0) {
+            echo json_encode(['status' => 'error', 'msg' => 'Daftar belanja tidak ditemukan']);
+            exit;
+        }
+
+        $qPending = mysqli_query($conn,"
+            SELECT id
+            FROM purchase_items
+            WHERE purchase_id = '$id'
+              AND deleted_at IS NULL
+              AND qty_buy IS NOT NULL
+              AND qty_stock IS NULL
+            ORDER BY id ASC
+        ");
+
+        $pending = [];
+        while ($qPending && $r = mysqli_fetch_assoc($qPending)) {
+            $pending[] = (int)$r['id'];
+        }
+
+        if (!$pending) {
+            echo json_encode(['status' => 'error', 'msg' => 'Daftar belanja sudah diinput / tidak ada item untuk direstock']);
+            exit;
+        }
+
+        mysqli_begin_transaction($conn);
+
+        $done = 0;
+
+        foreach ($pending as $item_id) {
+            $run = mysqli_query($conn,"
+                UPDATE purchase_items pi
+                JOIN products pr ON pr.id = pi.product_id
+                SET pi.qty_stock     = pi.qty_buy,
+                    pi.unit_stock    = COALESCE(NULLIF(pi.unit_buy, ''), pr.unit),
+                    pi.remaining_qty = pi.qty_buy
+                WHERE pi.id = $item_id
+                  AND pi.purchase_id = '$id'
+                  AND pi.deleted_at IS NULL
+            ");
+
+            if (!$run) {
+                mysqli_rollback($conn);
+                echo json_encode(['status' => 'error', 'msg' => mysqli_error($conn)]);
+                exit;
+            }
+
+            $done++;
+        }
+
+        mysqli_commit($conn);
+
+        echo json_encode([
+            'status' => 'success',
+            'msg'    => "$done item berhasil direstock ke stok gudang"
+        ]);
+        exit;
+    }
+
     if ($_GET['action'] == 'get_print') {
 
         $id = (int)$_GET['id'];

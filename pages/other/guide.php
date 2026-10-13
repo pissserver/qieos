@@ -62,7 +62,7 @@ $D['master-user'] = g('fa-users-cog', 'Master User', $base . '/pages/master/mast
     'Kelola akun pengguna sistem beserta perannya: developer, administrator, dan staff kasir.',
     array('Buat akun & tentukan role', 'Reset / ubah kata sandi', 'Kontrol akses tiap role ke menu'));
 
-$D['daftar-belanja'] = g('fa-cart-shopping', 'Belanja & Restock', $base . '/pages/purchasing/list.php', $A,
+$D['restock'] = g('fa-cart-shopping', 'Belanja & Restock', $base . '/pages/stock/restock.php', $A,
     'Daftar rencana / request pembelian barang. Memantau status dari draft hingga barang masuk.',
     array('Buat daftar belanja baru', 'Pantau status & prioritas', 'Lanjutkan menjadi pembelian'));
 
@@ -123,7 +123,7 @@ switch ($role) {
     case 'developer':
         $sections['UMUM'] = array('dashboard', 'pencarian', 'whatsnew', 'chat', 'keranjang', 'omzet', 'profil');
         $sections['MASTER'] = array('master-produk', 'master-supplier', 'master-customer', 'master-user');
-        $sections['STOK ACTION'] = array('daftar-belanja', 'transfer-gudang', 'stok-gudang');
+        $sections['STOK ACTION'] = array('restock', 'transfer-gudang', 'stok-gudang');
         $sections['KANTIN'] = array('stok-kantin', 'katalog', 'pesanan');
         $sections['TENANT'] = array('tenant');
         $sections['REKAP'] = array('rekap');
@@ -134,7 +134,7 @@ switch ($role) {
     case 'administrator':
         $sections['UMUM'] = array('dashboard', 'pencarian', 'whatsnew', 'chat', 'profil');
         $sections['MASTER'] = array('master-produk', 'master-supplier', 'master-customer', 'master-user');
-        $sections['STOK ACTION'] = array('daftar-belanja', 'transfer-gudang', 'stok-gudang');
+        $sections['STOK ACTION'] = array('restock', 'transfer-gudang', 'stok-gudang');
         $sections['TENANT'] = array('tenant');
         $sections['LAPORAN'] = array('laporan-penjualan', 'laporan-tenant');
         $sections['LAINNYA'] = array('update', 'guide');
@@ -152,7 +152,7 @@ switch ($role) {
 
 // ubah item yang belum tersedia sesuai role -> "segera hadir"
 $segera = array(
-    'administrator' => array('master-produk', 'master-supplier', 'master-customer', 'daftar-belanja',
+    'administrator' => array('master-produk', 'master-supplier', 'master-customer', 'restock',
         'stok-gudang', 'transfer-gudang', 'laporan-penjualan'),
     'staff kasir'   => array('master-customer', 'stok-kantin', 'katalog', 'pesanan'),
 );
