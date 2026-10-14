@@ -119,6 +119,7 @@ function buildProductOptions($products, $currentName, $currentId){
                            class="form-control"
                            placeholder="Harga Satuan"
                            min="0"
+                           required
                            value="<?= $d['price_unit'] !== null && $d['price_unit'] !== '' ? (int)$d['price_unit'] : '' ?>">
                 </div>
             </div>
@@ -133,6 +134,7 @@ function buildProductOptions($products, $currentName, $currentId){
                            class="form-control"
                            placeholder="Total Harga Produk"
                            min="0"
+                           required
                            value="<?= $d['price_buy'] !== null && $d['price_buy'] !== '' ? (int)$d['price_buy'] : '' ?>">
                 </div>
             </div>

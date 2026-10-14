@@ -1440,6 +1440,128 @@ body.restock-busy .modal-backdrop{
     transition:width .6s cubic-bezier(.4,0,.2,1);
 }
 
+/* ---------- SUCCESS STATE (validasi sukses) ---------- */
+
+/* overlay penuh tema sukses */
+.rp-success{
+    background:rgba(240,253,250,.94);
+}
+
+/* ring berubah jadi checkmark besar */
+.rp-ring-success{
+    animation:rpRingStop .45s cubic-bezier(.18,.89,.32,1.28) 1 !important;
+    background:conic-gradient(from 0deg,#10b981,#059669) !important;
+    box-shadow:
+        0 22px 44px -14px rgba(16,185,129,.75),
+        0 0 0 10px rgba(16,185,129,.12),
+        0 0 0 22px rgba(16,185,129,.05) !important;
+}
+
+/* lingkaran dalam dibuat transparan supaya ikon putih terlihat
+   di atas latar hijau (default ::before berwarna putih = ikon
+   putih di atas putih jadi tak terlihat) */
+.rp-ring-success::before{
+    background:transparent;
+    box-shadow:none;
+}
+
+/* icon checklist di tengah lingkaran hijau */
+.rp-ring-success i{
+    color:#fff !important;
+    animation:rpCheckPop .5s cubic-bezier(.18,.89,.32,1.4) .15s 1 both !important;
+    font-size:30px !important;
+}
+
+@keyframes rpRingStop{
+    0%{transform:scale(.82);}
+    100%{transform:scale(1);}
+}
+
+@keyframes rpCheckPop{
+    0%{transform:scale(0) rotate(-30deg);}
+    70%{transform:scale(1.25) rotate(6deg);}
+    100%{transform:scale(1) rotate(0);}
+}
+
+/* burst partikel keluar dari ring */
+.rp-burst{
+    position:absolute;
+    top:50%;
+    left:50%;
+    width:0;
+    height:0;
+    pointer-events:none;
+}
+
+.rp-particle{
+    position:absolute;
+    top:-4px;
+    left:-4px;
+    width:8px;
+    height:8px;
+    border-radius:50%;
+    background:linear-gradient(135deg,#10b981,#0d9488);
+    box-shadow:0 0 10px rgba(16,185,129,.8);
+    animation:rpParticleFly 1s cubic-bezier(.16,.84,.44,1) forwards;
+    animation-delay:calc(var(--i, 0) * 20ms);
+}
+
+@keyframes rpParticleFly{
+    0%{
+        opacity:1;
+        transform:rotate(var(--ang)) translateX(0) scale(1);
+    }
+    70%{
+        opacity:1;
+    }
+    100%{
+        opacity:0;
+        transform:rotate(var(--ang)) translateX(110px) scale(.3);
+    }
+}
+
+/* teks sukses */
+.rp-success .rp-text{
+    color:#059669;
+    animation:rpTextPop .45s cubic-bezier(.18,.89,.32,1.28) 1;
+}
+
+@keyframes rpTextPop{
+    0%{transform:scale(.9);opacity:0;}
+    100%{transform:scale(1);opacity:1;}
+}
+
+/* progress bar glow penuh */
+.rp-success .rp-progress span{
+    background:linear-gradient(90deg,#10b981,#059669);
+    box-shadow:0 0 14px rgba(16,185,129,.85);
+}
+
+/* semua step jadi sukses */
+.rp-success .rp-step{
+    opacity:1;
+    background:#ecfdf5;
+    border-color:#6ee7b7;
+}
+
+.rp-success .rp-step .rp-step-ico{
+    background:#059669;
+    color:#fff;
+    box-shadow:0 6px 12px -6px rgba(5,150,105,.7);
+    animation:rpStepDone .4s cubic-bezier(.18,.89,.32,1.28) both;
+    animation-delay:calc(var(--step, 0) * 120ms);
+}
+
+@keyframes rpStepDone{
+    0%{transform:scale(1);}
+    50%{transform:scale(1.18);}
+    100%{transform:scale(1);}
+}
+
+.rp-success .rp-step .rp-step-title{
+    color:#065f46;
+}
+
 /* ---------- TABLE BUTTON STATE ---------- */
 
 .btn-restocked{

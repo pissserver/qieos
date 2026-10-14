@@ -142,7 +142,8 @@ while($p = mysqli_fetch_assoc($qProd)){
                                             name="unit_price[]"
                                             class="form-control"
                                             placeholder="Harga Satuan"
-                                            min="0">
+                                            min="0"
+                                            required>
                                     </div>
                                 </div>
 
@@ -155,7 +156,8 @@ while($p = mysqli_fetch_assoc($qProd)){
                                             name="price_buy[]"
                                             class="form-control"
                                             placeholder="Total Harga Produk"
-                                            min="0">
+                                            min="0"
+                                            required>
                                     </div>
                                 </div>
 
@@ -293,6 +295,9 @@ while($p = mysqli_fetch_assoc($qProd)){
             let sel = r.querySelector('select[name="product_id[]"]');
             let qty = r.querySelector('input[name="qty_buy[]"]');
             let unit = r.querySelector('input[name="unit_buy[]"]');
+            let unitPrice = r.querySelector('input[name="unit_price[]"]');
+            let priceBuy = r.querySelector('input[name="price_buy[]"]');
+            
             if(!sel || !sel.value){
                 QToast('Error', 'Nama produk wajib dipilih', 'error');
                 valid = false;
@@ -305,6 +310,16 @@ while($p = mysqli_fetch_assoc($qProd)){
             }
             if(!unit || !unit.value.trim()){
                 QToast('Error', 'Satuan wajib diisi', 'error');
+                valid = false;
+                return;
+            }
+            if(!unitPrice || !unitPrice.value.trim()){
+                QToast('Error', 'Harga satuan wajib diisi', 'error');
+                valid = false;
+                return;
+            }
+            if(!priceBuy || !priceBuy.value.trim()){
+                QToast('Error', 'Total harga produk wajib diisi', 'error');
                 valid = false;
                 return;
             }
@@ -942,6 +957,44 @@ while($p = mysqli_fetch_assoc($qProd)){
     $(document).on('submit','#editPurchaseForm',function(e){
         e.preventDefault();
 
+        // Validasi manual (required Select2 tidak tervalidasi otomatis)
+        let valid = true;
+        $('#editPurchaseContent .item-row').each(function(){
+            let r = $(this);
+            let sel = r.find('select[name="product_id[]"]');
+            let qty = r.find('input[name="qty_buy[]"]');
+            let unit = r.find('input[name="unit_buy[]"]');
+            let unitPrice = r.find('input[name="unit_price[]"]');
+            let priceBuy = r.find('input[name="price_buy[]"]');
+
+            if(!sel.val()){
+                QToast('Error', 'Nama produk wajib dipilih', 'error');
+                valid = false;
+                return false;
+            }
+            if(!qty.val() || !String(qty.val()).trim()){
+                QToast('Error', 'Qty wajib diisi', 'error');
+                valid = false;
+                return false;
+            }
+            if(!unit.val() || !String(unit.val()).trim()){
+                QToast('Error', 'Satuan wajib diisi', 'error');
+                valid = false;
+                return false;
+            }
+            if(!unitPrice.val() || !String(unitPrice.val()).trim()){
+                QToast('Error', 'Harga satuan wajib diisi', 'error');
+                valid = false;
+                return false;
+            }
+            if(!priceBuy.val() || !String(priceBuy.val()).trim()){
+                QToast('Error', 'Total harga produk wajib diisi', 'error');
+                valid = false;
+                return false;
+            }
+        });
+        if(!valid) return;
+
         let formData = new FormData(this);
         let id = formData.get('id');
 
@@ -1082,6 +1135,36 @@ while($p = mysqli_fetch_assoc($qProd)){
             timers.forEach(clearTimeout);
         }
 
+        // Animasi sukses di dalam overlay processing: ring berubah jadi
+        // checkmark besar + badge checklist di atasnya + burst partikel
+        // + semua step hijau.
+        function showRestockSuccess(processing, rpSteps, rpBar, rpText){
+            rpSteps.removeClass('is-running').addClass('is-done');
+            rpBar.css('width', '100%');
+            rpText.text('Data berhasil direstock!');
+
+            // Ring jadi checkmark statis besar dengan glow, icon check
+            // putih di tengah lingkaran hijau
+            let ring = processing.find('.rp-ring');
+            ring.css('animation', 'none');
+            ring.addClass('rp-ring-success');
+            ring.html('<i class="fas fa-check"></i>');
+
+            // Burst partikel (12 buah, posisi acak)
+            let burst = $('<div class="rp-burst"></div>');
+            for(let i = 0; i < 12; i++){
+                let ang = (i / 12) * 360;
+                burst.append('<span class="rp-particle" style="--ang:' + ang + 'deg;--i:' + i + '"></span>');
+            }
+            processing.append(burst);
+
+            // Overlay jadi tema sukses
+            processing.addClass('rp-success');
+
+            // Hapus partikel setelah animasi selesai
+            setTimeout(function(){ burst.remove(); }, 1400);
+        }
+
         fetch('restock-action.php?action=validate',{
             method:'POST',
             body:formData
@@ -1097,43 +1180,52 @@ while($p = mysqli_fetch_assoc($qProd)){
 
                 if(res.status === 'success'){
 
-                    processing.prop('hidden', true);
+                    // Animasi sukses spektakuler: ring jadi checkmark besar,
+                    // confetti burst, semua step hijau, glow effect
+                    showRestockSuccess(processing, rpSteps, rpBar, rpText);
 
-                    // Isi field qty stock / remaining qty / unit stock langsung
-                    // (tanpa animasi berjenjang) begitu proses selesai
-                    form.find('.rv-field').each(function(){
-                        let el = $(this);
-                        let val = el.attr('data-value');
-                        el.text(val !== undefined && val !== '' ? val : '—').addClass('is-filled');
-                    });
+                    // Setelah animasi sukses selesai (1.5s), sembunyikan
+                    // overlay lalu isi field + tunggu 3s sebelum tutup modal
+                    setTimeout(function(){
+                        processing.prop('hidden', true);
 
-                    // Ganti tombol validasi dengan alert permanen
-                    form.find('.restock-view-footer').html(`
-                        <div class="restock-alert-done">
-                            <i class="fas fa-shield-halved"></i>
-                            <span>Data sudah masuk ke stok gudang dan tidak dapat diubah.</span>
-                        </div>
-                    `);
+                        // Isi field qty stock / remaining qty / unit stock langsung
+                        // (tanpa animasi berjenjang) begitu proses selesai
+                        form.find('.rv-field').each(function(){
+                            let el = $(this);
+                            let val = el.attr('data-value');
+                            el.text(val !== undefined && val !== '' ? val : '—').addClass('is-filled');
+                        });
 
-                    form.find('.restock-notice').addClass('restock-notice-done')
-                        .html(`
-                            <i class="fas fa-circle-check"></i>
-                            <div>
-                                <strong>Sudah direstock.</strong>
-                                Data sudah masuk ke <b>Stok Gudang</b> dan tidak dapat diubah lagi.
+                        // Ganti tombol validasi dengan alert permanen
+                        form.find('.restock-view-footer').html(`
+                            <div class="restock-alert-done">
+                                <i class="fas fa-shield-halved"></i>
+                                <span>Data sudah masuk ke stok gudang dan tidak dapat diubah.</span>
                             </div>
                         `);
 
-                    QToast('Berhasil', res.msg || 'Restock berhasil', 'success');
+                        form.find('.restock-notice').addClass('restock-notice-done')
+                            .html(`
+                                <i class="fas fa-circle-check"></i>
+                                <div>
+                                    <strong>Sudah direstock.</strong>
+                                    Data sudah masuk ke <b>Stok Gudang</b> dan tidak dapat diubah lagi.
+                                </div>
+                            `);
 
-                    setRestockBusy(false);
+                        QToast('Berhasil', res.msg || 'Restock berhasil', 'success');
 
-                    // Tabel diperbarui realtime: baris restocked dianimasikan
-                    // lembut tanpa reload seluruh tabel, lalu modal ditutup.
-                    setTimeout(function(){
-                        $('#restockModal').modal('hide');
-                        markPurchaseRestocked(formData.get('id'));
-                    }, 700);
+                        setRestockBusy(false);
+
+                        // Modal tetap tampil 3 detik supaya user melihat hasil
+                        // konversi, lalu ditutup smooth. Tabel diperbarui realtime
+                        // tanpa reload penuh.
+                        setTimeout(function(){
+                            $('#restockModal').modal('hide');
+                            markPurchaseRestocked(formData.get('id'));
+                        }, 3000);
+                    }, 1500);
 
                 }else{
 
