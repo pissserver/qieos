@@ -943,12 +943,43 @@ while($p = mysqli_fetch_assoc($qProd)){
 
     });
 
+    // Kunci modal + blur halaman belakang selama proses validasi
+    let restockBusy = false;
+
+    function setRestockBusy(on){
+        restockBusy = on;
+        document.body.classList.toggle('restock-busy', on);
+    }
+
+    $('#restockModal').on('hide.bs.modal', function(e){
+        if(restockBusy) e.preventDefault();
+    });
+
     // Validasi & Restock Action
     $(document).on('submit','#restockValidateForm',function(e){
         e.preventDefault();
 
         let form = $(this);
-        let formData = new FormData(this);
+
+        // Konfirmasi dulu supaya tidak sembarangan klik
+        QConfirm(
+            'Validasi & Restock?',
+            'Qty pada daftar belanja ini akan masuk ke Stok Gudang. Setelah divalidasi, data tidak dapat diubah lagi.',
+            {
+                confirmText:'Ya, Restock',
+                cancelText:'Batal',
+                icon:'fa-truck-ramp-box',
+                confirmClass:'q-confirm-btn-success',
+                iconClass:'q-confirm-icon-warning'
+            }
+        ).then(function(ok){
+            if(!ok) return;
+            runRestockValidate(form);
+        });
+    });
+
+    function runRestockValidate(form){
+        let formData = new FormData(form[0]);
 
         let btn = form.find('.btn-validate-restock');
         btn.prop('disabled', true).addClass('is-loading');
@@ -982,6 +1013,7 @@ while($p = mysqli_fetch_assoc($qProd)){
             rpText.text(stepTitles[i]);
         }
 
+        setRestockBusy(true);
         processing.prop('hidden', false);
         runPhase(0);
 
@@ -1057,6 +1089,8 @@ while($p = mysqli_fetch_assoc($qProd)){
 
                         loadPurchaseTable();
 
+                        setRestockBusy(false);
+
                     }, fillDone);
 
                 }else{
@@ -1068,6 +1102,8 @@ while($p = mysqli_fetch_assoc($qProd)){
                     btn.find('i').attr('class', 'fas fa-circle-check');
 
                     QToast('Gagal', res.msg || 'Terjadi kesalahan', 'error');
+
+                    setRestockBusy(false);
 
                 }
 
@@ -1081,8 +1117,9 @@ while($p = mysqli_fetch_assoc($qProd)){
             btn.find('span').text('Validasi & Restock');
             btn.find('i').attr('class', 'fas fa-circle-check');
             QToast('Error', 'Gagal memproses restock', 'error');
+            setRestockBusy(false);
         });
-    });
+    }
 
     // Delete Action
     $(document).on('click','.deletePurchaseBtn',function(){
@@ -1136,19 +1173,31 @@ while($p = mysqli_fetch_assoc($qProd)){
                 let items = res.data;
 
                 let rows = '';
+                let grandTotal = 0;
 
                 items.forEach((item, i) => {
+                    let price = parseFloat(item.price) || 0;
+                    grandTotal += price;
+
                     rows += `
                         <tr>
                             <td style="text-align:center">${i + 1}</td>
                             <td>${item.name}</td>
                             <td style="text-align:center">${item.qty}</td>
                             <td style="text-align:center">${item.unit}</td>
-                            <td style="text-align:center"></td>
+                            <td style="text-align:right">Rp ${price.toLocaleString('id-ID')}</td>
                             <td style="text-align:center"><span class="chk"></span></td>
                         </tr>
                     `;
                 });
+
+                rows += `
+                    <tr class="total-row">
+                        <td colspan="4" style="text-align:right;font-weight:700">Total Harga Keseluruhan</td>
+                        <td style="text-align:right;font-weight:700">Rp ${grandTotal.toLocaleString('id-ID')}</td>
+                        <td></td>
+                    </tr>
+                `;
 
                 let win = window.open('', '', 'width=900,height=700');
 
@@ -1186,6 +1235,10 @@ while($p = mysqli_fetch_assoc($qProd)){
                                 background: #fff;
                                 vertical-align: middle;
                             }
+
+                            .total-row td {
+                                background: #f2f2f2;
+                            }
                         </style>
                     </head>
                     <body>
@@ -1209,7 +1262,7 @@ while($p = mysqli_fetch_assoc($qProd)){
                                     <th>Nama Barang / Produk</th>
                                     <th>Qty</th>
                                     <th>Satuan</th>
-                                    <th>Harga</th>
+                                    <th>Total Harga</th>
                                     <th>Check</th>
                                 </tr>
                             </thead>

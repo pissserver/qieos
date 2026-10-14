@@ -78,7 +78,7 @@ $isRestocked = !empty($items) && $pending === 0;
         <?php
             $qtyStockVal = $d['qty_stock'] !== null ? (int)$d['qty_stock'] : (int)$d['qty_buy'];
             $remainVal   = $d['remaining_qty'] !== null ? (int)$d['remaining_qty'] : (int)$d['qty_buy'];
-            $unitStockVal = $d['unit_stock'] ?: ($d['unit_buy'] ?: $d['product_unit']);
+            $unitStockVal = $d['unit_stock'] ?: ($d['product_unit'] ?: $d['unit_buy']);
         ?>
 
         <div class="restock-view-item">

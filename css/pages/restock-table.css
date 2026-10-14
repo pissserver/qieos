@@ -1001,6 +1001,23 @@
     -webkit-overflow-scrolling:touch;
 }
 
+/* halaman di belakang modal ikut blur + terkunci selama proses */
+body.restock-busy .content,
+body.restock-busy .sidebar{
+    filter:blur(7px) saturate(.9);
+    transform:scale(1.012);
+    transform-origin:center;
+    pointer-events:none !important;
+    user-select:none;
+    transition:filter .4s ease, transform .4s ease;
+}
+
+body.restock-busy .modal-backdrop{
+    background:rgba(2,6,23,.6);
+    backdrop-filter:blur(7px);
+    -webkit-backdrop-filter:blur(7px);
+}
+
 /* cincin validasi berputar */
 .rp-ring{
     position:relative;

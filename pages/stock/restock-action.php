@@ -292,7 +292,7 @@ if ($_GET['action'] == 'update') {
                 UPDATE purchase_items pi
                 JOIN products pr ON pr.id = pi.product_id
                 SET pi.qty_stock     = pi.qty_buy,
-                    pi.unit_stock    = COALESCE(NULLIF(pi.unit_buy, ''), pr.unit),
+                    pi.unit_stock    = pr.unit,
                     pi.remaining_qty = pi.qty_buy
                 WHERE pi.id = $item_id
                   AND pi.purchase_id = '$id'
