@@ -69,6 +69,19 @@ while($s = mysqli_fetch_assoc($qs)){
     $allSuppliers[] = ['id' => (int)$s['id'], 'name' => $s['name']];
 }
 
+// Semua satuan dari Master Unit (untuk dropdown select2 di form edit).
+// Kalau satuan produk saat ini belum ada di Master Unit, tetap diikutkan
+// sebagai opsi supaya nilainya tidak hilang saat disimpan.
+$unitVal    = !empty($d['unit']) ? $d['unit'] : '';
+$unitInList = false;
+$allUnits   = [];
+$qu = mysqli_query($conn, "SELECT name FROM units WHERE deleted_at IS NULL ORDER BY name ASC");
+while($u = mysqli_fetch_assoc($qu)){
+    $allUnits[] = $u['name'];
+    if(strtolower($u['name']) === strtolower($unitVal)) $unitInList = true;
+}
+if($unitVal !== '' && !$unitInList) $allUnits[] = $unitVal;
+
 // Bangun opsi <option> untuk satu baris supplier (filter supplier yang sudah dipilih di row lain)
 function buildSupplierOptions($selectedId, $excludeIds, $allSuppliers){
     $html = '<option value="">Supplier (opsional)</option>';
@@ -304,7 +317,14 @@ $hid = $isAdditional ? ' style="display:none"' : '';
                     <label class="form-label"><i class="fas fa-ruler"></i> Satuan</label>
                     <div class="form-input-wrap">
                         <div class="form-input-icon"><i class="fas fa-ruler"></i></div>
-                        <input type="text" name="unit" class="form-input" value="<?= !empty($d['unit']) ? htmlspecialchars($d['unit']) : '' ?>" placeholder="Opsional, contoh: pcs, botol, dus">
+                        <div class="select-wrap">
+                            <select name="unit" id="editProductUnit" class="form-input">
+                                <option value="">Pilih satuan</option>
+                                <?php foreach($allUnits as $un): ?>
+                                <option value="<?= htmlspecialchars($un) ?>" <?= (strtolower($un) === strtolower($unitVal)) ? 'selected' : '' ?>><?= htmlspecialchars(ucwords($un)) ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
                     </div>
                 </div>
                 <div class="col-md-12 mb-3" id="editFieldLowStock"<?= $hid ?>>
@@ -799,6 +819,23 @@ supplierFields.addEventListener('click', function(e){
 // Inisialisasi opsi dropdown sesuai data awal
 refreshAllSupplierRows();
 
+// ===== SELECT2 UNTUK PILIH SATUAN (opsi dari Master Unit) =====
+(function(){
+    var unitSel = document.getElementById('editProductUnit');
+    if(!unitSel || !$.fn.select2) return;
+    $(unitSel).select2({
+        width: '100%',
+        placeholder: 'Pilih satuan',
+        allowClear: true,
+        // dropdown di-append ke <body> supaya tidak terpotong .edit-card
+        dropdownParent: document.body,
+        language: {
+            noResults: function(){ return 'Satuan tidak ditemukan'; },
+            searching: function(){ return 'Mencari...'; }
+        }
+    });
+})();
+
 // Toggle additional mode saat kategori di-edit form berubah
 (function(){
     var catSelect = document.querySelector('#editProductForm select[name="category"]');
@@ -1118,6 +1155,11 @@ syncDeletePhotoButton(!!(document.querySelector('.hero-photo img')));
         setForm('category', item.category);
         setForm('price', item.price);
         setForm('unit', item.unit || '');
+        // select2 tidak ikut ter-update lewat .value; pancing lewat 'change'
+        var unitSelEl = document.querySelector('#editProductForm select[name="unit"]');
+        if(unitSelEl && $.fn.select2 && $(unitSelEl).hasClass('select2-hidden-accessible')){
+            $(unitSelEl).trigger('change');
+        }
         setForm('low_stock', item.lowStock !== undefined && item.lowStock !== null ? item.lowStock : '');
         setForm('low_stock_kantin', item.lowStockKantin !== undefined && item.lowStockKantin !== null ? item.lowStockKantin : '');
 

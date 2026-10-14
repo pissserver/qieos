@@ -88,11 +88,15 @@ include '../../sessions/session.php';
                 <div class="input-icon">
                     <i class="fas fa-ruler"></i>
                 </div>
-                <input
-                    type="text"
-                    name="unit"
-                    class="form-control"
-                    placeholder="Satuan (opsional, contoh: pcs, botol, dus)">
+                <select name="unit" id="addProductUnit" class="form-control">
+                    <option value="">Satuan (opsional)</option>
+                    <?php
+                    $qu = mysqli_query($conn, "SELECT name FROM units WHERE deleted_at IS NULL ORDER BY name ASC");
+                    while($u = mysqli_fetch_assoc($qu)):
+                    ?>
+                    <option value="<?= htmlspecialchars($u['name']) ?>"><?= htmlspecialchars(ucwords($u['name'])) ?></option>
+                    <?php endwhile; ?>
+                </select>
             </div>
         </div>
 

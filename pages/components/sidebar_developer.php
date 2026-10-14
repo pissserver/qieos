@@ -8,6 +8,13 @@
     </a>
 </li>
 
+<li class="nav-item <?= ($current_page == 'master-unit.php') ? 'active' : ''; ?>">
+    <a href="<?php echo BASE_URL; ?>/pages/master/master-unit.php" class="nav-link" data-tooltip="Master Unit">
+        <span class="sidebar-icon"><i class="fas fa-ruler-combined"></i></span>
+        <span class="sidebar-text">Master Unit</span>
+    </a>
+</li>
+
 <li class="nav-item <?= ($current_page == 'master-supplier.php') ? 'active' : ''; ?>">
     <a href="<?php echo BASE_URL; ?>/pages/master/master-supplier.php" class="nav-link" data-tooltip="Master Supplier">
         <span class="sidebar-icon"><i class="fas fa-truck"></i></span>

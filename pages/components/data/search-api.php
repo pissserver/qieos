@@ -27,6 +27,7 @@ $pages = [
 if ($role === 'developer') {
     $pages = array_merge($pages, [
         $badge('Master Produk', BASE_URL . '/pages/master/master-product.php', 'fas fa-boxes-stacked', 'Master Data'),
+        $badge('Master Unit', BASE_URL . '/pages/master/master-unit.php', 'fas fa-ruler-combined', 'Master Data'),
         $badge('Master Supplier', BASE_URL . '/pages/master/master-supplier.php', 'fas fa-truck', 'Master Data'),
         $badge('Master Customer', BASE_URL . '/pages/master/master-customer.php', 'fas fa-users', 'Master Data'),
         $badge('Belanja & Restock', BASE_URL . '/pages/stock/restock.php', 'fas fa-cart-shopping', 'Stok Action'),
@@ -46,6 +47,7 @@ if ($role === 'developer') {
 } elseif ($role === 'administrator') {
     $pages = array_merge($pages, [
         $badge('Master Produk', $cs . 'master-product', 'fas fa-boxes-stacked', 'Master Data'),
+        $badge('Master Unit', BASE_URL . '/pages/master/master-unit.php', 'fas fa-ruler-combined', 'Master Data'),
         $badge('Master Supplier', $cs . 'master-supplier', 'fas fa-truck', 'Master Data'),
         $badge('Master Customer', $cs . 'master-customer', 'fas fa-users', 'Master Data'),
         $badge('Belanja & Restock', $cs . 'restock', 'fas fa-cart-shopping', 'Stok Action'),

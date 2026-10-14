@@ -444,6 +444,7 @@ include __DIR__ . '/../components/data/stock-status.php';
         // dia akan nyangkut jadi node Animation di dalam modal.
         destroyAddSupplierSelect2();
         ADD_SUPPLIER_STATE.fields = null;
+        destroyAddUnitSelect2();
 
         document.getElementById('addProductContent').innerHTML = `
             <div class="text-center py-5">
@@ -456,6 +457,7 @@ include __DIR__ . '/../components/data/stock-status.php';
         .then(html => {
             document.getElementById('addProductContent').innerHTML = html;
             initAddProductSuppliers();
+            initAddUnitSelect2();
             bindAddPhotoBox();
             initAddCategoryToggle();
             initAddCodeValidation();
@@ -604,6 +606,43 @@ include __DIR__ . '/../components/data/stock-status.php';
                 });
             }
         });
+    }
+
+    // ===== SELECT2 UNTUK PILIH SATUAN =====
+    // Opsi satuan diambil dari Master Unit (master-unit.php). Seperti supplier,
+    // <select> asli tetap jadi sumber nilai saat form disubmit.
+    function isAddUnitSelect2(sel){
+        return !!($.fn.select2) && $(sel).hasClass('select2-hidden-accessible');
+    }
+
+    function destroyAddUnitSelect2(){
+        var sel = document.getElementById('addProductUnit');
+        if(sel && isAddUnitSelect2(sel)) $(sel).select2('destroy');
+    }
+
+    function initAddUnitSelect2(){
+        var sel = document.getElementById('addProductUnit');
+        if(!sel || !$.fn.select2 || isAddUnitSelect2(sel)) return;
+        $(sel).select2({
+            width: '100%',
+            placeholder: 'Satuan (opsional)',
+            allowClear: true,
+            dropdownParent: $('#addProductModal').length && !ADD_SUPPLIER_MOBILE()
+                ? $('#addProductModal')
+                : document.body,
+            language: {
+                noResults: function(){ return 'Satuan tidak ditemukan'; },
+                searching: function(){ return 'Mencari...'; }
+            }
+        });
+        if(ADD_SUPPLIER_MOBILE()){
+            $(sel).on('mousedown touchstart', function(e){
+                if($(this).hasClass('select2-hidden-accessible')){
+                    e.preventDefault();
+                    $(this).select2('open');
+                }
+            });
+        }
     }
 
     // Select2 kadang menyisakan container dropdown yatim: 0x0, tidak terlihat, tapi
