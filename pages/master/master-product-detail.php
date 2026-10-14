@@ -1,6 +1,7 @@
 <?php
 include '../../sessions/session.php';
 include __DIR__ . '/../components/data/stock-status.php';
+include __DIR__ . '/../components/data/product-conversion.php';
 
 header('Cache-Control: no-store, no-cache, must-revalidate');
 
@@ -120,6 +121,11 @@ $currentPrice    = isset($d['sell_price']) ? $d['sell_price'] : 0;
 // Kategori additional: tidak pakai stok/supplier/batas menipis
 $isAdditional = (!empty($d['category']) && strtolower($d['category']) === 'additional');
 $hid = $isAdditional ? ' style="display:none"' : '';
+
+// Konversi unit untuk produk ini (base_unit konversi == satuan produk)
+$conv       = product_matched_conversions($conn, $d['id']);
+$hasConvUnit = (!$isAdditional && $unitVal !== '');
+$hidConv     = $hasConvUnit ? '' : ' style="display:none"';
 ?>
 
 <!doctype html>
@@ -493,6 +499,18 @@ $hid = $isAdditional ? ' style="display:none"' : '';
                     </div>
                 </div>
             </div>
+        </div>
+    </div>
+
+    <!-- KONVERSI UNIT CARD -->
+    <div class="detail-card premium-card convert-card" id="convertCardWrap"<?= $hidConv ?>>
+        <div class="detail-card-inner">
+            <div class="detail-card-header convert-card-header">
+                <div class="detail-card-icon"><i class="fas fa-right-left"></i></div>
+                <div class="detail-card-title">Konversi Unit</div>
+                <span class="convert-card-unit" id="convertCardUnit"><i class="fas fa-ruler-combined"></i> <?= $unit ?></span>
+            </div>
+            <div class="convert-card-body" id="convertPanelBody"></div>
         </div>
     </div>
 
@@ -918,6 +936,9 @@ document.getElementById('editProductForm').addEventListener('submit', function(e
                 renderLayerStatus(document.getElementById('ovGudangStatus'), stockStatusOf(window.__stockData.gudang, lowInt));
                 renderLayerStatus(document.getElementById('ovKantinStatus'), stockStatusOf(window.__stockData.kantin, lowKantinInt));
 
+                // Segarkan panel konversi (mengikuti satuan baru)
+                if(window.__refreshConvertPanel){ window.__refreshConvertPanel(newUnit); }
+
                 // Update foto hero jika ada file baru
                 var photoFile = formData.get('photo');
                 if(photoFile && photoFile.name){
@@ -1291,6 +1312,164 @@ syncDeletePhotoButton(!!(document.querySelector('.hero-photo img')));
             dropdown.style.display = 'none';
         }
     });
+})();
+
+// ===== KONVERSI UNIT — pilih convert yang cocok dengan satuan produk =====
+(function(){
+    var wrap = document.getElementById('convertCardWrap');
+    if(!wrap) return;
+
+    var panelBody = document.getElementById('convertPanelBody');
+
+    var STATE = {
+        productId: <?= (int)$d['id'] ?>,
+        unit: <?= json_encode($unitVal) ?>,
+        selectedId: <?= (int)$conv['conversion_id'] ?>,
+        matched: <?= json_encode($conv['matched']) ?>
+    };
+
+    function esc(s){
+        return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+    function fmtQty(n){
+        n = parseFloat(n);
+        if(isNaN(n)) n = 0;
+        if(Math.round(n) === n) return n.toLocaleString('id-ID');
+        return n.toLocaleString('id-ID', { maximumFractionDigits: 4 });
+    }
+    function findConv(id){
+        for(var i = 0; i < STATE.matched.length; i++){
+            if(String(STATE.matched[i].id) === String(id)) return STATE.matched[i];
+        }
+        return null;
+    }
+    function rowsHtml(conv, base){
+        if(!conv || !conv.items || !conv.items.length){
+            return '<div class="convert-row-empty">Konversi ini belum punya baris satuan.</div>';
+        }
+        var h = '';
+        for(var i = 0; i < conv.items.length; i++){
+            var it = conv.items[i];
+            h += '<div class="convert-detail-row">' +
+                    '<span class="convert-detail-seq">' + (i + 1) + '</span>' +
+                    '<span class="convert-detail-name">1 <b class="text-capitalize">' + esc(it.unit_name) + '</b></span>' +
+                    '<span class="convert-detail-eq">= ' + fmtQty(it.qty) + ' <span class="text-capitalize">' + esc(base) + '</span></span>' +
+                 '</div>';
+        }
+        return h;
+    }
+
+    function bindPanelActions(){
+        var pickBtn = document.getElementById('convertPickBtn');
+        if(pickBtn) pickBtn.addEventListener('click', function(){ applyConversion(STATE.matched[0].id); });
+        var detachBtn = document.getElementById('convertDetachBtn');
+        if(detachBtn) detachBtn.addEventListener('click', detach);
+    }
+
+    function renderPanel(){
+        if(!panelBody) return;
+        var unitLabel = '<b class="text-capitalize">' + esc(STATE.unit) + '</b>';
+
+        if(!STATE.matched.length){
+            panelBody.innerHTML =
+                '<div class="convert-empty">' +
+                    '<div class="convert-empty-icon"><i class="fas fa-link-slash"></i></div>' +
+                    '<div class="convert-empty-title">Belum ada konversi untuk satuan ' + unitLabel + '</div>' +
+                    '<div class="convert-empty-sub">Buat konversi dengan unit base <b>' + esc(STATE.unit) + '</b> di halaman Master Unit (panel Konversi Unit), lalu pasang di sini.</div>' +
+                    '<a class="convert-btn convert-btn-primary" href="' + BASE_URL + '/pages/master/master-unit.php"><i class="fas fa-plus me-1"></i> Buat Konversi</a>' +
+                '</div>';
+            return;
+        }
+
+        var sel = findConv(STATE.selectedId);
+        if(sel){
+            panelBody.innerHTML =
+                '<div class="convert-selected">' +
+                    '<div class="convert-selected-head">' +
+                        '<span class="convert-pill-ok"><i class="fas fa-circle-check"></i> Terpasang</span>' +
+                        '<span class="convert-selected-base"><i class="fas fa-ruler-combined"></i> Unit Base <b class="text-capitalize">' + esc(sel.base_unit) + '</b></span>' +
+                    '</div>' +
+                    '<div class="convert-detail-rows">' + rowsHtml(sel, sel.base_unit) + '</div>' +
+                    '<div class="convert-selected-actions">' +
+                        '<button type="button" class="convert-btn convert-btn-ghost" id="convertDetachBtn"><i class="fas fa-link-slash me-1"></i> Lepas</button>' +
+                    '</div>' +
+                '</div>';
+            bindPanelActions();
+        } else {
+            var cand = STATE.matched[0];
+            panelBody.innerHTML =
+                '<div class="convert-available">' +
+                    '<div class="convert-available-note"><i class="fas fa-circle-info"></i> Satuan ' + unitLabel + ' punya konversi. Pilih untuk memakainya di produk ini.</div>' +
+                    '<div class="convert-preview-card">' +
+                        '<div class="convert-preview-top">' +
+                            '<span class="convert-preview-avatar"><i class="fas fa-right-left"></i></span>' +
+                            '<span class="convert-preview-base">Unit Base <b class="text-capitalize">' + esc(cand.base_unit) + '</b></span>' +
+                        '</div>' +
+                        '<div class="convert-detail-rows">' + rowsHtml(cand, cand.base_unit) + '</div>' +
+                    '</div>' +
+                    '<button type="button" class="convert-btn convert-btn-primary convert-btn-block" id="convertPickBtn"><i class="fas fa-check me-1"></i> Pilih Konversi</button>' +
+                '</div>';
+            bindPanelActions();
+        }
+    }
+
+    function applyConversion(id){
+        var body = new URLSearchParams({ id: STATE.productId, conversion_id: id });
+        fetch('master-product-action.php?action=set_conversion', { method: 'POST', body: body })
+        .then(function(r){ return r.json(); })
+        .then(function(res){
+            if(res.status === 'success'){
+                STATE.selectedId = parseInt(res.conversion_id, 10) || 0;
+                renderPanel();
+                QToast('Berhasil', id > 0 ? 'Konversi unit berhasil dipasang' : 'Konversi unit dilepas', 'success');
+            } else {
+                QToast('Gagal', res.message || 'Terjadi kesalahan', 'error');
+            }
+        })
+        .catch(function(){
+            QToast('Error', 'Gagal menyimpan konversi', 'error');
+        });
+    }
+
+    function detach(){
+        QConfirm('Lepas Konversi?', 'Produk ini tidak akan memakai konversi unit.', {
+            confirmText: 'Lepas',
+            icon: 'fa-link-slash',
+            confirmClass: 'q-confirm-btn-warning',
+            iconClass: 'q-confirm-icon-warning'
+        }).then(function(ok){ if(ok) applyConversion(0); });
+    }
+
+    // Dipanggil setelah satuan produk diubah lewat form edit
+    window.__refreshConvertPanel = function(unit){
+        STATE.unit = unit || '';
+        var unitEl = document.getElementById('convertCardUnit');
+        if(unitEl) unitEl.innerHTML = '<i class="fas fa-ruler-combined"></i> ' + esc(STATE.unit || '-');
+        wrap.style.display = STATE.unit ? '' : 'none';
+
+        if(!STATE.unit){
+            STATE.matched = [];
+            STATE.selectedId = 0;
+            renderPanel();
+            return;
+        }
+        fetch('master-product-action.php?action=get_conversions', {
+            method: 'POST',
+            body: new URLSearchParams({ id: STATE.productId })
+        })
+        .then(function(r){ return r.json(); })
+        .then(function(res){
+            if(res.status === 'success' && res.data){
+                STATE.unit = res.data.unit || '';
+                STATE.selectedId = res.data.conversion_id || 0;
+                STATE.matched = res.data.matched || [];
+                renderPanel();
+            }
+        })
+        .catch(function(){});
+    };
+
+    renderPanel();
 })();
 </script>
 

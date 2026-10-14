@@ -215,10 +215,94 @@ if($action === 'update'){
         if(!supplierIdsEqual(currentSupplierIds($conn, $id), $supplierIds)){
             saveProductSuppliers($conn, $id, $supplierIds);
         }
+
+        // Jaga konsistensi: bila satuan berubah sehingga tidak lagi cocok
+        // dengan konversi yang dipakai, lepaskan konversinya.
+        mysqli_query($conn, "
+            UPDATE products p
+            LEFT JOIN unit_conversions c ON c.id = p.conversion_id AND c.deleted_at IS NULL
+            SET p.conversion_id = NULL
+            WHERE p.id = $id
+              AND p.conversion_id IS NOT NULL
+              AND (p.unit IS NULL OR c.id IS NULL OR LOWER(c.base_unit) <> LOWER(p.unit))
+        ");
+
         echo json_encode(['status'=>'success']);
     }else{
         echo json_encode(['status'=>'error', 'message'=>'Gagal memperbarui data']);
     }
+    exit;
+}
+
+// SET CONVERSION — pilih / lepas konversi unit yang dipakai produk.
+// Konversi harus aktif dan base_unit-nya sama dengan satuan produk.
+if($action === 'set_conversion'){
+
+    $id           = isset($_POST['id']) ? (int)$_POST['id'] : 0;
+    $conversionId = isset($_POST['conversion_id']) ? (int)$_POST['conversion_id'] : 0;
+
+    if($id <= 0){
+        echo json_encode(['status'=>'error', 'message'=>'ID produk tidak valid']);
+        exit;
+    }
+
+    $rp = mysqli_query($conn, "SELECT id, unit, category FROM products WHERE id = $id AND deleted_at IS NULL LIMIT 1");
+    $product = $rp ? mysqli_fetch_assoc($rp) : null;
+    if(!$product){
+        echo json_encode(['status'=>'error', 'message'=>'Produk tidak ditemukan']);
+        exit;
+    }
+
+    // Lepas konversi (kosongkan pilihan)
+    if($conversionId <= 0){
+        mysqli_query($conn, "UPDATE products SET conversion_id = NULL WHERE id = $id");
+        echo json_encode(['status'=>'success', 'conversion_id' => 0]);
+        exit;
+    }
+
+    $unit = isset($product['unit']) ? trim($product['unit']) : '';
+    $isAdd = strtolower(trim(isset($product['category']) ? $product['category'] : '')) === 'additional';
+    if($unit === '' || $isAdd){
+        echo json_encode(['status'=>'error', 'message'=>'Produk ini tidak memiliki satuan']);
+        exit;
+    }
+
+    // Konversi wajib aktif dan unit base-nya cocok dengan satuan produk
+    $unitEsc = mysqli_real_escape_string($conn, $unit);
+    $rc = mysqli_query($conn, "
+        SELECT id FROM unit_conversions
+        WHERE id = $conversionId AND deleted_at IS NULL
+          AND LOWER(base_unit) = LOWER('$unitEsc')
+        LIMIT 1
+    ");
+    if(!$rc || mysqli_num_rows($rc) === 0){
+        echo json_encode(['status'=>'error', 'message'=>'Konversi tidak cocok dengan satuan produk']);
+        exit;
+    }
+
+    $q = mysqli_query($conn, "UPDATE products SET conversion_id = $conversionId WHERE id = $id");
+    if($q){
+        echo json_encode(['status'=>'success', 'conversion_id' => $conversionId]);
+    }else{
+        echo json_encode(['status'=>'error', 'message'=>'Gagal menyimpan konversi']);
+    }
+    exit;
+}
+
+// GET CONVERSIONS — data konversi yang cocok untuk sebuah produk.
+// Dipakai halaman detail untuk menyegarkan panel setelah satuan diubah.
+if($action === 'get_conversions'){
+
+    include __DIR__ . '/../components/data/product-conversion.php';
+
+    $id = isset($_POST['id']) ? (int)$_POST['id'] : 0;
+    if($id <= 0){
+        echo json_encode(['status'=>'error', 'message'=>'ID produk tidak valid']);
+        exit;
+    }
+
+    $data = product_matched_conversions($conn, $id);
+    echo json_encode(['status'=>'success', 'data' => $data]);
     exit;
 }
 

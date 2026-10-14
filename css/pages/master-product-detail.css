@@ -2857,3 +2857,245 @@ body {
         font-size: 12px;
     }
 }
+
+/* ============================================================
+   KONVERSI UNIT (produk ↔ convert) — panel di bawah Info Card
+   Aksen biru langit senada panel Konversi Unit di Master Unit.
+   ============================================================ */
+
+.convert-card-header { justify-content: flex-start; }
+.convert-card-unit {
+    margin-left: auto;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 7px 14px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, .14);
+    border: 1px solid rgba(255, 255, 255, .22);
+    color: #e0f2fe;
+    font-size: 12.5px;
+    font-weight: 800;
+    text-transform: capitalize;
+    position: relative;
+    z-index: 1;
+}
+.convert-card-unit i { color: #bae6fd; }
+
+.convert-card-body {
+    padding: 24px;
+    background: linear-gradient(180deg, #f8fafc, #f1f5f9);
+}
+
+/* --- Tombol umum --- */
+.convert-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    padding: 12px 22px;
+    border-radius: 14px;
+    border: 2px solid transparent;
+    font-weight: 800;
+    font-size: 13px;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all .35s cubic-bezier(.4, 0, .2, 1);
+}
+.convert-btn-primary {
+    border: none;
+    color: #fff;
+    background: linear-gradient(135deg, #0ea5e9, #3b82f6);
+    box-shadow: 0 10px 24px rgba(14, 165, 233, .35);
+}
+.convert-btn-primary:hover:not(:disabled) {
+    transform: translateY(-2px);
+    background: linear-gradient(135deg, #38bdf8, #60a5fa);
+    box-shadow: 0 14px 30px rgba(14, 165, 233, .45);
+}
+.convert-btn-primary:disabled {
+    cursor: not-allowed;
+    background: linear-gradient(135deg, #cbd5e1, #e2e8f0);
+    color: #94a3b8;
+    box-shadow: none;
+}
+.convert-btn-ghost {
+    background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+    border-color: #e2e8f0;
+    color: #64748b;
+}
+.convert-btn-ghost:hover {
+    color: #334155;
+    border-color: #cbd5e1;
+    transform: translateY(-2px);
+}
+.convert-btn-block { width: 100%; }
+
+/* --- State kosong --- */
+.convert-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 10px;
+    padding: 30px 20px;
+    border: 1px dashed #cbd5e1;
+    border-radius: 20px;
+    background: linear-gradient(145deg, #ffffff, #f8fafc);
+}
+.convert-empty-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    color: #64748b;
+    background: linear-gradient(135deg, #e2e8f0, #f1f5f9);
+    box-shadow: 0 8px 18px rgba(15, 23, 42, .08);
+}
+.convert-empty-title { font-size: 15px; font-weight: 800; color: #0f172a; }
+.convert-empty-sub { max-width: 460px; font-size: 12.5px; line-height: 1.6; color: #64748b; }
+.convert-empty-sub a { color: #0284c7; font-weight: 800; text-decoration: none; }
+.convert-empty-sub a:hover { text-decoration: underline; }
+.convert-empty .convert-btn { margin-top: 6px; }
+
+/* --- State tersedia (belum dipilih) --- */
+.convert-available { display: flex; flex-direction: column; gap: 14px; }
+.convert-available-note {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    padding: 12px 16px;
+    border-radius: 14px;
+    background: #eff6ff;
+    border: 1px solid #bfdbfe;
+    color: #1e40af;
+    font-size: 12.8px;
+    font-weight: 600;
+}
+.convert-available-note i { color: #2563eb; }
+.convert-available-note b { font-weight: 800; }
+
+/* --- Kartu preview konversi --- */
+.convert-preview-card {
+    border-radius: 18px;
+    border: 1px solid rgba(14, 165, 233, .18);
+    background: linear-gradient(145deg, #f0f9ff, #ffffff);
+    box-shadow: 0 8px 20px rgba(15, 23, 42, .05);
+    overflow: hidden;
+}
+.convert-preview-top {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 18px;
+    border-bottom: 1px solid rgba(14, 165, 233, .12);
+}
+.convert-preview-avatar {
+    width: 38px;
+    height: 38px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 16px;
+    background: linear-gradient(135deg, #0ea5e9, #3b82f6);
+    box-shadow: 0 8px 18px rgba(14, 165, 233, .35);
+}
+.convert-preview-base { font-size: 14px; font-weight: 800; color: #0f172a; }
+
+/* --- State terpasang --- */
+.convert-selected { display: flex; flex-direction: column; gap: 14px; }
+.convert-selected-head {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+.convert-pill-ok {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 7px 14px;
+    border-radius: 999px;
+    background: #d1fae5;
+    color: #047857;
+    font-size: 12px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+}
+.convert-selected-base {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 14px;
+    font-weight: 700;
+    color: #0f172a;
+}
+.convert-selected-base i { color: #0ea5e9; }
+.convert-selected-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+}
+
+/* Baris konversi (dipakai di panel & modal) */
+.convert-detail-rows {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 14px 18px;
+}
+.convert-selected .convert-detail-rows {
+    border-radius: 18px;
+    border: 1px solid rgba(14, 165, 233, .18);
+    background: linear-gradient(145deg, #f0f9ff, #ffffff);
+    box-shadow: 0 8px 20px rgba(15, 23, 42, .05);
+}
+.convert-detail-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 14px;
+    border-radius: 12px;
+    background: #fff;
+    border: 1px solid #e2e8f0;
+}
+.convert-detail-seq {
+    flex-shrink: 0;
+    width: 22px;
+    height: 22px;
+    border-radius: 7px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #e0f2fe;
+    color: #0284c7;
+    font-size: 11px;
+    font-weight: 800;
+}
+.convert-detail-name { font-size: 13.5px; color: #334155; }
+.convert-detail-name b { color: #0f172a; font-weight: 800; }
+.convert-detail-eq {
+    margin-left: auto;
+    flex-shrink: 0;
+    font-size: 12.5px;
+    font-weight: 800;
+    color: #0369a1;
+    background: #e0f2fe;
+    border-radius: 999px;
+    padding: 3px 10px;
+    white-space: nowrap;
+}
+.convert-row-empty { padding: 6px 2px; font-size: 12.5px; color: #94a3b8; }
+
+@media (max-width: 575px) {
+    .convert-card-body { padding: 16px; }
+    .convert-card-unit { display: none; }
+    .convert-selected-actions { flex-direction: column-reverse; }
+    .convert-selected-actions .convert-btn { width: 100%; }
+}

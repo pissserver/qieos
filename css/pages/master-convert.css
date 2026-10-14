@@ -1,0 +1,325 @@
+/* ============================================================
+   KONVERSI UNIT — panel di bawah Master Unit (halaman master-unit.php)
+   Memakai ulang gaya visual Racikan/Combine (css/pages/master-combine.css):
+   kartu, grid, baris, tombol tambah, count, sticky bar.
+   Di sini hanya ditambah aksen warna (biru langit, senada ikon satuan)
+   plus aturan khusus #convertModal & baris konversi.
+   ============================================================ */
+
+/* --- Aksen panel konversi --- */
+.convert-panel .panel-icon {
+    background: linear-gradient(135deg, #0ea5e9, #3b82f6);
+    color: #fff;
+    box-shadow: 0 10px 22px rgba(14, 165, 233, .35);
+}
+
+.convert-header .btn-stock-global {
+    background: linear-gradient(135deg, #0ea5e9, #3b82f6);
+    color: #fff;
+    border: 1px solid rgba(255, 255, 255, .25);
+    box-shadow: 0 8px 20px rgba(14, 165, 233, .35);
+}
+.convert-header .btn-stock-global i { color: #fff; }
+.convert-header .btn-stock-global:hover {
+    background: linear-gradient(135deg, #38bdf8, #60a5fa);
+    color: #fff;
+    box-shadow: 0 12px 26px rgba(14, 165, 233, .45);
+}
+
+.convert-body { padding: 4px 2px 6px; }
+
+/* --- Avatar kartu (ikon) --- */
+.convert-avatar { background: linear-gradient(135deg, #0ea5e9, #3b82f6); }
+.convert-avatar i { font-size: 19px; }
+
+/* --- Angka konversi pada kartu: "= 100 pcs" --- */
+.convert-eq {
+    margin-left: auto;
+    flex-shrink: 0;
+    font-size: 12.5px;
+    font-weight: 800;
+    color: #0369a1;
+    background: #e0f2fe;
+    border-radius: 999px;
+    padding: 3px 10px;
+    white-space: nowrap;
+}
+
+/* ============================================================
+   MODAL KONVERSI — bentuk disamakan dengan #combineModal
+   overflow tetap visible karena dropdown select2 harus bisa
+   keluar dari batas modal.
+   ============================================================ */
+#convertModal .modal-content {
+    background: #fff !important;
+    border: 0 !important;
+    border-radius: 16px !important;
+    overflow: visible !important;
+    box-shadow: 0 20px 40px rgba(15, 23, 42, .25);
+}
+#convertModal .modal-body { overflow: visible !important; }
+#convertModal .panel-header { position: relative; }
+#convertModal .btn-close { filter: brightness(0) invert(1); opacity: .85; }
+#convertModal .modal-content * { opacity: 1 !important; }
+
+/* Select2 dropdown z-index lebih tinggi dari modal backdrop */
+#convertModal .select2-container--open .select2-dropdown {
+    z-index: 1056 !important;
+}
+
+/* --- Catatan kecil di bawah judul section --- */
+.convert-note {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    margin: 6px 0 12px;
+    font-size: 12px;
+    line-height: 1.5;
+    color: #64748b;
+}
+.convert-note i { color: #0ea5e9; margin-top: 2px; flex-shrink: 0; }
+.convert-note b { color: #0f172a; font-weight: 800; }
+
+/* Varian peringatan (mis. semua unit sudah dipakai sebagai unit base) */
+.convert-note-warn {
+    padding: 10px 14px;
+    border-radius: 12px;
+    background: #fffbeb;
+    border: 1px solid #fde68a;
+    color: #92400e;
+}
+.convert-note-warn i { color: #d97706; }
+
+/* --- Notice / alert info --- */
+.convert-alert {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin-top: 10px;
+    padding: 10px 14px;
+    border-radius: 12px;
+    font-size: 12.5px;
+    line-height: 1.5;
+}
+.convert-alert i { margin-top: 2px; flex-shrink: 0; }
+.convert-alert b { font-weight: 800; }
+.convert-alert-info {
+    background: #eff6ff;
+    border: 1px solid #bfdbfe;
+    color: #1e40af;
+}
+.convert-alert-info i { color: #2563eb; }
+
+/* --- Select unit base (select2, gaya sama dgn baris konversi) --- */
+.convert-base-wrap { margin-bottom: 4px; }
+.convert-base-wrap select.form-input { width: 100%; }
+.convert-base-wrap .select2-container {
+    flex: 1;
+    min-width: 0;
+    width: 100% !important;
+}
+.convert-base-wrap .select2-container--default .select2-selection--single {
+    height: 48px;
+    padding: 0 40px 0 18px;
+    border: 2px solid #e2e8f0;
+    border-radius: 14px;
+    background: linear-gradient(135deg, #f8fafc, #fff);
+    display: flex;
+    align-items: center;
+    transition: all .35s cubic-bezier(.4, 0, .2, 1);
+}
+.convert-base-wrap .select2-container--default .select2-selection--single .select2-selection__rendered {
+    padding: 0;
+    margin-left: 0;
+    line-height: 46px;
+    font-size: 14px;
+    color: #0f172a;
+}
+.convert-base-wrap .select2-container--default .select2-selection--single .select2-selection__placeholder {
+    color: #94a3b8;
+}
+.convert-base-wrap .select2-container--default.select2-container--open .select2-selection--single,
+.convert-base-wrap .select2-container--default.select2-container--focus .select2-selection--single,
+.convert-base-wrap .select2-container--default .select2-selection--single:hover {
+    border-color: #0ea5e9;
+    background: #fff;
+    box-shadow: 0 0 0 3px rgba(14, 165, 233, .12);
+}
+.convert-base-wrap .select2-container--default .select2-selection--single .select2-selection__arrow {
+    top: 50%;
+    right: 10px;
+    transform: translateY(-50%);
+}
+
+/* --- Baris konversi di dalam form --- */
+.convert-item-row { flex-wrap: wrap; }
+
+.convert-one {
+    flex-shrink: 0;
+    width: 22px;
+    height: 22px;
+    border-radius: 7px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #e0f2fe;
+    color: #0284c7;
+    font-size: 11px;
+    font-weight: 800;
+}
+
+.convert-factor {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+}
+.convert-factor .cb-eq { color: #64748b; font-weight: 800; font-size: 15px; }
+
+.convert-item-row .cb-qty-input {
+    width: 84px !important;
+    height: 48px;
+    padding: 0 12px;
+    border: 2px solid #e2e8f0;
+    border-radius: 14px;
+    background: linear-gradient(135deg, #f8fafc, #fff);
+    font-size: 14px;
+    font-weight: 700;
+    color: #0f172a;
+    text-align: center;
+    outline: none;
+    transition: all .35s cubic-bezier(.4, 0, .2, 1);
+}
+.convert-item-row .cb-qty-input:focus {
+    background: #fff;
+    border-color: #0ea5e9;
+    box-shadow: 0 0 0 4px rgba(14, 165, 233, .1), 0 4px 12px rgba(14, 165, 233, .08);
+}
+.convert-item-row .cb-qty-input::placeholder {
+    color: #94a3b8;
+    font-weight: 500;
+}
+/* Sembunyikan spinner bawaan input number */
+.convert-item-row .cb-qty-input::-webkit-outer-spin-button,
+.convert-item-row .cb-qty-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+.convert-item-row .cb-qty-input {
+    -moz-appearance: textfield;
+    appearance: textfield;
+}
+
+.convert-base-lbl {
+    font-size: 13px;
+    font-weight: 800;
+    color: #0369a1;
+    white-space: nowrap;
+    min-width: 30px;
+}
+
+/* Fokus select2 pada baris konversi pakai warna aksen */
+.convert-item-row .select2-container--default.select2-container--open .select2-selection--single,
+.convert-item-row .select2-container--default.select2-container--focus .select2-selection--single,
+.convert-item-row .select2-container--default .select2-selection--single:hover {
+    border-color: #0ea5e9;
+    box-shadow: 0 0 0 3px rgba(14, 165, 233, .12);
+}
+
+/* --- Tombol Batal (master-unit.php tidak memuat master-product-detail.css) --- */
+.btn-cancel {
+    padding: 14px 32px;
+    border: 2px solid #e2e8f0;
+    border-radius: 16px;
+    background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+    color: #64748b;
+    font-weight: 700;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all .35s cubic-bezier(.4, 0, .2, 1);
+}
+.btn-cancel:hover {
+    background: linear-gradient(135deg, #e2e8f0, #cbd5e1);
+    color: #334155;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, .08);
+    border-color: #cbd5e1;
+}
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+@media (max-width: 575.98px) {
+    .convert-last-row { margin-bottom: 28px; }
+
+    /* Padding konten disamakan dengan header: 12px */
+    #convertModal .convert-modal-body {
+        padding-left: 12px !important;
+        padding-right: 12px !important;
+    }
+
+    /* Header: margin + padding minimal, close button inline kanan */
+    #convertModal .panel-header {
+        flex-direction: row !important;
+        flex-wrap: nowrap !important;
+        align-items: center !important;
+        gap: 10px;
+        margin: 12px 12px 0 !important;
+        padding: 12px 14px;
+    }
+    #convertModal .panel-left {
+        min-width: 0;
+        flex: 1;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    #convertModal .combine-head-text { flex: 1; min-width: 0; }
+    #convertModal .panel-icon {
+        width: 38px;
+        height: 38px;
+        font-size: 14px;
+        flex-shrink: 0;
+    }
+    #convertModal .panel-title { font-size: 14.5px; line-height: 1.25; }
+    #convertModal .combine-modal-subtitle { font-size: 10.5px; line-height: 1.35; margin-top: 2px; }
+    #convertModal .combine-modal-close {
+        flex-shrink: 0;
+        width: 28px;
+        height: 28px;
+        font-size: 11px;
+        margin: 0;
+        align-self: center;
+    }
+
+    /* Baris konversi: select penuh satu baris, faktor turun ke baris kedua */
+    .convert-item-row {
+        flex-wrap: wrap;
+        gap: 8px;
+        padding: 8px;
+    }
+    .convert-item-row select.form-input { flex: 1 1 100%; }
+    .convert-item-row .select2-container { flex: 1 1 100%; min-width: 0; }
+    .convert-factor { flex: 1 1 auto; }
+    .convert-item-row .cb-qty-input { width: 92px !important; }
+
+    /* Footer: Batal/Simpan flex full + padding bottom */
+    #convertModal .convert-footer {
+        display: flex;
+        gap: 8px;
+        margin-top: 14px;
+        padding-bottom: 16px;
+        text-align: center;
+    }
+    #convertModal .convert-footer .btn {
+        flex: 1 1 0;
+        height: 46px;
+        font-size: 13.5px;
+        font-weight: 700;
+        border-radius: 12px;
+        margin: 0;
+    }
+    #convertModal .convert-footer .btn i { font-size: 12px; }
+
+    .convert-grid { grid-template-columns: 1fr; gap: 14px; }
+}
