@@ -21,7 +21,10 @@ $q = mysqli_query($conn,"
 ");
 ?>
 
-<link rel="stylesheet" href="<?php echo BASE_URL; ?>/css/pages/restock-table.css?v=<?php echo filemtime(__DIR__ . '/../../css/pages/restock-table.css'); ?>">
+<!-- Catatan: CSS restock-table.css dimuat di <head> restock.php,
+     bukan di sini. Kalau <link> ada di fragment ini, tiap reload innerHTML
+     memicu fetch + parse ulang stylesheet dan tabel kedap-kedip tanpa style
+     sebentar (glitch CSS saat toggle). -->
 
 <table id="purchaseTable" class="table table-hover align-middle">
 <thead>
@@ -38,7 +41,7 @@ $q = mysqli_query($conn,"
 <?php
     while($d=mysqli_fetch_assoc($q)): 
 ?>
-<tr class="purchase-row<?= (int)$d['used_flag'] === 1 ? ' is-restocked' : '' ?>">
+<tr class="purchase-row<?= (int)$d['used_flag'] === 1 ? ' is-restocked' : '' ?>" data-id="<?= $d['id'] ?>">
 
     <!-- ID -->
     <td>

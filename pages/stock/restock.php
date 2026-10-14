@@ -28,6 +28,11 @@ while($p = mysqli_fetch_assoc($qProd)){
      WAJIB setelah css/pages/restock.css: file ini menimpa gaya dasar
      DataTables di file halaman. Dipakai juga oleh 4 halaman Master. -->
 <link rel="stylesheet" href="<?php echo BASE_URL; ?>/css/components/datatable-premium.css?v=<?= filemtime(__DIR__ . '/../../css/components/datatable-premium.css') ?>">
+
+<!-- CSS tabel daftar belanja dimuat di head (bukan di fragment
+     restock-table.php) supaya toggle Form <-> Edit tidak kedap-kedip:
+     style sudah terpasang sebelum markup tabel di-inject via innerHTML. -->
+<link rel="stylesheet" href="<?php echo BASE_URL; ?>/css/pages/restock-table.css?v=<?= filemtime(__DIR__ . '/../../css/pages/restock-table.css') ?>">
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
 </head>
@@ -317,6 +322,10 @@ while($p = mysqli_fetch_assoc($qProd)){
             if(res.status==="success"){
                 QToast("Berhasil", res.msg, "success");
                 resetItemRows();
+                
+                // Auto-switch ke tab Edit dan muat data terbaru
+                panelToggle.checked = true;
+                panelToggle.dispatchEvent(new Event('change'));
             }else{
                 QToast("Error", res.msg, "error");
             }
@@ -426,7 +435,6 @@ while($p = mysqli_fetch_assoc($qProd)){
     });
 
     const panelToggle = document.getElementById('panelToggle');
-    let purchaseHistoryLoaded = false;
 
     // seluruh area toggle bisa diklik (kecuali switch langsung)
     const panelToggleWrap = document.querySelector('.panel-toggle-wrap');
@@ -453,10 +461,9 @@ while($p = mysqli_fetch_assoc($qProd)){
             labelForm.classList.remove('active');
             labelEdit.classList.add('active');
 
-            if(!purchaseHistoryLoaded){
-                purchaseHistoryLoaded = true;
-                loadPurchaseTable();
-            }
+            /* Selalu muat ulang tiap pindah ke Edit supaya isinya selalu
+               terbaru (realtime) tanpa refresh halaman. */
+            loadPurchaseTable();
         }else{
             editMode.classList.remove('active');
             formMode.classList.add('active');
@@ -619,22 +626,65 @@ while($p = mysqli_fetch_assoc($qProd)){
 
             document.getElementById('purchase-table').innerHTML = html;
 
-            setTimeout(() => {
-                purchaseIsMobile = isPurchaseMobile();
+            // Tunggu DOM + CSS terinisialisasi (tanpa arbitrary delay)
+            requestAnimationFrame(() => {
+                requestAnimationFrame(() => {
+                    purchaseIsMobile = isPurchaseMobile();
 
-                const dt = purchaseDataTable();
+                    const dt = purchaseDataTable();
 
-                if(keep){
-                    /* Halaman di luar rentang otomatis dikembalikan
-                       DataTable ke 0, jadi aman walau baris habis (mis.
-                       seluruh hasil filter ikut terhapus). */
-                    dt.page.len(keep.length)
-                      .search(keep.keyword)
-                      .page(keep.page)
-                      .draw(false);
-                }
-            },250);
+                    if(keep){
+                        dt.page.len(keep.length)
+                          .search(keep.keyword)
+                          .page(keep.page)
+                          .draw(false);
+                    }
+                });
+            });
         });
+    }
+
+    // Update baris purchase menjadi state "restocked" tanpa reload tabel.
+    // Animasi smooth: tombol berubah, class ditambahkan, pulse effect.
+    function markPurchaseRestocked(purchaseId){
+        if(!$.fn.DataTable.isDataTable('#purchaseTable')) return;
+
+        const $table = $('#purchaseTable');
+        const $row = $table.find('tr[data-id="' + purchaseId + '"]');
+        
+        if(!$row.length){
+            // Fallback: row tidak ada di halaman saat ini (filtered/pagination),
+            // atau markup belum punya data-id — reload tabel
+            loadPurchaseTable();
+            return;
+        }
+
+        // Tambah class restocked dengan animasi pulse
+        $row.addClass('is-restocked').css('animation', 'restockPulse 0.6s ease');
+        
+        // Hapus tombol Edit & Delete, ubah tombol Restock jadi badge sukses
+        const $actions = $row.find('.mp-actions');
+        $actions.find('.btn-edit, .btn-delete').fadeOut(300, function(){ $(this).remove(); });
+        
+        const $restockBtn = $actions.find('.restockPurchaseBtn');
+        $restockBtn.removeClass('btn-restock')
+                   .addClass('btn-restocked')
+                   .attr('title', 'Sudah direstock ke stok gudang')
+                   .html('<i class="fas fa-circle-check"></i>')
+                   .css({transform: 'scale(1.1)', transition: 'transform 0.3s ease'});
+        
+        setTimeout(() => $restockBtn.css('transform', 'scale(1)'), 300);
+
+        // Tambah meta chip "Stok masuk" di mobile summary
+        const $meta = $row.find('.mp-meta');
+        if($meta.length && !$meta.find('.mp-meta-chip-restocked').length){
+            $meta.find('.mp-meta-item').last().after(`
+                <span class="mp-meta-item mp-meta-chip-restocked" style="animation: fadeInScale 0.4s ease;">
+                    <i class="fas fa-circle-check"></i>
+                    Stok masuk
+                </span>
+            `);
+        }
     }
 
     /* Rebuild tabel saat pindah mobile <-> desktop.
@@ -1049,49 +1099,41 @@ while($p = mysqli_fetch_assoc($qProd)){
 
                     processing.prop('hidden', true);
 
-                    // Animasi data masuk ke field qty stock / remaining qty / unit stock
-                    let fields = form.find('.rv-field');
-                    fields.each(function(i){
+                    // Isi field qty stock / remaining qty / unit stock langsung
+                    // (tanpa animasi berjenjang) begitu proses selesai
+                    form.find('.rv-field').each(function(){
                         let el = $(this);
                         let val = el.attr('data-value');
-
-                        setTimeout(function(){
-                            if(val !== undefined && val !== ''){
-                                el.text(val).addClass('is-filled');
-                            } else {
-                                el.text('—').addClass('is-filled');
-                            }
-                        }, i * 140);
+                        el.text(val !== undefined && val !== '' ? val : '—').addClass('is-filled');
                     });
 
-                    let fillDone = (fields.length * 140) + 350;
+                    // Ganti tombol validasi dengan alert permanen
+                    form.find('.restock-view-footer').html(`
+                        <div class="restock-alert-done">
+                            <i class="fas fa-shield-halved"></i>
+                            <span>Data sudah masuk ke stok gudang dan tidak dapat diubah.</span>
+                        </div>
+                    `);
 
-                    setTimeout(function(){
-
-                        // Ganti tombol validasi dengan alert permanen
-                        form.find('.restock-view-footer').html(`
-                            <div class="restock-alert-done">
-                                <i class="fas fa-shield-halved"></i>
-                                <span>Data sudah masuk ke stok gudang dan tidak dapat diubah.</span>
+                    form.find('.restock-notice').addClass('restock-notice-done')
+                        .html(`
+                            <i class="fas fa-circle-check"></i>
+                            <div>
+                                <strong>Sudah direstock.</strong>
+                                Data sudah masuk ke <b>Stok Gudang</b> dan tidak dapat diubah lagi.
                             </div>
                         `);
 
-                        form.find('.restock-notice').addClass('restock-notice-done')
-                            .html(`
-                                <i class="fas fa-circle-check"></i>
-                                <div>
-                                    <strong>Sudah direstock.</strong>
-                                    Data sudah masuk ke <b>Stok Gudang</b> dan tidak dapat diubah lagi.
-                                </div>
-                            `);
+                    QToast('Berhasil', res.msg || 'Restock berhasil', 'success');
 
-                        QToast('Berhasil', res.msg || 'Restock berhasil', 'success');
+                    setRestockBusy(false);
 
-                        loadPurchaseTable();
-
-                        setRestockBusy(false);
-
-                    }, fillDone);
+                    // Tabel diperbarui realtime: baris restocked dianimasikan
+                    // lembut tanpa reload seluruh tabel, lalu modal ditutup.
+                    setTimeout(function(){
+                        $('#restockModal').modal('hide');
+                        markPurchaseRestocked(formData.get('id'));
+                    }, 700);
 
                 }else{
 

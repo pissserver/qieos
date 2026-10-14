@@ -94,7 +94,7 @@ $editJson = $editConv ? json_encode($editConv) : 'null';
 </div>
 <?php endif; ?>
 
-<div class="section-title">
+<div class="section-title mt-2">
     Daftar Konversi
     <span class="combine-count" id="convertCount">0 satuan</span>
 </div>
