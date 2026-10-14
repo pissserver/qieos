@@ -78,3 +78,74 @@ if(!function_exists('product_matched_conversions')){
         return $out;
     }
 }
+
+/**
+ * Konversi yang berlaku untuk satu baris belanja.
+ *
+ * product_conversion_for_unit($conn, $productId, $unitBuy)
+ *   Mengembalikan:
+ *     unit          : satuan produk (satuan stok / base)
+ *     base_unit     : satuan stok (base konversi)
+ *     unit_buy      : satuan beli yang dipakai
+ *     conversion_id : id konversi terpasang (0 bila belum)
+ *     factor        : qty base untuk 1 unit_buy (0 bila tak bisa dikonversi)
+ *     has_convert   : true bila unit_buy bisa dikonversi ke base
+ *
+ * Konversi dianggap "ada" hanya bila produk punya konversi terpasang
+ * (conversion_id) dan salah satu item-nya cocok dengan unit_buy.
+ */
+if(!function_exists('product_conversion_for_unit')){
+    function product_conversion_for_unit($conn, $productId, $unitBuy){
+        $out = [
+            'unit'          => '',
+            'base_unit'     => '',
+            'unit_buy'      => is_string($unitBuy) ? trim($unitBuy) : '',
+            'conversion_id' => 0,
+            'factor'        => 0,
+            'has_convert'   => false,
+        ];
+
+        if(!function_exists('product_matched_conversions')){
+            return $out;
+        }
+
+        $info = product_matched_conversions($conn, $productId);
+
+        $out['unit']          = $info['unit'];
+        $out['base_unit']     = $info['unit'];
+        $out['conversion_id'] = $info['conversion_id'];
+
+        if($info['conversion_id'] <= 0) return $out;
+
+        $ub = strtolower($out['unit_buy']);
+        if($ub === '') return $out;
+
+        foreach($info['matched'] as $m){
+            if((int)$m['id'] !== (int)$info['conversion_id']) continue;
+
+            foreach($m['items'] as $it){
+                if(strtolower(trim($it['unit_name'])) === $ub && (float)$it['qty'] > 0){
+                    $out['factor']      = (float)$it['qty'];
+                    $out['has_convert'] = true;
+                    break 2;
+                }
+            }
+        }
+
+        return $out;
+    }
+}
+
+/**
+ * Label qty rapi: bilangan bulat tanpa desimal, selain itu tanpa nol
+ * di belakang koma. Contoh: 100 -> "100", 1.5 -> "1,5".
+ */
+if(!function_exists('product_qty_label')){
+    function product_qty_label($n){
+        $n = (float)$n;
+        if(floor($n) == $n){
+            return number_format($n, 0, ',', '.');
+        }
+        return rtrim(rtrim(number_format($n, 4, ',', '.'), '0'), ',');
+    }
+}

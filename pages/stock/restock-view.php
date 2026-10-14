@@ -1,11 +1,13 @@
 <?php
 include '../../sessions/session.php';
+include __DIR__ . '/../components/data/product-conversion.php';
 
 $id = (int)$_GET['id'];
 
 $q = mysqli_query($conn,"
     SELECT
         pi.id AS item_id,
+        pi.product_id,
         COALESCE(products.name, '') AS name,
         pi.qty_buy,
         pi.unit_buy,
@@ -42,6 +44,10 @@ while($d = mysqli_fetch_assoc($q)){
 }
 
 $isRestocked = !empty($items) && $pending === 0;
+
+// Satuan beli yang berbeda dari satuan produk wajib punya konversi.
+// Bila ada minimal satu item seperti itu tanpa konversi, restock diblokir.
+$hasBlock = false;
 ?>
 
 <form id="restockValidateForm">
@@ -64,7 +70,8 @@ $isRestocked = !empty($items) && $pending === 0;
         <i class="fas fa-circle-info"></i>
         <div>
             <strong>Perhatian:</strong>
-            Qty akan otomatis masuk ke <b>Stok Gudang</b> sesuai produk.
+            Qty akan otomatis masuk ke <b>Stok Gudang</b>. Produk yang punya
+            <b>konversi</b> akan dikonversi ke satuan stok lebih dulu.
             Setelah divalidasi, data tidak dapat diubah.
         </div>
     </div>
@@ -76,9 +83,32 @@ $isRestocked = !empty($items) && $pending === 0;
         <?php foreach($items as $i => $d): ?>
 
         <?php
-            $qtyStockVal = $d['qty_stock'] !== null ? (int)$d['qty_stock'] : (int)$d['qty_buy'];
-            $remainVal   = $d['remaining_qty'] !== null ? (int)$d['remaining_qty'] : (int)$d['qty_buy'];
-            $unitStockVal = $d['unit_stock'] ?: ($d['product_unit'] ?: $d['unit_buy']);
+            $isPending = $d['qty_stock'] === null;
+
+            $conv        = product_conversion_for_unit($conn, isset($d['product_id']) ? $d['product_id'] : 0, $d['unit_buy']);
+            $hasConvert  = $conv['has_convert'];
+            $convFactor  = $conv['factor'];
+            $baseUnit    = $conv['base_unit'] !== '' ? $conv['base_unit'] : $d['product_unit'];
+
+            $productUnit = $d['product_unit'] !== '' ? $d['product_unit'] : $d['unit_buy'];
+            $sameUnit    = strtolower(trim($d['unit_buy'])) === strtolower(trim($productUnit));
+            $blocked     = $isPending && !$hasConvert && !$sameUnit;
+            if($blocked) $hasBlock = true;
+
+            if($isPending){
+                if($hasConvert){
+                    $qtyStockVal  = (int)round(((float)$d['qty_buy']) * $convFactor);
+                    $unitStockVal = $baseUnit;
+                } else {
+                    $qtyStockVal  = (int)$d['qty_buy'];
+                    $unitStockVal = $productUnit;
+                }
+                $remainVal = $qtyStockVal;
+            } else {
+                $qtyStockVal  = (int)$d['qty_stock'];
+                $remainVal    = $d['remaining_qty'] !== null ? (int)$d['remaining_qty'] : $qtyStockVal;
+                $unitStockVal = $d['unit_stock'] ?: ($d['product_unit'] ?: $d['unit_buy']);
+            }
         ?>
 
         <div class="restock-view-item">
@@ -106,6 +136,74 @@ $isRestocked = !empty($items) && $pending === 0;
                     <span class="rv-value">Rp <?= number_format((float)$d['price_buy'], 0, ',', '.') ?></span>
                 </div>
             </div>
+
+            <?php if($isPending): ?>
+                <?php if($hasConvert): ?>
+                <div class="rv-convert rv-convert-on">
+                    <div class="rvc-header">
+                        <i class="fas fa-arrow-right-arrow-left"></i>
+                        <span class="rvc-label">Konversi Otomatis</span>
+                    </div>
+                    <div class="rvc-body">
+                        <div class="rvc-input">
+                            <span class="rvc-qty"><?= product_qty_label($d['qty_buy']) ?></span>
+                            <span class="rvc-unit"><?= htmlspecialchars($d['unit_buy']) ?></span>
+                        </div>
+                        <div class="rvc-arrow">
+                            <i class="fas fa-arrow-right"></i>
+                        </div>
+                        <div class="rvc-result">
+                            <span class="rvc-qty-big"><?= product_qty_label($qtyStockVal) ?></span>
+                            <span class="rvc-unit-big"><?= htmlspecialchars($unitStockVal) ?></span>
+                        </div>
+                    </div>
+                    <div class="rvc-footer">
+                        <i class="fas fa-circle-info"></i>
+                        <span>1 <?= htmlspecialchars($d['unit_buy']) ?> = <?= product_qty_label($convFactor) ?> <?= htmlspecialchars($baseUnit) ?></span>
+                    </div>
+                </div>
+                <?php elseif($sameUnit): ?>
+                <div class="rv-convert rv-convert-same">
+                    <div class="rvc-header">
+                        <i class="fas fa-circle-check"></i>
+                        <span class="rvc-label">Satuan Sesuai</span>
+                    </div>
+                    <div class="rvc-body rvc-body-same">
+                        <div class="rvc-result-same">
+                            <span class="rvc-qty-same"><?= product_qty_label($qtyStockVal) ?></span>
+                            <span class="rvc-unit-same"><?= htmlspecialchars($unitStockVal) ?></span>
+                        </div>
+                    </div>
+                    <div class="rvc-footer">
+                        <i class="fas fa-circle-info"></i>
+                        <span>Qty belanja langsung masuk stok gudang</span>
+                    </div>
+                </div>
+                <?php else: ?>
+                <div class="rv-convert rv-convert-block">
+                    <div class="rvc-header rvc-header-error">
+                        <i class="fas fa-triangle-exclamation"></i>
+                        <span class="rvc-label">Tidak Bisa Diproses</span>
+                    </div>
+                    <div class="rvc-body rvc-body-error">
+                        <div class="rvc-error-detail">
+                            <div class="rvc-error-row">
+                                <span class="rvc-error-label">Satuan Beli:</span>
+                                <span class="rvc-error-value"><?= htmlspecialchars($d['unit_buy']) ?></span>
+                            </div>
+                            <div class="rvc-error-row">
+                                <span class="rvc-error-label">Satuan Produk:</span>
+                                <span class="rvc-error-value"><?= htmlspecialchars($productUnit) ?></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="rvc-footer rvc-footer-error">
+                        <i class="fas fa-circle-exclamation"></i>
+                        <span>Tambahkan konversi unit untuk produk ini atau sesuaikan satuan beli</span>
+                    </div>
+                </div>
+                <?php endif; ?>
+            <?php endif; ?>
 
             <div class="rv-fields">
                 <div class="rv-field-item">
@@ -149,6 +247,17 @@ $isRestocked = !empty($items) && $pending === 0;
         <div class="restock-alert-done">
             <i class="fas fa-shield-halved"></i>
             <span>Data sudah masuk ke stok gudang dan tidak dapat diubah.</span>
+        </div>
+
+        <?php elseif($hasBlock): ?>
+
+        <div class="restock-alert-block">
+            <i class="fas fa-triangle-exclamation"></i>
+            <span>
+                <strong>Tidak bisa divalidasi.</strong>
+                Ada item dengan satuan beli berbeda dari satuan produk dan belum punya konversi.
+                Perbaiki satuan beli atau tambahkan konversi produk terlebih dahulu.
+            </span>
         </div>
 
         <?php else: ?>

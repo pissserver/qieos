@@ -1,5 +1,6 @@
 <?php
     include '../../sessions/session.php';
+    include __DIR__ . '/../components/data/product-conversion.php';
     header('Content-Type: application/json');
 
     if ($_GET['action'] == 'store') {
@@ -283,20 +284,82 @@ if ($_GET['action'] == 'update') {
             exit;
         }
 
+        // Guard: satuan beli berbeda dari satuan produk wajib punya konversi.
+        foreach ($pending as $item_id) {
+            $qchk = mysqli_query($conn,"
+                SELECT product_id, unit_buy
+                FROM purchase_items
+                WHERE id = '$item_id'
+                  AND purchase_id = '$id'
+                  AND deleted_at IS NULL
+                LIMIT 1
+            ");
+            $ichk = $qchk ? mysqli_fetch_assoc($qchk) : null;
+            if (!$ichk) continue;
+
+            $ubChk = isset($ichk['unit_buy']) ? trim($ichk['unit_buy']) : '';
+            $cchk  = product_conversion_for_unit($conn, (int)$ichk['product_id'], $ubChk);
+
+            if (!$cchk['has_convert'] && strtolower($ubChk) !== strtolower($cchk['unit'])) {
+                echo json_encode([
+                    'status' => 'error',
+                    'msg'    => 'Tidak bisa restock: satuan beli "' . $ubChk
+                        . '" tidak sama dengan satuan produk dan belum ada konversi'
+                ]);
+                exit;
+            }
+        }
+
         mysqli_begin_transaction($conn);
 
         $done = 0;
 
         foreach ($pending as $item_id) {
+
+            $qi = mysqli_query($conn,"
+                SELECT product_id, qty_buy, unit_buy
+                FROM purchase_items
+                WHERE id = '$item_id'
+                  AND purchase_id = '$id'
+                  AND deleted_at IS NULL
+                LIMIT 1
+            ");
+
+            $it = $qi ? mysqli_fetch_assoc($qi) : null;
+
+            if (!$it) {
+                mysqli_rollback($conn);
+                echo json_encode(['status' => 'error', 'msg' => 'Gagal membaca item daftar belanja']);
+                exit;
+            }
+
+            $product_id = (int)$it['product_id'];
+            $qty_buy    = (float)$it['qty_buy'];
+            $unit_buy   = isset($it['unit_buy']) ? $it['unit_buy'] : '';
+
+            // Bila produk punya konversi yang cocok dengan satuan beli,
+            // qty belanja dikonversi ke satuan stok. Jika tidak, qty belanja
+            // langsung dipakai sebagai stok.
+            $conv = product_conversion_for_unit($conn, $product_id, $unit_buy);
+
+            if ($conv['has_convert'] && (float)$conv['factor'] > 0) {
+                $qtyStock  = (int)round($qty_buy * (float)$conv['factor']);
+                $unitStock = $conv['base_unit'] !== '' ? $conv['base_unit'] : $conv['unit'];
+            } else {
+                $qtyStock  = (int)round($qty_buy);
+                $unitStock = $conv['unit'] !== '' ? $conv['unit'] : $unit_buy;
+            }
+
+            $unitStockEsc = mysqli_real_escape_string($conn, $unitStock);
+
             $run = mysqli_query($conn,"
-                UPDATE purchase_items pi
-                JOIN products pr ON pr.id = pi.product_id
-                SET pi.qty_stock     = pi.qty_buy,
-                    pi.unit_stock    = pr.unit,
-                    pi.remaining_qty = pi.qty_buy
-                WHERE pi.id = $item_id
-                  AND pi.purchase_id = '$id'
-                  AND pi.deleted_at IS NULL
+                UPDATE purchase_items
+                SET qty_stock     = $qtyStock,
+                    unit_stock    = '$unitStockEsc',
+                    remaining_qty = $qtyStock
+                WHERE id = $item_id
+                  AND purchase_id = '$id'
+                  AND deleted_at IS NULL
             ");
 
             if (!$run) {
