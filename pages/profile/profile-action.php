@@ -12,7 +12,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // update password hanya jika diisi
     if (!empty($password)) {
         if ($password !== $password_confirm) {
-            $_SESSION['flash'] = "Password tidak sama.";
             header("Location: profile.php?status=error&msg=Password tidak sama");
             exit();
         }
@@ -39,11 +38,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         header("Location: ../../sessions/sign-in.php?success=reset");
         exit();
     } elseif ($result) {
-        $_SESSION['flash'] = "Profil berhasil diperbarui.";
         header("Location: profile.php?status=success&msg=Profil berhasil diperbarui");
         exit();
     } else {
-        $_SESSION['flash'] = "Profile gagal diperbarui.";
         header("Location: profile.php?status=error&msg=Profil gagal diperbarui");
         exit();
     }
