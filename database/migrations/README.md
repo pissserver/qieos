@@ -1,51 +1,38 @@
 # QIEOS - Migrasi Database
 
-Semua file SQL untuk membangun / memperbarui struktur database `db_kantin`
-disatukan di folder ini. File dijalankan **berurutan sesuai nama** dan sudah
-didesain **aman dijalankan ulang** (idempotent).
+Satu file skema: `000_schema.sql` — struktur lengkap 25 tabel `db_kantin`
+(diasumsikan sesuai database produksi saat ini).
 
-## Cara 1 - Otomatis (disarankan)
+## Cara pakai
 
-Pastikan MySQL & PHP aktif (XAMPP), lalu dari folder project:
+Dari folder project (XAMPP aktif):
 
 ```
 php database/migrate.php
 ```
 
-atau di Windows: double-click `database/migrate.bat`
+atau double-click `database/migrate.bat` di Windows.
 
 Runner akan:
+
 1. Membuat database `db_kantin` bila belum ada.
-2. Membuat tabel log `schema_migrations`.
-3. Menjalankan setiap file `*.sql` yang belum pernah dijalankan.
-4. File yang sudah pernah dijalankan akan otomatis dilewati (skip).
+2. Menjalankan file `*.sql` yang belum pernah dicatat di tabel `schema_migrations`.
+3. File yang sudah dijalankan otomatis dilewati (skip).
 
-Jadi setiap kali selesai `git pull`, tinggal jalankan lagi migrator ini.
+Setelah `git pull`, jalankan lagi perintah yang sama.
 
-## Cara 2 - Manual (via mysql CLI)
+## Aturan penamaan
 
-```
-mysql -u root -p db_kantin < database/migrations/000_baseline_schema.sql
-mysql -u root -p db_kantin < database/migrations/001_products_unit_low_stock.sql
-mysql -u root -p db_kantin < database/migrations/002_master_suppliers_customers.sql
-...
-```
+- Skema baru = file SQL baru berurutan (`001_...sql`, `002_...sql`, dst).
+- Selalu pakai `CREATE TABLE IF NOT EXISTS` / `ALTER TABLE` aman-ulang
+  supaya tidak merusak data yang sudah ada.
+- Jangan mengedit file migrasi yang sudah pernah dijalankan di server lain —
+  buat file baru.
 
-Catatan: tanpa runner, Anda harus memastikan manual file mana yang belum
-dijalankan di server tersebut.
+## Reset total (hanya untuk development)
 
-## Isi folder
+Kalau ingin membangun ulang skema dari nol:
 
-| File | Isi |
-|------|-----|
-| `000_baseline_schema.sql` | Skema lengkap 21 tabel produksi (hanya struktur, tanpa data) |
-| `001_products_unit_low_stock.sql` | Kolom `unit` & `low_stock` + tabel `app_settings` |
-| `002_master_suppliers_customers.sql` | `suppliers`, `customers`, `product_supplier` |
-| `003_product_combo.sql` | Racikan/combine produk + kolom di `order_details` |
-| `004_chat.sql` | `chat_messages` + kolom `last_seen` di `users` |
-| `005_stock_request_multi_item.sql` | Request stok multi-produk |
-| `006_purchases_list_migration.sql` | Gabung daftar belanja ke `purchases` |
-| `007_stock_ledger_sales.sql` | Ledger pergerakan stok (balance/transfer/sale/return) |
-| `008_order_details_customer.sql` | Relasi `order_details.customer_id` ke `customers` (sebelum `qty`) |
-| `009_low_stock_kantin_default.sql` | Default global batas stok menipis kantin (`low_stock_kantin_default`) |
-| `010_products_low_stock_kantin.sql` | Kolom `low_stock_kantin` per-produk (fallback ke default global) |
+1. Hapus baris di tabel `schema_migrations` (atau drop tabelnya).
+2. Edit `000_schema.sql` bila struktur sudah berubah.
+3. Jalankan lagi `php database/migrate.php`.

@@ -1,29 +1,17 @@
--- =============================================================
--- QIEOS - Baseline Skema Database
--- Dibuat otomatis dari server lokal (db_kantin) - 21 tabel.
---
--- Sifat file ini:
---   * Hanya STRUKTUR (tabel & kolom), tidak menyertakan data.
---   * Aman dijalankan berkali-kali (CREATE TABLE IF NOT EXISTS).
---   * Tidak menghapus / mengubah tabel yang sudah ada.
---
--- Cara pakai manual (CLI):
---   mysql -u root -p db_kantin < 000_baseline_schema.sql
--- Atau otomatis lewat runner:  php database/migrate.php
--- =============================================================
+-- ============================================================
+-- QIEOS Database Schema
+-- Generated: 2026-10-15
+-- ============================================================
+-- Skema lengkap 25 tabel aplikasi POS Qieos.
+-- Aman dijalankan ulang (CREATE IF NOT EXISTS).
+-- ============================================================
 
--- -------------------------------------------------------------
--- app_settings : penyimpanan setting aplikasi (key-value)
--- -------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS `app_settings` (
   `name` varchar(100) NOT NULL,
   `value` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- -------------------------------------------------------------
--- chat_messages : chat 1-on-1
--- -------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS `chat_messages` (
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   `sender_id` int(11) NOT NULL,
@@ -38,9 +26,6 @@ CREATE TABLE IF NOT EXISTS `chat_messages` (
   KEY `idx_receiver_read` (`receiver_id`,`read_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- -------------------------------------------------------------
--- customers : pelanggan
--- -------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS `customers` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(255) NOT NULL,
@@ -51,9 +36,6 @@ CREATE TABLE IF NOT EXISTS `customers` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- -------------------------------------------------------------
--- order_details : detail item pesanan
--- -------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS `order_details` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `order_id` int(11) DEFAULT NULL,
@@ -64,12 +46,10 @@ CREATE TABLE IF NOT EXISTS `order_details` (
   `qty` int(11) DEFAULT NULL,
   `price` int(11) DEFAULT NULL,
   `subtotal` int(11) DEFAULT NULL,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY `idx_order_details_customer` (`customer_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
--- -------------------------------------------------------------
--- orders : transaksi pesanan
--- -------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS `orders` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `staff_id` int(10) NOT NULL,
@@ -81,9 +61,6 @@ CREATE TABLE IF NOT EXISTS `orders` (
   UNIQUE KEY `code` (`code`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
--- -------------------------------------------------------------
--- product_combo_items : bahan produk racikan/combine
--- -------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS `product_combo_items` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `combo_id` int(11) NOT NULL,
@@ -94,9 +71,6 @@ CREATE TABLE IF NOT EXISTS `product_combo_items` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- -------------------------------------------------------------
--- product_combos : produk racikan/combine
--- -------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS `product_combos` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(150) NOT NULL,
@@ -105,20 +79,14 @@ CREATE TABLE IF NOT EXISTS `product_combos` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- -------------------------------------------------------------
--- product_supplier : relasi produk <-> supplier (multi supplier)
--- -------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS `product_supplier` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `product_id` int(11) NOT NULL,
-  `supplier_id` int(11) NOT NULL,
-  `created_at` datetime DEFAULT NULL,
+  `id` int(11) NOT NULL AUTO_INCREMENT COMMENT 'Primary Key',
+  `product_id` int(11) NOT NULL COMMENT 'Product ID',
+  `supplier_id` int(11) NOT NULL COMMENT 'Supplier ID',
+  `created_at` datetime DEFAULT NULL COMMENT 'Created At',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
--- -------------------------------------------------------------
--- products : master produk
--- -------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS `products` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(150) DEFAULT NULL,
@@ -126,7 +94,9 @@ CREATE TABLE IF NOT EXISTS `products` (
   `category` varchar(100) DEFAULT NULL,
   `sell_price` decimal(10,2) DEFAULT NULL,
   `unit` varchar(100) DEFAULT NULL,
+  `conversion_id` int(11) DEFAULT NULL,
   `low_stock` int(11) DEFAULT NULL,
+  `low_stock_kantin` int(11) DEFAULT NULL,
   `photo` varchar(255) DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `deleted_at` int(11) DEFAULT NULL,
@@ -135,28 +105,22 @@ CREATE TABLE IF NOT EXISTS `products` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
--- -------------------------------------------------------------
--- purchase_items : detail item pembelian
--- -------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS `purchase_items` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `purchase_id` int(11) DEFAULT NULL,
   `product_id` int(11) DEFAULT NULL,
-  `qty` int(11) DEFAULT NULL,
   `qty_buy` int(11) DEFAULT NULL,
-  `unit` varchar(20) DEFAULT NULL,
-  `unit_buy` varchar(20) DEFAULT NULL,
+  `qty_stock` int(11) DEFAULT NULL,
   `remaining_qty` int(11) DEFAULT NULL,
-  `price` decimal(10,2) DEFAULT NULL,
+  `unit_buy` varchar(20) DEFAULT NULL,
+  `unit_stock` varchar(20) DEFAULT NULL,
+  `price_unit` decimal(10,2) DEFAULT NULL,
   `price_buy` decimal(10,2) DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `deleted_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
--- -------------------------------------------------------------
--- purchases : transaksi pembelian
--- -------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS `purchases` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `form` varchar(50) DEFAULT NULL,
@@ -166,9 +130,6 @@ CREATE TABLE IF NOT EXISTS `purchases` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
--- -------------------------------------------------------------
--- sales_stock : ledger pergerakan stok (balance/transfer/sale/return)
--- -------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS `sales_stock` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `product_id` int(11) DEFAULT NULL,
@@ -178,9 +139,6 @@ CREATE TABLE IF NOT EXISTS `sales_stock` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
--- -------------------------------------------------------------
--- stock_request_items : detail item request stok (multi item)
--- -------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS `stock_request_items` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `request_id` int(11) DEFAULT NULL,
@@ -190,9 +148,6 @@ CREATE TABLE IF NOT EXISTS `stock_request_items` (
   KEY `idx_request` (`request_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
--- -------------------------------------------------------------
--- stock_requests : header request stok
--- -------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS `stock_requests` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `code` varchar(20) NOT NULL,
@@ -204,9 +159,6 @@ CREATE TABLE IF NOT EXISTS `stock_requests` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
--- -------------------------------------------------------------
--- suppliers : pemasok
--- -------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS `suppliers` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(255) NOT NULL,
@@ -219,9 +171,6 @@ CREATE TABLE IF NOT EXISTS `suppliers` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- -------------------------------------------------------------
--- tenant_payments : pembayaran penyewa tenant
--- -------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS `tenant_payments` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `staff_id` int(11) NOT NULL,
@@ -232,9 +181,6 @@ CREATE TABLE IF NOT EXISTS `tenant_payments` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
--- -------------------------------------------------------------
--- tenants : data tenant / penyewa
--- -------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS `tenants` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `tenant_name` varchar(20) NOT NULL,
@@ -245,9 +191,34 @@ CREATE TABLE IF NOT EXISTS `tenants` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
--- -------------------------------------------------------------
--- update_details : detail changelog update
--- -------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS `unit_conversion_items` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `conversion_id` int(11) NOT NULL,
+  `unit_name` varchar(100) NOT NULL,
+  `qty` decimal(14,4) NOT NULL DEFAULT '1.0000',
+  `created_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS `unit_conversions` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `base_unit` varchar(100) NOT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  `deleted_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS `units` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(100) NOT NULL,
+  `note` varchar(255) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  `deleted_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 CREATE TABLE IF NOT EXISTS `update_details` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `update_id` int(20) NOT NULL,
@@ -255,9 +226,6 @@ CREATE TABLE IF NOT EXISTS `update_details` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
--- -------------------------------------------------------------
--- updates : changelog update aplikasi
--- -------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS `updates` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `update_name` varchar(30) NOT NULL,
@@ -268,9 +236,6 @@ CREATE TABLE IF NOT EXISTS `updates` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
--- -------------------------------------------------------------
--- users : akun pengguna aplikasi
--- -------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS `users` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `fullname` varchar(30) NOT NULL,
@@ -283,9 +248,6 @@ CREATE TABLE IF NOT EXISTS `users` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
--- -------------------------------------------------------------
--- utility_payments : pembayaran utilitas tenant
--- -------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS `utility_payments` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `staff_id` int(10) NOT NULL,

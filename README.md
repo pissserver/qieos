@@ -75,34 +75,37 @@ _Catatan:_ Akun **Developer** bersifat terproteksi dan tidak dapat diubah/dihapu
 
 Nama Database: **`db_kantin`** (MySQL)
 
-### Daftar Tabel (13 Tabel)
+### Daftar Tabel (25 Tabel)
 
-1. **`users`**: Data akun pengguna (username, password bcrypt, fullname, role, photo).
-2. **`products`**: Master data produk (nama, kode, kategori, harga jual, foto, status katalog, starred).
-3. **`purchases`**: Header transaksi pembelian & daftar belanja (nomor form, tanggal).
-4. **`purchase_items`**: Detail item pembelian dengan tracking stok FIFO (`qty`, `remaining_qty`, `price`) serta data rencana belanja (`qty_buy`, `unit_buy`, `price_buy`).
-5. **`sales_stock`**: Tabel pergerakan stok kantin (ledger). Setiap baris mencatat satu pergerakan (`type`: `balance`, `transfer`, `sale`, `return`) dengan qty positif/negatif; saldo saat ini = `SUM(qty)` per produk.
-6. **`stock_requests`**: Permintaan transfer stok dari kasir ke gudang (`pending`, `approved`, `rejected`).
-7. **`orders`**: Header transaksi penjualan (kode transaksi, staff_id, total, status_payment).
-8. **`order_details`**: Detail item penjualan (order_id, product_id, qty, price, subtotal).
-9. **`tenants`**: Data penyewa / tenant (nama tenant, pemikir/owner, status).
-10. **`tenant_payments`**: Transaksi pembayaran uang sewa tenant.
-11. **`utility_payments`**: Transaksi pembayaran biaya air & listrik tenant.
-12. **`updates`**: Header changelog versi aplikasi.
-13. **`update_details`**: Detail uraian pembaruan versi.
+| Domain | Tabel | Fungsi |
+|--------|-------|--------|
+| **Master** | `products` | Master produk: kode, nama, kategori, harga jual, unit, low stock, foto |
+| | `suppliers` | Master supplier / pemasok barang |
+| | `customers` | Master customer pembeli di kantin |
+| | `users` | Akun pengguna: developer, administrator, staff kasir |
+| | `tenants` | Data tenant penyewa kantin |
+| | `units` | Master satuan barang (pcs, karton, slop, dll) |
+| | `unit_conversions` | Konversi unit: unit base + daftar konversi |
+| | `unit_conversion_items` | Detail konversi: unit + qty per unit base |
+| | `product_combos` | Paket racikan produk |
+| | `product_combo_items` | Bahan penyusun paket racikan |
+| | `product_supplier` | Relasi produk ke supplier (many-to-many) |
+| **Purchasing** | `purchases` | Transaksi pembelian / daftar belanja |
+| | `purchase_items` | Detail item pembelian: qty, unit, harga (FIFO via `remaining_qty`) |
+| **Stok** | `sales_stock` | Ledger stok: `balance`, `transfer`, `sale`, `return` — saldo = `SUM(qty)` |
+| | `stock_requests` | Permintaan stok kantin ke gudang (`pending`/`approved`/`rejected`) |
+| | `stock_request_items` | Detail produk dalam permintaan stok |
+| **Penjualan** | `orders` | Header pesanan: kode, tanggal, kasir, total, status bayar |
+| | `order_details` | Item pesanan: produk/paket, qty, harga, customer |
+| **Tenant** | `tenant_payments` | Pembayaran sewa tenant per periode |
+| | `utility_payments` | Pembayaran utilitas (listrik/air) tenant |
+| **Sistem** | `app_settings` | Pengaturan global key-value |
+| | `chat_messages` | Pesan chat antar pengguna |
+| | `updates` | Riwayat rilis aplikasi |
+| | `update_details` | Detail perubahan per rilis |
+| | `schema_migrations` | Log migrasi database (internal) |
 
-### Diagram Relasi Sederhana
-
-```
-users ──(staff_id)──> orders ──(order_id)──> order_details ──(product_id)──> products
-  │                                                                                │
-  ├──(staff_id)──> tenant_payments <──(tenant_id)── tenants                      │
-  └──(staff_id)──> utility_payments <──(tenant_id)──┘                            │
-                                                                                   │
-purchases ──(purchase_id)──> purchase_items ──────(product_id)─────────────────────┤
-                                                                                     ├─> sales_stock
-updates ────> update_details                                                       └─> stock_requests
-```
+Lihat halaman **Flow & Database** di aplikasi untuk visualisasi lengkap alur & tabel.
 
 ---
 
@@ -128,18 +131,15 @@ updates ────> update_details                                            
 2. **Jalankan Apache & MySQL**
    Buka **XAMPP Control Panel**, lalu klik **Start** pada modul **Apache** dan **MySQL**.
 
-3. **Impor Database**
-    - Buka browser dan akses `http://localhost/phpmyadmin`
-    - Buat database baru bernama **`db_kantin`**
-    - Pilih database `db_kantin`, masuk ke tab **Import**, lalu pilih file SQL database aplikasi (`db_kantin.sql`).
-    - Klik **Go / Kirim** hingga proses impor selesai.
-
-    _Atau via Command Line:_
+3. **Setup Database via Migrator** (disarankan)
 
     ```bash
-    mysql -u root -e "CREATE DATABASE db_kantin;"
-    mysql -u root db_kantin < db_kantin.sql
+    php database/migrate.php
     ```
+
+    Runner otomatis membuat database `db_kantin` + menjalankan semua file SQL di `database/migrations/`. File yang sudah dijalankan dilewati (idempotent) — setelah `git pull` tinggal jalankan lagi.
+
+    _Atau via phpMyAdmin:_ buat database `db_kantin`, import `database/migrations/000_schema.sql`.
 
 4. **Cek Konfigurasi Koneksi**
    Buka file `script/connection.php` dan pastikan pengaturan sesuai dengan MySQL lokal Anda:
