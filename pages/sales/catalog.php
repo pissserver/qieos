@@ -199,6 +199,17 @@ if($cq){
                                     <i class="fas fa-tag"></i>
                                     <?php echo ucfirst($row['category']); ?>
                                 </div>
+
+                                <?php if($isCombo): ?>
+                                <button
+                                    type="button"
+                                    class="combo-eye"
+                                    onclick="event.stopPropagation();showComboDetail('<?php echo $row['id']; ?>', catalogComboQty('<?php echo $row['id']; ?>'))"
+                                    title="Lihat detail racikan"
+                                    aria-label="Lihat detail racikan">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                                <?php endif; ?>
                             </div>
 
                             <h4 class="product-title">
@@ -526,6 +537,15 @@ if($cq){
         }
 
         setInitialIndex();
+
+        // Ambil qty yang sedang dipilih di kartu racikan (desktop/mobile).
+        // Dipakai untuk mengali jumlah bahan saat lihat detail racikan.
+        function catalogComboQty(id) {
+            let d = document.getElementById('qty-' + id);
+            let m = document.getElementById('mqty-' + id);
+            let v = (d && parseInt(d.value || 0)) || (m && parseInt(m.value || 0)) || 0;
+            return v > 0 ? v : 1;
+        }
 
         function sortProduct(type, btn) {
 

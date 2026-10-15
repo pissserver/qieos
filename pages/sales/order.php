@@ -767,6 +767,10 @@ include '../../sessions/session.php';
                                 ? `<img src="../../assets/img/products/${item.photo}" alt="${item.product_name}">`
                                 : `<div class="order-item-img order-item-img-empty"><i class="fas fa-box-open"></i></div>`;
 
+                            const eye = item.product_combo_id
+                                ? `<button type="button" class="combo-eye" onclick="event.stopPropagation();showComboDetail('c${item.product_combo_id}', ${item.qty})" title="Lihat detail racikan" aria-label="Lihat detail racikan"><i class="fas fa-eye"></i></button>`
+                                : '';
+
                             html += `
                     <div class="order-item">
                     ${thumb}
@@ -775,6 +779,7 @@ include '../../sessions/session.php';
                         <div class="order-item-badges">
                         <span class="badge-price">Rp ${Number(item.price).toLocaleString()}</span>
                         <span class="badge-qty">Qty: ${item.qty}</span>
+                        ${eye}
                         </div>
                     </div>
                     <div class="order-item-subtotal">Rp ${subtotal.toLocaleString()}</div>

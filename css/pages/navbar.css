@@ -2614,3 +2614,242 @@ main.content.has-stock-alert > .dash-hdr{
     .sta-icon{width:30px;height:30px;margin:5px 8px 5px 10px;font-size:12px}
     .sta-msg{font-size:11.5px;padding-right:30px}
 }
+
+/* ============================================================
+   DETAIL RACIKAN (combine) — tombol mata + modal
+   Dipakai di katalog, keranjang, dan modal detail pesanan.
+   ============================================================ */
+
+.combo-eye {
+    width: 28px;
+    height: 28px;
+    flex-shrink: 0;
+    border: none;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(99, 102, 241, .12);
+    color: #6366f1;
+    cursor: pointer;
+    transition: all .25s;
+}
+
+.combo-eye i {
+    font-size: 12px;
+}
+
+.combo-eye:hover {
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    color: #fff;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 14px rgba(99, 102, 241, .35);
+}
+
+.cart-title-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.cart-title-row .cart-title {
+    min-width: 0;
+}
+
+#comboDetailModal .cdm-content {
+    background: #fff;
+    border: 0;
+    border-radius: 18px;
+    overflow: hidden;
+    box-shadow: 0 24px 60px rgba(15, 23, 42, .28);
+}
+
+#comboDetailModal .cdm-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 16px 18px;
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    color: #fff;
+}
+
+#comboDetailModal .cdm-head-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+}
+
+#comboDetailModal .cdm-head-icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 13px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, .18);
+    color: #fff;
+    font-size: 17px;
+}
+
+#comboDetailModal .cdm-title {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 800;
+    color: #fff;
+    line-height: 1.25;
+}
+
+#comboDetailModal .cdm-sub {
+    font-size: 11px;
+    color: rgba(255, 255, 255, .82);
+    margin-top: 2px;
+}
+
+#comboDetailModal .cdm-body {
+    padding: 16px 18px;
+}
+
+.cdm-recipe {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.cdm-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 10px;
+    border-radius: 12px;
+    background: #f8fafc;
+    border: 1px solid #eef2f7;
+}
+
+.cdm-seq {
+    width: 22px;
+    height: 22px;
+    border-radius: 7px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #eef2ff;
+    color: #6366f1;
+    font-size: 11px;
+    font-weight: 800;
+}
+
+.cdm-product {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: 1;
+    min-width: 0;
+}
+
+.cdm-thumb {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    object-fit: cover;
+    flex-shrink: 0;
+    background: #fff;
+    border: 1px solid #eef2f7;
+}
+
+.cdm-thumb-ph {
+    background: linear-gradient(135deg, #e0e7ff, #ede9fe);
+    color: #6366f1;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.cdm-name {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    font-size: 13px;
+    font-weight: 700;
+    color: #0f172a;
+    line-height: 1.25;
+}
+
+.cdm-name small {
+    font-size: 10px;
+    font-weight: 500;
+    color: #94a3b8;
+}
+
+.cdm-qty {
+    flex-shrink: 0;
+    font-size: 11px;
+    font-weight: 800;
+    color: #b45309;
+    background: #fef3c7;
+    border-radius: 999px;
+    padding: 3px 8px;
+}
+
+.cdm-price {
+    flex-shrink: 0;
+    font-size: 12.5px;
+    font-weight: 800;
+    color: #334155;
+    white-space: nowrap;
+}
+
+.cdm-total {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-top: 14px;
+    padding: 12px 14px;
+    border-radius: 14px;
+    background: linear-gradient(135deg, #0f172a, #334155);
+    color: #fff;
+}
+
+.cdm-total span {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    color: #cbd5e1;
+}
+
+.cdm-total span i {
+    margin-right: 6px;
+}
+
+.cdm-total strong {
+    font-size: 17px;
+    font-weight: 800;
+    white-space: nowrap;
+    background: rgba(255, 255, 255, .12);
+    padding: 6px 12px;
+    border-radius: 10px;
+}
+
+.cdm-error,
+.cdm-empty {
+    text-align: center;
+    padding: 28px 12px;
+    color: #64748b;
+}
+
+.cdm-error {
+    color: #dc2626;
+}
+
+.cdm-error i,
+.cdm-empty i {
+    display: block;
+    font-size: 22px;
+    margin-bottom: 8px;
+}

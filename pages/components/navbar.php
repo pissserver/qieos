@@ -552,6 +552,27 @@ if (!defined('BASE_URL')) {
     </div>
 </div>
 
+<!-- Modal Detail Racikan (Combine) -->
+<div class="modal fade" id="comboDetailModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content cdm-content">
+            <div class="cdm-header">
+                <div class="cdm-head-left">
+                    <div class="cdm-head-icon"><i class="fas fa-blender"></i></div>
+                    <div class="cdm-head-text">
+                        <h5 class="cdm-title" id="cdmTitle">Racikan</h5>
+                        <div class="cdm-sub">Detail bahan racikan</div>
+                    </div>
+                </div>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Tutup"></button>
+            </div>
+            <div class="modal-body cdm-body" id="cdmBody">
+                <div class="text-center py-4"><i class="fas fa-spinner fa-spin"></i> Memuat...</div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- Update Overlay -->
 <div class="update-overlay" id="updateOverlay">
     <div class="update-modal">
@@ -897,7 +918,14 @@ if (!defined('BASE_URL')) {
                         ${thumb}
 
                         <div>
-                            <div class="cart-title text-capitalize">${item.name}</div>
+                            <div class="cart-title-row">
+                                <div class="cart-title text-capitalize">${item.name}</div>
+                                ${
+                                    item.type === 'combo'
+                                    ? `<button type="button" class="combo-eye" onclick="event.stopPropagation();showComboDetail('${item.id}', ${item.qty})" title="Lihat detail racikan"><i class="fas fa-eye"></i></button>`
+                                    : ''
+                                }
+                            </div>
 
                             <div class="cart-meta">
                                 <span class="badge-price">
@@ -907,15 +935,9 @@ if (!defined('BASE_URL')) {
                                     })}
                                 </span>
 
-                                ${
-                                    item.category.toLowerCase() !== 'additional'
-                                    ? `
-                                        <span class="badge-qty">
-                                            Qty: ${item.qty}
-                                        </span>
-                                    `
-                                    : ''
-                                }
+                                <span class="badge-qty">
+                                    Qty: ${item.qty}
+                                </span>
                             </div>
                         </div>
                     </div>
@@ -1409,5 +1431,85 @@ if (!defined('BASE_URL')) {
 
     fetchStock(update);
     setInterval(function(){ fetchStock(update); }, 120000);
+})();
+</script>
+
+<script>
+// ==========================================================
+// DETAIL RACIKAN (combine) — dipakai katalog, keranjang,
+// dan modal detail pesanan. Modal + fungsi global di navbar
+// supaya tidak diduplikasi di tiap halaman.
+// ==========================================================
+(function(){
+    var comboDetailModalInstance = null;
+
+    function comboEsc(s){
+        var d = document.createElement('div');
+        d.appendChild(document.createTextNode(String(s == null ? '' : s)));
+        return d.innerHTML;
+    }
+
+    window.showComboDetail = function(id, qty){
+        var modalEl = document.getElementById('comboDetailModal');
+        if(!modalEl || typeof bootstrap === 'undefined') return;
+
+        // Modal ini berada di dalam <main>, sedangkan modal halaman (mis.
+        // detail pesanan) berada di body. Pindahkan ke body sekali supaya
+        // racikan selalu tampil DI ATAS modal yang sedang terbuka.
+        if(modalEl.parentNode !== document.body){
+            document.body.appendChild(modalEl);
+        }
+
+        if(!comboDetailModalInstance){
+            comboDetailModalInstance = new bootstrap.Modal(modalEl);
+        }
+
+        var mult = parseInt(qty, 10);
+        if(!mult || mult < 1) mult = 1;
+
+        var body  = document.getElementById('cdmBody');
+        var title = document.getElementById('cdmTitle');
+        title.textContent = 'Racikan';
+        body.innerHTML = '<div class="text-center py-4"><i class="fas fa-spinner fa-spin"></i> Memuat...</div>';
+        comboDetailModalInstance.show();
+
+        fetch(BASE_URL + '/pages/sales/combo-detail.php?id=' + encodeURIComponent(id), { cache: 'no-store' })
+            .then(function(r){ return r.json(); })
+            .then(function(data){
+                if(data.status !== 'success'){
+                    body.innerHTML = '<div class="cdm-error"><i class="fas fa-exclamation-triangle"></i> ' + comboEsc(data.message) + '</div>';
+                    return;
+                }
+
+                title.textContent = data.combo.name;
+
+                if(!data.items.length){
+                    body.innerHTML = '<div class="cdm-empty"><i class="fas fa-box-open"></i><div>Racikan ini belum punya bahan.</div></div>';
+                    return;
+                }
+
+                var html = '<div class="cdm-recipe">';
+                data.items.forEach(function(it, i){
+                    var thumb = it.photo
+                        ? '<img src="' + BASE_URL + '/assets/img/products/' + encodeURIComponent(it.photo) + '" class="cdm-thumb" alt="">'
+                        : '<span class="cdm-thumb cdm-thumb-ph"><i class="fas fa-box"></i></span>';
+                    html += '<div class="cdm-row">'
+                        + '<span class="cdm-seq">' + (i + 1) + '</span>'
+                        + '<span class="cdm-product">' + thumb
+                        + '<span class="cdm-name">' + comboEsc(it.product_name)
+                        + (it.code ? '<small>' + comboEsc(it.code) + '</small>' : '') + '</span></span>'
+                        + '<span class="cdm-qty">&times;' + mult + '</span>'
+                        + '<span class="cdm-price">Rp ' + Number(it.price).toLocaleString('id-ID') + '</span>'
+                        + '</div>';
+                });
+                html += '</div>';
+                html += '<div class="cdm-total"><span><i class="fas fa-coins"></i> Harga per racikan</span>'
+                     + '<strong>Rp ' + Number(data.total).toLocaleString('id-ID') + '</strong></div>';
+                body.innerHTML = html;
+            })
+            .catch(function(){
+                body.innerHTML = '<div class="cdm-error"><i class="fas fa-exclamation-triangle"></i> Terjadi kesalahan memuat data.</div>';
+            });
+    };
 })();
 </script>
