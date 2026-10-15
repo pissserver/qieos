@@ -21,7 +21,7 @@
     <div class="report-filter">
         <div class="row">
 
-            <div class="col-md-3">
+            <div class="col-md-2">
                 <label class="form-label fw-bold">
                     Tanggal Awal
                 </label>
@@ -31,7 +31,7 @@
                     id="first_date_best">
             </div>
 
-            <div class="col-md-3">
+            <div class="col-md-2">
                 <label class="form-label fw-bold">
                     Tanggal Akhir
                 </label>
@@ -52,15 +52,23 @@
                 </select>
             </div>
 
+            <div class="col-md-2 d-flex align-items-end">
+                <input type="checkbox" id="best_detail" class="detail-toggle-input" onchange="toggleReportDetail('best')">
+                <label class="detail-toggle" for="best_detail" title="Tampilkan rincian qty & omzet per tanggal di file Excel (khusus Excel).">
+                    <span class="detail-toggle-icon"><i class="fas fa-list-ul"></i></span>
+                    <span class="detail-toggle-text">Detail</span>
+                    <span class="detail-toggle-switch"></span>
+                </label>
+            </div>
+
             <div class="col-md-4 d-flex align-items-end">
-                <button class="btn btn-success me-2 w-100" type="button" onclick="printExcel('best')">
-                    <i class="fas fa-file-excel me-2"></i>
-                    Export Excel
+                <button id="bestExcelBtn" class="btn btn-success me-2 w-100" type="button" onclick="printExcel('best')">
+                    <i class="fas fa-file-excel"></i>
+                    <span class="excel-label">Export Excel</span>
                 </button>
 
-                <button class="btn btn-danger w-100" type="button" onclick="printPDF('best')">
-                    <i class="fas fa-file-pdf me-2"></i>
-                    Print PDF
+                <button id="bestPdfBtn" class="btn btn-danger w-100" type="button" onclick="printPDF('best')">
+                    <i class="fas fa-file-pdf"></i>
                 </button>
             </div>
 

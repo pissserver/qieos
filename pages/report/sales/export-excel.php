@@ -12,6 +12,7 @@ $product_id = isset($_GET['product_id']) ? (int) $_GET['product_id'] : 0;
 $category   = isset($_GET['category']) ? $_GET['category'] : '';
 $cashier_id = isset($_GET['cashier_id']) ? (int) $_GET['cashier_id'] : 0;
 $limit      = isset($_GET['limit']) ? (int) $_GET['limit'] : 10;
+$detail     = isset($_GET['detail']) ? (int) $_GET['detail'] : 0;
 
 $escFirst = mysqli_real_escape_string($conn, $first_date);
 $escLast  = mysqli_real_escape_string($conn, $last_date);
@@ -132,6 +133,600 @@ if ($tab === 'product' && $product_id > 0) {
 $categoryName = '';
 if ($tab === 'category' && $category !== '') {
     $categoryName = (strtolower($category) === 'all') ? 'Semua Kategori' : ucfirst($category);
+}
+
+// ============================================================
+// MODE DETAIL PER TANGGAL - KHUSUS EXPORT EXCEL TAB KATEGORI
+// Menampilkan matriks Produk x Tanggal (Qty Terjual + Omzet),
+// dengan kolom Total (semua tanggal) di paling kanan.
+// ============================================================
+if ($tab === 'category' && $detail === 1) {
+
+    // Daftar tanggal dalam rentang (inklusif)
+    $detailDates = array();
+    $tsStart = strtotime($first_date);
+    $tsEnd   = strtotime($last_date);
+    if ($tsStart !== false && $tsEnd !== false && $tsStart <= $tsEnd) {
+        for ($t = $tsStart; $t <= $tsEnd; $t += 86400) {
+            $detailDates[] = date('Y-m-d', $t);
+        }
+    }
+
+    $escCat = mysqli_real_escape_string($conn, $category);
+    $catFilter = ($category !== '' && strtolower($category) !== 'all') ? "AND p.category='$escCat'" : '';
+
+    // Semua produk sesuai filter kategori (termasuk yang tidak terjual -> bernilai 0)
+    $products = array();
+    $qp = mysqli_query($conn, "SELECT p.id, p.name, p.code FROM products p WHERE p.deleted_at IS NULL $catFilter ORDER BY p.name ASC");
+    if ($qp) {
+        while ($pr = mysqli_fetch_assoc($qp)) {
+            $products[(int) $pr['id']] = $pr;
+        }
+    }
+
+    // Matriks penjualan per produk per tanggal
+    $matrix = array();
+    $productTotals = array();
+    $qm = mysqli_query($conn, "SELECT od.product_id, DATE(o.tanggal) AS dt, COALESCE(SUM(od.qty),0) AS qty, COALESCE(SUM(od.subtotal),0) AS omzet FROM order_details od JOIN orders o ON od.order_id=o.id JOIN products p ON od.product_id=p.id WHERE o.status_payment='paid' AND $where $catFilter GROUP BY od.product_id, DATE(o.tanggal)");
+    if ($qm) {
+        while ($mr = mysqli_fetch_assoc($qm)) {
+            $pid = (int) $mr['product_id'];
+            $dt  = $mr['dt'];
+            $matrix[$pid][$dt] = array('qty' => (int) $mr['qty'], 'omzet' => (float) $mr['omzet']);
+            if (!isset($productTotals[$pid])) {
+                $productTotals[$pid] = array('qty' => 0, 'omzet' => 0);
+            }
+            $productTotals[$pid]['qty']   += (int) $mr['qty'];
+            $productTotals[$pid]['omzet'] += (float) $mr['omzet'];
+        }
+    }
+
+    $numDates = count($detailDates);
+    $lastColIdx = 2 + ($numDates * 2) + 2; // A=No, B=Produk, C=Kode, lalu 2 kolom/tanggal, lalu 2 kolom Total
+    $lastCol = PHPExcel_Cell::stringFromColumnIndex($lastColIdx);
+
+    $objPHPExcel = new PHPExcel();
+    $objPHPExcel->getProperties()->setCreator("Qieos")->setTitle($title2);
+
+    $sheet = $objPHPExcel->setActiveSheetIndex(0);
+    $sheet->setTitle("Laporan");
+
+    $sheet->mergeCells("A1:{$lastCol}1");
+    $sheet->setCellValue('A1', 'PT. SELARASGRIYA SARANA UTAMA');
+    $sheet->mergeCells("A2:{$lastCol}2");
+    $sheet->setCellValue('A2', 'Pasar Induk Surabaya Sidotopo');
+    $sheet->mergeCells("A4:{$lastCol}4");
+    $sheet->setCellValue('A4', $title);
+
+    $periode = '';
+    if (!empty($first_date) && !empty($last_date)) {
+        $periode = 'Periode : ' . date('d M Y', strtotime($first_date)) . ' s/d ' . date('d M Y', strtotime($last_date));
+    }
+    if ($categoryName !== '') {
+        $periode = trim($periode . '  |  Kategori : ' . $categoryName);
+    }
+    $sheet->mergeCells("A5:{$lastCol}5");
+    $sheet->setCellValue('A5', $periode);
+
+    // Header 2 baris: baris 7 = tanggal (merge 2 kolom), baris 8 = Qty Terjual / Omzet
+    $hdrTop = 7;
+    $hdrBot = 8;
+
+    foreach (array('A' => 'No', 'B' => 'Produk', 'C' => 'Kode') as $col => $label) {
+        $sheet->mergeCells("{$col}{$hdrTop}:{$col}{$hdrBot}");
+        $sheet->setCellValue("{$col}{$hdrTop}", $label);
+    }
+
+    $qtyCols = array();
+    $omzetCols = array();
+
+    $col = 3;
+    foreach ($detailDates as $d) {
+        $c1 = PHPExcel_Cell::stringFromColumnIndex($col);
+        $c2 = PHPExcel_Cell::stringFromColumnIndex($col + 1);
+        $sheet->mergeCells("{$c1}{$hdrTop}:{$c2}{$hdrTop}");
+        $sheet->setCellValue("{$c1}{$hdrTop}", date('d/m/Y', strtotime($d)));
+        $sheet->setCellValue("{$c1}{$hdrBot}", 'Qty Terjual');
+        $sheet->setCellValue("{$c2}{$hdrBot}", 'Omzet');
+        $qtyCols[] = $c1;
+        $omzetCols[] = $c2;
+        $col += 2;
+    }
+
+    $cTot1 = PHPExcel_Cell::stringFromColumnIndex($col);
+    $cTot2 = PHPExcel_Cell::stringFromColumnIndex($col + 1);
+    $sheet->mergeCells("{$cTot1}{$hdrTop}:{$cTot2}{$hdrTop}");
+    $sheet->setCellValue("{$cTot1}{$hdrTop}", 'Total');
+    $sheet->setCellValue("{$cTot1}{$hdrBot}", 'Qty Terjual');
+    $sheet->setCellValue("{$cTot2}{$hdrBot}", 'Omzet');
+    $qtyCols[] = $cTot1;
+    $omzetCols[] = $cTot2;
+
+    $sheet->getStyle("A{$hdrTop}:{$lastCol}{$hdrBot}")->applyFromArray(array(
+        'font' => array('bold' => true, 'color' => array('rgb' => 'FFFFFF')),
+        'fill' => array('type' => PHPExcel_Style_Fill::FILL_SOLID, 'color' => array('rgb' => '1E1B4B')),
+        'alignment' => array('horizontal' => PHPExcel_Style_Alignment::HORIZONTAL_CENTER, 'vertical' => PHPExcel_Style_Alignment::VERTICAL_CENTER, 'wrapText' => true),
+        'borders' => array('allborders' => array('style' => PHPExcel_Style_Border::BORDER_THIN))
+    ));
+
+    // Baris data (satu baris per produk)
+    $row = $hdrBot + 1;
+    $firstDataRow = $row;
+    $no = 1;
+
+    foreach ($products as $pid => $pr) {
+        $sheet->setCellValue("A$row", $no);
+        $sheet->setCellValue("B$row", $pr['name']);
+        $sheet->setCellValue("C$row", $pr['code']);
+
+        $col = 3;
+        foreach ($detailDates as $d) {
+            $c1 = PHPExcel_Cell::stringFromColumnIndex($col);
+            $c2 = PHPExcel_Cell::stringFromColumnIndex($col + 1);
+            $cell = isset($matrix[$pid][$d]) ? $matrix[$pid][$d] : array('qty' => 0, 'omzet' => 0);
+            $sheet->setCellValue("{$c1}$row", $cell['qty']);
+            $sheet->setCellValue("{$c2}$row", $cell['omzet']);
+            $col += 2;
+        }
+
+        $tot = isset($productTotals[$pid]) ? $productTotals[$pid] : array('qty' => 0, 'omzet' => 0);
+        $sheet->setCellValue("{$cTot1}$row", $tot['qty']);
+        $sheet->setCellValue("{$cTot2}$row", $tot['omzet']);
+
+        $row++;
+        $no++;
+    }
+    $lastDataRow = $row - 1;
+
+    // Baris total (jumlah seluruh produk per tanggal + grand total)
+    $sheet->mergeCells("A$row:C$row");
+    $sheet->setCellValue("A$row", 'TOTAL');
+    $sheet->getStyle("A$row")->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_RIGHT);
+
+    $col = 3;
+    foreach ($detailDates as $d) {
+        $c1 = PHPExcel_Cell::stringFromColumnIndex($col);
+        $c2 = PHPExcel_Cell::stringFromColumnIndex($col + 1);
+        if ($lastDataRow >= $firstDataRow) {
+            $sheet->setCellValue("{$c1}$row", "=SUM({$c1}$firstDataRow:{$c1}$lastDataRow)");
+            $sheet->setCellValue("{$c2}$row", "=SUM({$c2}$firstDataRow:{$c2}$lastDataRow)");
+        } else {
+            $sheet->setCellValue("{$c1}$row", 0);
+            $sheet->setCellValue("{$c2}$row", 0);
+        }
+        $col += 2;
+    }
+    if ($lastDataRow >= $firstDataRow) {
+        $sheet->setCellValue("{$cTot1}$row", "=SUM({$cTot1}$firstDataRow:{$cTot1}$lastDataRow)");
+        $sheet->setCellValue("{$cTot2}$row", "=SUM({$cTot2}$firstDataRow:{$cTot2}$lastDataRow)");
+    } else {
+        $sheet->setCellValue("{$cTot1}$row", 0);
+        $sheet->setCellValue("{$cTot2}$row", 0);
+    }
+
+    $sheet->getStyle("A$row:{$lastCol}$row")->applyFromArray(array(
+        'font' => array('bold' => true, 'color' => array('rgb' => 'FFFFFF')),
+        'fill' => array('type' => PHPExcel_Style_Fill::FILL_SOLID, 'color' => array('rgb' => '1E1B4B')),
+        'borders' => array('allborders' => array('style' => PHPExcel_Style_Border::BORDER_THIN))
+    ));
+
+    // Border seluruh tabel + perataan
+    $sheet->getStyle("A{$hdrTop}:{$lastCol}$row")->applyFromArray(array(
+        'borders' => array('allborders' => array('style' => PHPExcel_Style_Border::BORDER_THIN))
+    ));
+    $sheet->getStyle("A{$firstDataRow}:C$row")->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+    $sheet->getStyle("B{$firstDataRow}:B$row")->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_LEFT);
+
+    foreach ($qtyCols as $c) {
+        $sheet->getStyle("{$c}{$firstDataRow}:{$c}$row")
+            ->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+        $sheet->getStyle("{$c}{$firstDataRow}:{$c}$row")
+            ->getNumberFormat()->setFormatCode('#,##0');
+    }
+    foreach ($omzetCols as $c) {
+        $sheet->getStyle("{$c}{$firstDataRow}:{$c}$row")
+            ->getNumberFormat()->setFormatCode('"Rp " #,##0');
+    }
+
+    // Freeze kolom produk + baris header
+    $sheet->freezePane('D' . $firstDataRow);
+
+    for ($ci = 0; $ci <= $lastColIdx; $ci++) {
+        $cl = PHPExcel_Cell::stringFromColumnIndex($ci);
+        $sheet->getColumnDimension($cl)->setAutoSize(true);
+    }
+
+    if (ob_get_length()) {
+        ob_end_clean();
+    }
+
+    $filename = $title2 . ' (Detail) - ' . date('d M Y', strtotime($first_date)) . ' s.d. ' . date('d M Y', strtotime($last_date)) . '.xlsx';
+
+    header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    header('Content-Disposition: attachment; filename="' . $filename . '"');
+    header('Cache-Control: max-age=0');
+    header('Pragma: public');
+
+    try {
+        $objWriter = PHPExcel_IOFactory::createWriter($objPHPExcel, 'Excel2007');
+        $objWriter->save('php://output');
+    } catch (Exception $e) {
+        error_log('[QIEOS Excel Error] ' . $e->getMessage() . ' in ' . $e->getFile() . ':' . $e->getLine());
+        header('Content-Type: text/html; charset=utf-8');
+        echo '<h3>Error Generating Excel</h3>';
+        echo '<pre>' . htmlspecialchars($e->getMessage()) . '</pre>';
+    }
+
+    exit;
+}
+
+// ============================================================
+// MODE DETAIL PER TANGGAL - EXPORT EXCEL TAB RINGKASAN KEUANGAN
+// Baris = komponen (Omzet, Pengeluaran, Laba), kolom = per tanggal + Total.
+// ============================================================
+if ($tab === 'summary' && $detail === 1) {
+
+    $detailDates = array();
+    $tsStart = strtotime($first_date);
+    $tsEnd   = strtotime($last_date);
+    if ($tsStart !== false && $tsEnd !== false && $tsStart <= $tsEnd) {
+        for ($t = $tsStart; $t <= $tsEnd; $t += 86400) {
+            $detailDates[] = date('Y-m-d', $t);
+        }
+    }
+
+    $omzetByDate = array();
+    $qo = mysqli_query($conn, "SELECT DATE(tanggal) AS dt, COALESCE(SUM(total),0) AS v FROM orders WHERE status_payment='paid' AND $where GROUP BY DATE(tanggal)");
+    if ($qo) { while ($ro = mysqli_fetch_assoc($qo)) { $omzetByDate[$ro['dt']] = (float) $ro['v']; } }
+
+    $expenseByDate = array();
+    $qe = mysqli_query($conn, "SELECT DATE(p.date) AS dt, COALESCE(SUM(pi.price_buy),0) AS v FROM purchase_items pi JOIN purchases p ON pi.purchase_id=p.id WHERE p.deleted_at IS NULL AND pi.deleted_at IS NULL AND DATE(p.date) BETWEEN '$escFirst' AND '$escLast' GROUP BY DATE(p.date)");
+    if ($qe) { while ($re = mysqli_fetch_assoc($qe)) { $expenseByDate[$re['dt']] = (float) $re['v']; } }
+
+    $numDates = count($detailDates);
+    $lastColIdx = 1 + $numDates + 1; // A=No, B=Komponen, tanggal..., Total
+    $lastCol = PHPExcel_Cell::stringFromColumnIndex($lastColIdx);
+
+    $objPHPExcel = new PHPExcel();
+    $objPHPExcel->getProperties()->setCreator("Qieos")->setTitle($title2);
+
+    $sheet = $objPHPExcel->setActiveSheetIndex(0);
+    $sheet->setTitle("Laporan");
+
+    $sheet->mergeCells("A1:{$lastCol}1");
+    $sheet->setCellValue('A1', 'PT. SELARASGRIYA SARANA UTAMA');
+    $sheet->mergeCells("A2:{$lastCol}2");
+    $sheet->setCellValue('A2', 'Pasar Induk Surabaya Sidotopo');
+    $sheet->mergeCells("A4:{$lastCol}4");
+    $sheet->setCellValue('A4', $title);
+
+    $periode = '';
+    if (!empty($first_date) && !empty($last_date)) {
+        $periode = 'Periode : ' . date('d M Y', strtotime($first_date)) . ' s/d ' . date('d M Y', strtotime($last_date));
+    }
+    $sheet->mergeCells("A5:{$lastCol}5");
+    $sheet->setCellValue('A5', $periode);
+
+    $hdrTop = 7;
+    $hdrBot = 8;
+
+    $sheet->mergeCells("A{$hdrTop}:A{$hdrBot}");
+    $sheet->setCellValue("A{$hdrTop}", 'No');
+    $sheet->mergeCells("B{$hdrTop}:B{$hdrBot}");
+    $sheet->setCellValue("B{$hdrTop}", 'Komponen');
+
+    $col = 2;
+    foreach ($detailDates as $d) {
+        $c = PHPExcel_Cell::stringFromColumnIndex($col);
+        $sheet->mergeCells("{$c}{$hdrTop}:{$c}{$hdrBot}");
+        $sheet->setCellValue("{$c}{$hdrTop}", date('d/m/Y', strtotime($d)));
+        $col++;
+    }
+    $cTot = PHPExcel_Cell::stringFromColumnIndex($col);
+    $sheet->mergeCells("{$cTot}{$hdrTop}:{$cTot}{$hdrBot}");
+    $sheet->setCellValue("{$cTot}{$hdrTop}", 'Total');
+
+    $sheet->getStyle("A{$hdrTop}:{$lastCol}{$hdrBot}")->applyFromArray(array(
+        'font' => array('bold' => true, 'color' => array('rgb' => 'FFFFFF')),
+        'fill' => array('type' => PHPExcel_Style_Fill::FILL_SOLID, 'color' => array('rgb' => '1E1B4B')),
+        'alignment' => array('horizontal' => PHPExcel_Style_Alignment::HORIZONTAL_CENTER, 'vertical' => PHPExcel_Style_Alignment::VERTICAL_CENTER, 'wrapText' => true),
+        'borders' => array('allborders' => array('style' => PHPExcel_Style_Border::BORDER_THIN))
+    ));
+
+    $firstDateCol = 'C';
+    $lastDateCol = ($numDates > 0) ? PHPExcel_Cell::stringFromColumnIndex($numDates + 1) : 'B';
+
+    $row = $hdrBot + 1;
+    $firstDataRow = $row;
+    $omzetRow = $row;
+
+    // Baris Omzet Penjualan
+    $sheet->setCellValue("A$row", 1);
+    $sheet->setCellValue("B$row", 'Omzet Penjualan');
+    $col = 2;
+    foreach ($detailDates as $d) {
+        $c = PHPExcel_Cell::stringFromColumnIndex($col);
+        $sheet->setCellValue("{$c}$row", isset($omzetByDate[$d]) ? $omzetByDate[$d] : 0);
+        $col++;
+    }
+    $sheet->setCellValue("{$cTot}$row", ($numDates > 0) ? "=SUM({$firstDateCol}$row:{$lastDateCol}$row)" : 0);
+    $row++;
+
+    // Baris Pengeluaran Belanja
+    $expenseRow = $row;
+    $sheet->setCellValue("A$row", 2);
+    $sheet->setCellValue("B$row", 'Pengeluaran Belanja');
+    $col = 2;
+    foreach ($detailDates as $d) {
+        $c = PHPExcel_Cell::stringFromColumnIndex($col);
+        $sheet->setCellValue("{$c}$row", isset($expenseByDate[$d]) ? $expenseByDate[$d] : 0);
+        $col++;
+    }
+    $sheet->setCellValue("{$cTot}$row", ($numDates > 0) ? "=SUM({$firstDateCol}$row:{$lastDateCol}$row)" : 0);
+    $row++;
+
+    // Baris Laba Bersih (omzet - pengeluaran per tanggal)
+    $labaRow = $row;
+    $sheet->setCellValue("A$row", 3);
+    $sheet->setCellValue("B$row", 'Laba Bersih');
+    $col = 2;
+    foreach ($detailDates as $d) {
+        $c = PHPExcel_Cell::stringFromColumnIndex($col);
+        $sheet->setCellValue("{$c}$row", "={$c}{$omzetRow}-{$c}{$expenseRow}");
+        $col++;
+    }
+    $sheet->setCellValue("{$cTot}$row", ($numDates > 0) ? "=SUM({$firstDateCol}$row:{$lastDateCol}$row)" : 0);
+
+    $sheet->getStyle("A{$hdrTop}:{$lastCol}$row")->applyFromArray(array(
+        'borders' => array('allborders' => array('style' => PHPExcel_Style_Border::BORDER_THIN))
+    ));
+    $sheet->getStyle("A{$firstDataRow}:A$row")->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+    $sheet->getStyle("B{$firstDataRow}:B$row")->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_LEFT);
+    $sheet->getStyle("{$firstDateCol}{$firstDataRow}:{$lastCol}$row")->getNumberFormat()->setFormatCode('"Rp " #,##0');
+    $sheet->getStyle("{$cTot}{$firstDataRow}:{$cTot}$row")->getFont()->setBold(true);
+
+    $sheet->freezePane('C' . $firstDataRow);
+
+    for ($ci = 0; $ci <= $lastColIdx; $ci++) {
+        $cl = PHPExcel_Cell::stringFromColumnIndex($ci);
+        $sheet->getColumnDimension($cl)->setAutoSize(true);
+    }
+
+    if (ob_get_length()) {
+        ob_end_clean();
+    }
+
+    $filename = $title2 . ' (Detail) - ' . date('d M Y', strtotime($first_date)) . ' s.d. ' . date('d M Y', strtotime($last_date)) . '.xlsx';
+
+    header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    header('Content-Disposition: attachment; filename="' . $filename . '"');
+    header('Cache-Control: max-age=0');
+    header('Pragma: public');
+
+    try {
+        $objWriter = PHPExcel_IOFactory::createWriter($objPHPExcel, 'Excel2007');
+        $objWriter->save('php://output');
+    } catch (Exception $e) {
+        error_log('[QIEOS Excel Error] ' . $e->getMessage() . ' in ' . $e->getFile() . ':' . $e->getLine());
+        header('Content-Type: text/html; charset=utf-8');
+        echo '<h3>Error Generating Excel</h3>';
+        echo '<pre>' . htmlspecialchars($e->getMessage()) . '</pre>';
+    }
+
+    exit;
+}
+
+// ============================================================
+// MODE DETAIL PER TANGGAL - EXPORT EXCEL TAB PRODUK TERLARIS
+// Baris = produk top-N, kolom = per tanggal (Qty+Omzet) + Total.
+// ============================================================
+if ($tab === 'best' && $detail === 1) {
+
+    if ($limit <= 0) { $limit = 10; }
+
+    $detailDates = array();
+    $tsStart = strtotime($first_date);
+    $tsEnd   = strtotime($last_date);
+    if ($tsStart !== false && $tsEnd !== false && $tsStart <= $tsEnd) {
+        for ($t = $tsStart; $t <= $tsEnd; $t += 86400) {
+            $detailDates[] = date('Y-m-d', $t);
+        }
+    }
+
+    // Produk terlaris top-N pada rentang
+    $products = array();
+    $qp = mysqli_query($conn, "SELECT p.id, p.name, p.category, COALESCE(SUM(od.qty),0) AS qty_sold, COALESCE(SUM(od.subtotal),0) AS omzet FROM order_details od JOIN orders o ON od.order_id=o.id JOIN products p ON od.product_id=p.id WHERE o.status_payment='paid' AND $where GROUP BY p.id, p.name, p.category ORDER BY qty_sold DESC, omzet DESC LIMIT $limit");
+    if ($qp) { while ($pr = mysqli_fetch_assoc($qp)) { $products[(int) $pr['id']] = $pr; } }
+
+    $matrix = array();
+    $productTotals = array();
+    if (!empty($products)) {
+        $ids = implode(',', array_map('intval', array_keys($products)));
+        $qm = mysqli_query($conn, "SELECT od.product_id, DATE(o.tanggal) AS dt, COALESCE(SUM(od.qty),0) AS qty, COALESCE(SUM(od.subtotal),0) AS omzet FROM order_details od JOIN orders o ON od.order_id=o.id WHERE o.status_payment='paid' AND $where AND od.product_id IN ($ids) GROUP BY od.product_id, DATE(o.tanggal)");
+        if ($qm) {
+            while ($mr = mysqli_fetch_assoc($qm)) {
+                $pid = (int) $mr['product_id'];
+                $dt  = $mr['dt'];
+                $matrix[$pid][$dt] = array('qty' => (int) $mr['qty'], 'omzet' => (float) $mr['omzet']);
+                if (!isset($productTotals[$pid])) {
+                    $productTotals[$pid] = array('qty' => 0, 'omzet' => 0);
+                }
+                $productTotals[$pid]['qty']   += (int) $mr['qty'];
+                $productTotals[$pid]['omzet'] += (float) $mr['omzet'];
+            }
+        }
+    }
+
+    $numDates = count($detailDates);
+    $lastColIdx = 2 + ($numDates * 2) + 2; // A=Peringkat, B=Produk, C=Kategori, 2 kolom/tanggal, 2 kolom Total
+    $lastCol = PHPExcel_Cell::stringFromColumnIndex($lastColIdx);
+
+    $objPHPExcel = new PHPExcel();
+    $objPHPExcel->getProperties()->setCreator("Qieos")->setTitle($title2);
+
+    $sheet = $objPHPExcel->setActiveSheetIndex(0);
+    $sheet->setTitle("Laporan");
+
+    $sheet->mergeCells("A1:{$lastCol}1");
+    $sheet->setCellValue('A1', 'PT. SELARASGRIYA SARANA UTAMA');
+    $sheet->mergeCells("A2:{$lastCol}2");
+    $sheet->setCellValue('A2', 'Pasar Induk Surabaya Sidotopo');
+    $sheet->mergeCells("A4:{$lastCol}4");
+    $sheet->setCellValue('A4', $title);
+
+    $periode = '';
+    if (!empty($first_date) && !empty($last_date)) {
+        $periode = 'Periode : ' . date('d M Y', strtotime($first_date)) . ' s/d ' . date('d M Y', strtotime($last_date));
+    }
+    $sheet->mergeCells("A5:{$lastCol}5");
+    $sheet->setCellValue('A5', $periode);
+
+    $hdrTop = 7;
+    $hdrBot = 8;
+
+    foreach (array('A' => 'Peringkat', 'B' => 'Produk', 'C' => 'Kategori') as $cl => $label) {
+        $sheet->mergeCells("{$cl}{$hdrTop}:{$cl}{$hdrBot}");
+        $sheet->setCellValue("{$cl}{$hdrTop}", $label);
+    }
+
+    $qtyCols = array();
+    $omzetCols = array();
+
+    $col = 3;
+    foreach ($detailDates as $d) {
+        $c1 = PHPExcel_Cell::stringFromColumnIndex($col);
+        $c2 = PHPExcel_Cell::stringFromColumnIndex($col + 1);
+        $sheet->mergeCells("{$c1}{$hdrTop}:{$c2}{$hdrTop}");
+        $sheet->setCellValue("{$c1}{$hdrTop}", date('d/m/Y', strtotime($d)));
+        $sheet->setCellValue("{$c1}{$hdrBot}", 'Qty Terjual');
+        $sheet->setCellValue("{$c2}{$hdrBot}", 'Omzet');
+        $qtyCols[] = $c1;
+        $omzetCols[] = $c2;
+        $col += 2;
+    }
+
+    $cTot1 = PHPExcel_Cell::stringFromColumnIndex($col);
+    $cTot2 = PHPExcel_Cell::stringFromColumnIndex($col + 1);
+    $sheet->mergeCells("{$cTot1}{$hdrTop}:{$cTot2}{$hdrTop}");
+    $sheet->setCellValue("{$cTot1}{$hdrTop}", 'Total');
+    $sheet->setCellValue("{$cTot1}{$hdrBot}", 'Qty Terjual');
+    $sheet->setCellValue("{$cTot2}{$hdrBot}", 'Omzet');
+    $qtyCols[] = $cTot1;
+    $omzetCols[] = $cTot2;
+
+    $sheet->getStyle("A{$hdrTop}:{$lastCol}{$hdrBot}")->applyFromArray(array(
+        'font' => array('bold' => true, 'color' => array('rgb' => 'FFFFFF')),
+        'fill' => array('type' => PHPExcel_Style_Fill::FILL_SOLID, 'color' => array('rgb' => '1E1B4B')),
+        'alignment' => array('horizontal' => PHPExcel_Style_Alignment::HORIZONTAL_CENTER, 'vertical' => PHPExcel_Style_Alignment::VERTICAL_CENTER, 'wrapText' => true),
+        'borders' => array('allborders' => array('style' => PHPExcel_Style_Border::BORDER_THIN))
+    ));
+
+    $row = $hdrBot + 1;
+    $firstDataRow = $row;
+    $no = 1;
+
+    foreach ($products as $pid => $pr) {
+        $sheet->setCellValue("A$row", $no);
+        $sheet->setCellValue("B$row", $pr['name']);
+        $sheet->setCellValue("C$row", ucfirst($pr['category']));
+
+        $col = 3;
+        foreach ($detailDates as $d) {
+            $c1 = PHPExcel_Cell::stringFromColumnIndex($col);
+            $c2 = PHPExcel_Cell::stringFromColumnIndex($col + 1);
+            $cell = isset($matrix[$pid][$d]) ? $matrix[$pid][$d] : array('qty' => 0, 'omzet' => 0);
+            $sheet->setCellValue("{$c1}$row", $cell['qty']);
+            $sheet->setCellValue("{$c2}$row", $cell['omzet']);
+            $col += 2;
+        }
+
+        $tot = isset($productTotals[$pid]) ? $productTotals[$pid] : array('qty' => 0, 'omzet' => 0);
+        $sheet->setCellValue("{$cTot1}$row", $tot['qty']);
+        $sheet->setCellValue("{$cTot2}$row", $tot['omzet']);
+
+        $row++;
+        $no++;
+    }
+    $lastDataRow = $row - 1;
+
+    // Baris total
+    $sheet->mergeCells("A$row:C$row");
+    $sheet->setCellValue("A$row", 'TOTAL');
+    $sheet->getStyle("A$row")->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_RIGHT);
+
+    $col = 3;
+    foreach ($detailDates as $d) {
+        $c1 = PHPExcel_Cell::stringFromColumnIndex($col);
+        $c2 = PHPExcel_Cell::stringFromColumnIndex($col + 1);
+        if ($lastDataRow >= $firstDataRow) {
+            $sheet->setCellValue("{$c1}$row", "=SUM({$c1}$firstDataRow:{$c1}$lastDataRow)");
+            $sheet->setCellValue("{$c2}$row", "=SUM({$c2}$firstDataRow:{$c2}$lastDataRow)");
+        } else {
+            $sheet->setCellValue("{$c1}$row", 0);
+            $sheet->setCellValue("{$c2}$row", 0);
+        }
+        $col += 2;
+    }
+    if ($lastDataRow >= $firstDataRow) {
+        $sheet->setCellValue("{$cTot1}$row", "=SUM({$cTot1}$firstDataRow:{$cTot1}$lastDataRow)");
+        $sheet->setCellValue("{$cTot2}$row", "=SUM({$cTot2}$firstDataRow:{$cTot2}$lastDataRow)");
+    } else {
+        $sheet->setCellValue("{$cTot1}$row", 0);
+        $sheet->setCellValue("{$cTot2}$row", 0);
+    }
+
+    $sheet->getStyle("A$row:{$lastCol}$row")->applyFromArray(array(
+        'font' => array('bold' => true, 'color' => array('rgb' => 'FFFFFF')),
+        'fill' => array('type' => PHPExcel_Style_Fill::FILL_SOLID, 'color' => array('rgb' => '1E1B4B')),
+        'borders' => array('allborders' => array('style' => PHPExcel_Style_Border::BORDER_THIN))
+    ));
+
+    $sheet->getStyle("A{$hdrTop}:{$lastCol}$row")->applyFromArray(array(
+        'borders' => array('allborders' => array('style' => PHPExcel_Style_Border::BORDER_THIN))
+    ));
+    $sheet->getStyle("A{$firstDataRow}:C$row")->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+    $sheet->getStyle("B{$firstDataRow}:B$row")->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_LEFT);
+
+    foreach ($qtyCols as $c) {
+        $sheet->getStyle("{$c}{$firstDataRow}:{$c}$row")
+            ->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
+        $sheet->getStyle("{$c}{$firstDataRow}:{$c}$row")
+            ->getNumberFormat()->setFormatCode('#,##0');
+    }
+    foreach ($omzetCols as $c) {
+        $sheet->getStyle("{$c}{$firstDataRow}:{$c}$row")
+            ->getNumberFormat()->setFormatCode('"Rp " #,##0');
+    }
+
+    $sheet->freezePane('D' . $firstDataRow);
+
+    for ($ci = 0; $ci <= $lastColIdx; $ci++) {
+        $cl = PHPExcel_Cell::stringFromColumnIndex($ci);
+        $sheet->getColumnDimension($cl)->setAutoSize(true);
+    }
+
+    if (ob_get_length()) {
+        ob_end_clean();
+    }
+
+    $filename = $title2 . ' (Detail) - ' . date('d M Y', strtotime($first_date)) . ' s.d. ' . date('d M Y', strtotime($last_date)) . '.xlsx';
+
+    header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    header('Content-Disposition: attachment; filename="' . $filename . '"');
+    header('Cache-Control: max-age=0');
+    header('Pragma: public');
+
+    try {
+        $objWriter = PHPExcel_IOFactory::createWriter($objPHPExcel, 'Excel2007');
+        $objWriter->save('php://output');
+    } catch (Exception $e) {
+        error_log('[QIEOS Excel Error] ' . $e->getMessage() . ' in ' . $e->getFile() . ':' . $e->getLine());
+        header('Content-Type: text/html; charset=utf-8');
+        echo '<h3>Error Generating Excel</h3>';
+        echo '<pre>' . htmlspecialchars($e->getMessage()) . '</pre>';
+    }
+
+    exit;
 }
 
 // ============================

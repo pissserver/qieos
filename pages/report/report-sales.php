@@ -404,7 +404,17 @@
         if (tab === "cashier") url += "&cashier_id=" + ($("#cashier_id").val() || "");
         if (tab === "best") url += "&limit=" + ($("#best_limit").val() || 10);
 
+        if ($("#" + tab + "_detail").is(":checked")) url += "&detail=1";
+
         window.open(url, "_self");
+    }
+
+    // Mode Detail (khusus tab Per Kategori, Ringkasan Keuangan, Produk Terlaris):
+    // hanya Excel yang tersedia, PDF disembunyikan, teks "Export Excel" muncul.
+    function toggleReportDetail(tab){
+        let checked = $("#" + tab + "_detail").is(":checked");
+        $("#" + tab + "PdfBtn").toggle(!checked);
+        $("#" + tab + "ExcelBtn").toggleClass("is-detail", checked);
     }
 </script>
 
