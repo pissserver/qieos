@@ -43,11 +43,28 @@
                         </div>
                     </div>
 
-                    <div class="report-menu">
+                    <div class="report-menu" id="reportMenu" data-active="keuangan">
 
-                        <div class="report-menu-group">Keuangan</div>
+                        <div class="report-menu-toggle" role="tablist" aria-label="Jenis Laporan">
+                            <span class="report-menu-toggle-pill" aria-hidden="true"></span>
+
+                            <button type="button" class="report-menu-toggle-btn active"
+                                data-group="keuangan" role="tab" aria-selected="true"
+                                onclick="switchReportGroup('keuangan', this)">
+                                <i class="fas fa-wallet"></i>
+                                <span>Keuangan</span>
+                            </button>
+
+                            <button type="button" class="report-menu-toggle-btn"
+                                data-group="penjualan" role="tab" aria-selected="false"
+                                onclick="switchReportGroup('penjualan', this)">
+                                <i class="fas fa-receipt"></i>
+                                <span>Penjualan</span>
+                            </button>
+                        </div>
 
                         <button class="report-menu-item active"
+                            data-group="keuangan" data-tab="summary"
                             onclick="switchReportTab('summary', this)">
                             <i class="fas fa-wallet"></i>
 
@@ -58,6 +75,7 @@
                         </button>
 
                         <button class="report-menu-item"
+                            data-group="keuangan" data-tab="omzet"
                             onclick="switchReportTab('omzet', this)">
                             <i class="fas fa-coins"></i>
 
@@ -68,6 +86,7 @@
                         </button>
 
                         <button class="report-menu-item"
+                            data-group="keuangan" data-tab="expense"
                             onclick="switchReportTab('expense', this)">
                             <i class="fas fa-cart-shopping"></i>
 
@@ -78,6 +97,7 @@
                         </button>
 
                         <button class="report-menu-item"
+                            data-group="keuangan" data-tab="profit"
                             onclick="switchReportTab('profit', this)">
                             <i class="fas fa-chart-pie"></i>
 
@@ -88,6 +108,7 @@
                         </button>
 
                         <button class="report-menu-item"
+                            data-group="keuangan" data-tab="margin"
                             onclick="switchReportTab('margin', this)">
                             <i class="fas fa-percent"></i>
 
@@ -97,9 +118,8 @@
                             </div>
                         </button>
 
-                        <div class="report-menu-group">Penjualan</div>
-
                         <button class="report-menu-item"
+                            data-group="penjualan" data-tab="all"
                             onclick="switchReportTab('all', this)">
                             <i class="fas fa-receipt"></i>
 
@@ -110,6 +130,7 @@
                         </button>
 
                         <button class="report-menu-item"
+                            data-group="penjualan" data-tab="product"
                             onclick="switchReportTab('product', this)">
                             <i class="fas fa-box"></i>
 
@@ -120,6 +141,7 @@
                         </button>
 
                         <button class="report-menu-item"
+                            data-group="penjualan" data-tab="category"
                             onclick="switchReportTab('category', this)">
                             <i class="fas fa-tags"></i>
 
@@ -130,6 +152,7 @@
                         </button>
 
                         <button class="report-menu-item"
+                            data-group="penjualan" data-tab="cashier"
                             onclick="switchReportTab('cashier', this)">
                             <i class="fas fa-cash-register"></i>
 
@@ -140,6 +163,7 @@
                         </button>
 
                         <button class="report-menu-item"
+                            data-group="penjualan" data-tab="best"
                             onclick="switchReportTab('best', this)">
                             <i class="fas fa-trophy"></i>
 
@@ -334,11 +358,36 @@
         });
     }
 
+    function setReportGroup(group){
+        if (!group) return;
+
+        $("#reportMenu").attr("data-active", group);
+
+        $(".report-menu-toggle-btn").removeClass("active").attr("aria-selected", "false");
+        $('.report-menu-toggle-btn[data-group="' + group + '"]').addClass("active").attr("aria-selected", "true");
+    }
+
+    function switchReportGroup(group, el){
+        setReportGroup(group);
+
+        // Jika laporan yang sedang aktif bukan bagian grup ini,
+        // otomatis pindah ke laporan pertama grup tersebut.
+        let active = $(".report-menu-item.active");
+        if (!active.length || active.data("group") !== group) {
+            let first = $('.report-menu-item[data-group="' + group + '"]').first();
+            if (first.length) {
+                switchReportTab(first.data("tab"), first[0]);
+            }
+        }
+    }
+
     function switchReportTab(tab, el){
         currentSubTab = tab;
 
         $(".report-menu-item").removeClass("active");
         $(el).addClass("active");
+
+        setReportGroup($(el).data("group"));
 
         $("#summaryContent, #omzetContent, #expenseContent, #profitContent, #marginContent, #allContent, #productContent, #categoryContent, #cashierContent, #bestContent").hide();
         $(panelMap[tab] || "#allContent").show();
@@ -375,10 +424,9 @@
         $("#cashier_id, #first_date_cashier, #last_date_cashier").on("change", function(){ loadReport("cashier"); });
         $("#first_date_best, #last_date_best, #best_limit").on("change", function(){ loadReport("best"); });
 
-        let activeTab = $(".report-menu-item.active").attr("onclick") || "";
-        let match = activeTab.match(/'([^']+)'/);
-        let defaultSub = match ? match[1] : "all";
-        switchReportTab(defaultSub, $(".report-menu-item.active")[0] || $(".report-menu-item")[0]);
+        let activeItem = $(".report-menu-item.active").first();
+        let defaultSub = activeItem.data("tab") || "all";
+        switchReportTab(defaultSub, activeItem[0] || $(".report-menu-item")[0]);
     });
 
     function printPDF(tab){

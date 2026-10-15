@@ -50,19 +50,6 @@
     color: #c2410c;
 }
 
-.report-menu-group {
-    font-size: 11px;
-    font-weight: 800;
-    letter-spacing: 1.2px;
-    text-transform: uppercase;
-    color: #94a3b8;
-    padding: 4px 6px 2px;
-}
-
-.report-menu-group:not(:first-child) {
-    margin-top: 10px;
-}
-
 .money-stat {
     display: flex;
     align-items: center;
@@ -383,6 +370,82 @@
     outline-offset: 2px;
 }
 
+/* ===========================
+   TOGGLE JENIS LAPORAN (segmented pill: Keuangan / Penjualan)
+   =========================== */
+
+.report-menu-toggle {
+    position: relative;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4px;
+    padding: 4px;
+    margin-bottom: 14px;
+    background: #eef1f8;
+    border: 1px solid #e2e8f4;
+    border-radius: 14px;
+    box-shadow: inset 0 1px 3px rgba(15, 23, 42, .06);
+}
+
+.report-menu-toggle-pill {
+    position: absolute;
+    top: 4px;
+    bottom: 4px;
+    left: 4px;
+    width: calc(50% - 6px);
+    border-radius: 11px;
+    background: linear-gradient(135deg, #5b4cf4, #4338ca);
+    box-shadow: 0 8px 20px rgba(91, 76, 244, .32);
+    transition: transform .35s cubic-bezier(.23, 1, .32, 1);
+    z-index: 0;
+}
+
+#reportMenu[data-active="penjualan"] .report-menu-toggle-pill {
+    transform: translateX(calc(100% + 4px));
+}
+
+.report-menu-toggle-btn {
+    position: relative;
+    z-index: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 9px 8px;
+    border: none;
+    border-radius: 11px;
+    background: transparent;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: .02em;
+    color: #64748b;
+    cursor: pointer;
+    transition: color .3s;
+}
+
+.report-menu-toggle-btn i {
+    font-size: 13px;
+}
+
+.report-menu-toggle-btn:hover,
+.report-menu-toggle-btn.active {
+    color: #fff;
+}
+
+.report-menu-toggle-btn:not(.active):hover {
+    color: #4338ca;
+}
+
+/* Hanya tampilkan item dari grup yang sedang aktif */
+#reportMenu[data-active="keuangan"] .report-menu-item[data-group="penjualan"],
+#reportMenu[data-active="penjualan"] .report-menu-item[data-group="keuangan"] {
+    display: none;
+}
+
+#reportMenu .report-menu-item[data-group] {
+    animation: fadeReport .3s;
+}
+
 @media (max-width: 575.98px) {
 
     /* ===========================
@@ -418,12 +481,14 @@
         flex-direction: column;
     }
 
-    .report-menu-group{
+    .report-sales-card .report-menu-toggle{
         grid-column: 1 / -1;
+        margin-bottom: 12px;
     }
 
-    .report-sales-card .report-menu-group:not(:first-child){
-        margin-top: 8px;
+    .report-sales-card .report-menu-toggle-btn{
+        flex-direction: row;
+        padding: 10px 8px;
     }
 
     .report-sales-card .report-menu-item{
