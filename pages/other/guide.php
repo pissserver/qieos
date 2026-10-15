@@ -50,6 +50,10 @@ $D['master-produk'] = g('fa-boxes-stacked', 'Master Produk', $base . '/pages/mas
     'Pusat data produk: nama, kode, kategori, harga beli & jual, stok minimal, dan foto produk. Dasar bagi Katalog, Stok, dan Pesanan.',
     array('Tambah, ubah, hapus, atau nonaktifkan produk', 'Atur stok minimal untuk peringatan low stock', 'Detail produk menampilkan histori harga & stok'));
 
+$D['master-unit'] = g('fa-ruler-combined', 'Master Unit', $base . '/pages/master/master-unit.php', $A,
+    'Kelola satuan barang (pcs, karton, slop, dus, lusin, kg, liter, dll) beserta konversinya, mis. 1 karton = 100 pcs.',
+    array('Tambah / ubah / hapus satuan', 'Konversi antar satuan per produk', 'Dipakai di pembelian & stok'));
+
 $D['master-supplier'] = g('fa-truck', 'Master Supplier', $base . '/pages/master/master-supplier.php', $A,
     'Kelola data supplier / pemasok barang untuk mendukung proses pembelian dan pengisian stok.',
     array('Simpan profil lengkap supplier', 'Tandai status aktif / nonaktif', 'Terhubung dengan daftar belanja'));
@@ -110,6 +114,10 @@ $D['guide'] = g('fa-book', 'Guide', $base . '/pages/other/guide.php', $A,
     'Halaman ini. Petunjuk penggunaan setiap halaman Qieos sesuai role Anda.',
     array('Cara pakai tiap menu', 'Status fitur: aktif / segera hadir', 'Buka halaman langsung dari kartu'));
 
+$D['database-schema'] = g('fa-database', 'Database Schema', $base . '/pages/other/database-schema.php', $A,
+    'Peta struktur tabel database Qieos beserta relasinya: 24 tabel dengan domain MASTER, KONVERSI UNIT, PURCHASING, STOK, PENJUALAN, TENANT, AKUN & CHAT, dan SISTEM.',
+    array('Diagram relasi tabel interaktif (SVG)', 'Keterangan lengkap tiap tabel', 'Klik tabel untuk sorot relasinya'));
+
 // ============================================================
 // KOMPOSISI PER ROLE
 // ============================================================
@@ -122,22 +130,22 @@ $sections = array();
 switch ($role) {
     case 'developer':
         $sections['UMUM'] = array('dashboard', 'pencarian', 'whatsnew', 'chat', 'keranjang', 'omzet', 'profil');
-        $sections['MASTER'] = array('master-produk', 'master-supplier', 'master-customer', 'master-user');
+        $sections['MASTER'] = array('master-produk', 'master-unit', 'master-supplier', 'master-customer', 'master-user');
         $sections['STOK ACTION'] = array('restock', 'transfer-gudang', 'stok-gudang');
         $sections['KANTIN'] = array('stok-kantin', 'katalog', 'pesanan');
         $sections['TENANT'] = array('tenant');
         $sections['REKAP'] = array('rekap');
         $sections['LAPORAN'] = array('laporan-penjualan', 'laporan-tenant');
-        $sections['LAINNYA'] = array('update', 'guide');
+        $sections['LAINNYA'] = array('update', 'guide', 'database-schema');
         break;
 
     case 'administrator':
         $sections['UMUM'] = array('dashboard', 'pencarian', 'whatsnew', 'chat', 'profil');
-        $sections['MASTER'] = array('master-produk', 'master-supplier', 'master-customer', 'master-user');
+        $sections['MASTER'] = array('master-produk', 'master-unit', 'master-supplier', 'master-customer', 'master-user');
         $sections['STOK ACTION'] = array('restock', 'transfer-gudang', 'stok-gudang');
         $sections['TENANT'] = array('tenant');
         $sections['LAPORAN'] = array('laporan-penjualan', 'laporan-tenant');
-        $sections['LAINNYA'] = array('update', 'guide');
+        $sections['LAINNYA'] = array('update', 'guide', 'database-schema');
         break;
 
     default: // staff kasir
@@ -146,7 +154,7 @@ switch ($role) {
         $sections['KANTIN'] = array('stok-kantin', 'katalog', 'pesanan');
         $sections['TENANT'] = array('tenant');
         $sections['REKAP'] = array('rekap');
-        $sections['LAINNYA'] = array('update', 'guide');
+        $sections['LAINNYA'] = array('update', 'guide', 'database-schema');
         break;
 }
 

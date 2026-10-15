@@ -43,6 +43,8 @@ if ($role === 'developer') {
         $badge('Laporan Tenant', BASE_URL . '/pages/report/report-tenant.php', 'fas fa-file-invoice-dollar', 'Laporan'),
         $badge('Master User', BASE_URL . '/pages/master/master-user.php', 'fas fa-users-cog', 'Management'),
         $badge('Update', BASE_URL . '/pages/other/update.php', 'fas fa-rocket', 'Sistem'),
+        $badge('Guide', BASE_URL . '/pages/other/guide.php', 'fas fa-book', 'Sistem'),
+        $badge('Database Schema', BASE_URL . '/pages/other/database-schema.php', 'fas fa-database', 'Sistem'),
     ]);
 } elseif ($role === 'administrator') {
     $pages = array_merge($pages, [
@@ -58,6 +60,8 @@ if ($role === 'developer') {
         $badge('Laporan Tenant', BASE_URL . '/pages/report/report-tenant.php', 'fas fa-file-invoice-dollar', 'Laporan'),
         $badge('Master User', BASE_URL . '/pages/master/master-user.php', 'fas fa-users-cog', 'Management'),
         $badge('Update', BASE_URL . '/pages/other/update.php', 'fas fa-rocket', 'Sistem'),
+        $badge('Guide', BASE_URL . '/pages/other/guide.php', 'fas fa-book', 'Sistem'),
+        $badge('Database Schema', BASE_URL . '/pages/other/database-schema.php', 'fas fa-database', 'Sistem'),
     ]);
 } else {
     $pages = array_merge($pages, [
@@ -70,6 +74,8 @@ if ($role === 'developer') {
         $badge('Daftar Tenant', BASE_URL . '/pages/tenant/tenant.php', 'fas fa-store', 'Tenant'),
         $badge('Rekap Penjualan & Tenant', BASE_URL . '/pages/recap/recap.php', 'fas fa-clipboard-list', 'Rekap'),
         $badge('Update', BASE_URL . '/pages/other/update.php', 'fas fa-rocket', 'Sistem'),
+        $badge('Guide', BASE_URL . '/pages/other/guide.php', 'fas fa-book', 'Sistem'),
+        $badge('Database Schema', BASE_URL . '/pages/other/database-schema.php', 'fas fa-database', 'Sistem'),
     ]);
 }
 

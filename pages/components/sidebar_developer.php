@@ -138,9 +138,9 @@
     </a>
 </li>
 
-<li class="nav-item <?= ($current_page == 'flow-database.php') ? 'active' : ''; ?>">
-    <a href="<?php echo BASE_URL; ?>/pages/other/flow-database.php" class="nav-link" data-tooltip="Flow & Database">
-        <span class="sidebar-icon"><i class="fas fa-sitemap"></i></span>
-        <span class="sidebar-text">Flow & Database</span>
+<li class="nav-item <?= ($current_page == 'database-schema.php') ? 'active' : ''; ?>">
+    <a href="<?php echo BASE_URL; ?>/pages/other/database-schema.php" class="nav-link" data-tooltip="Database Schema">
+        <span class="sidebar-icon"><i class="fas fa-database"></i></span>
+        <span class="sidebar-text">Database Schema</span>
     </a>
 </li>
