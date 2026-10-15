@@ -166,7 +166,7 @@ include __DIR__ . '/../components/data/stock-status.php';
                 <div class="mt-2 px-5 mp-add-body import-modal-body">
                     <div class="import-guide">
                         <p><i class="fas fa-info-circle"></i> Unduh template, isi daftar produk, lalu unggah kembali file tersebut.</p>
-                        <p>Kolom <b>code</b> (Kode), <b>name</b> (Nama), <b>category</b> (Kategori), dan <b>sell_price</b> (Harga Jual) wajib diisi; <b>unit</b> boleh kosong. Kategori dipilih dari dropdown Excel. Kolom <b>low_stock</b> (batas menipis gudang) dan <b>low_stock_kantin</b> (batas menipis kantin) diisi angka (0 diperbolehkan); foto &amp; supplier diinput manual di detail produk. Baris yang diawali <code>#</code> (mis. baris contoh) dilewati otomatis dan produk dengan kode yang sama tidak diimport dua kali.</p>
+                        <p>Kolom <b>code</b> (Kode), <b>name</b> (Nama), <b>category</b> (Kategori), dan <b>sell_price</b> (Harga Jual) wajib diisi; <b>unit</b> boleh kosong. Kategori &amp; unit dipilih dari dropdown Excel. Kolom <b>low_stock</b> (batas menipis gudang) dan <b>low_stock_kantin</b> (batas menipis kantin) diisi angka (0 diperbolehkan); foto &amp; supplier diinput manual di detail produk. Baris yang diawali <code>#</code> (mis. baris contoh) dilewati otomatis dan produk dengan kode yang sama tidak diimport dua kali.</p>
                     </div>
 
                     <a href="master-product-template.php" class="btn mu-add-btn mu-add-btn-template">

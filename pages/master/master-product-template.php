@@ -9,6 +9,15 @@ require '../../vendor/phpoffice/phpexcel/Classes/PHPExcel/IOFactory.php';
 // dropdown Excel & validasi di master-product-import.php.
 $categories = ['Makanan', 'Minuman', 'Jajanan', 'Pelengkap'];
 
+// Unit aktif dari tabel units (untuk dropdown Excel kolom unit).
+$units = array();
+$qu = mysqli_query($conn, "SELECT name FROM units WHERE deleted_at IS NULL ORDER BY name ASC");
+if ($qu) {
+    while ($d = mysqli_fetch_assoc($qu)) {
+        $units[] = $d['name'];
+    }
+}
+
 $objPHPExcel = new PHPExcel();
 $objPHPExcel->getProperties()->setCreator('Qieos')->setTitle('Template Import Produk');
 
@@ -34,7 +43,7 @@ $sheet->getStyle('A1')->applyFromArray([
 $sheet->mergeCells('A2:G2');
 $sheet->setCellValue('A2', 'Isi data mulai baris 5. JANGAN mengubah / menghapus baris header (baris 4).');
 $sheet->mergeCells('A3:G3');
-$sheet->setCellValue('A3', 'Kolom "code", "name", "category", "sell_price" wajib diisi; "unit" boleh kosong; "low_stock" (batas menipis gudang) & "low_stock_kantin" (batas menipis kantin) isi angka (boleh 0). Baris yang diawali tanda # otomatis dilewati saat import.');
+$sheet->setCellValue('A3', 'Kolom "code", "name", "category", "sell_price" wajib diisi; "unit" pilih dari dropdown (boleh kosong); "low_stock" (batas menipis gudang) & "low_stock_kantin" (batas menipis kantin) isi angka (boleh 0). Baris yang diawali tanda # otomatis dilewati saat import.');
 foreach (array('A2', 'A3') as $c) {
     $sheet->getStyle($c)->applyFromArray([
         'font' => ['italic' => true, 'size' => 10, 'color' => ['rgb' => '64748B']],
@@ -97,6 +106,37 @@ $objValidation->setErrorTitle('Kategori tidak valid');
 $objValidation->setError('Kategori harus salah satu dari: ' . implode(', ', $categories));
 // Baris 5 adalah baris contoh sekaligus awal isi data — ikut diberi dropdown.
 $sheet->setDataValidation('C5:C45', $objValidation);
+
+// ---- Data validation unit: dropdown dari tabel units ----
+$unitsList = array_values(array_unique(array_map('trim', $units)));
+if (!empty($unitsList)) {
+    // Formula list Excel max 255 karakter; kalau unit banyak, pindah ke sheet tersembunyi.
+    $formula = '"' . implode(',', $unitsList) . '"';
+    if (strlen($formula) > 255) {
+        $hidden = $objPHPExcel->createSheet();
+        $hidden->setTitle('Units');
+        $hidden->setSheetState(PHPExcel_Worksheet::SHEETSTATE_HIDDEN);
+        $hr = 1;
+        foreach ($unitsList as $u) {
+            $hidden->setCellValue('A' . $hr, $u);
+            $hr++;
+        }
+        $formula = 'Units!$A$1:$A$' . ($hr - 1);
+    }
+
+    $objValUnit = new PHPExcel_Cell_DataValidation();
+    $objValUnit->setType(PHPExcel_Cell_DataValidation::TYPE_LIST);
+    $objValUnit->setFormula1($formula);
+    $objValUnit->setAllowBlank(true);
+    $objValUnit->setShowDropDown(true);
+    $objValUnit->setShowInputMessage(true);
+    $objValUnit->setShowErrorMessage(true);
+    $objValUnit->setPromptTitle('Pilih Unit');
+    $objValUnit->setPrompt('Pilih salah satu unit dari daftar.');
+    $objValUnit->setErrorTitle('Unit tidak valid');
+    $objValUnit->setError('Unit harus salah satu dari: ' . implode(', ', $unitsList));
+    $sheet->setDataValidation('E5:E45', $objValUnit);
+}
 
 $sheet->getStyle('A4:G45')->getAlignment()->setVertical(PHPExcel_Style_Alignment::VERTICAL_CENTER);
 $sheet->getStyle('D4:D45')->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_RIGHT);

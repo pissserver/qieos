@@ -44,6 +44,12 @@ include '../../sessions/session.php';
                             <i class="fas fa-plus me-2"></i>
                             Tambah Unit
                         </button>
+                        <button type="button" class="btn mu-add-btn mu-add-btn-import" id="btnImportUnit">
+                            <i class="fas fa-file-import me-2"></i>Import
+                        </button>
+                        <a class="btn mu-add-btn mu-add-btn-export" href="master-unit-export.php">
+                            <i class="fas fa-file-export me-2"></i>Export
+                        </a>
                     </div>
 
                     <div class="table-responsive-wrap" id="unitTableContainer"></div>
@@ -131,6 +137,65 @@ include '../../sessions/session.php';
                     <button class="btn-close btn-close-white mp-add-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="mt-2 px-5 mp-add-body" id="editUnitContent"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- IMPORT MODAL -->
+    <div class="modal fade" id="importUnitModal" tabindex="-1">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content stock-panel border-0">
+
+                <div class="panel-header panel-dark my-3 mx-3 mp-add-header">
+                    <div class="panel-left">
+                        <div class="panel-icon">
+                            <i class="fas fa-file-import"></i>
+                        </div>
+
+                        <div class="mp-add-head-text">
+                            <div class="panel-title">
+                                Import Unit
+                            </div>
+                            <div class="panel-subtitle">
+                                Import data satuan dari file Excel
+                            </div>
+                        </div>
+                    </div>
+
+                    <button class="btn-close btn-close-white mp-add-close" data-bs-dismiss="modal"></button>
+                </div>
+
+                <div class="mt-2 px-5 mp-add-body import-modal-body">
+                    <div class="import-guide">
+                        <p><i class="fas fa-info-circle"></i> Unduh template, isi daftar unit, lalu unggah kembali file tersebut.</p>
+                        <p>Kolom <b>name</b> (Nama Unit) wajib diisi; <b>note</b> (Catatan) boleh kosong. Baris yang diawali <code>#</code> (mis. baris contoh) dilewati otomatis dan unit dengan nama yang sama tidak diimport dua kali.</p>
+                    </div>
+
+                    <a href="master-unit-template.php" class="btn mu-add-btn mu-add-btn-template">
+                        <i class="fas fa-file-download me-2"></i>Download Template
+                    </a>
+
+                    <form id="importUnitForm" enctype="multipart/form-data">
+                        <label class="import-dropzone" id="unitImportDropzone" for="importUnitFile">
+                            <input type="file" id="importUnitFile" name="file" accept=".xlsx,.xls" hidden>
+                            <i class="fas fa-cloud-upload-alt import-drop-ico"></i>
+                            <div class="import-drop-title">Klik untuk <span>pilih file</span> Excel</div>
+                            <div class="import-drop-sub">Format .xlsx / .xls &middot; maksimal 5MB</div>
+                        </label>
+                        <div class="import-fileinfo d-none" id="unitImportFileInfo">
+                            <i class="fas fa-file-excel"></i>
+                            <span id="importUnitFileName"></span>
+                            <button type="button" class="import-file-remove" id="importUnitFileRemove" aria-label="Hapus file">
+                                <i class="fas fa-xmark"></i>
+                            </button>
+                        </div>
+                        <div class="mp-add-footer">
+                            <button type="submit" class="btn-save" id="btnImportUnitSubmit">
+                                <i class="fas fa-upload"></i> Import Sekarang
+                            </button>
+                        </div>
+                    </form>
+                </div>
             </div>
         </div>
     </div>
@@ -297,6 +362,64 @@ $(document).on('click','.deleteUnitBtn',function(){
             fetch('master-unit-action.php?action=destroy',{method:'POST',body:new URLSearchParams({id:id})})
             .then(res=>res.json()).then(res=>{ if(res.status==='success'){ QToast('Terhapus','Data berhasil dihapus','success'); loadUnitTable(); } });
         }
+    });
+});
+
+// IMPORT
+$(document).on('click','#btnImportUnit',function(){
+    $('#importUnitModal').modal('show');
+});
+$(document).on('change','#importUnitFile',function(){
+    let f=this.files && this.files[0];
+    if(!f) return;
+    $('#importUnitFileName').text(f.name);
+    $('#unitImportFileInfo').removeClass('d-none');
+    $('#unitImportDropzone').addClass('d-none');
+});
+$(document).on('click','#importUnitFileRemove',function(){
+    $('#importUnitFile').val('');
+    $('#unitImportFileInfo').addClass('d-none');
+    $('#unitImportDropzone').removeClass('d-none');
+});
+$('#importUnitModal').on('hidden.bs.modal',function(){
+    $('#importUnitForm')[0].reset();
+    $('#importUnitFile').val('');
+    $('#unitImportFileInfo').addClass('d-none');
+    $('#unitImportDropzone').removeClass('d-none');
+});
+$(document).on('submit','#importUnitForm',function(e){
+    e.preventDefault();
+    let f = document.getElementById('importUnitFile').files && document.getElementById('importUnitFile').files[0];
+    if(!f){ QToast('Perhatian','Pilih file Excel terlebih dahulu','warning'); return; }
+
+    let formData=new FormData(this);
+    let btn=document.getElementById('btnImportUnitSubmit');
+    let oldHtml=btn.innerHTML;
+    btn.disabled=true;
+    btn.innerHTML='<i class="fas fa-spinner fa-spin"></i> Mengimpor...';
+
+    fetch('master-unit-import.php',{method:'POST',body:formData})
+    .then(res=>res.json()).then(res=>{
+        btn.disabled=false;
+        btn.innerHTML=oldHtml;
+        if(res.status==='success'){
+            $('#importUnitModal').modal('hide');
+            let msg=res.inserted+' unit berhasil diimport';
+            if(res.duplicated>0) msg+=', '+res.duplicated+' duplikat dilewati';
+            if(res.errors && res.errors.length>0) msg+=' ('+res.errors.length+' baris gagal)';
+            QToast('Import Selesai',msg,'success');
+            if(res.errors && res.errors.length>0){
+                console.warn('Baris gagal:',res.errors);
+            }
+            loadUnitTable();
+            loadConvertContent();
+        }
+        else{ QToast('Gagal',res.message||'Terjadi kesalahan saat import','error'); }
+    })
+    .catch(()=>{
+        btn.disabled=false;
+        btn.innerHTML=oldHtml;
+        QToast('Error','Gagal memproses import','error');
     });
 });
 </script>

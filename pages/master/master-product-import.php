@@ -56,6 +56,15 @@ if ($headerRow < 0) {
 // Kategori "Additional" dibuat manual lewat form tambah produk.
 $categories = ['Makanan', 'Minuman', 'Jajanan', 'Pelengkap'];
 
+// Unit aktif dari tabel units — nilai tidak ada di daftar ini ditolak.
+$unitsList = array();
+$qu = mysqli_query($conn, "SELECT name FROM units WHERE deleted_at IS NULL");
+if ($qu) {
+    while ($d = mysqli_fetch_assoc($qu)) {
+        $unitsList[$d['name']] = true;
+    }
+}
+
 // Kode produk aktif yang sudah ada -> duplikat dilewati
 $existing = array();
 $q = mysqli_query($conn, "SELECT code FROM products WHERE deleted_at IS NULL");
@@ -124,6 +133,22 @@ for ($i = $headerRow + 1; $i < count($rows); $i++) {
         continue;
     }
     $priceSql = number_format((float)$priceRaw, 2, '.', '');
+
+    // Unit: case-insensitive, wajib ada di tabel units (boleh kosong)
+    if ($unit !== '') {
+        $unitKey = null;
+        foreach (array_keys($unitsList) as $uName) {
+            if (strtolower($unit) === strtolower($uName)) {
+                $unit = $uName;
+                $unitKey = $uName;
+                break;
+            }
+        }
+        if ($unitKey === null) {
+            $rowErrors[] = 'Baris ' . $rowNo . ': unit "' . $unit . '" tidak valid (pilih: ' . implode(', ', array_keys($unitsList)) . ')';
+            continue;
+        }
+    }
 
     // low_stock & low_stock_kantin: numerik >= 0, default 0 jika kosong
     $lowStock = 0;

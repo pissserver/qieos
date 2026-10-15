@@ -1705,14 +1705,16 @@ textarea.form-control {
 
     #productTableContainer #btnContainer,
     #customerTableContainer #btnContainer,
-    #supplierTableContainer #btnContainer {
+    #supplierTableContainer #btnContainer,
+    #unitTableContainer #btnContainer {
         display: block;
         width: 100%;
     }
 
     #productTableContainer .mu-add-btn,
     #customerTableContainer .mu-add-btn,
-    #supplierTableContainer .mu-add-btn {
+    #supplierTableContainer .mu-add-btn,
+    #unitTableContainer .mu-add-btn {
         width: 100%;
         height: 44px;
         border-radius: 14px;
@@ -1722,7 +1724,8 @@ textarea.form-control {
 
     #productTableContainer .mu-add-btn:active,
     #customerTableContainer .mu-add-btn:active,
-    #supplierTableContainer .mu-add-btn:active {
+    #supplierTableContainer .mu-add-btn:active,
+    #unitTableContainer .mu-add-btn:active {
         transform: scale(.985);
         box-shadow: 0 6px 14px rgba(79, 70, 229, .3);
     }
@@ -2591,7 +2594,8 @@ textarea.form-control {
 @media (min-width: 576px) {
     #productTableContainer #btnContainer,
     #customerTableContainer #btnContainer,
-    #supplierTableContainer #btnContainer {
+    #supplierTableContainer #btnContainer,
+    #unitTableContainer #btnContainer {
         display: flex;
         align-items: center;
         gap: 10px;
@@ -2724,7 +2728,8 @@ textarea.form-control {
 @media (max-width: 575.98px) {
     #productTableContainer #btnContainer,
     #customerTableContainer #btnContainer,
-    #supplierTableContainer #btnContainer {
+    #supplierTableContainer #btnContainer,
+    #unitTableContainer #btnContainer {
         display: flex;
         flex-direction: column;
         gap: 10px;
@@ -3000,7 +3005,9 @@ textarea.form-control {
     }
 
     #unitTableContainer #btnContainer {
-        display: block;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
         width: 100%;
     }
 
@@ -3010,11 +3017,6 @@ textarea.form-control {
         border-radius: 14px;
         justify-content: center;
         margin: 0;
-    }
-
-    #unitTableContainer .mu-add-btn:active {
-        transform: scale(.985);
-        box-shadow: 0 6px 14px rgba(79, 70, 229, .3);
     }
 
     #unitTableContainer .dataTables_paginate,
