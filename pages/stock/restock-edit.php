@@ -33,6 +33,13 @@ while($p = mysqli_fetch_assoc($qProd)){
     $products[] = $p;
 }
 
+// Satuan untuk dropdown (Master Unit)
+$qUnit = mysqli_query($conn, "SELECT name FROM units WHERE deleted_at IS NULL ORDER BY name ASC");
+$units = [];
+while($u = mysqli_fetch_assoc($qUnit)){
+    $units[] = $u['name'];
+}
+
 // Bangun opsi <select> untuk satu item; pilih berdasarkan product_id,
 // fallback berdasarkan nama agar data lama yang belum punya id tetap terbaca
 function buildProductOptions($products, $currentName, $currentId){
@@ -49,6 +56,22 @@ function buildProductOptions($products, $currentName, $currentId){
                . ' data-name="' . htmlspecialchars($p['name']) . '"'
                . ' data-unit="' . htmlspecialchars($p['unit']) . '"'
                . ($sel ? ' selected' : '') . '>' . htmlspecialchars($p['name']) . '</option>';
+    }
+    return $html;
+}
+
+// Opsi satuan; nilai tersimpan tetap ditampilkan walau tidak ada di Master Unit
+function buildUnitOptions($units, $current){
+    $current = $current === null ? '' : (string)$current;
+    $html = '<option value=""></option>';
+    $found = false;
+    foreach($units as $u){
+        $sel = ($current !== '' && (string)$u === $current);
+        if($sel) $found = true;
+        $html .= '<option value="' . htmlspecialchars($u) . '"' . ($sel ? ' selected' : '') . '>' . htmlspecialchars($u) . '</option>';
+    }
+    if($current !== '' && !$found){
+        $html .= '<option value="' . htmlspecialchars($current) . '" selected>' . htmlspecialchars($current) . '</option>';
     }
     return $html;
 }
@@ -101,11 +124,13 @@ function buildProductOptions($products, $currentName, $currentId){
                     <div class="input-icon input-icon-unit">
                         <i class="fas fa-balance-scale"></i>
                     </div>
-                    <input type="text"
+                    <select
                            name="unit_buy[]"
-                           class="form-control"
-                           value="<?= htmlspecialchars($d['unit_buy']) ?>"
+                           class="form-control unit-select"
+                           placeholder="Satuan"
                            required>
+                        <?= buildUnitOptions($units, $d['unit_buy']) ?>
+                    </select>
                 </div>
             </div>
 

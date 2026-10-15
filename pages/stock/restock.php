@@ -12,6 +12,13 @@ $products = [];
 while($p = mysqli_fetch_assoc($qProd)){
     $products[] = ['id' => (int)$p['id'], 'name' => $p['name'], 'unit' => $p['unit']];
 }
+
+// Satuan untuk dropdown (Master Unit)
+$qUnit = mysqli_query($conn, "SELECT name FROM units WHERE deleted_at IS NULL ORDER BY name ASC");
+$units = [];
+while($u = mysqli_fetch_assoc($qUnit)){
+    $units[] = $u['name'];
+}
 ?>
 
 <!doctype html>
@@ -125,11 +132,16 @@ while($p = mysqli_fetch_assoc($qProd)){
                                         <div class="input-icon input-icon-unit">
                                             <i class="fas fa-balance-scale"></i>
                                         </div>
-                                        <input type="text"
+                                        <select
                                             name="unit_buy[]"
-                                            class="form-control"
+                                            class="form-control unit-select"
                                             placeholder="Satuan"
                                             required>
+                                            <option value=""></option>
+                                            <?php foreach($units as $u): ?>
+                                            <option value="<?= htmlspecialchars($u) ?>"><?= htmlspecialchars($u) ?></option>
+                                            <?php endforeach; ?>
+                                        </select>
                                     </div>
                                 </div>
 
@@ -294,7 +306,7 @@ while($p = mysqli_fetch_assoc($qProd)){
         rows.forEach(function(r){
             let sel = r.querySelector('select[name="product_id[]"]');
             let qty = r.querySelector('input[name="qty_buy[]"]');
-            let unit = r.querySelector('input[name="unit_buy[]"]');
+            let unit = r.querySelector('select[name="unit_buy[]"]');
             let unitPrice = r.querySelector('input[name="unit_price[]"]');
             let priceBuy = r.querySelector('input[name="price_buy[]"]');
             
@@ -350,7 +362,7 @@ while($p = mysqli_fetch_assoc($qProd)){
     // Reset form item ke kondisi awal (satu baris kosong seperti halaman baru)
     function resetItemRows(){
         let container = document.getElementById('itemsContainer');
-        container.querySelectorAll('.product-select').forEach(function(sel){
+        container.querySelectorAll('.product-select, .unit-select').forEach(function(sel){
             let $s = $(sel);
             if($s.hasClass('select2-hidden-accessible')) $s.select2('destroy');
         });
@@ -376,7 +388,9 @@ while($p = mysqli_fetch_assoc($qProd)){
             <div class="col-md-2">
                 <div class="input-group-modern">
                     <div class="input-icon input-icon-unit"><i class="fas fa-balance-scale"></i></div>
-                    <input type="text" name="unit_buy[]" class="form-control" placeholder="Satuan" required>
+                    <select name="unit_buy[]" class="form-control unit-select" placeholder="Satuan" required>
+                        ${buildUnitOptions('')}
+                    </select>
                 </div>
             </div>
             <div class="col-md-2 item-unit-price">
@@ -394,10 +408,14 @@ while($p = mysqli_fetch_assoc($qProd)){
         `;
         container.appendChild(row);
         initProductSelect(row.querySelector('.product-select'));
+        initUnitSelect(row.querySelector('.unit-select'));
     }
 
     // Daftar produk untuk dropdown dinamis (semua kecuali Additional)
     var PRODUCT_LIST = <?= json_encode(array_values($products), JSON_UNESCAPED_UNICODE) ?>;
+
+    // Daftar satuan untuk dropdown dinamis (Master Unit)
+    var UNIT_LIST = <?= json_encode(array_values($units), JSON_UNESCAPED_UNICODE) ?>;
 
     function escAttr(s){
         return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
@@ -410,6 +428,37 @@ while($p = mysqli_fetch_assoc($qProd)){
             html += '<option value="' + p.id + '" data-name="' + escAttr(p.name) + '" data-unit="' + escAttr(p.unit || '') + '"' + sel + '>' + escAttr(p.name) + '</option>';
         });
         return html;
+    }
+
+    // Opsi satuan; nilai tersimpan tetap ditampilkan walau tidak ada di Master Unit
+    function buildUnitOptions(selected){
+        selected = selected ? String(selected) : '';
+        let html = '<option value=""></option>';
+        let found = false;
+        UNIT_LIST.forEach(function(u){
+            let sel = (selected !== '' && String(u) === selected) ? ' selected' : '';
+            if(sel) found = true;
+            html += '<option value="' + escAttr(u) + '"' + sel + '>' + escAttr(u) + '</option>';
+        });
+        if(selected !== '' && !found){
+            html += '<option value="' + escAttr(selected) + '" selected>' + escAttr(selected) + '</option>';
+        }
+        return html;
+    }
+
+    // Set nilai satuan pada <select>; tambahkan opsi bila belum ada,
+    // lalu picu 'change' supaya tampilan select2 ikut terbarui
+    function setUnitValue($unitSel, unit){
+        if(!$unitSel || !$unitSel.length || !unit) return;
+        let val = String(unit);
+        let exists = false;
+        $unitSel.find('option').each(function(){
+            if(String(this.value) === val){ exists = true; return false; }
+        });
+        if(!exists){
+            $unitSel.append('<option value="' + escAttr(val) + '">' + escAttr(val) + '</option>');
+        }
+        $unitSel.val(val).trigger('change');
     }
 
     function applyItemSelect2($sel){
@@ -425,13 +474,25 @@ while($p = mysqli_fetch_assoc($qProd)){
         }
         $sel.select2(opts);
         $sel.on('change', function(){
-            let unitInput = $(this).closest('.item-row').find('input[name="unit_buy[]"]');
-            if(unitInput.length){
-                let opt = this.options[this.selectedIndex];
-                let u = opt ? opt.getAttribute('data-unit') : '';
-                if(u) unitInput.val(u);
-            }
+            let unitSel = $(this).closest('.item-row').find('select[name="unit_buy[]"]');
+            let opt = this.options[this.selectedIndex];
+            let u = opt ? opt.getAttribute('data-unit') : '';
+            if(u) setUnitValue(unitSel, u);
         });
+    }
+
+    function applyUnitSelect2($sel){
+        if(!$sel || !$sel.length) return;
+        if($sel.hasClass('select2-hidden-accessible')) $sel.select2('destroy');
+        let opts = {
+            width: '100%',
+            placeholder: 'Pilih Satuan...',
+            allowClear: true
+        };
+        if($sel.closest('#editPurchaseModal').length){
+            opts.dropdownParent = $('#editPurchaseModal');
+        }
+        $sel.select2(opts);
     }
 
     function initProductSelect(sel){
@@ -439,14 +500,23 @@ while($p = mysqli_fetch_assoc($qProd)){
         applyItemSelect2($(sel));
     }
 
+    function initUnitSelect(sel){
+        if(!sel || typeof $ === 'undefined') return;
+        applyUnitSelect2($(sel));
+    }
+
     function initEditSelects(){
         document.querySelectorAll('#itemsContainerEdit .product-select').forEach(function(sel){
             applyItemSelect2($(sel));
+        });
+        document.querySelectorAll('#itemsContainerEdit .unit-select').forEach(function(sel){
+            applyUnitSelect2($(sel));
         });
     }
 
     document.addEventListener('DOMContentLoaded', function(){
         document.querySelectorAll('#itemsContainer .product-select').forEach(initProductSelect);
+        document.querySelectorAll('#itemsContainer .unit-select').forEach(initUnitSelect);
     });
 
     const panelToggle = document.getElementById('panelToggle');
@@ -766,11 +836,13 @@ while($p = mysqli_fetch_assoc($qProd)){
                         <div class="input-icon input-icon-unit">
                             <i class="fas fa-balance-scale"></i>
                         </div>
-                        <input type="text"
+                        <select
                             name="unit_buy[]"
-                            class="form-control"
+                            class="form-control unit-select"
                             placeholder="Satuan"
                             required>
+                            ${buildUnitOptions('')}
+                        </select>
                     </div>
                 </div>
 
@@ -820,6 +892,8 @@ while($p = mysqli_fetch_assoc($qProd)){
 
         let last = document.querySelector('#itemsContainer .item-row:last-child select.product-select');
         initProductSelect(last);
+        let lastUnit = document.querySelector('#itemsContainer .item-row:last-child select.unit-select');
+        initUnitSelect(lastUnit);
     }
 
     function addItemEdit()
@@ -865,11 +939,13 @@ while($p = mysqli_fetch_assoc($qProd)){
                         <div class="input-icon input-icon-unit">
                             <i class="fas fa-balance-scale"></i>
                         </div>
-                        <input type="text"
+                        <select
                             name="unit_buy[]"
-                            class="form-control"
+                            class="form-control unit-select"
                             placeholder="Satuan"
                             required>
+                            ${buildUnitOptions('')}
+                        </select>
                     </div>
                 </div>
 
@@ -921,6 +997,8 @@ while($p = mysqli_fetch_assoc($qProd)){
 
         let last = document.querySelector('#itemsContainerEdit .item-row:last-child select.product-select');
         applyItemSelect2($(last));
+        let lastUnit = document.querySelector('#itemsContainerEdit .item-row:last-child select.unit-select');
+        applyUnitSelect2($(lastUnit));
     }
 
     function removeItem(button)
@@ -963,7 +1041,7 @@ while($p = mysqli_fetch_assoc($qProd)){
             let r = $(this);
             let sel = r.find('select[name="product_id[]"]');
             let qty = r.find('input[name="qty_buy[]"]');
-            let unit = r.find('input[name="unit_buy[]"]');
+            let unit = r.find('select[name="unit_buy[]"]');
             let unitPrice = r.find('input[name="unit_price[]"]');
             let priceBuy = r.find('input[name="price_buy[]"]');
 
