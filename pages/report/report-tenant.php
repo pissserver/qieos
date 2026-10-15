@@ -18,30 +18,6 @@
     <?php include '../components/navbar.php'; ?>
 
     <div class="container-fluid px-0 mt-5">
-        <div class="row">
-            <div class="col-md-12">
-                <div class="detail-container mb-5 report-tenant-tabs">
-
-                    <div class="payment-tabs">
-
-                        <button
-                            class="payment-tab active"
-                            onclick="switchMainTab('tenant', this)">
-                            <i class="fas fa-store"></i>
-                            Pembayaran Tenant
-                        </button>
-
-                        <button
-                            class="payment-tab"
-                            onclick="switchMainTab('utility', this)">
-                            <i class="fas fa-bolt"></i>
-                            Air & Listrik
-                        </button>
-
-                    </div>
-                </div>
-            </div>
-        </div>
 
         <!-- Main Content -->
         <div id="mainContent" class="row mt-n2 mb-4 report-tenant-card">
@@ -69,6 +45,30 @@
                     </div>
 
                     <div class="report-menu">
+
+                        <div class="report-menu-toggle" id="tenantMainTabs" data-active="tenant">
+
+                            <span class="report-menu-toggle-pill" aria-hidden="true"></span>
+
+                            <button
+                                type="button"
+                                class="report-menu-toggle-btn active"
+                                data-group="tenant"
+                                onclick="switchMainTab('tenant', this)">
+                                <i class="fas fa-store"></i>
+                                <span>Pembayaran</span>
+                            </button>
+
+                            <button
+                                type="button"
+                                class="report-menu-toggle-btn"
+                                data-group="utility"
+                                onclick="switchMainTab('utility', this)">
+                                <i class="fas fa-bolt"></i>
+                                <span>Air & Listrik</span>
+                            </button>
+
+                        </div>
 
                         <button class="report-menu-item active"
                             onclick="switchReportTab('all', this)">
@@ -118,8 +118,10 @@
 
     function switchMainTab(type, el){
 
-        $(".payment-tab").removeClass("active");
+        $(".report-menu-toggle-btn").removeClass("active");
         $(el).addClass("active");
+
+        $("#tenantMainTabs").attr("data-active", type);
 
         currentMainTab = type;
 
