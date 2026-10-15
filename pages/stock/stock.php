@@ -63,6 +63,12 @@ include '../../sessions/session.php';
                         <h5 class="mb-0">Mutasi Stok</h5>
                         <small>Pergerakan stok gudang &amp; kantin per produk</small>
                     </div>
+
+                    <button type="button" class="mutasi-export-btn" id="mutasiExportBtn" disabled
+                            title="Ekspor mutasi stok sesuai tab yang dibuka">
+                        <i class="fas fa-file-excel"></i>
+                        <span class="mutasi-export-label">Export Gudang</span>
+                    </button>
                 </div>
 
                 <div class="mutasi-toolbar">
@@ -309,6 +315,7 @@ include '../../sessions/session.php';
 
         window.activeStockId = id;
         highlightActiveRow(id);
+        syncMutasiExport();
 
         loadMutasi();
     }
@@ -368,6 +375,44 @@ include '../../sessions/session.php';
             b.classList.toggle('is-active', on);
             b.setAttribute('aria-selected', on ? 'true' : 'false');
         });
+
+        syncMutasiExport();
+    }
+
+    /* Tombol ekspor mengikuti tab yang sedang dibuka:
+       gudang -> "Export Gudang", kantin -> "Export Kantin".
+       Nonaktif sampai ada produk yang dipilih. */
+    function syncMutasiExport(){
+        const btn = document.getElementById('mutasiExportBtn');
+        if(!btn) return;
+
+        const kantin = window.mutasiTab === 'kantin';
+        const label = btn.querySelector('.mutasi-export-label');
+        if(label) label.textContent = kantin ? 'Export Kantin' : 'Export Gudang';
+
+        btn.disabled = !window.activeStockId;
+    }
+
+    /* Unduh Excel mutasi sesuai tab + periode yang aktif. */
+    function exportMutasi(){
+        const id = window.activeStockId;
+        if(!id) return;
+
+        const tab  = window.mutasiTab === 'kantin' ? 'kantin' : 'gudang';
+        const from = $('#mutasiFrom').val() || defaultFromDate();
+        const to   = $('#mutasiTo').val()   || defaultToDate();
+
+        const url = 'stock-mutasi-export.php?id=' + encodeURIComponent(id)
+            + '&tab='  + encodeURIComponent(tab)
+            + '&from=' + encodeURIComponent(from)
+            + '&to='   + encodeURIComponent(to);
+
+        const a = document.createElement('a');
+        a.href = url;
+        a.rel = 'noopener';
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
     }
 
     /* Opsi tabel riwayat mutasi. Dipisah jadi fungsi supaya dipakai ulang
@@ -566,6 +611,9 @@ include '../../sessions/session.php';
         initPaneTable(tab);
     });
 
+    // Ekspor Excel mutasi sesuai tab yang sedang dibuka
+    $(document).on('click', '#mutasiExportBtn', exportMutasi);
+
     // Ganti periode -> muat ulang panel
     let mutasiPeriodTimer;
     $(document).on('change', '#mutasiFrom, #mutasiTo', function(){
@@ -575,8 +623,7 @@ include '../../sessions/session.php';
     });
 
     // Tutup modal FIFO
-    $(document).on('click', '[data-fifo-close]', closeFifo);
-    $(document).on('keydown', function(e){
+    $(document).on('click', '[data-fifo-close]', closeFifo);    $(document).on('keydown', function(e){
         if(e.key === 'Escape' && document.getElementById('fifoModal').classList.contains('is-open')){
             closeFifo();
         }
@@ -632,6 +679,7 @@ include '../../sessions/session.php';
         $('#mutasiFrom').val(defaultFromDate());
         $('#mutasiTo').val(defaultToDate());
 
+        syncMutasiExport();
         loadStockTable();
     });
 </script>

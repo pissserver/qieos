@@ -511,6 +511,46 @@
             box-shadow:0 4px 12px rgba(79,70,229,.16);
         }
 
+        /* Tombol ekspor Excel panel mutasi: berdiri sendiri di kanan,
+           terpisah dari judul (margin-left:auto mendorongnya mepet kanan). */
+        .mutasi-export-btn{
+            margin-left:auto;
+            display:inline-flex;
+            align-items:center;
+            gap:8px;
+            border:none;
+            cursor:pointer;
+            padding:10px 16px;
+            border-radius:12px;
+            font-size:12.5px;
+            font-weight:700;
+            letter-spacing:.01em;
+            color:#fff;
+            background:linear-gradient(135deg,#16a34a,#22c55e);
+            box-shadow:0 8px 18px rgba(22,163,74,.28);
+            white-space:nowrap;
+            transition:transform .18s ease,box-shadow .18s ease,opacity .18s ease;
+        }
+
+        .mutasi-export-btn i{
+            font-size:14px;
+        }
+
+        .mutasi-export-btn:hover:not(:disabled){
+            transform:translateY(-1px);
+            box-shadow:0 11px 22px rgba(22,163,74,.34);
+        }
+
+        .mutasi-export-btn:active:not(:disabled){
+            transform:scale(.96);
+        }
+
+        .mutasi-export-btn:disabled{
+            cursor:not-allowed;
+            opacity:.5;
+            box-shadow:none;
+        }
+
         .mutasi-period{
             display:inline-flex;
             align-items:center;
@@ -1683,6 +1723,18 @@
             .fifo-title{
                 padding-bottom:12px;
                 margin-bottom:16px;
+            }
+
+            /* Tombol ekspor turun ke barisnya sendiri, penuh lebar */
+            .fifo-title{
+                flex-wrap:wrap;
+            }
+
+            .mutasi-export-btn{
+                order:3;
+                margin-left:0;
+                width:100%;
+                justify-content:center;
             }
 
             .fifo-empty{
