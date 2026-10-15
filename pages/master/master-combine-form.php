@@ -20,11 +20,14 @@ if($editId > 0){
 $editPids   = $editCombo ? $editCombo['items'] : [];
 $editPidSet = array_flip($editPids);
 
-// Daftar produk aktif untuk dipilih sebagai bahan racikan.
-// HANYA produk yang tersedia di stok kantin yang ditampilkan
-// (stok kantin = penjumlahan qty di sales_stock). Produk yang sudah
-// terpilih pada racikan yang sedang diedit tetap disertakan walaupun
-// stok kantinnya kosong, supaya bahan yang sudah dipilih tidak hilang.
+// Daftar produk yang boleh dipilih sebagai bahan racikan:
+// - Produk yang SUDAH TERDAFTAR di kantin, yaitu punya minimal satu baris
+//   di sales_stock (walaupun stok kantinnya sedang 0). Definisi "terdaftar"
+//   ini sama seperti katalog kasir di pages/sales/sales-table.php.
+// - Produk kategori "additional" selalu ikut ditampilkan.
+// Produk yang belum pernah masuk kantin (tanpa baris sales_stock) TIDAK
+// ditampilkan, kecuali kalau produk itu sudah menjadi bahan racikan yang
+// sedang diedit supaya bahan lama tidak hilang saat edit.
 $products = [];
 $q = mysqli_query($conn, "
     SELECT
@@ -32,6 +35,7 @@ $q = mysqli_query($conn, "
         COALESCE(p.sell_price, 0) AS sell_price,
         COALESCE(p.unit, '') AS unit,
         COALESCE(p.category, '') AS category,
+        CASE WHEN ss.product_id IS NULL THEN 0 ELSE 1 END AS kantin_registered,
         COALESCE(ss.v, 0) AS kantin
     FROM products p
     LEFT JOIN (
@@ -40,13 +44,52 @@ $q = mysqli_query($conn, "
         GROUP BY product_id
     ) ss ON ss.product_id = p.id
     WHERE p.deleted_at IS NULL
+      AND (
+            ss.product_id IS NOT NULL
+         OR LOWER(COALESCE(p.category, '')) = 'additional'
+      )
     ORDER BY p.name ASC
 ");
 if($q){
     while($row = mysqli_fetch_assoc($q)){
         $row['kantin'] = max(0, (int)$row['kantin']);
-        if($row['kantin'] > 0 || isset($editPidSet[$row['id']])){
-            $products[] = $row;
+        $products[] = $row;
+    }
+}
+
+// Sisipkan bahan racikan yang sedang diedit tapi belum terdaftar di kantin,
+// supaya nilainya tetap tampil di form edit.
+if($editPidSet){
+    $have = [];
+    foreach($products as $p){ $have[(int)$p['id']] = true; }
+    $missing = [];
+    foreach($editPids as $pid){
+        if(!isset($have[$pid])) $missing[] = (int)$pid;
+    }
+    if($missing){
+        $idList = implode(',', $missing);
+        $mq = mysqli_query($conn, "
+            SELECT
+                p.id, p.name, p.code,
+                COALESCE(p.sell_price, 0) AS sell_price,
+                COALESCE(p.unit, '') AS unit,
+                COALESCE(p.category, '') AS category,
+                0 AS kantin_registered,
+                COALESCE(ss.v, 0) AS kantin
+            FROM products p
+            LEFT JOIN (
+                SELECT product_id, SUM(qty) AS v
+                FROM sales_stock
+                GROUP BY product_id
+            ) ss ON ss.product_id = p.id
+            WHERE p.deleted_at IS NULL AND p.id IN ($idList)
+            ORDER BY p.name ASC
+        ");
+        if($mq){
+            while($row = mysqli_fetch_assoc($mq)){
+                $row['kantin'] = max(0, (int)$row['kantin']);
+                $products[] = $row;
+            }
         }
     }
 }
@@ -88,8 +131,8 @@ $editJson = $editCombo ? json_encode($editCombo) : 'null';
 <div class="combine-stock-note">
     <i class="fas fa-circle-info"></i>
     <div>
-        <b>Hanya produk yang tersedia di stok kantin</b> yang dapat dipilih sebagai bahan racikan.
-        Produk yang belum tersedia di stok kantin tidak ditampilkan dalam daftar.
+        Hanya menampilkan produk yang <b>sudah terdaftar di kantin</b> (walaupun stoknya sedang 0)
+        dan produk kategori <b>Additional</b>. Produk yang belum masuk kantin tidak ditampilkan.
     </div>
 </div>
 
