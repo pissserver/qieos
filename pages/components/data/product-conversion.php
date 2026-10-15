@@ -33,18 +33,26 @@ if(!function_exists('product_matched_conversions')){
             return $out;
         }
 
-        $unitEsc = mysqli_real_escape_string($conn, $unit);
         $matched = [];
         $idx     = [];
+        // Cari konversi milik produk ini (per-produk)
         $q = mysqli_query($conn, "
             SELECT id, base_unit
             FROM unit_conversions
-            WHERE deleted_at IS NULL AND LOWER(base_unit) = LOWER('$unitEsc')
+            WHERE deleted_at IS NULL AND product_id = $productId
             ORDER BY id ASC
+            LIMIT 1
         ");
         if($q){
             while($row = mysqli_fetch_assoc($q)){
-                $matched[] = ['id' => (int)$row['id'], 'base_unit' => $row['base_unit'], 'items' => []];
+                // Pastikan base_unit sesuai dengan unit produk (sinkronkan jika perlu)
+                $baseUnit = isset($row['base_unit']) ? trim($row['base_unit']) : '';
+                if(strtolower($baseUnit) !== strtolower($unit)){
+                    $baseUnitEsc = mysqli_real_escape_string($conn, $unit);
+                    mysqli_query($conn, "UPDATE unit_conversions SET base_unit = '$baseUnitEsc', updated_at = NOW() WHERE id = " . (int)$row['id']);
+                    $baseUnit = $unit;
+                }
+                $matched[] = ['id' => (int)$row['id'], 'base_unit' => $baseUnit, 'items' => []];
                 $idx[(int)$row['id']] = count($matched) - 1;
             }
         }
@@ -68,12 +76,18 @@ if(!function_exists('product_matched_conversions')){
         }
         $out['matched'] = $matched;
 
-        // Pastikan konversi yang tersimpan masih ada di daftar yang cocok
-        $valid = false;
-        foreach($matched as $m){
-            if($m['id'] === $out['conversion_id']){ $valid = true; break; }
+        // Konversi per produk: kalau ada, pastikan products.conversion_id
+        // menunjuk ke baris itu (self-healing setelah satuan berubah).
+        if(!empty($matched)){
+            $cid = (int)$matched[0]['id'];
+            $out['conversion_id'] = $cid;
+            $row = mysqli_fetch_assoc(mysqli_query($conn, "SELECT conversion_id FROM products WHERE id = $productId LIMIT 1"));
+            if(!$row || (int)$row['conversion_id'] !== $cid){
+                mysqli_query($conn, "UPDATE products SET conversion_id = $cid WHERE id = $productId");
+            }
+        }else{
+            $out['conversion_id'] = 0;
         }
-        if(!$valid) $out['conversion_id'] = 0;
 
         return $out;
     }

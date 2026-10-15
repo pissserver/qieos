@@ -99,11 +99,11 @@ $tables = array(
     ),
     'unit_conversions' => array(
         'domain' => 'MASTER', 'icon' => 'fa-right-left', 'color' => '#0ea5e9',
-        'desc' => 'Konversi unit: unit base + daftar konversi.',
+        'desc' => 'Konversi unit per produk: unit base + daftar konversi.',
     ),
     'unit_conversion_items' => array(
         'domain' => 'MASTER', 'icon' => 'fa-list-ul', 'color' => '#0ea5e9',
-        'desc' => 'Detail konversi: unit + qty per unit base.',
+        'desc' => 'Detail konversi per produk: unit + qty per unit base.',
     ),
     'product_combos' => array(
         'domain' => 'MASTER', 'icon' => 'fa-layer-group', 'color' => '#0ea5e9',

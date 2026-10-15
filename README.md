@@ -85,8 +85,8 @@ Nama Database: **`db_kantin`** (MySQL)
 | | `users` | Akun pengguna: developer, administrator, staff kasir |
 | | `tenants` | Data tenant penyewa kantin |
 | | `units` | Master satuan barang (pcs, karton, slop, dll) |
-| | `unit_conversions` | Konversi unit: unit base + daftar konversi |
-| | `unit_conversion_items` | Detail konversi: unit + qty per unit base |
+| | `unit_conversions` | Konversi unit per produk: unit base + daftar konversi |
+| | `unit_conversion_items` | Detail konversi per produk: unit + qty per unit base |
 | | `product_combos` | Paket racikan produk |
 | | `product_combo_items` | Bahan penyusun paket racikan |
 | | `product_supplier` | Relasi produk ke supplier (many-to-many) |

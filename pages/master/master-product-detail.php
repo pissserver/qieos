@@ -1114,7 +1114,12 @@ syncDeletePhotoButton(!!(document.querySelector('.hero-photo img')));
         set('heroCode', item.code);
         set('heroCategory', item.category);
         set('heroPrice', 'Rp ' + item.priceFormatted);
-        applyAdditionalMode((item.category || '').toLowerCase() === 'additional');
+        var isAddCat = (item.category || '').toLowerCase() === 'additional';
+        applyAdditionalMode(isAddCat);
+        // Segarkan panel konversi untuk produk yang baru dipilih
+        if(window.__refreshConvertPanel){
+            window.__refreshConvertPanel(isAddCat ? '' : (item.unit || ''), item.id);
+        }
         var supNames = item.supplierNames || [];
         renderSupplierBadges(document.getElementById('heroSupplierName'), supNames);
         renderSupplierBadges(document.getElementById('infoSupplier'), supNames);
@@ -1314,7 +1319,7 @@ syncDeletePhotoButton(!!(document.querySelector('.hero-photo img')));
     });
 })();
 
-// ===== KONVERSI UNIT — pilih convert yang cocok dengan satuan produk =====
+// ===== KONVERSI UNIT — per produk =====
 (function(){
     var wrap = document.getElementById('convertCardWrap');
     if(!wrap) return;
@@ -1324,12 +1329,17 @@ syncDeletePhotoButton(!!(document.querySelector('.hero-photo img')));
     var STATE = {
         productId: <?= (int)$d['id'] ?>,
         unit: <?= json_encode($unitVal) ?>,
-        selectedId: <?= (int)$conv['conversion_id'] ?>,
-        matched: <?= json_encode($conv['matched']) ?>
+        units: <?= json_encode(array_values($allUnits)) ?>,
+        conv: <?= json_encode(!empty($conv['matched']) ? $conv['matched'][0] : null) ?>,
+        editing: false,
+        draft: []
     };
 
     function esc(s){
         return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+    function ucwords(s){
+        return String(s == null ? '' : s).replace(/(^|\s)\S/g, function(m){ return m.toUpperCase(); });
     }
     function fmtQty(n){
         n = parseFloat(n);
@@ -1337,11 +1347,43 @@ syncDeletePhotoButton(!!(document.querySelector('.hero-photo img')));
         if(Math.round(n) === n) return n.toLocaleString('id-ID');
         return n.toLocaleString('id-ID', { maximumFractionDigits: 4 });
     }
-    function findConv(id){
-        for(var i = 0; i < STATE.matched.length; i++){
-            if(String(STATE.matched[i].id) === String(id)) return STATE.matched[i];
+    function convItems(){
+        return (STATE.conv && STATE.conv.items) ? STATE.conv.items : [];
+    }
+
+    // ===== SELECT2 untuk pemilih satuan di editor konversi =====
+    function convertSelect2Config(){
+        return {
+            width: '100%',
+            placeholder: 'Cari / pilih satuan...',
+            minimumResultsForSearch: 0,
+            dropdownParent: document.body,
+            language: {
+                noResults: function(){ return 'Satuan tidak ditemukan'; },
+                searching: function(){ return 'Mencari...'; }
+            }
+        };
+    }
+    function isConvertSelect2(sel){
+        return !!($.fn.select2) && $(sel).hasClass('select2-hidden-accessible');
+    }
+    function destroyConvertSelect2(){
+        var box = document.getElementById('convertEditRows');
+        if(box){
+            Array.prototype.forEach.call(box.querySelectorAll('select'), function(sel){
+                if(isConvertSelect2(sel)) $(sel).select2('destroy');
+            });
         }
-        return null;
+        if(typeof sweepSupplierSelect2Orphans === 'function') sweepSupplierSelect2Orphans();
+    }
+    function initConvertSelect2(){
+        if(!$.fn.select2) return;
+        var box = document.getElementById('convertEditRows');
+        if(!box) return;
+        Array.prototype.forEach.call(box.querySelectorAll('select'), function(sel){
+            if(isConvertSelect2(sel)) return;
+            $(sel).select2(convertSelect2Config());
+        });
     }
     function rowsHtml(conv, base){
         if(!conv || !conv.items || !conv.items.length){
@@ -1359,98 +1401,216 @@ syncDeletePhotoButton(!!(document.querySelector('.hero-photo img')));
         return h;
     }
 
-    function bindPanelActions(){
-        var pickBtn = document.getElementById('convertPickBtn');
-        if(pickBtn) pickBtn.addEventListener('click', function(){ applyConversion(STATE.matched[0].id); });
-        var detachBtn = document.getElementById('convertDetachBtn');
-        if(detachBtn) detachBtn.addEventListener('click', detach);
+    function renderEmpty(){
+        panelBody.innerHTML =
+            '<div class="convert-empty">' +
+                '<div class="convert-empty-icon"><i class="fas fa-link-slash"></i></div>' +
+                '<div class="convert-empty-title">Belum ada konversi untuk satuan <b class="text-capitalize">' + esc(STATE.unit) + '</b></div>' +
+                '<div class="convert-empty-sub">Buat konversi khusus produk ini. Contoh: 1 karton = 100 <b class="text-capitalize">' + esc(STATE.unit) + '</b>.</div>' +
+                '<button type="button" class="convert-btn convert-btn-primary" id="convertCreateBtn"><i class="fas fa-plus me-1"></i> Buat Konversi</button>' +
+            '</div>';
+        document.getElementById('convertCreateBtn').addEventListener('click', function(){ startEdit([]); });
     }
 
-    function renderPanel(){
-        if(!panelBody) return;
-        var unitLabel = '<b class="text-capitalize">' + esc(STATE.unit) + '</b>';
-
-        if(!STATE.matched.length){
-            panelBody.innerHTML =
-                '<div class="convert-empty">' +
-                    '<div class="convert-empty-icon"><i class="fas fa-link-slash"></i></div>' +
-                    '<div class="convert-empty-title">Belum ada konversi untuk satuan ' + unitLabel + '</div>' +
-                    '<div class="convert-empty-sub">Buat konversi dengan unit base <b>' + esc(STATE.unit) + '</b> di halaman Master Unit (panel Konversi Unit), lalu pasang di sini.</div>' +
-                    '<a class="convert-btn convert-btn-primary" href="' + BASE_URL + '/pages/master/master-unit.php"><i class="fas fa-plus me-1"></i> Buat Konversi</a>' +
-                '</div>';
-            return;
-        }
-
-        var sel = findConv(STATE.selectedId);
-        if(sel){
-            panelBody.innerHTML =
-                '<div class="convert-selected">' +
-                    '<div class="convert-selected-head">' +
-                        '<span class="convert-pill-ok"><i class="fas fa-circle-check"></i> Terpasang</span>' +
-                        '<span class="convert-selected-base"><i class="fas fa-ruler-combined"></i> Unit Base <b class="text-capitalize">' + esc(sel.base_unit) + '</b></span>' +
-                    '</div>' +
-                    '<div class="convert-detail-rows">' + rowsHtml(sel, sel.base_unit) + '</div>' +
-                    '<div class="convert-selected-actions">' +
-                        '<button type="button" class="convert-btn convert-btn-ghost" id="convertDetachBtn"><i class="fas fa-link-slash me-1"></i> Lepas</button>' +
-                    '</div>' +
-                '</div>';
-            bindPanelActions();
-        } else {
-            var cand = STATE.matched[0];
-            panelBody.innerHTML =
-                '<div class="convert-available">' +
-                    '<div class="convert-available-note"><i class="fas fa-circle-info"></i> Satuan ' + unitLabel + ' punya konversi. Pilih untuk memakainya di produk ini.</div>' +
-                    '<div class="convert-preview-card">' +
-                        '<div class="convert-preview-top">' +
-                            '<span class="convert-preview-avatar"><i class="fas fa-right-left"></i></span>' +
-                            '<span class="convert-preview-base">Unit Base <b class="text-capitalize">' + esc(cand.base_unit) + '</b></span>' +
-                        '</div>' +
-                        '<div class="convert-detail-rows">' + rowsHtml(cand, cand.base_unit) + '</div>' +
-                    '</div>' +
-                    '<button type="button" class="convert-btn convert-btn-primary convert-btn-block" id="convertPickBtn"><i class="fas fa-check me-1"></i> Pilih Konversi</button>' +
-                '</div>';
-            bindPanelActions();
-        }
+    function renderView(){
+        var c = STATE.conv;
+        panelBody.innerHTML =
+            '<div class="convert-selected">' +
+                '<div class="convert-selected-head">' +
+                    '<span class="convert-pill-ok"><i class="fas fa-circle-check"></i> Terpasang</span>' +
+                    '<span class="convert-selected-base"><i class="fas fa-ruler-combined"></i> Unit Base <b class="text-capitalize">' + esc(c.base_unit) + '</b></span>' +
+                '</div>' +
+                '<div class="convert-detail-rows">' + rowsHtml(c, c.base_unit) + '</div>' +
+                '<div class="convert-selected-actions">' +
+                    '<button type="button" class="convert-btn convert-btn-danger" id="convertDeleteBtn"><i class="fas fa-trash-alt me-1"></i> Hapus</button>' +
+                    '<button type="button" class="convert-btn convert-btn-ghost" id="convertEditBtn"><i class="fas fa-pen me-1"></i> Ubah</button>' +
+                '</div>' +
+            '</div>';
+        document.getElementById('convertEditBtn').addEventListener('click', function(){
+            startEdit(convItems().map(function(it){ return { unit: it.unit_name, qty: it.qty }; }));
+        });
+        document.getElementById('convertDeleteBtn').addEventListener('click', askDelete);
     }
 
-    function applyConversion(id){
-        var body = new URLSearchParams({ id: STATE.productId, conversion_id: id });
-        fetch('master-product-action.php?action=set_conversion', { method: 'POST', body: body })
+    function unitOptions(selected){
+        var h = '<option value="">Pilih satuan...</option>';
+        for(var i = 0; i < STATE.units.length; i++){
+            var u = STATE.units[i];
+            if(String(u).toLowerCase() === String(STATE.unit).toLowerCase()) continue;
+            var sel = (String(u).toLowerCase() === String(selected == null ? '' : selected).toLowerCase()) ? ' selected' : '';
+            h += '<option value="' + esc(u) + '"' + sel + '>' + esc(ucwords(u)) + '</option>';
+        }
+        return h;
+    }
+
+    function editRowHtml(unit, qty){
+        var qv = (qty === null || qty === undefined || qty === '') ? '' : qty;
+        return '<div class="convert-edit-row">' +
+            '<span class="convert-one">1</span>' +
+            '<select class="form-input convert-unit-sel">' + unitOptions(unit) + '</select>' +
+            '<span class="convert-eq">=</span>' +
+            '<input type="number" class="form-input convert-qty-input" min="0" step="any" inputmode="decimal" placeholder="qty" value="' + esc(qv) + '">' +
+            '<span class="convert-base-lbl text-capitalize">' + esc(STATE.unit) + '</span>' +
+            '<button type="button" class="convert-row-remove" title="Hapus satuan" aria-label="Hapus satuan"><i class="fas fa-times"></i></button>' +
+        '</div>';
+    }
+
+    function renderEditRows(){
+        var box = document.getElementById('convertEditRows');
+        if(!box) return;
+        destroyConvertSelect2();
+        if(!STATE.draft.length) STATE.draft.push({ unit: '', qty: '' });
+        var h = '';
+        for(var i = 0; i < STATE.draft.length; i++){
+            h += editRowHtml(STATE.draft[i].unit, STATE.draft[i].qty);
+        }
+        box.innerHTML = h;
+        initConvertSelect2();
+    }
+
+    function readDraftFromDom(){
+        var box = document.getElementById('convertEditRows');
+        if(!box) return;
+        var rows = box.querySelectorAll('.convert-edit-row');
+        STATE.draft = [];
+        Array.prototype.forEach.call(rows, function(r){
+            var u = r.querySelector('.convert-unit-sel').value;
+            var q = r.querySelector('.convert-qty-input').value;
+            STATE.draft.push({ unit: u, qty: q });
+        });
+    }
+
+    function renderEditor(){
+        destroyConvertSelect2();
+        panelBody.innerHTML =
+            '<div class="convert-editor">' +
+                '<div class="convert-editor-note"><i class="fas fa-circle-info"></i> Isi satuan konversi: 1 satuan = berapa <b class="text-capitalize">' + esc(STATE.unit) + '</b>.</div>' +
+                '<div id="convertEditRows"></div>' +
+                '<button type="button" class="convert-btn convert-btn-ghost convert-btn-block" id="convertAddRow"><i class="fas fa-plus me-1"></i> Tambah Satuan</button>' +
+                '<div class="convert-editor-actions">' +
+                    '<button type="button" class="convert-btn convert-btn-ghost" id="convertCancelBtn">Batal</button>' +
+                    '<button type="button" class="convert-btn convert-btn-primary" id="convertSaveBtn"><i class="fas fa-save me-1"></i> Simpan</button>' +
+                '</div>' +
+            '</div>';
+        renderEditRows();
+        document.getElementById('convertAddRow').addEventListener('click', function(){
+            readDraftFromDom();
+            STATE.draft.push({ unit: '', qty: '' });
+            renderEditRows();
+        });
+        document.getElementById('convertCancelBtn').addEventListener('click', cancelEdit);
+        document.getElementById('convertSaveBtn').addEventListener('click', saveConv);
+    }
+
+    function startEdit(items){
+        STATE.editing = true;
+        STATE.draft = (items || []).map(function(it){ return { unit: it.unit, qty: it.qty }; });
+        renderEditor();
+    }
+
+    function cancelEdit(){
+        STATE.editing = false;
+        render();
+    }
+
+    function setSaving(on){
+        var btn = document.getElementById('convertSaveBtn');
+        if(!btn) return;
+        btn.disabled = !!on;
+        btn.innerHTML = on ? '<i class="fas fa-spinner fa-spin me-1"></i> Menyimpan...' : '<i class="fas fa-save me-1"></i> Simpan';
+    }
+
+    function saveConv(){
+        readDraftFromDom();
+        var body = new URLSearchParams();
+        body.append('id', STATE.productId);
+        STATE.draft.forEach(function(r){
+            body.append('unit[]', r.unit);
+            body.append('qty[]', r.qty);
+        });
+        setSaving(true);
+        fetch('master-product-action.php?action=save_conversion', { method: 'POST', body: body })
         .then(function(r){ return r.json(); })
         .then(function(res){
             if(res.status === 'success'){
-                STATE.selectedId = parseInt(res.conversion_id, 10) || 0;
-                renderPanel();
-                QToast('Berhasil', id > 0 ? 'Konversi unit berhasil dipasang' : 'Konversi unit dilepas', 'success');
+                STATE.editing = false;
+                STATE.conv = (res.data && res.data.matched && res.data.matched.length) ? res.data.matched[0] : null;
+                render();
+                QToast('Berhasil', 'Konversi unit disimpan', 'success');
             } else {
+                setSaving(false);
                 QToast('Gagal', res.message || 'Terjadi kesalahan', 'error');
             }
         })
         .catch(function(){
+            setSaving(false);
             QToast('Error', 'Gagal menyimpan konversi', 'error');
         });
     }
 
-    function detach(){
-        QConfirm('Lepas Konversi?', 'Produk ini tidak akan memakai konversi unit.', {
-            confirmText: 'Lepas',
-            icon: 'fa-link-slash',
-            confirmClass: 'q-confirm-btn-warning',
-            iconClass: 'q-confirm-icon-warning'
-        }).then(function(ok){ if(ok) applyConversion(0); });
+    function askDelete(){
+        QConfirm('Hapus Konversi?', 'Konversi unit produk ini akan dihapus.', {
+            confirmText: 'Hapus',
+            icon: 'fa-trash-alt',
+            confirmClass: 'q-confirm-btn-danger',
+            iconClass: 'q-confirm-icon-danger'
+        }).then(function(ok){
+            if(!ok) return;
+            fetch('master-product-action.php?action=delete_conversion', {
+                method: 'POST',
+                body: new URLSearchParams({ id: STATE.productId })
+            })
+            .then(function(r){ return r.json(); })
+            .then(function(res){
+                if(res.status === 'success'){
+                    STATE.conv = null;
+                    render();
+                    QToast('Terhapus', 'Konversi unit dihapus', 'success');
+                } else {
+                    QToast('Gagal', res.message || 'Terjadi kesalahan', 'error');
+                }
+            })
+            .catch(function(){ QToast('Error', 'Gagal menghapus konversi', 'error'); });
+        });
     }
 
-    // Dipanggil setelah satuan produk diubah lewat form edit
-    window.__refreshConvertPanel = function(unit){
+    function render(){
+        if(!panelBody) return;
+        if(STATE.editing){ renderEditor(); return; }
+        destroyConvertSelect2();
+        if(!STATE.unit){ panelBody.innerHTML = ''; return; }
+        if(STATE.conv){ renderView(); return; }
+        renderEmpty();
+    }
+
+    // Delegasi klik tombol hapus baris (aman saat baris di-render ulang)
+    panelBody.addEventListener('click', function(e){
+        var btn = e.target.closest('.convert-row-remove');
+        if(!btn) return;
+        readDraftFromDom();
+        var row = btn.closest('.convert-edit-row');
+        var rows = Array.prototype.slice.call(panelBody.querySelectorAll('#convertEditRows .convert-edit-row'));
+        var idx = rows.indexOf(row);
+        if(idx >= 0) STATE.draft.splice(idx, 1);
+        renderEditRows();
+    });
+
+    // Dipanggil setelah satuan produk diubah lewat form edit, atau saat
+    // berganti produk lewat quick search (productId diisi).
+    window.__refreshConvertPanel = function(unit, productId){
+        if(productId !== undefined && productId !== null && productId !== ''){
+            STATE.productId = parseInt(productId, 10) || STATE.productId;
+        }
         STATE.unit = unit || '';
+        STATE.editing = false;
+        STATE.draft = [];
         var unitEl = document.getElementById('convertCardUnit');
         if(unitEl) unitEl.innerHTML = '<i class="fas fa-ruler-combined"></i> ' + esc(STATE.unit || '-');
         wrap.style.display = STATE.unit ? '' : 'none';
 
         if(!STATE.unit){
-            STATE.matched = [];
-            STATE.selectedId = 0;
-            renderPanel();
+            STATE.conv = null;
+            render();
             return;
         }
         fetch('master-product-action.php?action=get_conversions', {
@@ -1461,15 +1621,14 @@ syncDeletePhotoButton(!!(document.querySelector('.hero-photo img')));
         .then(function(res){
             if(res.status === 'success' && res.data){
                 STATE.unit = res.data.unit || '';
-                STATE.selectedId = res.data.conversion_id || 0;
-                STATE.matched = res.data.matched || [];
-                renderPanel();
+                STATE.conv = (res.data.matched && res.data.matched.length) ? res.data.matched[0] : null;
+                render();
             }
         })
         .catch(function(){});
     };
 
-    renderPanel();
+    render();
 })();
 </script>
 

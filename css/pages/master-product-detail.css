@@ -3093,9 +3093,122 @@ body {
 }
 .convert-row-empty { padding: 6px 2px; font-size: 12.5px; color: #94a3b8; }
 
+/* --- Tombol hapus (danger) --- */
+.convert-btn-danger {
+    background: linear-gradient(135deg, #fef2f2, #fff1f2);
+    border-color: #fecaca;
+    color: #dc2626;
+}
+.convert-btn-danger:hover:not(:disabled) {
+    color: #b91c1c;
+    border-color: #fca5a5;
+    transform: translateY(-2px);
+}
+
+/* --- Editor konversi --- */
+.convert-editor { display: flex; flex-direction: column; gap: 12px; }
+.convert-editor-note {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12.5px;
+    color: #475569;
+    background: #f1f5f9;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 10px 14px;
+}
+.convert-editor-note i { color: #0ea5e9; }
+.convert-editor-note b { color: #0f172a; font-weight: 800; }
+.convert-edit-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    margin-bottom: 8px;
+    border-radius: 12px;
+    background: #fff;
+    border: 1px solid #e2e8f0;
+}
+.convert-edit-row .convert-one { flex-shrink: 0; font-weight: 800; color: #64748b; }
+.convert-edit-row .convert-unit-sel { flex: 1 1 auto; min-width: 0; height: 42px; }
+.convert-edit-row .convert-eq { flex-shrink: 0; color: #64748b; font-weight: 800; }
+.convert-edit-row .convert-qty-input { width: 110px; flex-shrink: 0; height: 42px; }
+.convert-edit-row .convert-base-lbl {
+    flex-shrink: 0;
+    font-weight: 800;
+    color: #0369a1;
+    background: #e0f2fe;
+    border-radius: 999px;
+    padding: 3px 10px;
+    font-size: 12px;
+    white-space: nowrap;
+}
+.convert-row-remove {
+    flex-shrink: 0;
+    border: none;
+    background: #fee2e2;
+    color: #dc2626;
+    width: 32px;
+    height: 32px;
+    border-radius: 9px;
+    cursor: pointer;
+    transition: all .25s ease;
+}
+.convert-row-remove:hover { background: #fecaca; }
+
+/* Select2 untuk pemilih satuan di editor konversi */
+.convert-edit-row .select2-container { width: 100% !important; }
+.convert-edit-row .select2-container--default .select2-selection--single {
+    height: 42px;
+    padding: 0 38px 0 14px;
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #f8fafc, #fff);
+    display: flex;
+    align-items: center;
+    transition: all .3s ease;
+}
+.convert-edit-row .select2-container--default .select2-selection--single .select2-selection__rendered {
+    padding: 0;
+    line-height: 38px;
+    font-size: 13.5px;
+    color: #0f172a;
+}
+.convert-edit-row .select2-container--default .select2-selection--single .select2-selection__placeholder {
+    color: #94a3b8;
+}
+.convert-edit-row .select2-container--default.select2-container--open .select2-selection--single,
+.convert-edit-row .select2-container--default.select2-container--focus .select2-selection--single,
+.convert-edit-row .select2-container--default .select2-selection--single:hover {
+    border-color: #0ea5e9;
+    background: #fff;
+    box-shadow: 0 0 0 4px rgba(14, 165, 233, .1);
+}
+.convert-edit-row .select2-container--default .select2-selection--single .select2-selection__arrow {
+    top: 50%;
+    right: 10px;
+    transform: translateY(-50%);
+}
+.convert-edit-row .select2-container--default.select2-container--open .select2-selection--single .select2-selection__arrow {
+    transform: translateY(-50%) rotate(180deg);
+}
+
+.convert-editor-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 4px;
+}
+
 @media (max-width: 575px) {
     .convert-card-body { padding: 16px; }
     .convert-card-unit { display: none; }
     .convert-selected-actions { flex-direction: column-reverse; }
     .convert-selected-actions .convert-btn { width: 100%; }
+    .convert-edit-row { flex-wrap: wrap; }
+    .convert-edit-row .convert-unit-sel { flex: 1 1 100%; }
+    .convert-edit-row .select2-container { flex: 1 1 100%; }
+    .convert-editor-actions { flex-direction: column-reverse; }
+    .convert-editor-actions .convert-btn { width: 100%; }
 }
