@@ -199,6 +199,10 @@ $hidConv     = $hasConvUnit ? '' : ' style="display:none"';
             </div>
             <div class="hero-info">
                 <div class="hero-category" id="heroCategory"><i class="fas fa-tag"></i> <?= $cat ?></div>
+                <div class="hero-add-notice" id="heroAddNotice"<?= $isAdditional ? '' : ' style="display:none"' ?>>
+                    <i class="fas fa-circle-info"></i>
+                    <span>Produk kategori <b>Additional</b> tidak memiliki stok dan tidak bisa dipakai di <b>Daftar Belanja</b> &amp; <b>Restock</b>, dan otomatis muncul di <b>katalog produk kantin</b>.</span>
+                </div>
                 <div class="hero-status-row" id="heroStatusRow"<?= $hid ?>>
                     <span class="st-badge st-badge-lg <?= $statusInfo['css'] ?>" id="heroStatusBadge">
                         <i class="fas <?= $statusInfo['icon'] ?>"></i> <?= $statusInfo['label'] ?>
@@ -619,6 +623,10 @@ function applyAdditionalMode(additional){
     }
     var statsRow = document.getElementById('statsRow');
     if(statsRow) statsRow.classList.toggle('stats-row--add', additional);
+
+    // Notice khusus Additional: tampil HANYA saat kategori additional
+    var addNotice = document.getElementById('heroAddNotice');
+    if(addNotice) addNotice.style.display = additional ? '' : 'none';
 }
 
 function supplierOptionsHtml(selectedId, excludeIds){
