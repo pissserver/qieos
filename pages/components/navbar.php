@@ -89,7 +89,7 @@ if (!defined('BASE_URL')) {
             SELECT SUM(total) as omzet
             FROM orders
             WHERE DATE(tanggal)=?
-            AND status_payment!='cancelled'
+            AND status_payment='paid'
         ");
 
         $omzetQuery->bind_param("s", $today);

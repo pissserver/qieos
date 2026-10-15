@@ -16,7 +16,7 @@ $query = mysqli_query($conn, "
     FROM order_details od
     JOIN orders o ON od.order_id = o.id
     WHERE od.product_id = $productId
-      AND o.status_payment != 'cancelled'
+      AND o.status_payment = 'paid'
       AND DATE(o.tanggal) BETWEEN '$first' AND '$last'
     ORDER BY o.tanggal DESC, o.id DESC
 ");

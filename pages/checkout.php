@@ -60,6 +60,9 @@
     $order_id = $stmt->insert_id;
 
     // 2️⃣ insert ke order_details
+    // Stok kantin TIDAK dipotong di sini. Pemotongan dilakukan saat
+    // pesanan benar-benar dibayar (order-pay.php), supaya pesanan yang
+    // masih 'waiting' belum mengurangi stok.
     $stmt_detail = $conn->prepare("
         INSERT INTO order_details (order_id, product_id, product_combo_id, name, customer_id, qty, price, subtotal)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?)
@@ -94,53 +97,6 @@
         );
 
         $stmt_detail->execute();
-
-        // Racikan bukan produk fisik, tapi tiap bahan penyusunnya
-        // mengurangi stok kantin (1 unit racikan = 1 unit per bahan).
-        if($isCombo){
-            $cid      = (int)$comboId;
-            $comboQty = (int)$item['qty'];
-            if($cid > 0 && $comboQty > 0){
-                $ingr = mysqli_query($conn, "
-                    SELECT product_id, COALESCE(qty, 1) AS qty
-                    FROM product_combo_items
-                    WHERE combo_id = $cid
-                ");
-                while($ingr && $ing = mysqli_fetch_assoc($ingr)){
-                    $pid    = (int)$ing['product_id'];
-                    $need   = max(1, (int)$ing['qty']) * $comboQty;
-                    $bal    = mysqli_fetch_assoc(mysqli_query($conn, "
-                        SELECT COALESCE(SUM(qty),0) v
-                        FROM sales_stock
-                        WHERE product_id = $pid
-                    "));
-                    $deduct = min($need, (int)$bal['v']);
-
-                    if($deduct > 0){
-                        mysqli_query($conn, "
-                            INSERT INTO sales_stock (product_id, qty, type)
-                            VALUES ($pid, -$deduct, 'sale')
-                        ");
-                    }
-                }
-            }
-            continue;
-        }
-
-        $bal = mysqli_fetch_assoc(mysqli_query($conn, "
-            SELECT COALESCE(SUM(qty),0) v
-            FROM sales_stock
-            WHERE product_id = " . (int)$item['id']
-        ));
-
-        $deduct = min((int)$item['qty'], (int)$bal['v']);
-
-        if($deduct > 0){
-            mysqli_query($conn, "
-                INSERT INTO sales_stock (product_id, qty, type)
-                VALUES (" . (int)$item['id'] . ", -$deduct, 'sale')
-            ");
-        }
     }
 
     echo json_encode([

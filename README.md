@@ -41,7 +41,7 @@
 1. **Login & Session**: User masuk sesuai akun. Role menentukan menu navigasi yang dapat diakses.
 2. **Purchasing & Inbound**: Admin/Developer melakukan pembelian barang → data masuk ke `purchase_items` sebagai layer stok gudang (dengan tracking `remaining_qty` per lot).
 3. **Stock Transfer**: Barang dari gudang ditransfer ke stok penjualan (`sales_stock`) melalui sistem persetujuan request transfer.
-4. **Penjualan Kasir**: Kasir memilih produk di katalog, mengisi keranjang, dan melakukan checkout. Stok penjualan otomatis terpotong (`sales_stock`).
+4. **Penjualan Kasir**: Kasir memilih produk di katalog, mengisi keranjang, dan melakukan checkout. Pesanan dibuat berstatus `waiting`; stok penjualan (`sales_stock`) baru terpotong **saat pesanan dibayar** (tombol Bayar). Omzet dan total terjual hanya menghitung pesanan berstatus `paid`.
 5. **Manajemen Tenant**: Kasir/Admin mencatat pembayaran sewa dan tagihan air/listrik tenant.
 6. **Laporan & Rekap**: Data transaksi dan pembayaran tenant dapat direkap harian serta dicetak sebagai dokumen PDF / Excel.
 

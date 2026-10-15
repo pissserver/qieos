@@ -44,7 +44,7 @@ if($query && $query->num_rows > 0){
         if($pi && $pi->num_rows > 0){
             $totalQty = (int)$pi->fetch_assoc()['tq'];
         }
-        $od = @$conn->query("SELECT COALESCE(SUM(od.qty),0) as total_od FROM order_details od INNER JOIN orders o ON o.id = od.order_id WHERE od.product_id = {$d['id']} AND o.status_payment != 'cancelled'");
+        $od = @$conn->query("SELECT COALESCE(SUM(od.qty),0) as total_od FROM order_details od INNER JOIN orders o ON o.id = od.order_id WHERE od.product_id = {$d['id']} AND o.status_payment = 'paid'");
         if($od && $od->num_rows > 0){
             $totalTrans = (int)$od->fetch_assoc()['total_od'];
         }

@@ -24,13 +24,13 @@ $qi = mysqli_query($conn,"
 ");
 $di = mysqli_fetch_assoc($qi);
 
-// Hitung total terjual dari order_details (SUM qty per produk, kecuali order dibatalkan)
+// Hitung total terjual dari order_details (SUM qty per produk, hanya order terbayar)
 $qo = mysqli_query($conn,"
     SELECT COALESCE(SUM(od.qty),0) AS total_terjual
     FROM order_details od
     INNER JOIN orders o ON o.id = od.order_id
     WHERE od.product_id = {$d['id']}
-      AND o.status_payment != 'cancelled'
+      AND o.status_payment = 'paid'
 ");
 $do = mysqli_fetch_assoc($qo);
 

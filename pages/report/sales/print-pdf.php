@@ -147,7 +147,7 @@ switch ($tab) {
 
     case 'product':
         $escProduct = (int) $product_id;
-        $q = mysqli_query($conn, "SELECT o.code, o.tanggal, od.qty, od.price, od.subtotal FROM order_details od JOIN orders o ON od.order_id=o.id WHERE od.product_id=$escProduct AND o.status_payment!='cancelled' AND $where ORDER BY o.tanggal DESC, o.id DESC");
+        $q = mysqli_query($conn, "SELECT o.code, o.tanggal, od.qty, od.price, od.subtotal FROM order_details od JOIN orders o ON od.order_id=o.id WHERE od.product_id=$escProduct AND o.status_payment='paid' AND $where ORDER BY o.tanggal DESC, o.id DESC");
         $totalQty = 0;
         if ($q) while ($r = mysqli_fetch_assoc($q)) { $totalQty+=(int)$r['qty']; $total+=(float)$r['subtotal']; $rows[]=$r; }
         $extra['qty'] = $totalQty;
