@@ -63,36 +63,67 @@
     // Stok kantin TIDAK dipotong di sini. Pemotongan dilakukan saat
     // pesanan benar-benar dibayar (order-pay.php), supaya pesanan yang
     // masih 'waiting' belum mengurangi stok.
+    //
+    // Racikan (combo) dipecah jadi item per bahan penyusun: tiap bahan
+    // disimpan sebagai baris tersendiri dengan product_id bahannya,
+    // product_combo_id racikannya, dan qty = qty bahan × qty racikan.
     $stmt_detail = $conn->prepare("
-        INSERT INTO order_details (order_id, product_id, product_combo_id, name, customer_id, qty, price, subtotal)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO order_details (order_id, product_id, product_combo_id, customer_id, qty, price, subtotal)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
     ");
 
     foreach($data['cart'] as $item){
-        $isCombo  = !empty($item['type']) && $item['type'] === 'combo';
-        $subtotal = $item['price'] * $item['qty'];
+        $isCombo = !empty($item['type']) && $item['type'] === 'combo';
 
         if($isCombo){
-            // Racikan: simpan id combo + nama, product_id NULL
-            $comboId = (int)ltrim((string)$item['id'], 'c');
-            $prodId  = null;
-            $name    = $item['name'];
-        }else{
-            // Produk biasa: product_id dipakai, product_combo_id & name NULL
-            $comboId = null;
-            $prodId  = (int)$item['id'];
-            $name    = null;
+            $comboId  = (int)ltrim((string)$item['id'], 'c');
+            $comboQty = (int)$item['qty'];
+
+            $ings = mysqli_query($conn, "
+                SELECT product_id, qty, price
+                FROM product_combo_items
+                WHERE combo_id = $comboId
+            ");
+
+            while($ings && $ing = mysqli_fetch_assoc($ings)){
+                $prodId   = (int)$ing['product_id'];
+                $qty      = max(1, (int)$ing['qty']) * $comboQty;
+                $price    = (int)$ing['price'];
+                $subtotal = $price * $qty;
+
+                $stmt_detail->bind_param(
+                    "iiiiiii",
+                    $order_id,
+                    $prodId,
+                    $comboId,
+                    $customerId,
+                    $qty,
+                    $price,
+                    $subtotal
+                );
+
+                $stmt_detail->execute();
+            }
+
+            continue;
         }
 
+        // Produk biasa: product_id dipakai, product_combo_id NULL
+        $prodId   = (int)$item['id'];
+        $qty      = (int)$item['qty'];
+        $price    = (int)$item['price'];
+        $subtotal = $price * $qty;
+
+        $comboId = null;
+
         $stmt_detail->bind_param(
-            "iiisiiii",
+            "iiiiiii",
             $order_id,
             $prodId,
             $comboId,
-            $name,
             $customerId,
-            $item['qty'],
-            $item['price'],
+            $qty,
+            $price,
             $subtotal
         );
 

@@ -760,7 +760,7 @@ include '../../sessions/session.php';
                 `;
 
                         items.forEach((item) => {
-                            const subtotal = item.qty * item.price;
+                            const subtotal = (item.subtotal != null) ? Number(item.subtotal) : item.qty * item.price;
                             total += subtotal;
 
                             const thumb = item.photo

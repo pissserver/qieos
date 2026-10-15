@@ -27,11 +27,12 @@ $customerName = mysqli_query($conn, "
 $customerName = $customerName ? $customerName['name'] : '-';
 
 $details = mysqli_query($conn, "
-    SELECT od.*, p.name AS product_name 
+    SELECT od.*, COALESCE(p.name, pc.name, 'Barang') AS product_name
     FROM order_details od
     LEFT JOIN products p ON od.product_id = p.id
+    LEFT JOIN product_combos pc ON od.product_combo_id = pc.id
     WHERE od.order_id = $order_id
-    ORDER BY COALESCE(od.name, p.name) ASC
+    ORDER BY product_name ASC
 ");
 ?>
 
@@ -92,7 +93,7 @@ $details = mysqli_query($conn, "
             <div class="item">
 
                 <div class="item-name">
-                    <?= htmlspecialchars(ucwords(strtolower($d['name'] ? $d['name'] : ($d['product_name'] ? $d['product_name'] : 'Barang')))) ?>
+                    <?= htmlspecialchars(ucwords(strtolower($d['product_name'] ? $d['product_name'] : 'Barang'))) ?>
                 </div>
 
                 <div class="item-detail">
