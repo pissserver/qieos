@@ -6,6 +6,10 @@ include 'report-helper.php';
 list($first, $last) = report_dates($conn);
 $category = isset($_GET['category']) ? report_esc($conn, $_GET['category']) : '';
 
+/* 'all' (atau kosong) = tampilkan seluruh kategori tanpa filter. */
+$filterCategory = ($category !== '' && strtolower($category) !== 'all');
+$catWhere = $filterCategory ? "AND p.category = '$category'" : '';
+
 $query = mysqli_query($conn, "
     SELECT
         p.name,
@@ -15,9 +19,9 @@ $query = mysqli_query($conn, "
     FROM order_details od
     JOIN orders o ON od.order_id = o.id
     JOIN products p ON od.product_id = p.id
-    WHERE p.category = '$category'
-      AND o.status_payment = 'paid'
+    WHERE o.status_payment = 'paid'
       AND DATE(o.tanggal) BETWEEN '$first' AND '$last'
+      $catWhere
     GROUP BY p.id, p.name, p.code
     ORDER BY omzet DESC, p.name ASC
 ");
@@ -42,7 +46,7 @@ if ($hasData) {
         <?php
     }
 } else {
-    report_empty(5, 'Tidak ada penjualan untuk kategori ini pada periode tersebut.');
+    report_empty(5, 'Tidak ada penjualan pada periode tersebut.');
 }
 
 echo '<!--SPLIT_FOOT-->';

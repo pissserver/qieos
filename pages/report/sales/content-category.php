@@ -26,9 +26,7 @@
                     Kategori
                 </label>
                 <select class="form-control" id="category_id">
-                    <option value="">
-                        -- Pilih Kategori --
-                    </option>
+                    <option value="all" selected>Semua Kategori</option>
                     <option value="makanan">Makanan</option>
                     <option value="minuman">Minuman</option>
                     <option value="jajanan">Jajanan</option>

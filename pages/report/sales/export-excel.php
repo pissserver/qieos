@@ -94,7 +94,8 @@ switch ($tab) {
 
     case 'category':
         $escCat = mysqli_real_escape_string($conn, $category);
-        $q = mysqli_query($conn, "SELECT p.name, p.code, COALESCE(SUM(od.qty),0) AS qty_sold, COALESCE(SUM(od.subtotal),0) AS omzet FROM order_details od JOIN orders o ON od.order_id=o.id JOIN products p ON od.product_id=p.id WHERE p.category='$escCat' AND o.status_payment='paid' AND $where GROUP BY p.id, p.name, p.code ORDER BY omzet DESC, p.name ASC");
+        $catFilter = ($category !== '' && strtolower($category) !== 'all') ? "AND p.category='$escCat'" : '';
+        $q = mysqli_query($conn, "SELECT p.name, p.code, COALESCE(SUM(od.qty),0) AS qty_sold, COALESCE(SUM(od.subtotal),0) AS omzet FROM order_details od JOIN orders o ON od.order_id=o.id JOIN products p ON od.product_id=p.id WHERE o.status_payment='paid' AND $where $catFilter GROUP BY p.id, p.name, p.code ORDER BY omzet DESC, p.name ASC");
         if ($q) while ($r = mysqli_fetch_assoc($q)) { $total+=(float)$r['omzet']; $rows[]=$r; }
         break;
 
@@ -130,7 +131,7 @@ if ($tab === 'product' && $product_id > 0) {
 
 $categoryName = '';
 if ($tab === 'category' && $category !== '') {
-    $categoryName = ucfirst($category);
+    $categoryName = (strtolower($category) === 'all') ? 'Semua Kategori' : ucfirst($category);
 }
 
 // ============================
