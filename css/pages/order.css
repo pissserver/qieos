@@ -1356,29 +1356,41 @@ body {
 
     .order-item-badges {
         display: flex;
+        align-items: center;
         gap: 6px;
         flex-wrap: wrap;
         font-size: 13px;
     }
 
     .badge-price {
-        background: linear-gradient(135deg, #6366f1, #8b5cf6);
-        color: #fff;
-        padding: 2px 8px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 28px;
+        padding: 0 12px;
         border-radius: 999px;
-        font-size: 11px;
-        font-weight: 700;
-        box-shadow: 0 4px 10px rgba(99, 102, 241, .22);
+        font-size: 12px;
+        font-weight: 800;
+        letter-spacing: .2px;
+        line-height: 1;
+        color: #fff;
+        background: linear-gradient(135deg, #6366f1, #8b5cf6);
+        box-shadow: 0 5px 14px rgba(99, 102, 241, .28), inset 0 1px 0 rgba(255, 255, 255, .28);
     }
 
     .badge-qty {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 28px;
+        padding: 0 12px;
+        border-radius: 999px;
+        font-size: 12px;
+        font-weight: 700;
+        line-height: 1;
+        color: #475569;
         background: #f1f5f9;
         border: 1px solid #e2e8f0;
-        color: #475569;
-        padding: 2px 8px;
-        border-radius: 999px;
-        font-size: 11px;
-        font-weight: 600;
     }
 
     .order-item-subtotal {
