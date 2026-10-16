@@ -120,9 +120,6 @@ $tables = array(
             array('stock_requests', 'stock_request_items.request_id'),
             array('products', 'stock_request_items.product_id'),
         )),
-    'app_settings' => array('name' => 'app_settings', 'domain' => 'SISTEM', 'icon' => 'fa-sliders',
-        'desc' => 'Pengaturan aplikasi berformat key-value, misalnya ambang batas stok menipis.',
-        'rels' => array()),
     'orders' => array('name' => 'orders', 'domain' => 'PENJUALAN', 'icon' => 'fa-receipt',
         'desc' => 'Header pesanan: kode unik, tanggal, kasir penanggung jawab, total, dan status pembayaran.',
         'rels' => array(
@@ -185,7 +182,6 @@ $pos = array(
     'sales_stock'           => array(60, 600),
     'stock_requests'        => array(380, 600),
     'stock_request_items'   => array(700, 600),
-    'app_settings'          => array(1020, 600),
     'orders'                => array(380, 820),
     'order_details'         => array(700, 820),
     'tenant_payments'       => array(60, 1040),

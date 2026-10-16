@@ -160,7 +160,7 @@ switch ($role) {
 
 // ubah item yang belum tersedia sesuai role -> "segera hadir"
 $segera = array(
-    'administrator' => array('master-produk', 'master-supplier', 'master-customer', 'restock',
+    'administrator' => array('master-produk', 'master-unit', 'master-supplier', 'master-customer', 'restock',
         'stok-gudang', 'transfer-gudang', 'laporan-penjualan'),
     'staff kasir'   => array('master-customer', 'stok-kantin', 'katalog', 'pesanan'),
 );
