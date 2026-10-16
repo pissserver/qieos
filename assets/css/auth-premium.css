@@ -1999,3 +1999,65 @@ body.auth-container {
         transform: none !important;
     }
 }
+
+/* ============================================
+   MOBILE PERF MODE (max-width: 520px)
+   Efek berat (filter blur besar, backdrop-filter,
+   re-raster box-shadow glow) ditukar versi murah
+   agar animasi tetap 60fps di HP.
+   ============================================ */
+@media (max-width: 520px) {
+
+    /* Nebula orbs: gradient blur-friendly, tanpa filter */
+    .auth-shapes .shape {
+        filter: none;
+        opacity: 0.16;
+    }
+    .auth-shapes .shape:nth-child(1) { background: radial-gradient(circle, rgba(99,102,241,0.75) 0%, transparent 70%); }
+    .auth-shapes .shape:nth-child(2) { background: radial-gradient(circle, rgba(236,72,153,0.7) 0%, transparent 70%); }
+    .auth-shapes .shape:nth-child(3) { background: radial-gradient(circle, rgba(139,92,246,0.7) 0%, transparent 70%); }
+    .auth-shapes .shape:nth-child(4) { background: radial-gradient(circle, rgba(6,182,212,0.65) 0%, transparent 70%); }
+    .auth-shapes .shape:nth-child(5) { background: radial-gradient(circle, rgba(245,158,11,0.6) 0%, transparent 70%); }
+
+    /* Bintang: twinkle opacity saja, tanpa re-raster glow */
+    .auth-shapes .star {
+        box-shadow: none;
+        animation-name: authStarTwinkleLite;
+    }
+
+    /* Bulan: glow statis */
+    .auth-shapes .auth-moon { animation: none; }
+
+    /* Meteor: 2 cukup */
+    .auth-shapes .meteor:nth-child(3),
+    .auth-shapes .meteor:nth-child(4) { display: none; }
+
+    /* Card: backdrop-filter off — kemenangan terbesar */
+    .auth-card {
+        -webkit-backdrop-filter: none;
+        backdrop-filter: none;
+        background: linear-gradient(165deg, rgba(17, 24, 39, 0.95) 0%, rgba(23, 18, 47, 0.94) 55%, rgba(30, 16, 42, 0.93) 100%);
+    }
+    .auth-card::before { animation: none; }
+
+    /* Card exit tanpa blur filter */
+    .auth-card-wrapper.login-exit {
+        animation: cardExitLite 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    }
+
+    /* Warp stars overlay: setengah saja + tanpa glow */
+    .login-warp-stars .ws:nth-child(even) { display: none; }
+    .login-warp-stars .ws { box-shadow: none; }
+
+    /* Partikel: layer komposit stabil sejak awal */
+    .particle { will-change: transform, opacity; }
+}
+
+@keyframes authStarTwinkleLite {
+    0%, 100% { opacity: 0.15; }
+    50% { opacity: 0.85; }
+}
+
+@keyframes cardExitLite {
+    to { opacity: 0; transform: scale(0.93); }
+}

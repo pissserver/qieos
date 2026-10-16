@@ -182,7 +182,8 @@
             document.addEventListener('DOMContentLoaded', function() {
                 // Background floating particles
                 const container = document.querySelector('.auth-container');
-                for(let i = 0; i < 15; i++) {
+                const maxParticles = window.matchMedia('(max-width: 520px)').matches ? 6 : 15;
+                for(let i = 0; i < maxParticles; i++) {
                     const particle = document.createElement('div');
                     particle.className = 'particle';
                     particle.style.left = Math.random() * 100 + '%';
