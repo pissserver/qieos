@@ -1131,6 +1131,7 @@ if (!defined('BASE_URL')) {
     let omzet = <?php echo $omzet; ?>;
     animateValue("omzet-today", omzet, 800); // cepat & smooth
 </script>
+<?php } ?>
 
 <script>
 (function(){
@@ -1227,8 +1228,6 @@ if (!defined('BASE_URL')) {
     resetTimer();
 })();
 </script>
-
-<?php } ?>
 
 <!-- STOCK NOTIFICATION: Dropdown + Toast -->
 <div class="stock-notif-dropdown" id="stockNotifDropdown" aria-hidden="true">
