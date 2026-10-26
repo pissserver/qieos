@@ -143,6 +143,123 @@ include '../../sessions/session.php';
     </div>
 </div>
 
+<!-- ============================ MODAL ADJUSTMENT STOK ============================ -->
+<div class="adjust-modal" id="adjustModal" aria-hidden="true">
+    <div class="adjust-modal-backdrop" data-adjust-close></div>
+
+    <div class="adjust-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="adjustModalName">
+        <div class="adjust-modal-head">
+            <div class="adjust-modal-product">
+                <img class="adjust-modal-img" id="adjustModalImg" alt="" hidden>
+                <span class="adjust-modal-icon" id="adjustModalIcon"><i class="fas fa-sliders"></i></span>
+                <div class="adjust-modal-meta">
+                    <div class="adjust-modal-name" id="adjustModalName">Adjustment Stok</div>
+                    <div class="adjust-modal-code" id="adjustModalCode">Sesuaikan stok produk dengan kondisi fisik</div>
+                </div>
+            </div>
+
+            <button type="button" class="adjust-modal-close" data-adjust-close aria-label="Tutup">
+                <i class="fas fa-xmark"></i>
+            </button>
+        </div>
+
+        <div class="adjust-modal-body">
+            <div class="adjust-product-card">
+                <div class="adjust-product-avatar" id="adjustProductAvatar">
+                    <i class="fas fa-box-open"></i>
+                </div>
+                <div class="adjust-product-info">
+                    <div class="adjust-product-name" id="adjustProductName">&mdash;</div>
+                    <div class="adjust-product-sub">
+                        <span id="adjustProductCode"></span>
+                        <span class="adjust-product-dot">&bull;</span>
+                        <span id="adjustProductUnit"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="adjust-tabs" role="tablist">
+                <button type="button" class="adjust-tab is-active" data-adjust-tab="form" role="tab">
+                    <i class="fas fa-pen-to-square"></i>
+                    <span>Form Adjustment</span>
+                </button>
+                <button type="button" class="adjust-tab" data-adjust-tab="history" role="tab">
+                    <i class="fas fa-clock-rotate-left"></i>
+                    <span>Riwayat Adjustment</span>
+                </button>
+            </div>
+
+            <div class="adjust-panes">
+                <div class="adjust-pane is-active" data-adjust-pane="form">
+                    <form id="adjustForm" novalidate>
+                        <div class="adjust-fields">
+                            <div class="adjust-field">
+                                <label class="adjust-label" for="adjustType">Jenis Adjustment</label>
+                                <div class="adjust-select-wrap">
+                                    <select class="adjust-select" id="adjustType" required>
+                                        <option value="" selected disabled>Pilih jenis adjustment...</option>
+                                        <option value="in">Penambahan Stok</option>
+                                        <option value="out">Pengurangan Stok</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="adjust-field">
+                                <label class="adjust-label" for="adjustLocation">Lokasi Stok</label>
+                                <div class="adjust-select-wrap">
+                                    <select class="adjust-select" id="adjustLocation" required disabled>
+                                        <option value="">Pilih jenis dahulu</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="adjust-field" id="adjustLayerField" style="display:none;">
+                                <label class="adjust-label" for="adjustLayer">Layer FIFO</label>
+                                <select class="adjust-select" id="adjustLayer" disabled>
+                                    <option value="">Pilih lokasi dahulu</option>
+                                </select>
+                                <small class="adjust-field-hint">Pilih layer pembelian yang di-adjust</small>
+                            </div>
+
+                            <div class="adjust-field">
+                                <label class="adjust-label" for="adjustQty">Jumlah</label>
+                                <div class="adjust-qty-wrap">
+                                    <input type="number" class="adjust-input" id="adjustQty" min="1" step="1" placeholder="0" required disabled>
+                                    <span class="adjust-qty-unit-chip" id="adjustQtyUnit" hidden></span>
+                                </div>
+                                <small class="adjust-field-hint" id="adjustQtyHint"></small>
+                            </div>
+
+                            <div class="adjust-field">
+                                <label class="adjust-label" for="adjustNote">Catatan <span class="adjust-label-req" id="adjustNoteReq" hidden>(wajib)</span></label>
+                                <textarea class="adjust-textarea" id="adjustNote" rows="3" maxlength="500" placeholder="Contoh: stok rusak, opname gudang, dll."></textarea>
+                                <small class="adjust-field-hint">Catatan wajib untuk adjustment stok kantin</small>
+                            </div>
+                        </div>
+
+                        <div class="adjust-modal-foot">
+                            <button type="button" class="adjust-btn adjust-btn-ghost" data-adjust-close>Batal</button>
+                            <button type="submit" class="adjust-btn adjust-btn-primary" id="adjustSubmitBtn" disabled>
+                                <span class="adjust-btn-spinner" hidden><i class="fas fa-circle-notch fa-spin"></i></span>
+                                <span class="adjust-btn-text">Simpan Adjustment</span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="adjust-pane" data-adjust-pane="history">
+                    <div id="adjustHistoryContent" class="adjust-history-wrap">
+                        <div class="adjust-loading">
+                            <i class="fas fa-circle-notch fa-spin"></i>
+                            <span>Memuat riwayat...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <?php include '../../script/footscript.php'; ?>
 
     <script src="<?php echo BASE_URL; ?>/script/datatable-compact.js?v=<?php echo filemtime(__DIR__ . '/../../script/datatable-compact.js'); ?>"></script>
@@ -681,6 +798,428 @@ include '../../sessions/session.php';
 
         syncMutasiExport();
         loadStockTable();
+    });
+
+    /* ============================ MODAL ADJUSTMENT ============================ */
+
+    let adjustProductData = null;
+    let adjustFifoLayers = [];
+
+    function openAdjust(row){
+        if(!row) return;
+
+        const id    = row.getAttribute('data-id');
+        const name  = row.getAttribute('data-name') || 'Adjustment Stok';
+        const code  = row.getAttribute('data-code') || '';
+        const unit  = row.querySelector('.unit-badge')?.textContent.trim() || '';
+        const photo = row.getAttribute('data-photo') || '';
+
+        adjustProductData = { id, name, code, unit, photo };
+
+        document.getElementById('adjustModalName').textContent = name;
+        document.getElementById('adjustModalCode').textContent = 'Sesuaikan stok produk dengan kondisi fisik';
+
+        document.getElementById('adjustProductName').textContent = name;
+        document.getElementById('adjustProductCode').textContent = code;
+        document.getElementById('adjustProductUnit').textContent = unit;
+        
+        const qtyChip = document.getElementById('adjustQtyUnit');
+        if(unit){
+            qtyChip.textContent = unit;
+            qtyChip.hidden = false;
+        } else {
+            qtyChip.hidden = true;
+        }
+
+        const avatar = document.getElementById('adjustProductAvatar');
+        if(photo){
+            avatar.innerHTML = '<img src="' + BASE_URL + '/assets/img/products/' + photo + '" alt="' + name + '">';
+        } else {
+            avatar.innerHTML = '<i class="fas fa-box-open"></i>';
+        }
+
+        const img = document.getElementById('adjustModalImg');
+        const icon = document.getElementById('adjustModalIcon');
+        if(photo){
+            img.src = BASE_URL + '/assets/img/products/' + photo;
+            img.alt = name;
+            img.hidden = false;
+            icon.hidden = true;
+        } else {
+            img.hidden = true;
+            icon.hidden = false;
+        }
+
+        document.getElementById('adjustModal').classList.add('is-open');
+        document.getElementById('adjustModal').setAttribute('aria-hidden', 'false');
+        document.body.classList.add('adjust-modal-open');
+
+        resetAdjustForm();
+        loadFifoLayers(id);
+        loadAdjustHistory(id);
+    }
+
+    function closeAdjust(){
+        const modal = document.getElementById('adjustModal');
+        if(!modal) return;
+
+        modal.classList.remove('is-open');
+        modal.setAttribute('aria-hidden', 'true');
+        document.body.classList.remove('adjust-modal-open');
+
+        resetAdjustForm();
+        adjustProductData = null;
+        adjustFifoLayers = [];
+    }
+
+    function switchAdjustTab(tab){
+        document.querySelectorAll('.adjust-tab').forEach(function(b){
+            b.classList.toggle('is-active', b.getAttribute('data-adjust-tab') === tab);
+        });
+        document.querySelectorAll('.adjust-pane').forEach(function(p){
+            p.classList.toggle('is-active', p.getAttribute('data-adjust-pane') === tab);
+        });
+    }
+
+    function loadAdjustHistory(productId){
+        const wrap = document.getElementById('adjustHistoryContent');
+        wrap.innerHTML = '<div class="adjust-loading"><i class="fas fa-circle-notch fa-spin"></i><span>Memuat riwayat...</span></div>';
+
+        fetch('stock-adjustment-history.php?id=' + encodeURIComponent(productId))
+        .then(res => res.text())
+        .then(html => { wrap.innerHTML = html; });
+    }
+
+    /* Select2 layer FIFO: sekali init, isi opsi di-refresh tiap buka modal. */
+    function initLayerSelect2(){
+        const $layer = $('#adjustLayer');
+        if(!$layer.data('select2')){
+            $layer.select2({
+                width: '100%',
+                placeholder: 'Cari / pilih layer FIFO...',
+                minimumResultsForSearch: 0,
+                dropdownParent: $('#adjustModal'),
+                templateResult: formatLayerOption,
+                language: {
+                    noResults: function(){ return 'Layer tidak ditemukan'; },
+                    searching: function(){ return 'Mencari layer...' }
+                }
+            });
+            $layer.on('change', onLayerChange);
+        }
+    }
+
+    /* Opsi layer dua baris: badge form + tanggal di kiri, sisa stok kanan. */
+    function formatLayerOption(layer){
+        if(!layer.id) return layer.text;
+        const $opt = $(layer.element);
+        return $('<div class="adjust-opt">'
+            + '<span class="adjust-opt-form">' + ($opt.data('form') || 'FIFO') + '</span>'
+            + '<span class="adjust-opt-date">' + ($opt.data('date') || '') + '</span>'
+            + '<span class="adjust-opt-sisa">Sisa ' + ($opt.data('sisa') || 0) + '</span>'
+            + '</div>');
+    }
+
+    function resetAdjustForm(){
+        const form = document.getElementById('adjustForm');
+        form.reset();
+
+        switchAdjustTab('form');
+
+        document.getElementById('adjustType').value = '';
+        document.getElementById('adjustLayerField').style.display = 'none';
+        document.getElementById('adjustNoteReq').hidden = true;
+        document.getElementById('adjustQty').disabled = true;
+        document.getElementById('adjustQty').value = '';
+        document.getElementById('adjustQty').removeAttribute('max');
+        document.getElementById('adjustQtyHint').textContent = '';
+        document.getElementById('adjustQtyHint').classList.remove('is-warn');
+        document.getElementById('adjustSubmitBtn').disabled = true;
+
+        const loc = document.getElementById('adjustLocation');
+        loc.disabled = true;
+        loc.innerHTML = '<option value="" selected disabled>Pilih jenis adjustment dahulu</option>';
+
+        if($.fn.select2 && $('#adjustLayer').data('select2')){
+            $('#adjustLayer').val('').trigger('change.select2');
+        }
+
+        document.querySelectorAll('.adjust-select, .adjust-input, .adjust-textarea').forEach(el => {
+            el.classList.remove('is-invalid');
+        });
+    }
+
+    function loadFifoLayers(productId){
+        fetch('stock-detail.php?id=' + encodeURIComponent(productId))
+        .then(res => res.text())
+        .then(html => {
+            const temp = document.createElement('div');
+            temp.innerHTML = html;
+            const rows = temp.querySelectorAll('tbody tr');
+
+            adjustFifoLayers = [];
+            rows.forEach((tr) => {
+                const cells = tr.querySelectorAll('td');
+                if(cells.length < 4) return;
+
+                const itemId = tr.getAttribute('data-item-id');
+                if(!itemId) return;
+
+                const dateText = cells[0].querySelector('.date-main')?.textContent.trim() || '';
+                const formText = cells[0].querySelector('.form-badge')?.textContent.trim() || '';
+                const qtyText  = cells[1].querySelector('.badge-value')?.textContent.trim() || '0';
+                const remText  = cells[2].querySelector('.badge-value')?.textContent.trim() || '0';
+                const priceText= cells[3].querySelector('.badge-value')?.textContent.trim() || 'Rp 0';
+
+                const qty = parseInt(qtyText);
+                const remaining = parseInt(remText);
+
+                adjustFifoLayers.push({
+                    id: parseInt(itemId),
+                    date: dateText,
+                    form: formText,
+                    qty: qty,
+                    remaining: remaining,
+                    price: priceText
+                });
+            });
+        });
+    }
+
+    $(document).on('click', '.adjust-tab', function(){
+        switchAdjustTab($(this).data('adjust-tab'));
+    });
+
+    $(document).on('change', '#adjustType', function(){
+        const type = $(this).val();
+        const locSelect = document.getElementById('adjustLocation');
+        const layerField = document.getElementById('adjustLayerField');
+        const qtyInput = document.getElementById('adjustQty');
+
+        locSelect.innerHTML = '';
+        qtyInput.value = '';
+        qtyInput.disabled = true;
+        layerField.style.display = 'none';
+        document.getElementById('adjustQtyHint').textContent = '';
+        document.getElementById('adjustSubmitBtn').disabled = true;
+
+        if(!type){
+            locSelect.disabled = true;
+            locSelect.innerHTML = '<option value="">Pilih jenis adjustment dahulu</option>';
+            return;
+        }
+
+        locSelect.disabled = false;
+        locSelect.innerHTML = '<option value="" selected disabled>Pilih lokasi stok...</option>'
+            + '<option value="gudang">Stok Gudang</option>'
+            + '<option value="kantin">Stok Kantin</option>';
+    });
+
+    $(document).on('change', '#adjustLocation', function(){
+        const location = $(this).val();
+        const layerField = document.getElementById('adjustLayerField');
+        const qtyInput = document.getElementById('adjustQty');
+        const noteReq = document.getElementById('adjustNoteReq');
+        const $layer = $('#adjustLayer');
+
+        qtyInput.value = '';
+        qtyInput.disabled = true;
+        document.getElementById('adjustQtyHint').textContent = '';
+        document.getElementById('adjustSubmitBtn').disabled = true;
+
+        if(location === 'gudang'){
+            layerField.style.display = '';
+            noteReq.hidden = true;
+
+            initLayerSelect2();
+
+            if(adjustFifoLayers.length === 0){
+                $layer.html('<option value="">Tidak ada layer FIFO tersedia</option>').prop('disabled', true).trigger('change.select2');
+                return;
+            }
+
+            let opts = '<option value="" selected>Pilih layer FIFO...</option>';
+            adjustFifoLayers.forEach(function(layer){
+                opts += '<option value="' + layer.id + '"'
+                    + ' data-form="' + (layer.form || 'FIFO') + '"'
+                    + ' data-date="' + layer.date + '"'
+                    + ' data-sisa="' + layer.remaining + '">'
+                    + layer.date + ' — ' + layer.form + ' (Sisa: ' + layer.remaining + ')'
+                    + '</option>';
+            });
+            $layer.html(opts).prop('disabled', false).trigger('change.select2');
+
+        } else if(location === 'kantin'){
+            layerField.style.display = 'none';
+            noteReq.hidden = false;
+            qtyInput.disabled = false;
+            qtyInput.focus();
+            document.getElementById('adjustQtyHint').textContent = 'Masukkan jumlah adjustment';
+        } else {
+            layerField.style.display = 'none';
+            noteReq.hidden = true;
+        }
+
+        validateAdjustForm();
+    });
+
+    function onLayerChange(){
+        const layerId = $('#adjustLayer').val();
+        const qtyInput = document.getElementById('adjustQty');
+        const hint = document.getElementById('adjustQtyHint');
+
+        if(!layerId || layerId === ''){
+            qtyInput.disabled = true;
+            qtyInput.value = '';
+            hint.textContent = '';
+            document.getElementById('adjustSubmitBtn').disabled = true;
+            return;
+        }
+
+        const layer = adjustFifoLayers.find(l => l.id == layerId);
+        const type = document.getElementById('adjustType').value;
+
+        qtyInput.disabled = false;
+        qtyInput.focus();
+
+        if(type === 'out'){
+            qtyInput.max = layer ? layer.remaining : '';
+            hint.textContent = 'Maksimal ' + (layer ? layer.remaining : 0) + ' ' + (adjustProductData?.unit || '');
+            hint.classList.add('is-warn');
+        } else {
+            qtyInput.removeAttribute('max');
+            hint.textContent = 'Masukkan jumlah penambahan stok';
+            hint.classList.remove('is-warn');
+        }
+
+        validateAdjustForm();
+    }
+
+    $(document).on('input', '#adjustQty', validateAdjustForm);
+    $(document).on('input', '#adjustNote', validateAdjustForm);
+
+    function validateAdjustForm(){
+        const type = document.getElementById('adjustType').value;
+        const location = document.getElementById('adjustLocation').value;
+        const qty = parseInt(document.getElementById('adjustQty').value) || 0;
+        const note = document.getElementById('adjustNote').value.trim();
+        const submitBtn = document.getElementById('adjustSubmitBtn');
+
+        if(!type || !location || qty <= 0){
+            submitBtn.disabled = true;
+            return;
+        }
+
+        if(location === 'kantin' && note === ''){
+            submitBtn.disabled = true;
+            return;
+        }
+
+        if(location === 'gudang'){
+            const layerId = $('#adjustLayer').val();
+            if(!layerId || layerId === ''){
+                submitBtn.disabled = true;
+                return;
+            }
+
+            if(type === 'out'){
+                const layer = adjustFifoLayers.find(l => l.id == layerId);
+                const maxQty = layer ? layer.remaining : 0;
+                if(qty > maxQty){
+                    submitBtn.disabled = true;
+                    document.getElementById('adjustQty').classList.add('is-invalid');
+                    return;
+                }
+            }
+        }
+
+        document.getElementById('adjustQty').classList.remove('is-invalid');
+        submitBtn.disabled = false;
+    }
+
+    $(document).on('submit', '#adjustForm', function(e){
+        e.preventDefault();
+
+        const submitBtn = document.getElementById('adjustSubmitBtn');
+        const spinner = submitBtn.querySelector('.adjust-btn-spinner');
+        const btnText = submitBtn.querySelector('.adjust-btn-text');
+
+        submitBtn.disabled = true;
+        spinner.hidden = false;
+        btnText.textContent = 'Menyimpan...';
+
+        const formData = {
+            product_id: adjustProductData.id,
+            type: document.getElementById('adjustType').value,
+            location: document.getElementById('adjustLocation').value,
+            purchase_item_id: document.getElementById('adjustLocation').value === 'gudang' ? ($('#adjustLayer').val() || 0) : 0,
+            qty: document.getElementById('adjustQty').value,
+            note: document.getElementById('adjustNote').value.trim()
+        };
+
+        fetch('stock-adjustment-save.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(formData)
+        })
+        .then(res => res.json())
+        .then(data => {
+            if(data.success){
+                /* Mutasi stok langsung refresh sesuai lokasi yang di-adjust */
+                if(window.activeStockId){
+                    window.mutasiTab = formData.location;
+                    applyMutasiTab(window.mutasiTab);
+                    loadMutasi();
+                }
+
+                /* Riwayat di modal ikut terbarui */
+                loadAdjustHistory(adjustProductData.id);
+                switchAdjustTab('history');
+
+                resetAdjustFormValues();
+            } else {
+                alert('Gagal menyimpan: ' + (data.message || 'Error'));
+            }
+        })
+        .catch(err => {
+            alert('Terjadi kesalahan: ' + err.message);
+        })
+        .finally(() => {
+            submitBtn.disabled = false;
+            spinner.hidden = true;
+            btnText.textContent = 'Simpan Adjustment';
+        });
+    });
+
+    /* Reset nilai form saja (tanpa pindah tab) supaya user bisa langsung
+       input adjustment berikutnya setelah simpan. */
+    function resetAdjustFormValues(){
+        document.getElementById('adjustType').value = '';
+        const loc = document.getElementById('adjustLocation');
+        loc.value = '';
+        loc.disabled = true;
+        loc.innerHTML = '<option value="" selected disabled>Pilih jenis adjustment dahulu</option>';
+
+        document.getElementById('adjustLayerField').style.display = 'none';
+        document.getElementById('adjustNoteReq').hidden = true;
+        document.getElementById('adjustQty').disabled = true;
+        document.getElementById('adjustQty').value = '';
+        document.getElementById('adjustQty').removeAttribute('max');
+        document.getElementById('adjustQtyHint').textContent = '';
+        document.getElementById('adjustQtyHint').classList.remove('is-warn');
+        document.getElementById('adjustSubmitBtn').disabled = true;
+
+        if($.fn.select2 && $('#adjustLayer').data('select2')){
+            $('#adjustLayer').val('').trigger('change.select2');
+        }
+    }
+
+    $(document).on('click', '[data-adjust-close]', closeAdjust);
+
+    $(document).on('keydown', function(e){
+        if(e.key === 'Escape' && document.getElementById('adjustModal').classList.contains('is-open')){
+            closeAdjust();
+        }
     });
 </script>
 

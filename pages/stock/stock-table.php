@@ -6,6 +6,7 @@
             <th>Produk</th>
             <th class="text-center">Satuan</th>
             <th class="text-center">Layer Purchase</th>
+            <th class="text-center">Adjustment</th>
         </tr>
     </thead>
     <tbody>
@@ -78,6 +79,18 @@
                     title="Detail layer FIFO">
                     <i class="fas fa-layer-group"></i>
                     <span>FIFO</span>
+                </button>
+            </div>
+        </td>
+
+        <td class="text-center">
+            <div class="status-actions">
+                <button type="button" class="row-adjust-btn"
+                    onclick="event.stopPropagation(); openAdjust(this.closest('tr'));"
+                    aria-label="Adjustment stok <?= htmlspecialchars($d['name']) ?>"
+                    title="Adjustment stok">
+                    <i class="fas fa-sliders"></i>
+                    <span>Adjust</span>
                 </button>
             </div>
         </td>

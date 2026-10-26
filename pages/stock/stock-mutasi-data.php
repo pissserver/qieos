@@ -73,10 +73,14 @@ $bulan = [
 ];
 
 /* ==================== GUDANG ==================== */
-$gMasukBefore  = mutasi_scalar($conn, "SELECT COALESCE(SUM(pi.qty_stock),0) FROM purchase_items pi JOIN purchases p ON p.id = pi.purchase_id WHERE pi.product_id = $id AND pi.deleted_at IS NULL AND p.deleted_at IS NULL AND p.date < '$from'");
-$gKeluarBefore = mutasi_scalar($conn, "SELECT COALESCE(SUM(qty),0) FROM sales_stock WHERE product_id = $id AND type = 'transfer' AND created_at < '$startTs'");
-$gMasuk        = mutasi_scalar($conn, "SELECT COALESCE(SUM(pi.qty_stock),0) FROM purchase_items pi JOIN purchases p ON p.id = pi.purchase_id WHERE pi.product_id = $id AND pi.deleted_at IS NULL AND p.deleted_at IS NULL AND p.date BETWEEN '$from' AND '$to'");
-$gKeluar       = mutasi_scalar($conn, "SELECT COALESCE(SUM(qty),0) FROM sales_stock WHERE product_id = $id AND type = 'transfer' AND created_at BETWEEN '$startTs' AND '$endTs'");
+$gMasukBefore  = mutasi_scalar($conn, "SELECT COALESCE(SUM(pi.qty_stock),0) FROM purchase_items pi JOIN purchases p ON p.id = pi.purchase_id WHERE pi.product_id = $id AND pi.deleted_at IS NULL AND p.deleted_at IS NULL AND p.date < '$from'")
+               + mutasi_scalar($conn, "SELECT COALESCE(SUM(qty),0) FROM stock_adjustments WHERE product_id = $id AND location = 'gudang' AND type = 'in' AND created_at < '$startTs'");
+$gKeluarBefore = mutasi_scalar($conn, "SELECT COALESCE(SUM(qty),0) FROM sales_stock WHERE product_id = $id AND type = 'transfer' AND created_at < '$startTs'")
+               + mutasi_scalar($conn, "SELECT COALESCE(SUM(qty),0) FROM stock_adjustments WHERE product_id = $id AND location = 'gudang' AND type = 'out' AND created_at < '$startTs'");
+$gMasuk        = mutasi_scalar($conn, "SELECT COALESCE(SUM(pi.qty_stock),0) FROM purchase_items pi JOIN purchases p ON p.id = pi.purchase_id WHERE pi.product_id = $id AND pi.deleted_at IS NULL AND p.deleted_at IS NULL AND p.date BETWEEN '$from' AND '$to'")
+               + mutasi_scalar($conn, "SELECT COALESCE(SUM(qty),0) FROM stock_adjustments WHERE product_id = $id AND location = 'gudang' AND type = 'in' AND created_at BETWEEN '$startTs' AND '$endTs'");
+$gKeluar       = mutasi_scalar($conn, "SELECT COALESCE(SUM(qty),0) FROM sales_stock WHERE product_id = $id AND type = 'transfer' AND created_at BETWEEN '$startTs' AND '$endTs'")
+               + mutasi_scalar($conn, "SELECT COALESCE(SUM(qty),0) FROM stock_adjustments WHERE product_id = $id AND location = 'gudang' AND type = 'out' AND created_at BETWEEN '$startTs' AND '$endTs'");
 
 $gAwal  = max(0, $gMasukBefore - $gKeluarBefore);
 $gAkhir = max(0, $gAwal + $gMasuk - $gKeluar);
@@ -129,6 +133,30 @@ while($qt && $r = mysqli_fetch_assoc($qt)){
     ];
 }
 
+$qa = mysqli_query($conn, "
+    SELECT sa.created_at AS ts, DATE(sa.created_at) AS tgl, sa.type, sa.qty, sa.note, p.form
+    FROM stock_adjustments sa
+    LEFT JOIN purchase_items pi ON pi.id = sa.purchase_item_id
+    LEFT JOIN purchases p ON p.id = pi.purchase_id
+    WHERE sa.product_id = $id
+      AND sa.location = 'gudang'
+      AND sa.created_at BETWEEN '$startTs' AND '$endTs'
+    ORDER BY sa.created_at ASC, sa.id ASC
+");
+while($qa && $r = mysqli_fetch_assoc($qa)){
+    $isIn = $r['type'] === 'in';
+    $rowsG[] = [
+        'tgl'    => $r['tgl'],
+        'ts'     => $r['ts'],
+        'title'  => $isIn ? 'Adjustment Penambahan' : 'Adjustment Pengurangan',
+        'sub'    => ($r['note'] ?: '') . ($r['form'] ? ' • ' . $r['form'] : ''),
+        'masuk'  => $isIn ? (int)$r['qty'] : 0,
+        'keluar' => $isIn ? 0 : (int)$r['qty'],
+        'saldo'  => 0,
+        'idx'    => $gIdx++
+    ];
+}
+
 /* Urut kronologis memakai waktu kejadian ASLI (created_at), bukan
    menebak "pembelian dulu baru transfer". 'idx' jadi tie-breaker
    karena usort PHP < 8 TIDAK stabil. Dengan begitu array_reverse di
@@ -153,8 +181,10 @@ $rowsG = array_reverse($rowsG);
 
 /* ==================== KANTIN ==================== */
 $kAwal   = mutasi_scalar($conn, "SELECT COALESCE(SUM(qty),0) FROM sales_stock WHERE product_id = $id AND created_at < '$startTs'");
-$kMasuk  = mutasi_scalar($conn, "SELECT COALESCE(SUM(qty),0) FROM sales_stock WHERE product_id = $id AND type IN ('transfer','return') AND created_at BETWEEN '$startTs' AND '$endTs'");
-$kKeluar = mutasi_scalar($conn, "SELECT COALESCE(SUM(-qty),0) FROM sales_stock WHERE product_id = $id AND type = 'sale' AND created_at BETWEEN '$startTs' AND '$endTs'");
+$kMasuk  = mutasi_scalar($conn, "SELECT COALESCE(SUM(qty),0) FROM sales_stock WHERE product_id = $id AND type IN ('transfer','return') AND created_at BETWEEN '$startTs' AND '$endTs'")
+         + mutasi_scalar($conn, "SELECT COALESCE(SUM(qty),0) FROM sales_stock WHERE product_id = $id AND type = 'adjustment' AND qty > 0 AND created_at BETWEEN '$startTs' AND '$endTs'");
+$kKeluar = mutasi_scalar($conn, "SELECT COALESCE(SUM(-qty),0) FROM sales_stock WHERE product_id = $id AND type = 'sale' AND created_at BETWEEN '$startTs' AND '$endTs'")
+         + mutasi_scalar($conn, "SELECT COALESCE(SUM(-qty),0) FROM sales_stock WHERE product_id = $id AND type = 'adjustment' AND qty < 0 AND created_at BETWEEN '$startTs' AND '$endTs'");
 
 $kAkhir = max(0, $kAwal + $kMasuk - $kKeluar);
 
@@ -167,7 +197,7 @@ $labelsK = [
 ];
 
 $qk = mysqli_query($conn, "
-    SELECT created_at, qty, type
+    SELECT created_at, qty, type, note
     FROM sales_stock
     WHERE product_id = $id
       AND created_at BETWEEN '$startTs' AND '$endTs'
@@ -179,8 +209,8 @@ while($qk && $r = mysqli_fetch_assoc($qk)){
     $saldoK += $q;
     $rowsK[] = [
         'tgl'    => substr($r['created_at'], 0, 10),
-        'title'  => isset($labelsK[$r['type']]) ? $labelsK[$r['type']] : ucfirst($r['type']),
-        'sub'    => '',
+        'title'  => $r['type'] === 'adjustment' ? ($q > 0 ? 'Adjustment Penambahan' : 'Adjustment Pengurangan') : (isset($labelsK[$r['type']]) ? $labelsK[$r['type']] : ucfirst($r['type'])),
+        'sub'    => $r['note'] ?: '',
         'masuk'  => $q > 0 ? $q : 0,
         'keluar' => $q < 0 ? -$q : 0,
         'saldo'  => $saldoK
