@@ -1,6 +1,7 @@
 <?php
 
 include '../../../sessions/session.php';
+include 'report-helper.php';
 
 require '../../../vendor/phpoffice/phpexcel/Classes/PHPExcel.php';
 require '../../../vendor/phpoffice/phpexcel/Classes/PHPExcel/IOFactory.php';
@@ -28,7 +29,8 @@ $tabLabels = [
     'category' => 'LAPORAN PENJUALAN PER KATEGORI',
     'cashier'  => 'LAPORAN PENJUALAN PER KASIR',
     'best'     => 'LAPORAN PRODUK TERLARIS',
-    'unpaid'   => 'LAPORAN PIUTANG'
+    'unpaid'   => 'LAPORAN PIUTANG',
+    'stock'    => 'LAPORAN STOK'
 ];
 
 $tabTitles = [
@@ -42,7 +44,8 @@ $tabTitles = [
     'category' => 'Laporan Penjualan Per Kategori',
     'cashier'  => 'Laporan Penjualan Per Kasir',
     'best'     => 'Laporan Produk Terlaris',
-    'unpaid'   => 'Laporan Piutang'
+    'unpaid'   => 'Laporan Piutang',
+    'stock'    => 'Laporan Stok'
 ];
 
 $title  = isset($tabLabels[$tab]) ? $tabLabels[$tab] : 'LAPORAN PENJUALAN';
@@ -117,9 +120,40 @@ switch ($tab) {
         $q = mysqli_query($conn, "SELECT o.code, o.tanggal, o.total, COALESCE(NULLIF(u.fullname,''),u.username,'-') AS cashier_name FROM orders o LEFT JOIN users u ON o.staff_id=u.id WHERE o.status_payment='waiting' AND $where ORDER BY o.tanggal DESC, o.id DESC");
         if ($q) while ($r = mysqli_fetch_assoc($q)) { $total+=(float)$r['total']; $rows[]=$r; }
         break;
+
+    case 'stock':
+        $location = isset($_GET['location']) ? $_GET['location'] : 'gudang';
+        if (!in_array($location, ['gudang','kantin','gabungan'])) $location = 'gudang';
+        $startTs = $escFirst . ' 00:00:00';
+        $endTs   = $escLast . ' 23:59:59';
+
+        $stockRows = [];
+        $qp = mysqli_query($conn, "SELECT id, name, code, unit FROM products WHERE category != 'Additional' ORDER BY name ASC");
+        while ($qp && $p = mysqli_fetch_assoc($qp)) $stockRows[] = $p;
+
+        foreach ($stockRows as $p) {
+            $pid = (int)$p['id'];
+            $unit = strtoupper($p['unit'] ?: '');
+            $m = stock_mutation_row($conn, $pid, $location, $escFirst, $escLast, $startTs, $endTs);
+            $rows[] = [
+                'name'     => $p['name'],
+                'code'     => $p['code'],
+                'unit'     => $unit,
+                'awal'     => $m['awal'],
+                'masuk'    => $m['masuk'],
+                'keluar'   => $m['keluar'],
+                'adj_in'   => $m['adj_in'],
+                'adj_out'  => $m['adj_out'],
+                'adj_in_note'  => $m['adj_in_note'],
+                'adj_out_note' => $m['adj_out_note'],
+                'akhir'    => $m['akhir'],
+            ];
+        }
+        break;
 }
 
 $count = ($tab === 'summary') ? 3 : count($rows);
+
 
 $cashierName = '';
 if ($tab === 'cashier' && $cashier_id > 0) {
@@ -756,7 +790,8 @@ $headers = [
     'category' => ['No', 'Produk', 'Kode', 'Qty Terjual', 'Omzet'],
     'cashier'  => ['No', 'Kode Pesanan', 'Tanggal', 'Total', 'Status'],
     'best'     => ['Peringkat', 'Produk', 'Kategori', 'Qty Terjual', 'Omzet'],
-    'unpaid'   => ['No', 'Kode Pesanan', 'Tanggal', 'Kasir', 'Total', 'Status']
+    'unpaid'   => ['No', 'Kode Pesanan', 'Tanggal', 'Kasir', 'Total', 'Status'],
+    'stock'    => ['No', 'Nama Produk', 'Qty Awal', 'Qty Masuk', 'Qty Keluar', 'Adjustment Masuk (Penambahan)', 'Adjustment Keluar (Pengurangan)', 'Saldo Akhir']
 ];
 
 $hdrs = isset($headers[$tab]) ? $headers[$tab] : $headers['all'];
@@ -783,6 +818,10 @@ if ($tab === 'product' && $productName !== '') {
 }
 if ($tab === 'category' && $categoryName !== '') {
     $periode = trim($periode . '  |  Kategori : ' . $categoryName);
+}
+if ($tab === 'stock') {
+    $locLabel = ['gudang' => 'Stok Gudang', 'kantin' => 'Stok Kantin', 'gabungan' => 'Gabungan (Gudang + Kantin)'];
+    $periode = trim($periode . '  |  Lokasi : ' . (isset($locLabel[$location]) ? $locLabel[$location] : ucfirst($location)));
 }
 $sheet->mergeCells("A5:{$lastCol}5");
 $sheet->setCellValue('A5', $periode);
@@ -919,6 +958,25 @@ for ($idx = 0; $idx < $count; $idx++) {
             $sheet->setCellValue("E$row", (float) $r['total']);
             $sheet->setCellValue("F$row", 'Belum Bayar');
             break;
+
+        case 'stock':
+            $sheet->setCellValue("A$row", $no);
+            $sheet->setCellValue("B$row", $r['name']);
+            $sheet->setCellValue("C$row", $r['awal'] . ($r['unit'] ? ' ' . $r['unit'] : ''));
+            $sheet->setCellValue("D$row", $r['masuk'] . ($r['unit'] ? ' ' . $r['unit'] : ''));
+            $sheet->setCellValue("E$row", $r['keluar'] . ($r['unit'] ? ' ' . $r['unit'] : ''));
+            
+            /* Format dari helper: "(+5) (Bonus 5 pcs)" per baris, banyak
+               adjustment dipisah newline sehingga bertumpuk ke bawah. */
+            $adjInText  = $r['adj_in_note']  !== '' ? $r['adj_in_note']  : '-';
+            $adjOutText = $r['adj_out_note'] !== '' ? $r['adj_out_note'] : '-';
+            
+            $sheet->setCellValue("F$row", $adjInText);
+            $sheet->getStyle("F$row")->getAlignment()->setWrapText(true);
+            $sheet->setCellValue("G$row", $adjOutText);
+            $sheet->getStyle("G$row")->getAlignment()->setWrapText(true);
+            $sheet->setCellValue("H$row", $r['akhir'] . ($r['unit'] ? ' ' . $r['unit'] : ''));
+            break;
     }
 
     $row++;
@@ -936,7 +994,8 @@ $totalLabels = [
     'category' => 'TOTAL',
     'cashier'  => 'TOTAL OMZET (TERBAYAR)',
     'best'     => 'TOTAL',
-    'unpaid'   => 'TOTAL PIUTANG'
+    'unpaid'   => 'TOTAL PIUTANG',
+    'stock'    => ''
 ];
 $totalLabel = isset($totalLabels[$tab]) ? $totalLabels[$tab] : 'TOTAL';
 
@@ -961,6 +1020,8 @@ $mergeEndCol = chr(ord('A') + max(0, $totalColIdx - 1));
 $firstDataRow = 8;
 $lastDataRow = $row - 1;
 $hasDataRows = $lastDataRow >= $firstDataRow;
+
+if ($tab !== 'stock') {
 
 if ($tab === 'best' || $tab === 'category' || $tab === 'product') {
     $sheet->mergeCells("A$row:C$row");
@@ -1022,6 +1083,8 @@ if ($tab === 'best' || $tab === 'category') {
     $sheet->getStyle($totalCol . $row)->getNumberFormat()->setFormatCode('"Rp " #,##0');
 }
 
+}
+
 $rpColMap = [
     'summary'  => ['D'],
     'omzet'    => ['F'],
@@ -1033,7 +1096,8 @@ $rpColMap = [
     'category' => ['E'],
     'cashier'  => ['D'],
     'best'     => ['E'],
-    'unpaid'   => ['E']
+    'unpaid'   => ['E'],
+    'stock'    => []
 ];
 $rpCols = isset($rpColMap[$tab]) ? $rpColMap[$tab] : ['D'];
 if ($hasDataRows) {

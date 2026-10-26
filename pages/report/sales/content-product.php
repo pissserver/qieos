@@ -33,6 +33,7 @@
                         $qProduct = mysqli_query($conn, "
                             SELECT id, name, code
                             FROM products
+                            WHERE deleted_at IS NULL
                             ORDER BY name ASC
                         ");
 

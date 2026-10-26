@@ -1241,24 +1241,36 @@
                 width:100% !important;
             }
 
+            /* Distribusi lebar: produk lega, kolom tombol muat
+               tanpa tombol terpotong */
             #stockTable thead th:nth-child(1),
             #stockTable tbody td:nth-child(1){
-                width:52%;
+                width:44%;
             }
 
             #stockTable thead th:nth-child(2),
             #stockTable tbody td:nth-child(2){
-                width:15%;
+                width:16%;
             }
 
             #stockTable thead th:nth-child(3),
             #stockTable tbody td:nth-child(3){
-                width:15%;
+                width:19%;
             }
 
             #stockTable thead th:nth-child(4),
             #stockTable tbody td:nth-child(4){
-                width:18%;
+                width:21%;
+            }
+
+            #stockTable tbody .row-mutasi-btn,
+            #stockTable tbody .row-adjust-btn{
+                padding:7px 13px;
+                font-size:11px;
+            }
+
+            #stockTable tbody td .status-actions{
+                justify-content:center;
             }
 
             .product-wrap{
@@ -1424,11 +1436,20 @@
             }
 
             #stockTableContainer #stockTable tbody td:nth-child(2){
-                flex:1 1 100%;
                 order:3;
+                flex:1 1 100%;
                 margin-top:10px;
-                padding-top:9px !important;
+                padding-top:10px !important;
                 border-top:1px solid rgba(99,102,241,.12) !important;
+            }
+
+            /* Tombol Adjust sejajar unit badge di baris kedua, kanan.
+               Absolute terhadap kartu supaya garis pemisah dari td
+               Satuan tetap penuh sampai tepi kanan. */
+            #stockTableContainer #stockTable tbody td:nth-child(4){
+                position:absolute;
+                right:14px;
+                bottom:12px;
             }
 
             .product-wrap{
@@ -2711,6 +2732,42 @@ body.adjust-modal-open{
     color:#94a3b8;
 }
 
+/* --- Aksi riwayat: edit & hapus --- */
+.adjust-hist-actions{
+    display:flex;
+    align-items:center;
+    gap:4px;
+    margin-left:6px;
+}
+
+.adjust-hist-btn{
+    width:30px;
+    height:30px;
+    border:none;
+    border-radius:9px;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    font-size:12px;
+    cursor:pointer;
+    transition:.2s;
+    background:#f1f5f9;
+    color:#64748b;
+    border:1px solid transparent;
+}
+
+.adjust-hist-btn:hover{
+    background:#eef2ff;
+    color:#4f46e5;
+    border-color:#c7d2fe;
+}
+
+.adjust-hist-delete:hover{
+    background:#fef2f2;
+    color:#dc2626;
+    border-color:#fecaca;
+}
+
 /* --- Empty & loading --- */
 .adjust-empty{
     display:flex;
@@ -2824,7 +2881,71 @@ body.adjust-modal-open{
         font-size:15.5px;
     }
 
+    /* ---- Riwayat adjustment: kartu compact ---- */
+    .adjust-history-wrap{
+        gap:8px;
+    }
+
+    .adjust-hist-item{
+        padding:11px 12px;
+        border-radius:14px;
+    }
+
+    .adjust-hist-top{
+        gap:9px;
+    }
+
+    .adjust-hist-ico{
+        width:30px;
+        height:30px;
+        border-radius:10px;
+        font-size:11px;
+    }
+
+    .adjust-hist-title{
+        font-size:12.5px;
+    }
+
     .adjust-hist-meta{
-        gap:4px 10px;
+        gap:3px 8px;
+        margin-top:3px;
+        font-size:10px;
+    }
+
+    .adjust-hist-loc i,
+    .adjust-hist-form i,
+    .adjust-hist-date i{
+        margin-right:3px;
+        font-size:9px;
+    }
+
+    .adjust-hist-qty{
+        padding:5px 9px;
+        border-radius:9px;
+        font-size:12px;
+    }
+
+    .adjust-hist-actions{
+        margin-left:auto;
+    }
+
+    .adjust-hist-btn{
+        width:28px;
+        height:28px;
+        border-radius:8px;
+        font-size:11px;
+    }
+
+    .adjust-hist-note{
+        margin-top:8px;
+        padding:8px 11px;
+        border-radius:10px;
+        font-size:11px;
+        gap:6px;
+    }
+
+    /* Baris kiri (icon) tidak perlu mengecil; head bisa wrap */
+    .adjust-hist-head{
+        flex:1 1 140px;
     }
 }

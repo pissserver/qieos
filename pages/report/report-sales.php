@@ -130,6 +130,17 @@
                         </button>
 
                         <button class="report-menu-item"
+                            data-group="penjualan" data-tab="stock"
+                            onclick="switchReportTab('stock', this)">
+                            <i class="fas fa-boxes-stacked"></i>
+
+                            <div>
+                                <h6>Laporan Stok</h6>
+                                <small>Mutasi stok gudang dan kantin</small>
+                            </div>
+                        </button>
+
+                        <button class="report-menu-item"
                             data-group="penjualan" data-tab="product"
                             onclick="switchReportTab('product', this)">
                             <i class="fas fa-box"></i>
@@ -199,6 +210,7 @@
                 <?php include 'sales/content-profit.php' ?>
                 <?php include 'sales/content-margin.php' ?>
                 <?php include 'sales/content-all.php' ?>
+    <?php include 'sales/content-stock.php' ?>
                 <?php include 'sales/content-product.php' ?>
                 <?php include 'sales/content-category.php' ?>
                 <?php include 'sales/content-cashier.php' ?>
@@ -222,6 +234,7 @@
         profit:   { body: "#reportProfitBody",   card: "#reportProfitSummaryCard",   label: "#totalProfitAmountLabel",   url: "sales/report-profit.php",   colspan: 6, icon: "fa-chart-pie",       empty: "Silakan pilih tanggal awal dan tanggal akhir untuk menampilkan laba dan rugi." },
         margin:   { body: "#reportMarginBody",   card: "#reportMarginSummaryCard",   label: "#totalMarginAmountLabel",   url: "sales/report-margin.php",   colspan: 7, icon: "fa-percent",         empty: "Silakan pilih tanggal awal dan tanggal akhir untuk menampilkan margin produk." },
         all:      { body: "#reportAllBody",      card: "#reportAllSummaryCard",      label: "#totalAllAmountLabel",      url: "sales/report-all.php",      colspan: 6, icon: "fa-receipt",         empty: "Silakan pilih tanggal awal dan tanggal akhir untuk menampilkan laporan transaksi." },
+        stock:    { body: "#reportStockBody",    card: "#reportStockSummaryCard",    label: "#totalStockAmountLabel",    url: "sales/report-stock.php",    colspan: 8, icon: "fa-boxes-stacked",   empty: "Silakan pilih tanggal awal dan tanggal akhir untuk menampilkan laporan stok." },
         product:  { body: "#reportProductBody",  card: "#reportProductSummaryCard",  label: "#totalProductAmountLabel",  url: "sales/report-product.php",  colspan: 6, icon: "fa-box",             empty: "Pilih produk terlebih dahulu untuk melihat laporan penjualan." },
         category: { body: "#reportCategoryBody", card: "#reportCategorySummaryCard", label: "#totalCategoryAmountLabel", url: "sales/report-category.php", colspan: 5, icon: "fa-tags",            empty: "Pilih kategori terlebih dahulu untuk melihat laporan penjualan." },
         cashier:  { body: "#reportCashierBody",  card: "#reportCashierSummaryCard",  label: "#totalCashierAmountLabel",  url: "sales/report-cashier.php",  colspan: 5, icon: "fa-cash-register",   empty: "Pilih kasir terlebih dahulu untuk melihat laporan penjualan." },
@@ -236,6 +249,7 @@
         profit: "#profitContent",
         margin: "#marginContent",
         all: "#allContent",
+        stock: "#stockContent",
         product: "#productContent",
         category: "#categoryContent",
         cashier: "#cashierContent",
@@ -354,6 +368,13 @@
                 return;
             }
             params.limit = $("#best_limit").val() || 10;
+        } else if (tab === "stock") {
+            if (!first || !last) {
+                $(cfg.card).hide();
+                $(cfg.body).html(emptyHtml(cfg, cfg.empty));
+                return;
+            }
+            params.location = $("#stock_location").val() || "gudang";
         } else {
             if (!first || !last) {
                 $(cfg.card).hide();
@@ -403,7 +424,7 @@
 
         setReportGroup($(el).data("group"));
 
-        $("#summaryContent, #omzetContent, #expenseContent, #profitContent, #marginContent, #allContent, #productContent, #categoryContent, #cashierContent, #bestContent, #unpaidContent").hide();
+        $("#summaryContent, #omzetContent, #expenseContent, #profitContent, #marginContent, #allContent, #stockContent, #productContent, #categoryContent, #cashierContent, #bestContent, #unpaidContent").hide();
         $(panelMap[tab] || "#allContent").show();
 
         loadReport(tab);
@@ -433,11 +454,19 @@
         $("#first_date_profit, #last_date_profit").on("change", function(){ loadReport("profit"); });
         $("#first_date_margin, #last_date_margin").on("change", function(){ loadReport("margin"); });
         $("#first_date_all, #last_date_all").on("change", function(){ loadReport("all"); });
+        $("#stock_location, #first_date_stock, #last_date_stock").on("change", function(){ loadReport("stock"); });
         $("#product_id, #first_date_product, #last_date_product").on("change", function(){ loadReport("product"); });
         $("#category_id, #first_date_category, #last_date_category").on("change", function(){ loadReport("category"); });
         $("#cashier_id, #first_date_cashier, #last_date_cashier").on("change", function(){ loadReport("cashier"); });
         $("#first_date_best, #last_date_best, #best_limit").on("change", function(){ loadReport("best"); });
         $("#first_date_unpaid, #last_date_unpaid").on("change", function(){ loadReport("unpaid"); });
+
+        $('#product_id').select2({
+            width: '100%',
+            placeholder: '-- Pilih Produk --',
+            allowClear: true,
+            dropdownParent: $('#productContent')
+        });
 
         let activeItem = $(".report-menu-item.active").first();
         let defaultSub = activeItem.data("tab") || "all";
@@ -453,6 +482,7 @@
         if (tab === "category") url += "&category=" + ($("#category_id").val() || "");
         if (tab === "cashier") url += "&cashier_id=" + ($("#cashier_id").val() || "");
         if (tab === "best") url += "&limit=" + ($("#best_limit").val() || 10);
+        if (tab === "stock") url += "&location=" + ($("#stock_location").val() || "gudang");
 
         window.open(url, "_blank");
     }
@@ -466,6 +496,7 @@
         if (tab === "category") url += "&category=" + ($("#category_id").val() || "");
         if (tab === "cashier") url += "&cashier_id=" + ($("#cashier_id").val() || "");
         if (tab === "best") url += "&limit=" + ($("#best_limit").val() || 10);
+        if (tab === "stock") url += "&location=" + ($("#stock_location").val() || "gudang");
 
         if ($("#" + tab + "_detail").is(":checked")) url += "&detail=1";
 

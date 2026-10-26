@@ -570,6 +570,35 @@
     --tone-ink: #4338ca;
 }
 
+/* Kartu adjustment: lebih kecil dari kartu lain */
+.mutasi-stat-adj {
+    --tone: #f59e0b;
+    --tone-soft: #fef3c7;
+    --tone-ink: #d97706;
+}
+
+.mutasi-stat-adj .mutasi-stat-value {
+    font-size: 18px;
+}
+
+.mutasi-stat-adj .mutasi-stat-ico {
+    width: 22px;
+    height: 22px;
+    font-size: 10px;
+}
+
+.mutasi-adj-pos {
+    color: #15803d;
+}
+
+.mutasi-adj-neg {
+    color: #be123c;
+}
+
+.mutasi-adj-nil {
+    color: #cbd5e1;
+}
+
 /* Riwayat */
 .mutasi-riwayat-head {
     display: flex;

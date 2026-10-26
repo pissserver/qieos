@@ -1,6 +1,7 @@
 <?php
 
 include '../../../sessions/session.php';
+include 'report-helper.php';
 require '../../../vendor/autoload.php';
 
 use Dompdf\Dompdf;
@@ -39,6 +40,7 @@ $product_id = isset($_GET['product_id']) ? (int) $_GET['product_id'] : 0;
 $category   = isset($_GET['category']) ? $_GET['category'] : '';
 $cashier_id = isset($_GET['cashier_id']) ? (int) $_GET['cashier_id'] : 0;
 $limit      = isset($_GET['limit']) ? (int) $_GET['limit'] : 10;
+$location   = isset($_GET['location']) ? $_GET['location'] : 'gudang';
 
 $escFirst = mysqli_real_escape_string($conn, $first_date);
 $escLast  = mysqli_real_escape_string($conn, $last_date);
@@ -54,7 +56,8 @@ $tabLabels = [
     'category' => 'LAPORAN PENJUALAN PER KATEGORI',
     'cashier'  => 'LAPORAN PENJUALAN PER KASIR',
     'best'     => 'LAPORAN PRODUK TERLARIS',
-    'unpaid'   => 'LAPORAN PIUTANG'
+    'unpaid'   => 'LAPORAN PIUTANG',
+    'stock'    => 'LAPORAN STOK'
 ];
 
 $tabTitles = [
@@ -68,7 +71,8 @@ $tabTitles = [
     'category' => 'Laporan Penjualan Per Kategori',
     'cashier'  => 'Laporan Penjualan Per Kasir',
     'best'     => 'Laporan Produk Terlaris',
-    'unpaid'   => 'Laporan Piutang'
+    'unpaid'   => 'Laporan Piutang',
+    'stock'    => 'Laporan Stok'
 ];
 
 $title  = isset($tabLabels[$tab]) ? $tabLabels[$tab] : 'LAPORAN PENJUALAN';
@@ -101,6 +105,12 @@ if ($tab === 'product' && $product_id > 0) {
 $categoryName = '';
 if ($tab === 'category' && $category !== '') {
     $categoryName = (strtolower($category) === 'all') ? 'Semua Kategori' : ucfirst($category);
+}
+
+$locationName = '';
+if ($tab === 'stock') {
+    $locMap = ['gudang' => 'Stok Gudang', 'kantin' => 'Stok Kantin', 'gabungan' => 'Gabungan (Gudang + Kantin)'];
+    $locationName = isset($locMap[$location]) ? $locMap[$location] : ucfirst($location);
 }
 
 // ============================
@@ -180,6 +190,30 @@ switch ($tab) {
     case 'unpaid':
         $q = mysqli_query($conn, "SELECT o.code, o.tanggal, o.total, COALESCE(NULLIF(u.fullname,''),u.username,'-') AS cashier_name FROM orders o LEFT JOIN users u ON o.staff_id=u.id WHERE o.status_payment='waiting' AND $where ORDER BY o.tanggal DESC, o.id DESC");
         if ($q) while ($r = mysqli_fetch_assoc($q)) { $total+=(float)$r['total']; $rows[]=$r; }
+        break;
+
+    case 'stock':
+        if (!in_array($location, ['gudang','kantin','gabungan'])) $location = 'gudang';
+        $startTs = $escFirst . ' 00:00:00';
+        $endTs   = $escLast . ' 23:59:59';
+
+        $qp = mysqli_query($conn, "SELECT id, name, code, unit FROM products WHERE category != 'Additional' ORDER BY name ASC");
+        while ($qp && $p = mysqli_fetch_assoc($qp)) {
+            $m = stock_mutation_row($conn, (int)$p['id'], $location, $escFirst, $escLast, $startTs, $endTs);
+            $rows[] = [
+                'name'     => $p['name'],
+                'code'     => $p['code'],
+                'unit'     => strtoupper($p['unit'] ?: ''),
+                'awal'     => $m['awal'],
+                'masuk'    => $m['masuk'],
+                'keluar'   => $m['keluar'],
+                'adj_in'   => $m['adj_in'],
+                'adj_out'  => $m['adj_out'],
+                'adj_in_note'  => $m['adj_in_note'],
+                'adj_out_note' => $m['adj_out_note'],
+                'akhir'    => $m['akhir'],
+            ];
+        }
         break;
 }
 
@@ -278,7 +312,7 @@ ob_start();
     <div class="title-block">
         <div class="report-kicker">Laporan Penjualan</div>
         <div class="report-title"><?= sPdfEscape($title) ?></div>
-        <div class="report-period">Periode <?= sPdfEscape($periodLabel) ?><?= $tab === 'cashier' && $cashierName !== '' ? '  ·  Kasir ' . sPdfEscape($cashierName) : '' ?><?= $tab === 'product' && $productName !== '' ? '  ·  Produk ' . sPdfEscape($productName) : '' ?><?= $tab === 'category' && $categoryName !== '' ? '  ·  Kategori ' . sPdfEscape($categoryName) : '' ?></div>
+        <div class="report-period">Periode <?= sPdfEscape($periodLabel) ?><?= $tab === 'cashier' && $cashierName !== '' ? '  ·  Kasir ' . sPdfEscape($cashierName) : '' ?><?= $tab === 'product' && $productName !== '' ? '  ·  Produk ' . sPdfEscape($productName) : '' ?><?= $tab === 'category' && $categoryName !== '' ? '  ·  Kategori ' . sPdfEscape($categoryName) : '' ?><?= $tab === 'stock' ? '  ·  Lokasi ' . sPdfEscape($locationName) : '' ?></div>
     </div>
 
     <table class="meta-table" cellspacing="0" cellpadding="0">
@@ -335,7 +369,8 @@ ob_start();
                     'category' => ['w5','w25','w12','w15','w43'],
                     'cashier'  => ['w5','w20','w20','w27','w28'],
                     'best'     => ['w8','w28','w18','w16','w30'],
-                    'unpaid'   => ['w5','w18','w17','w22','w20','w18']
+                    'unpaid'   => ['w5','w18','w17','w22','w20','w18'],
+                    'stock'    => ['w5','w20','w10','w11','w11','w17','w17','w19']
                 ];
                 $colMap = [
                     'summary'  => ['No', 'Komponen', 'Keterangan', 'Jumlah'],
@@ -348,7 +383,8 @@ ob_start();
                     'category' => ['No', 'Produk', 'Kode', 'Qty Terjual', 'Omzet'],
                     'cashier'  => ['No', 'Kode Pesanan', 'Tanggal', 'Total', 'Status'],
                     'best'     => ['Peringkat', 'Produk', 'Kategori', 'Qty Terjual', 'Omzet'],
-                    'unpaid'   => ['No', 'Kode Pesanan', 'Tanggal', 'Kasir', 'Total', 'Status']
+                    'unpaid'   => ['No', 'Kode Pesanan', 'Tanggal', 'Kasir', 'Total', 'Status'],
+                    'stock'    => ['No', 'Produk', 'Awal', 'Masuk', 'Keluar', 'Adj +', 'Adj −', 'Akhir']
                 ];
                 $headers = isset($colMap[$tab]) ? $colMap[$tab] : $colMap['all'];
                 $widths = isset($colWidths[$tab]) ? $colWidths[$tab] : $colWidths['all'];
@@ -511,11 +547,34 @@ ob_start();
                 <?php
                         break;
 
+                    case 'stock':
+                        $unit = $r['unit'] !== '' ? ' ' . $r['unit'] : '';
+                        /* Format dari helper: "(+5) (Bonus 5 pcs)" per baris,
+                           banyak adjustment dipisah newline -> tumpuk ke bawah. */
+                        $adjInHtml = ($r['adj_in_note'] !== '')
+                            ? '<span style="color:#047857;font-weight:bold;">' . nl2br(sPdfEscape($r['adj_in_note'])) . '</span>'
+                            : '–';
+                        $adjOutHtml = ($r['adj_out_note'] !== '')
+                            ? '<span style="color:#b91c1c;font-weight:bold;">' . nl2br(sPdfEscape($r['adj_out_note'])) . '</span>'
+                            : '–';
+                ?>
+                        <td class="c w5"><?= $i + 1 ?></td>
+                        <td class="l w20"><b><?= sPdfEscape($r['name']) ?></b><br><span style="font-size:8px;color:#64748b;"><?= sPdfEscape($r['code']) ?></span></td>
+                        <td class="c w10"><?= number_format((int)$r['awal'], 0, ',', '.') . $unit ?></td>
+                        <td class="c w11" style="color:#047857;">+<?= number_format((int)$r['masuk'], 0, ',', '.') . $unit ?></td>
+                        <td class="c w11" style="color:#b91c1c;">−<?= number_format((int)$r['keluar'], 0, ',', '.') . $unit ?></td>
+                        <td class="c w17"><?= $adjInHtml ?></td>
+                        <td class="c w17"><?= $adjOutHtml ?></td>
+                        <td class="c w19"><b><?= number_format((int)$r['akhir'], 0, ',', '.') . $unit ?></b></td>
+                <?php
+                        break;
+
                 endswitch;
                 ?>
             </tr>
             <?php endfor; ?>
 
+            <?php if ($tab !== 'stock'): ?>
             <tr class="total-row">
                 <?php
                 $totalCols = count($headers);
@@ -564,6 +623,7 @@ ob_start();
                 <td class="r total-amount"><?= sPdfRp($total) ?></td>
                 <?php endif; ?>
             </tr>
+            <?php endif; ?>
             <?php endif; ?>
         </tbody>
     </table>

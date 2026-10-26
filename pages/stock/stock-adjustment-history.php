@@ -18,7 +18,7 @@ $pq = mysqli_query($conn, "SELECT unit FROM products WHERE id = $id");
 if($pq && ($pd = mysqli_fetch_assoc($pq))) $unit = strtoupper($pd['unit'] ?: '');
 
 $q = mysqli_query($conn, "
-    SELECT sa.type, sa.location, sa.qty, sa.note, sa.created_at,
+    SELECT sa.id, sa.type, sa.location, sa.qty, sa.note, sa.created_at,
            p.form
     FROM stock_adjustments sa
     LEFT JOIN purchase_items pi ON pi.id = sa.purchase_item_id
@@ -49,8 +49,9 @@ foreach($rows as $r){
     $locLabel = $r['location'] === 'kantin' ? 'Stok Kantin' : 'Stok Gudang';
     $locIcon  = $r['location'] === 'kantin' ? 'fa-store' : 'fa-warehouse';
     $form = ($r['location'] === 'gudang' && !empty($r['form'])) ? $r['form'] : '';
+    $adjId = (int)$r['id'];
 
-    echo '<div class="adjust-hist-item adjust-hist-' . $tone . '">'
+    echo '<div class="adjust-hist-item adjust-hist-' . $tone . '" data-adj-id="' . $adjId . '">'
         . '<div class="adjust-hist-top">'
         .   '<span class="adjust-hist-ico"><i class="fas ' . ($isIn ? 'fa-arrow-down-long' : 'fa-arrow-up-long') . '"></i></span>'
         .   '<div class="adjust-hist-head">'
@@ -62,6 +63,14 @@ foreach($rows as $r){
         .     '</div>'
         .   '</div>'
         .   '<span class="adjust-hist-qty">' . $sign . number_format((int)$r['qty']) . ($unit ? ' ' . $unit : '') . '</span>'
+        .   '<div class="adjust-hist-actions">'
+        .     '<button type="button" class="adjust-hist-btn adjust-hist-edit" data-adj-id="' . $adjId . '" title="Edit adjustment">'
+        .       '<i class="fas fa-pen-to-square"></i>'
+        .     '</button>'
+        .     '<button type="button" class="adjust-hist-btn adjust-hist-delete" data-adj-id="' . $adjId . '" title="Hapus adjustment">'
+        .       '<i class="fas fa-trash-can"></i>'
+        .     '</button>'
+        .   '</div>'
         . '</div>'
         . ($r['note'] !== '' ? '<div class="adjust-hist-note"><i class="far fa-comment-dots"></i>' . htmlspecialchars($r['note']) . '</div>' : '')
         . '</div>';

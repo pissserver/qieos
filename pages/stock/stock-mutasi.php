@@ -30,6 +30,27 @@ function mutasi_stat($label, $value, $unit, $icon, $tone){
         . '</div>';
 }
 
+/* Kartu kecil "Adjustment": tampil di antara Qty Keluar dan Qty Akhir.
+   Nilai net adjustment (+in −out); tanda minus kalau net negatif,
+   strip kalau nol. */
+function mutasi_stat_adj($adjIn, $adjOut, $unit, $tone){
+    $net  = (int)$adjIn - (int)$adjOut;
+    $unitHtml = $unit !== '' ? '<em>' . htmlspecialchars($unit) . '</em>' : '';
+    $value = $net > 0
+        ? '<span class="mutasi-adj-pos">+' . number_format($net) . '</span>' . $unitHtml
+        : ($net < 0
+            ? '<span class="mutasi-adj-neg">−' . number_format(-$net) . '</span>' . $unitHtml
+            : '<span class="mutasi-adj-nil">–</span>');
+
+    return '<div class="mutasi-stat mutasi-stat-adj mutasi-stat-' . $tone . '">'
+        . '<div class="mutasi-stat-top">'
+        .     '<span class="mutasi-stat-ico"><i class="fas fa-sliders"></i></span>'
+        .     '<span class="mutasi-stat-label">Adjustment</span>'
+        . '</div>'
+        . '<div class="mutasi-stat-value">' . $value . '</div>'
+        . '</div>';
+}
+
 function mutasi_rows_html($rows, $bulan){
     $html = '';
     foreach($rows as $r){
@@ -65,6 +86,7 @@ function mutasi_rows_html($rows, $bulan){
         <?= mutasi_stat('Qty Awal',  $gAwal,  $unit, 'fa-box-archive',      'awal') ?>
         <?= mutasi_stat('Qty Masuk', $gMasuk, $unit, 'fa-arrow-down-long',  'masuk') ?>
         <?= mutasi_stat('Qty Keluar',$gKeluar,$unit, 'fa-arrow-up-long',    'keluar') ?>
+        <?= mutasi_stat_adj($gAdjIn, $gAdjOut, $unit, 'adj') ?>
         <?= mutasi_stat('Qty Akhir', $gAkhir, $unit, 'fa-cubes-stacked',    'akhir') ?>
     </div>
 
@@ -96,6 +118,7 @@ function mutasi_rows_html($rows, $bulan){
         <?= mutasi_stat('Qty Awal',  $kAwal,  $unit, 'fa-box-archive',      'awal') ?>
         <?= mutasi_stat('Qty Masuk', $kMasuk, $unit, 'fa-arrow-down-long',  'masuk') ?>
         <?= mutasi_stat('Qty Keluar',$kKeluar,$unit, 'fa-arrow-up-long',    'keluar') ?>
+        <?= mutasi_stat_adj($kAdjIn, $kAdjOut, $unit, 'adj') ?>
         <?= mutasi_stat('Qty Akhir', $kAkhir, $unit, 'fa-cubes-stacked',    'akhir') ?>
     </div>
 

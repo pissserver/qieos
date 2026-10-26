@@ -77,13 +77,13 @@ $gMasukBefore  = mutasi_scalar($conn, "SELECT COALESCE(SUM(pi.qty_stock),0) FROM
                + mutasi_scalar($conn, "SELECT COALESCE(SUM(qty),0) FROM stock_adjustments WHERE product_id = $id AND location = 'gudang' AND type = 'in' AND created_at < '$startTs'");
 $gKeluarBefore = mutasi_scalar($conn, "SELECT COALESCE(SUM(qty),0) FROM sales_stock WHERE product_id = $id AND type = 'transfer' AND created_at < '$startTs'")
                + mutasi_scalar($conn, "SELECT COALESCE(SUM(qty),0) FROM stock_adjustments WHERE product_id = $id AND location = 'gudang' AND type = 'out' AND created_at < '$startTs'");
-$gMasuk        = mutasi_scalar($conn, "SELECT COALESCE(SUM(pi.qty_stock),0) FROM purchase_items pi JOIN purchases p ON p.id = pi.purchase_id WHERE pi.product_id = $id AND pi.deleted_at IS NULL AND p.deleted_at IS NULL AND p.date BETWEEN '$from' AND '$to'")
-               + mutasi_scalar($conn, "SELECT COALESCE(SUM(qty),0) FROM stock_adjustments WHERE product_id = $id AND location = 'gudang' AND type = 'in' AND created_at BETWEEN '$startTs' AND '$endTs'");
-$gKeluar       = mutasi_scalar($conn, "SELECT COALESCE(SUM(qty),0) FROM sales_stock WHERE product_id = $id AND type = 'transfer' AND created_at BETWEEN '$startTs' AND '$endTs'")
-               + mutasi_scalar($conn, "SELECT COALESCE(SUM(qty),0) FROM stock_adjustments WHERE product_id = $id AND location = 'gudang' AND type = 'out' AND created_at BETWEEN '$startTs' AND '$endTs'");
+$gMasuk        = mutasi_scalar($conn, "SELECT COALESCE(SUM(pi.qty_stock),0) FROM purchase_items pi JOIN purchases p ON p.id = pi.purchase_id WHERE pi.product_id = $id AND pi.deleted_at IS NULL AND p.deleted_at IS NULL AND p.date BETWEEN '$from' AND '$to'");
+$gKeluar       = mutasi_scalar($conn, "SELECT COALESCE(SUM(qty),0) FROM sales_stock WHERE product_id = $id AND type = 'transfer' AND created_at BETWEEN '$startTs' AND '$endTs'");
+$gAdjIn        = mutasi_scalar($conn, "SELECT COALESCE(SUM(qty),0) FROM stock_adjustments WHERE product_id = $id AND location = 'gudang' AND type = 'in' AND created_at BETWEEN '$startTs' AND '$endTs'");
+$gAdjOut       = mutasi_scalar($conn, "SELECT COALESCE(SUM(qty),0) FROM stock_adjustments WHERE product_id = $id AND location = 'gudang' AND type = 'out' AND created_at BETWEEN '$startTs' AND '$endTs'");
 
 $gAwal  = max(0, $gMasukBefore - $gKeluarBefore);
-$gAkhir = max(0, $gAwal + $gMasuk - $gKeluar);
+$gAkhir = max(0, $gAwal + $gMasuk - $gKeluar + $gAdjIn - $gAdjOut);
 
 $rowsG = [];
 $gIdx = 0;
@@ -181,12 +181,12 @@ $rowsG = array_reverse($rowsG);
 
 /* ==================== KANTIN ==================== */
 $kAwal   = mutasi_scalar($conn, "SELECT COALESCE(SUM(qty),0) FROM sales_stock WHERE product_id = $id AND created_at < '$startTs'");
-$kMasuk  = mutasi_scalar($conn, "SELECT COALESCE(SUM(qty),0) FROM sales_stock WHERE product_id = $id AND type IN ('transfer','return') AND created_at BETWEEN '$startTs' AND '$endTs'")
-         + mutasi_scalar($conn, "SELECT COALESCE(SUM(qty),0) FROM sales_stock WHERE product_id = $id AND type = 'adjustment' AND qty > 0 AND created_at BETWEEN '$startTs' AND '$endTs'");
-$kKeluar = mutasi_scalar($conn, "SELECT COALESCE(SUM(-qty),0) FROM sales_stock WHERE product_id = $id AND type = 'sale' AND created_at BETWEEN '$startTs' AND '$endTs'")
-         + mutasi_scalar($conn, "SELECT COALESCE(SUM(-qty),0) FROM sales_stock WHERE product_id = $id AND type = 'adjustment' AND qty < 0 AND created_at BETWEEN '$startTs' AND '$endTs'");
+$kMasuk  = mutasi_scalar($conn, "SELECT COALESCE(SUM(qty),0) FROM sales_stock WHERE product_id = $id AND type IN ('transfer','return') AND created_at BETWEEN '$startTs' AND '$endTs'");
+$kKeluar = mutasi_scalar($conn, "SELECT COALESCE(SUM(-qty),0) FROM sales_stock WHERE product_id = $id AND type = 'sale' AND created_at BETWEEN '$startTs' AND '$endTs'");
+$kAdjIn  = mutasi_scalar($conn, "SELECT COALESCE(SUM(qty),0) FROM sales_stock WHERE product_id = $id AND type = 'adjustment' AND qty > 0 AND created_at BETWEEN '$startTs' AND '$endTs'");
+$kAdjOut = mutasi_scalar($conn, "SELECT COALESCE(SUM(-qty),0) FROM sales_stock WHERE product_id = $id AND type = 'adjustment' AND qty < 0 AND created_at BETWEEN '$startTs' AND '$endTs'");
 
-$kAkhir = max(0, $kAwal + $kMasuk - $kKeluar);
+$kAkhir = max(0, $kAwal + $kMasuk - $kKeluar + $kAdjIn - $kAdjOut);
 
 $rowsK = [];
 $labelsK = [

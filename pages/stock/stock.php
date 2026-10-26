@@ -815,6 +815,8 @@ include '../../sessions/session.php';
         const photo = row.getAttribute('data-photo') || '';
 
         adjustProductData = { id, name, code, unit, photo };
+        currentEditId = 0;
+        currentEditAdj = null;
 
         document.getElementById('adjustModalName').textContent = name;
         document.getElementById('adjustModalCode').textContent = 'Sesuaikan stok produk dengan kondisi fisik';
@@ -870,6 +872,8 @@ include '../../sessions/session.php';
         resetAdjustForm();
         adjustProductData = null;
         adjustFifoLayers = [];
+        currentEditId = 0;
+        currentEditAdj = null;
     }
 
     function switchAdjustTab(tab){
@@ -1124,7 +1128,16 @@ include '../../sessions/session.php';
 
             if(type === 'out'){
                 const layer = adjustFifoLayers.find(l => l.id == layerId);
-                const maxQty = layer ? layer.remaining : 0;
+                let maxQty = layer ? layer.remaining : 0;
+
+                /* Mode edit: sisa layer termasuk efek adjustment lama.
+                   Koreksi max dengan efek lama dibatalkan. */
+                if(currentEditAdj && currentEditAdj.location === 'gudang' && currentEditAdj.purchase_item_id == layerId){
+                    if(currentEditAdj.type === 'out') maxQty += currentEditAdj.qty;
+                    else maxQty -= currentEditAdj.qty;
+                    if(maxQty < 0) maxQty = 0;
+                }
+
                 if(qty > maxQty){
                     submitBtn.disabled = true;
                     document.getElementById('adjustQty').classList.add('is-invalid');
@@ -1149,6 +1162,7 @@ include '../../sessions/session.php';
         btnText.textContent = 'Menyimpan...';
 
         const formData = {
+            edit_id: currentEditId,
             product_id: adjustProductData.id,
             type: document.getElementById('adjustType').value,
             location: document.getElementById('adjustLocation').value,
@@ -1165,12 +1179,19 @@ include '../../sessions/session.php';
         .then(res => res.json())
         .then(data => {
             if(data.success){
+                currentEditId = 0;
+                currentEditAdj = null;
+
                 /* Mutasi stok langsung refresh sesuai lokasi yang di-adjust */
                 if(window.activeStockId){
                     window.mutasiTab = formData.location;
                     applyMutasiTab(window.mutasiTab);
                     loadMutasi();
                 }
+
+                /* Tabel stok & layer FIFO ikut terbarui */
+                loadStockTable();
+                loadFifoLayers(adjustProductData.id);
 
                 /* Riwayat di modal ikut terbarui */
                 loadAdjustHistory(adjustProductData.id);
@@ -1220,6 +1241,154 @@ include '../../sessions/session.php';
         if(e.key === 'Escape' && document.getElementById('adjustModal').classList.contains('is-open')){
             closeAdjust();
         }
+    });
+
+    /* ============================ EDIT & DELETE ADJUSTMENT ============================ */
+
+    let currentEditId = 0;
+    let currentEditAdj = null;
+
+    $(document).on('click', '.adjust-hist-edit', function(){
+        const adjId = $(this).data('adj-id');
+        if(!adjId) return;
+
+        fetch('stock-adjustment-edit.php?id=' + adjId)
+        .then(res => res.json())
+        .then(data => {
+            if(!data.success){
+                QToast('Gagal memuat data', data.message || 'Error', 'error');
+                return;
+            }
+
+            currentEditId = data.data.id;
+            switchAdjustTab('form');
+            prefillAdjustForm(data.data);
+        })
+        .catch(err => QToast('Terjadi kesalahan', err.message, 'error'));
+    });
+
+    /* Isi form adjustment dari data riwayat tanpa cascade event change:
+       setiap kontrol di-set langsung supaya tidak bergantung timing. */
+    function prefillAdjustForm(adj){
+        currentEditAdj = adj;
+
+        const typeSel   = document.getElementById('adjustType');
+        const locSel    = document.getElementById('adjustLocation');
+        const layerField= document.getElementById('adjustLayerField');
+        const qtyInput  = document.getElementById('adjustQty');
+        const noteReq   = document.getElementById('adjustNoteReq');
+        const hint      = document.getElementById('adjustQtyHint');
+
+        document.querySelectorAll('.adjust-select, .adjust-input, .adjust-textarea').forEach(el => el.classList.remove('is-invalid'));
+
+        typeSel.value = adj.type;
+
+        locSel.disabled = false;
+        locSel.innerHTML = '<option value="" disabled>Pilih lokasi stok...</option>'
+            + '<option value="gudang">Stok Gudang</option>'
+            + '<option value="kantin">Stok Kantin</option>';
+        locSel.value = adj.location;
+
+        qtyInput.disabled = false;
+        qtyInput.value = adj.qty;
+        document.getElementById('adjustNote').value = adj.note || '';
+        document.getElementById('adjustSubmitBtn').disabled = true;
+
+        if(adj.location === 'gudang'){
+            layerField.style.display = '';
+            noteReq.hidden = true;
+            initLayerSelect2();
+
+            let opts = '<option value="">Pilih layer FIFO...</option>';
+            adjustFifoLayers.forEach(function(layer){
+                const sel = (layer.id == adj.purchase_item_id) ? ' selected' : '';
+                opts += '<option value="' + layer.id + '"' + sel
+                    + ' data-form="' + (layer.form || 'FIFO') + '"'
+                    + ' data-date="' + layer.date + '"'
+                    + ' data-sisa="' + layer.remaining + '">'
+                    + layer.date + ' — ' + layer.form + ' (Sisa: ' + layer.remaining + ')'
+                    + '</option>';
+            });
+
+            /* Layer yang di-adjust bisa saja sudah habis (sisa 0) sehingga
+               tidak ikut di daftar; tetap tampilkan supaya bisa diedit. */
+            if(adj.purchase_item_id > 0 && !adjustFifoLayers.some(l => l.id == adj.purchase_item_id)){
+                opts += '<option value="' + adj.purchase_item_id + '" selected'
+                    + ' data-form="FIFO" data-date="" data-sisa="0">'
+                    + 'Layer #' + adj.purchase_item_id + ' (Sisa: 0)'
+                    + '</option>';
+            }
+
+            $('#adjustLayer').html(opts).prop('disabled', false).trigger('change.select2');
+
+            const max = editLayerMax(adj);
+            if(adj.type === 'out'){
+                qtyInput.setAttribute('max', max);
+                hint.textContent = 'Maksimal ' + max + ' ' + (adjustProductData?.unit || '');
+                hint.classList.add('is-warn');
+            } else {
+                qtyInput.removeAttribute('max');
+                hint.textContent = 'Masukkan jumlah penambahan stok';
+                hint.classList.remove('is-warn');
+            }
+        } else {
+            layerField.style.display = 'none';
+            noteReq.hidden = false;
+            hint.textContent = 'Masukkan jumlah adjustment';
+            hint.classList.remove('is-warn');
+        }
+
+        validateAdjustForm();
+    }
+
+    /* Batas qty 'out' saat mode edit: sisa layer sekarang dikoreksi dengan
+       efek adjustment lama yang masih terbukukan di layer yang sama. */
+    function editLayerMax(adj){
+        const layer = adjustFifoLayers.find(l => l.id == adj.purchase_item_id);
+        let max = layer ? layer.remaining : 0;
+        if(adj.type === 'out') max += adj.qty; else max -= adj.qty;
+        if(max < 0) max = 0;
+        return max;
+    }
+
+    $(document).on('click', '.adjust-hist-delete', function(){
+        const adjId = $(this).data('adj-id');
+        if(!adjId) return;
+
+        QConfirm(
+            'Hapus Adjustment',
+            'Stok akan dikembalikan ke kondisi sebelum adjustment. Lanjutkan?',
+            {
+                confirmText: 'Ya, Hapus',
+                cancelText: 'Batal',
+                icon: 'fa-trash-can',
+                confirmClass: 'q-confirm-btn-danger',
+                iconClass: 'q-confirm-icon-danger'
+            }
+        ).then(ok => {
+            if(!ok) return;
+
+            fetch('stock-adjustment-delete.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id: adjId })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if(data.success){
+                    QToast('Berhasil', 'Adjustment berhasil dihapus', 'success');
+                    if(window.activeStockId){
+                        loadMutasi();
+                    }
+                    loadStockTable();
+                    loadFifoLayers(adjustProductData.id);
+                    loadAdjustHistory(adjustProductData.id);
+                } else {
+                    QToast('Gagal menghapus', data.message || 'Error', 'error');
+                }
+            })
+            .catch(err => QToast('Terjadi kesalahan', err.message, 'error'));
+        });
     });
 </script>
 
