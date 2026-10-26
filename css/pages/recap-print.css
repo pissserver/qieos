@@ -1,0 +1,188 @@
+
+    body{
+        margin:0;
+        padding:20px;
+        background:#ececec;
+        font-family:monospace;
+        display:flex;
+        justify-content:center;
+    }
+
+    .receipt{
+
+        width:300px;
+        background:#fff;
+        padding:14px;
+        box-shadow:0 5px 20px rgba(0,0,0,.15);
+
+    }
+
+    .logo{
+
+        font-size:22px;
+        font-weight:bold;
+        letter-spacing:3px;
+
+    }
+
+    .title{
+
+        font-size:13px;
+        font-weight:bold;
+        margin-top:3px;
+
+    }
+
+    .center{
+
+        text-align:center;
+
+    }
+
+    .small{
+
+        font-size:11px;
+        color:#555;
+
+    }
+
+    hr{
+
+        border:none;
+        border-top:1px dashed #000;
+        margin:8px 0;
+
+    }
+
+    .item{
+
+        margin:8px 0;
+
+    }
+
+    .code{
+
+        font-weight:bold;
+
+    }
+
+    .date{
+
+        font-size:10px;
+        color:#555;
+
+    }
+
+    .staff{
+
+        font-size:11px;
+
+    }
+
+    .amount{
+
+        text-align:right;
+        font-weight:bold;
+        margin-top:3px;
+
+    }
+
+    .summary{
+        margin:3px 0;
+    }
+
+    .tbl{
+        margin:4px 0;
+    }
+
+    .tbl-row{
+        display:flex;
+        align-items:center;
+        padding:2px 0;
+        font-size:11px;
+        gap:4px;
+    }
+
+    .tbl-row.zebra{
+        background:#f0f0f0;
+    }
+
+    .tbl-head{
+        font-weight:bold;
+        border-top:1px dashed #000;
+        border-bottom:1px dashed #000;
+    }
+
+    .tbl-c-no{
+        width:10%;
+        flex:0 0 10%;
+    }
+
+    .tbl-c-code{
+        flex:1 1 42%;
+        overflow:hidden;
+        text-overflow:ellipsis;
+        white-space:nowrap;
+    }
+
+    .tbl-c-staff{
+        flex:0 0 26%;
+        overflow:hidden;
+        text-overflow:ellipsis;
+        white-space:nowrap;
+    }
+
+    .tbl-c-amount{
+        flex:0 0 22%;
+        text-align:right;
+        font-weight:bold;
+    }
+
+    .row{
+
+        display:flex;
+        justify-content:space-between;
+        margin:3px 0;
+
+    }
+
+    .grand{
+
+        font-size:15px;
+        font-weight:bold;
+
+    }
+
+    .footer{
+
+        text-align:center;
+        font-size:11px;
+        margin-top:10px;
+
+    }
+
+    @media print{
+
+    body{
+
+        background:white;
+        padding:0;
+
+    }
+
+    .receipt{
+
+        width:58mm;
+        box-shadow:none;
+        padding:5px;
+
+    }
+
+    }
+
+    @page{
+
+    size:58mm auto;
+    margin:0;
+
+    }

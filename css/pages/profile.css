@@ -1,0 +1,1019 @@
+/* ============================================================
+   PROFILE PAGE — premium, minimalis, colorful
+   ============================================================ */
+
+/* ---------- galaksi di dalam kartu hero ---------- */
+.hero-galaxy-canvas{
+    position:absolute;
+    inset:0;
+    width:100%;
+    height:100%;
+    z-index:0;
+    display:block;
+    pointer-events:none;
+}
+
+.hero-galaxy-layer{
+    position:absolute;
+    inset:0;
+    z-index:0;
+    overflow:hidden;
+    pointer-events:none;
+}
+
+.galaxy-nebula{
+    position:absolute;
+    border-radius:50%;
+    filter:blur(70px);
+    opacity:.55;
+    mix-blend-mode:screen;
+}
+
+.nebula-a{
+    width:340px; height:340px; top:-150px; left:-90px;
+    background:radial-gradient(circle, rgba(124,58,237,.75), transparent 70%);
+    animation:nebulaFloat 22s ease-in-out infinite alternate;
+}
+
+.nebula-b{
+    width:400px; height:400px; bottom:-210px; right:-120px;
+    background:radial-gradient(circle, rgba(14,165,233,.6), transparent 70%);
+    animation:nebulaFloat 27s ease-in-out infinite alternate-reverse;
+}
+
+.nebula-c{
+    width:280px; height:280px; top:8%; left:46%;
+    background:radial-gradient(circle, rgba(236,72,153,.5), transparent 70%);
+    animation:nebulaFloat 31s ease-in-out infinite alternate;
+}
+
+@keyframes nebulaFloat{
+    from{ transform:translate3d(0,0,0) scale(1); }
+    to{ transform:translate3d(42px,-32px,0) scale(1.12); }
+}
+
+.galaxy-planet{
+    position:absolute;
+    border-radius:50%;
+}
+
+.planet-a{
+    width:92px; height:92px; top:16%; right:8%;
+    background:radial-gradient(circle at 33% 28%, #7dd3fc, #2563eb 55%, #0b1e4d 100%);
+    box-shadow:inset -14px -10px 28px rgba(0,0,0,.65), 0 0 60px rgba(56,189,248,.45);
+    animation:planetFloat 18s ease-in-out infinite alternate;
+}
+
+.planet-a::after{
+    content:"";
+    position:absolute;
+    left:-32%; top:46%;
+    width:164%; height:22%;
+    border-radius:50%;
+    border:2px solid rgba(165,243,252,.45);
+    transform:rotate(-18deg);
+    box-shadow:0 0 18px rgba(56,189,248,.35);
+}
+
+.planet-b{
+    width:56px; height:56px; bottom:12%; left:5%;
+    background:radial-gradient(circle at 34% 30%, #fda4af, #be185d 55%, #4c0519 100%);
+    box-shadow:inset -10px -8px 20px rgba(0,0,0,.6), 0 0 40px rgba(244,63,94,.4);
+    animation:planetFloat 23s ease-in-out infinite alternate-reverse;
+}
+
+.planet-c{
+    width:34px; height:34px; top:60%; right:26%;
+    background:radial-gradient(circle at 34% 30%, #fcd34d, #d97706 60%, #78350f 100%);
+    box-shadow:inset -6px -5px 12px rgba(0,0,0,.55), 0 0 28px rgba(245,158,11,.4);
+    animation:planetFloat 27s ease-in-out infinite alternate;
+}
+
+@keyframes planetFloat{
+    from{ transform:translateY(-12px); }
+    to{ transform:translateY(14px); }
+}
+
+.profile-page{
+    --ink:#0f172a;
+    --muted:#64748b;
+    --line:#eef1f6;
+
+    --indigo:#6366f1;
+    --violet:#8b5cf6;
+    --blue:#2563eb;
+    --cyan:#0ea5e9;
+    --emerald:#10b981;
+    --amber:#f59e0b;
+    --rose:#f43f5e;
+    --pink:#ec4899;
+
+    --card-shadow:
+        0 18px 50px -30px rgba(15,23,42,.35),
+        0 2px 6px rgba(15,23,42,.04);
+}
+
+/* ---------- entrance motion ---------- */
+@keyframes pfRise{
+    from{ opacity:0; transform:translateY(18px); }
+    to{ opacity:1; transform:translateY(0); }
+}
+
+.profile-page > .profile-hero,
+.profile-page > .row{
+    animation:pfRise .6s cubic-bezier(.2,.7,.2,1) both;
+}
+
+.profile-page > .row{ animation-delay:.08s; }
+
+/* ============================================================
+   HERO
+   ============================================================ */
+
+.profile-hero{
+    position:relative;
+    overflow:hidden;
+    border-radius:28px;
+    padding:34px;
+    margin-bottom:28px;
+    color:#fff;
+    background:
+        radial-gradient(700px 260px at 12% 0%, rgba(124,58,237,.30), transparent 65%),
+        radial-gradient(700px 300px at 92% 10%, rgba(14,165,233,.24), transparent 60%),
+        linear-gradient(180deg, #0f172a 0%, #1e293b 100%);
+    box-shadow:0 30px 60px -30px rgba(15,23,42,.85);
+}
+
+.hero-inner{
+    position:relative;
+    z-index:1;
+    display:flex;
+    align-items:center;
+    gap:28px;
+}
+
+/* ---------- avatar ---------- */
+
+.hero-avatar-wrap{
+    position:relative;
+    width:158px;
+    height:158px;
+    flex:0 0 158px;
+}
+
+.hero-avatar-ring{
+    position:absolute;
+    inset:-6px;
+    border-radius:50%;
+    background:conic-gradient(from 0deg, #fbbf24, #f43f5e, #a855f7, #38bdf8, #34d399, #fbbf24);
+    animation:heroRingSpin 9s linear infinite;
+    filter:blur(.4px);
+}
+
+@keyframes heroRingSpin{ to{ transform:rotate(360deg); } }
+
+.hero-avatar{
+    position:absolute;
+    inset:0;
+    width:158px;
+    height:158px;
+    border-radius:50%;
+    object-fit:cover;
+    border:6px solid rgba(255,255,255,.95);
+    background:#e2e8f0;
+    box-shadow:0 20px 44px rgba(15,23,42,.38);
+}
+
+.hero-status-dot{
+    position:absolute;
+    left:85.4%;
+    top:85.4%;
+    transform:translate(-50%,-50%);
+    width:22px;
+    height:22px;
+    border-radius:50%;
+    background:#22c55e;
+    border:3px solid #fff;
+    box-shadow:0 0 0 0 rgba(34,197,94,.6);
+    animation:heroPulse 2.2s ease-out infinite;
+    z-index:3;
+}
+
+@keyframes heroPulse{
+    0%{ box-shadow:0 0 0 0 rgba(34,197,94,.55); }
+    70%{ box-shadow:0 0 0 12px rgba(34,197,94,0); }
+    100%{ box-shadow:0 0 0 0 rgba(34,197,94,0); }
+}
+
+/* tombol hapus foto */
+.delete-photo-form{
+    position:absolute;
+    left:85.4%;
+    top:14.6%;
+    transform:translate(-50%,-50%);
+    z-index:4;
+}
+
+.delete-photo-btn{
+    width:36px;
+    height:36px;
+    border-radius:50%;
+    border:3px solid #fff;
+    background:linear-gradient(135deg,#f43f5e,#e11d48);
+    color:#fff;
+    font-size:13px;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    box-shadow:0 8px 18px rgba(225,29,72,.5);
+    transition:transform .2s ease, box-shadow .2s ease;
+}
+
+.delete-photo-btn:hover{
+    transform:translateY(-2px) scale(1.05);
+    box-shadow:0 12px 24px rgba(225,29,72,.55);
+}
+
+.delete-photo-btn:active{ transform:scale(.94); }
+
+/* ---------- hero text ---------- */
+
+.hero-info{ min-width:0; flex:1; }
+
+.hero-eyebrow{
+    display:inline-block;
+    font-size:12px;
+    font-weight:800;
+    letter-spacing:2.8px;
+    text-transform:uppercase;
+    color:rgba(255,255,255,.72);
+    margin-bottom:12px;
+}
+
+.hero-name-row{
+    display:flex;
+    align-items:center;
+    gap:16px;
+    flex-wrap:wrap;
+    margin-bottom:18px;
+}
+
+.hero-name{
+    font-size:clamp(2rem, 3.4vw, 3rem);
+    font-weight:800;
+    line-height:1.1;
+    letter-spacing:-.025em;
+    margin:0;
+    color:#fff;
+    filter:drop-shadow(0 3px 16px rgba(56,189,248,.4));
+}
+
+/* nama: gradasi berkilau (bukan hitam/polos) */
+@supports ((-webkit-background-clip:text) or (background-clip:text)){
+    .hero-name{
+        background:linear-gradient(100deg,#ffffff 8%, #a5f3fc 40%, #c4b5fd 66%, #ffffff 100%);
+        background-size:220% 100%;
+        -webkit-background-clip:text;
+        background-clip:text;
+        -webkit-text-fill-color:transparent;
+        color:transparent;
+        animation:nameSheen 7s linear infinite;
+    }
+}
+
+@keyframes nameSheen{
+    to{ background-position:220% 0; }
+}
+
+/* ---------- badge username & role (baris hero-tags) ---------- */
+
+.hero-tags{
+    display:flex;
+    flex-wrap:wrap;
+    gap:12px;
+    margin-bottom:18px;
+}
+
+.hero-tag{
+    position:relative;
+    overflow:hidden;
+    display:inline-flex;
+    align-items:center;
+    gap:9px;
+    padding:10px 20px;
+    border-radius:100px;
+    font-size:13.5px;
+    font-weight:800;
+    letter-spacing:.7px;
+    color:#fff;
+    border:1px solid rgba(255,255,255,.35);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.4);
+    white-space:nowrap;
+}
+
+.hero-tag::after{
+    content:"";
+    position:absolute;
+    inset:0;
+    background:linear-gradient(120deg, transparent 25%, rgba(255,255,255,.5) 50%, transparent 75%);
+    transform:translateX(-130%);
+    animation:badgeShine 5s ease-in-out infinite;
+    pointer-events:none;
+}
+
+.hero-tag > i,
+.hero-tag > span{ position:relative; z-index:1; }
+
+.hero-tag i{ font-size:13px; }
+
+/* badge username */
+.hero-tag-user{
+    background:linear-gradient(120deg,#0ea5e9,#2563eb 60%,#6366f1);
+    box-shadow:0 14px 30px -14px rgba(14,165,233,.95), inset 0 1px 0 rgba(255,255,255,.4);
+}
+
+/* badge role */
+.hero-tag-role{
+    background:linear-gradient(120deg,#8b5cf6,#6366f1 45%,#06b6d4);
+    box-shadow:0 14px 30px -14px rgba(139,92,246,.95), inset 0 1px 0 rgba(255,255,255,.4);
+    animation:badgeGlow 5s ease-in-out infinite;
+}
+
+@keyframes badgeShine{
+    0%{ transform:translateX(-130%); }
+    55%,100%{ transform:translateX(130%); }
+}
+
+@keyframes badgeGlow{
+    0%,100%{ box-shadow:0 14px 30px -14px rgba(139,92,246,.9), inset 0 1px 0 rgba(255,255,255,.4); }
+    50%{ box-shadow:0 20px 40px -14px rgba(99,102,241,1), inset 0 1px 0 rgba(255,255,255,.4); }
+}
+
+/* ---------- ringkasan akun (kanan hero) ---------- */
+
+.hero-aside{
+    flex:0 0 300px;
+    width:300px;
+    align-self:stretch;
+    display:flex;
+    flex-direction:column;
+    gap:14px;
+    padding:18px;
+    border-radius:20px;
+    background:rgba(255,255,255,.13);
+    border:1px solid rgba(255,255,255,.24);
+    backdrop-filter:blur(12px);
+    -webkit-backdrop-filter:blur(12px);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.25);
+}
+
+.ha-top{ display:flex; align-items:center; gap:13px; }
+
+.ha-ring{
+    position:relative;
+    width:58px;
+    height:58px;
+    flex:0 0 58px;
+    border-radius:50%;
+    background:conic-gradient(#6ee7b7 calc(var(--pct) * 1%), rgba(255,255,255,.22) 0);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    box-shadow:0 8px 18px -8px rgba(2,6,23,.6);
+}
+
+.ha-ring::before{
+    content:"";
+    position:absolute;
+    inset:6px;
+    border-radius:50%;
+    background:rgba(15,23,42,.45);
+}
+
+.ha-ring-num{
+    position:relative;
+    z-index:1;
+    font-size:13px;
+    font-weight:800;
+    color:#fff;
+}
+
+.ha-top-text{ min-width:0; }
+.ha-top-text strong{ display:block; font-size:14px; font-weight:800; }
+.ha-top-text span{ font-size:11px; color:rgba(255,255,255,.78); }
+
+.ha-list{
+    list-style:none;
+    margin:0;
+    padding:0;
+    display:flex;
+    flex-direction:column;
+    gap:9px;
+}
+
+.ha-list li{
+    display:flex;
+    align-items:center;
+    gap:9px;
+    font-size:12.5px;
+    font-weight:600;
+    color:rgba(255,255,255,.95);
+}
+
+.ha-list li i{ font-size:12px; flex:0 0 auto; }
+.ha-list li.ok i{ color:#6ee7b7; }
+.ha-list li.off{ color:rgba(255,255,255,.62); }
+.ha-list li.off i{ color:rgba(255,255,255,.5); }
+
+.ha-status{
+    margin-top:auto;
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    padding:8px 12px;
+    border-radius:12px;
+    background:rgba(255,255,255,.12);
+    border:1px solid rgba(255,255,255,.2);
+    font-size:11.5px;
+    font-weight:700;
+}
+
+.ha-status-dot{
+    width:8px;
+    height:8px;
+    border-radius:50%;
+    background:#22c55e;
+    box-shadow:0 0 0 0 rgba(34,197,94,.6);
+    animation:heroPulse 2.2s ease-out infinite;
+}
+
+/* ============================================================
+   PANEL CARD
+   ============================================================ */
+
+.panel-card{
+    position:relative;
+    overflow:hidden;
+    background:#fff;
+    border-radius:24px;
+    padding:30px;
+    border:1px solid rgba(15,23,42,.05);
+    box-shadow:var(--card-shadow);
+}
+
+.panel-card::before{
+    content:"";
+    position:absolute;
+    top:0;
+    left:0;
+    right:0;
+    height:4px;
+    background:linear-gradient(90deg,#6366f1,#8b5cf6,#ec4899,#0ea5e9);
+    background-size:250% 100%;
+    animation:pfBarShift 7s linear infinite;
+}
+
+@keyframes pfBarShift{
+    to{ background-position:250% 0; }
+}
+
+/* ---------- card head ---------- */
+
+.card-head{
+    display:flex;
+    align-items:flex-start;
+    gap:14px;
+    margin-bottom:28px;
+}
+
+.card-head-icon{
+    width:48px;
+    height:48px;
+    flex:0 0 48px;
+    border-radius:14px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:18px;
+    color:#fff;
+    box-shadow:0 10px 22px -10px rgba(15,23,42,.6);
+}
+
+.card-head-text{ min-width:0; flex:1; }
+
+.card-eyebrow{
+    display:block;
+    font-size:10.5px;
+    font-weight:800;
+    letter-spacing:2px;
+    text-transform:uppercase;
+    color:#8b93a7;
+    margin-bottom:5px;
+}
+
+.card-head-text h2{
+    font-size:1.45rem;
+    font-weight:800;
+    color:var(--ink);
+    letter-spacing:-.01em;
+    margin:0 0 5px;
+}
+
+.card-head-text p{
+    color:var(--muted);
+    font-size:13.5px;
+    margin:0;
+    line-height:1.45;
+}
+
+.status-badge{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    padding:8px 14px;
+    border-radius:100px;
+    background:#ecfdf5;
+    border:1px solid #a7f3d0;
+    color:#047857;
+    font-size:12px;
+    font-weight:700;
+    white-space:nowrap;
+}
+
+.status-badge span{
+    width:8px;
+    height:8px;
+    background:#22c55e;
+    border-radius:50%;
+    box-shadow:0 0 0 0 rgba(34,197,94,.6);
+    animation:heroPulse 2.2s ease-out infinite;
+}
+
+/* ---------- field ---------- */
+
+.field{ margin-bottom:20px; }
+
+.field label{
+    display:block;
+    margin-bottom:9px;
+    font-size:.8rem;
+    font-weight:700;
+    letter-spacing:.02em;
+    color:#475569;
+}
+
+.input-wrap{ position:relative; }
+
+.input-ico{
+    position:absolute;
+    left:9px;
+    top:50%;
+    transform:translateY(-50%);
+    width:38px;
+    height:38px;
+    border-radius:11px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:#fff;
+    font-size:14px;
+    z-index:2;
+    box-shadow:0 8px 16px -8px rgba(15,23,42,.55);
+    transition:transform .25s ease, box-shadow .25s ease;
+    pointer-events:none;
+}
+
+.input-ico::after{
+    content:"";
+    position:absolute;
+    inset:0;
+    border-radius:11px;
+    background:linear-gradient(160deg, rgba(255,255,255,.35), transparent 60%);
+    pointer-events:none;
+}
+
+.input-ico i{ position:relative; z-index:1; text-shadow:0 1px 2px rgba(15,23,42,.3); }
+
+.input-wrap input{
+    width:100%;
+    height:56px;
+    border-radius:16px;
+    border:1px solid var(--line);
+    background:#f7f8fc;
+    padding:0 18px 0 60px;
+    font-size:15px;
+    color:var(--ink);
+    outline:none;
+    transition:border-color .2s ease, box-shadow .2s ease, background .2s ease;
+}
+
+.input-wrap input::placeholder{ color:#a3adc0; }
+
+.input-wrap input:focus{
+    background:#fff;
+    border-color:#c7cbff;
+    box-shadow:0 0 0 4px rgba(99,102,241,.12), 0 12px 26px -18px rgba(79,70,229,.9);
+}
+
+.input-wrap:focus-within .input-ico{
+    transform:translateY(-50%) scale(1.06);
+}
+
+.input-wrap input[readonly]{
+    color:#64748b;
+    background:#f1f3f9;
+    cursor:not-allowed;
+}
+
+/* ---------- eye toggle ---------- */
+
+.input-wrap.has-eye input{ padding-right:54px; }
+
+/* sembunyikan ikon reveal bawaan browser (Edge/IE) agar tidak dobel */
+.input-wrap.has-eye input::-ms-reveal,
+.input-wrap.has-eye input::-ms-clear{ display:none; }
+
+.eye-btn{
+    position:absolute;
+    right:10px;
+    top:50%;
+    transform:translateY(-50%);
+    width:34px;
+    height:34px;
+    border:none;
+    border-radius:10px;
+    background:transparent;
+    color:#94a3b8;
+    font-size:14px;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    z-index:3;
+    transition:background .2s ease, color .2s ease;
+}
+
+.eye-btn:hover{ background:#eef1f7; color:#475569; }
+
+.eye-btn:focus-visible{
+    outline:2px solid rgba(99,102,241,.5);
+    outline-offset:2px;
+}
+
+.eye-btn.is-on{ color:#4f46e5; }
+
+/* ---------- validasi konfirmasi password ---------- */
+
+.input-wrap.is-invalid input{
+    border-color:#fca5a5;
+    background:#fff5f5;
+    box-shadow:0 0 0 4px rgba(244,63,94,.12);
+}
+
+.field-error{
+    display:flex;
+    align-items:center;
+    gap:7px;
+    margin-top:9px;
+    padding:9px 12px;
+    border-radius:12px;
+    background:#fef2f2;
+    border:1px solid #fecaca;
+    color:#b91c1c;
+    font-size:12.5px;
+    font-weight:700;
+    animation:pfRise .3s ease both;
+}
+
+.field-error i{ font-size:13px; flex:0 0 auto; }
+
+.field-error[hidden]{ display:none; }
+
+/* ---------- security ---------- */
+
+.security-section{
+    margin-top:32px;
+    padding:24px;
+    border-radius:20px;
+    background:linear-gradient(180deg,#f9fafc,#f4f6fb);
+    border:1px solid var(--line);
+}
+
+.security-header{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    margin-bottom:22px;
+}
+
+.security-head-icon{
+    width:38px;
+    height:38px;
+    flex:0 0 38px;
+    border-radius:12px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:#fff;
+    font-size:14px;
+    box-shadow:0 8px 16px -8px rgba(15,23,42,.55);
+}
+
+.security-header h3{
+    font-size:1.02rem;
+    font-weight:800;
+    color:var(--ink);
+    margin:0 0 2px;
+}
+
+.security-header span{
+    font-size:12.5px;
+    color:var(--muted);
+}
+
+.password-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:18px;
+}
+
+.password-grid .field{ margin-bottom:0; }
+
+/* ---------- save button ---------- */
+
+.save-button{
+    position:relative;
+    overflow:hidden;
+    margin-top:26px;
+    width:100%;
+    height:58px;
+    border:none;
+    border-radius:16px;
+    color:#fff;
+    font-size:15px;
+    font-weight:800;
+    letter-spacing:.01em;
+    cursor:pointer;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    gap:10px;
+    background:linear-gradient(120deg,#4f46e5,#7c3aed 50%,#2563eb);
+    background-size:180% 100%;
+    box-shadow:0 18px 34px -16px rgba(79,70,229,.9);
+    transition:transform .2s ease, box-shadow .2s ease, background-position .5s ease;
+}
+
+.save-button::after{
+    content:"";
+    position:absolute;
+    inset:0;
+    background:linear-gradient(120deg, transparent 20%, rgba(255,255,255,.35) 50%, transparent 80%);
+    transform:translateX(-120%);
+    transition:transform .7s ease;
+}
+
+.save-button:hover{
+    transform:translateY(-2px);
+    background-position:100% 0;
+    box-shadow:0 24px 44px -16px rgba(79,70,229,1);
+}
+
+.save-button:hover::after{ transform:translateX(120%); }
+
+.save-button:active{ transform:translateY(0); }
+
+.save-button i{ font-size:14px; }
+
+/* ============================================================
+   UPLOAD CARD
+   ============================================================ */
+
+.upload-card{ display:flex; flex-direction:column; }
+
+.upload-card::before{
+    background:linear-gradient(90deg,#f43f5e,#ec4899,#8b5cf6,#0ea5e9);
+}
+
+.upload-orb{
+    position:absolute;
+    top:-90px;
+    right:-90px;
+    width:220px;
+    height:220px;
+    border-radius:50%;
+    background:radial-gradient(circle, rgba(236,72,153,.14), transparent 65%);
+    pointer-events:none;
+}
+
+.card-head-compact{ position:relative; z-index:1; }
+
+.upload-note{
+    display:flex;
+    align-items:center;
+    gap:9px;
+    margin-bottom:18px;
+    padding:11px 14px;
+    border-radius:14px;
+    background:linear-gradient(120deg,#fff7ed,#fef3c7);
+    border:1px solid #fde68a;
+    color:#92400e;
+    font-size:12px;
+    line-height:1.4;
+}
+
+.upload-note i{ font-size:14px; color:#f59e0b; flex:0 0 auto; }
+.upload-note strong{ font-weight:800; }
+
+.upload-area{
+    position:relative;
+    border:2px dashed #cbd5e1;
+    border-radius:22px;
+    min-height:240px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+    cursor:pointer;
+    overflow:hidden;
+    background:linear-gradient(180deg,#fafbff,#f4f6fc);
+    transition:border-color .25s ease, background .25s ease, box-shadow .25s ease;
+}
+
+.upload-area:hover{
+    border-color:#a5b4fc;
+    background:linear-gradient(180deg,#f5f6ff,#eef1ff);
+    box-shadow:inset 0 0 0 4px rgba(99,102,241,.06);
+}
+
+.upload-area:focus-within{
+    border-color:#818cf8;
+    box-shadow:0 0 0 4px rgba(99,102,241,.12);
+}
+
+#uploadText{ padding:22px; }
+
+.upload-ico{
+    width:70px;
+    height:70px;
+    margin:0 auto 14px;
+    border-radius:22px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:26px;
+    color:#fff;
+    background:linear-gradient(135deg,#6366f1,#8b5cf6 55%,#ec4899);
+    box-shadow:0 16px 30px -14px rgba(124,58,237,.9);
+    transition:transform .3s ease;
+}
+
+.upload-area:hover .upload-ico{ transform:translateY(-4px) rotate(-4deg); }
+
+.upload-area h4{
+    font-size:1.05rem;
+    font-weight:800;
+    color:var(--ink);
+    margin:0 0 4px;
+}
+
+.upload-area p{
+    color:var(--muted);
+    font-size:13px;
+    margin:0;
+}
+
+#preview{
+    display:none;
+    width:100%;
+    height:100%;
+    min-height:236px;
+    object-fit:cover;
+    border-radius:20px;
+}
+
+.upload-btn{
+    display:none;
+    margin-top:18px;
+    width:100%;
+    height:56px;
+    border:none;
+    border-radius:16px;
+    color:#fff;
+    font-size:14.5px;
+    font-weight:800;
+    cursor:pointer;
+    align-items:center;
+    justify-content:center;
+    gap:10px;
+    background:linear-gradient(120deg,#ec4899,#8b5cf6 55%,#6366f1);
+    box-shadow:0 18px 34px -16px rgba(139,92,246,.9);
+    transition:transform .2s ease, box-shadow .2s ease;
+}
+
+.upload-btn:hover{
+    transform:translateY(-2px);
+    box-shadow:0 24px 44px -16px rgba(139,92,246,1);
+}
+
+.upload-btn:active{ transform:translateY(0); }
+
+/* ============================================================
+   ICON COLOR VARIANTS
+   ============================================================ */
+
+.profile-page .icon-indigo{ background:linear-gradient(135deg,#6366f1,#4f46e5); }
+.profile-page .icon-violet{ background:linear-gradient(135deg,#8b5cf6,#7c3aed); }
+.profile-page .icon-blue{ background:linear-gradient(135deg,#3b82f6,#2563eb); }
+.profile-page .icon-cyan{ background:linear-gradient(135deg,#06b6d4,#0ea5e9); }
+.profile-page .icon-emerald{ background:linear-gradient(135deg,#10b981,#059669); }
+.profile-page .icon-amber{ background:linear-gradient(135deg,#f59e0b,#ea580c); }
+.profile-page .icon-rose{ background:linear-gradient(135deg,#f43f5e,#e11d48); }
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+
+@media (max-width:1199.98px){
+    .hero-inner{ flex-wrap:wrap; }
+    .hero-aside{ flex:1 1 100%; width:100%; }
+
+    .ha-list{
+        flex-direction:row;
+        flex-wrap:wrap;
+        gap:10px 22px;
+    }
+
+    .ha-status{ margin-top:0; align-self:flex-start; }
+}
+
+@media (max-width:991.98px){
+    .profile-hero{ padding:28px; border-radius:24px; }
+    .hero-inner{ gap:22px; }
+}
+
+@media (max-width:767.98px){
+    .profile-hero{ padding:24px 20px 26px; border-radius:22px; }
+
+    .hero-inner{
+        flex-direction:column;
+        text-align:center;
+        gap:16px;
+    }
+
+    .hero-avatar-wrap{ width:128px; height:128px; flex:0 0 128px; }
+    .hero-avatar{ width:128px; height:128px; }
+
+    .hero-name-row{ justify-content:center; gap:12px; }
+    .hero-tags{ justify-content:center; }
+
+    .hero-aside{ text-align:left; }
+
+    .panel-card{ padding:22px; border-radius:20px; }
+    .card-head{ gap:12px; }
+
+    .password-grid{ grid-template-columns:1fr; }
+    .password-grid .field{ margin-bottom:0; }
+
+    .security-section{ padding:18px; }
+
+    .planet-a{ width:96px; height:96px; top:10%; right:4%; }
+    .planet-b{ width:54px; height:54px; bottom:9%; left:3%; }
+    .planet-c{ display:none; }
+    .galaxy-nebula{ filter:blur(56px); }
+}
+
+@media (max-width:575.98px){
+    .ha-top{ align-items:flex-start; }
+    .ha-list{ flex-direction:column; gap:9px; }
+
+    .card-head{ flex-wrap:wrap; }
+    .status-badge{ order:3; }
+}
+
+@media (prefers-reduced-motion: reduce){
+    .profile-page > .profile-hero,
+    .profile-page > .row,
+    .hero-avatar-ring,
+    .hero-status-dot,
+    .status-badge span,
+    .panel-card::before,
+    .galaxy-nebula,
+    .galaxy-planet,
+    .galaxy-planet::after,
+    .hero-name,
+    .hero-tag::after,
+    .hero-tag-role{
+        animation:none !important;
+    }
+
+    .save-button,
+    .upload-btn,
+    .upload-area,
+    .upload-ico,
+    .delete-photo-btn,
+    .input-ico{
+        transition:none !important;
+    }
+}

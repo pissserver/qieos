@@ -1,0 +1,1644 @@
+<?php
+include '../../sessions/session.php';
+include __DIR__ . '/../components/data/stock-status.php';
+include __DIR__ . '/../components/data/product-conversion.php';
+
+header('Cache-Control: no-store, no-cache, must-revalidate');
+
+$id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
+$q = mysqli_query($conn, "SELECT * FROM products WHERE id = $id");
+$d = mysqli_fetch_assoc($q);
+
+if(!$d){
+    echo '<!doctype html><html><head><title>Tidak Ditemukan</title></head><body class="d-flex align-items-center justify-content-center vh-100"><h3 class="text-muted">Produk tidak ditemukan.</h3></body></html>';
+    exit;
+}
+
+// Hitung jumlah pembelian (semua item, kecuali yang di-soft-delete)
+$qi = mysqli_query($conn,"
+    SELECT COALESCE(SUM(pi.qty_stock),0) AS total_qty
+    FROM purchase_items pi
+    INNER JOIN purchases p ON p.id = pi.purchase_id AND p.deleted_at IS NULL
+    WHERE pi.product_id = {$d['id']}
+      AND pi.deleted_at IS NULL
+");
+$di = mysqli_fetch_assoc($qi);
+
+// Hitung total terjual dari order_details (SUM qty per produk, hanya order terbayar)
+$qo = mysqli_query($conn,"
+    SELECT COALESCE(SUM(od.qty),0) AS total_terjual
+    FROM order_details od
+    INNER JOIN orders o ON o.id = od.order_id
+    WHERE od.product_id = {$d['id']}
+      AND o.status_payment = 'paid'
+");
+$do = mysqli_fetch_assoc($qo);
+
+// Batas stok menipis + stok per layer (gudang & kantin) + status
+$lowStock        = resolve_product_low_stock($conn, $d);
+$lowStockKantin  = resolve_product_low_stock_kantin($conn, $d);
+$stock           = get_product_stock($conn, $d['id']);
+$stockGudang     = $stock['gudang'];
+$stockKantin     = $stock['kantin'];
+$stockTotal      = $stock['total'];
+$statusGudang    = product_status_view($stockGudang, $lowStock);
+$statusKantin    = product_status_view($stockKantin, $lowStockKantin);
+// Ketersediaan mengikuti layer sesuai peran: administrator/developer pakai
+// batas gudang, staff kasir pakai batas kantin.
+$isKasir         = (isset($user['role']) && $user['role'] === 'staff kasir');
+$statusInfo      = $isKasir ? $statusKantin : $statusGudang;
+
+// Ambil suppliers dari tabel relasi product_supplier (multi supplier)
+$supplierNamesArr = [];
+$currentSupplierIds = [];
+$qs = mysqli_query($conn, "
+    SELECT s.id, s.name
+    FROM product_supplier ps
+    JOIN suppliers s ON s.id = ps.supplier_id
+    WHERE ps.product_id = {$d['id']} AND s.deleted_at IS NULL
+    ORDER BY s.name ASC
+");
+while($s = mysqli_fetch_assoc($qs)){
+    $currentSupplierIds[] = (int)$s['id'];
+    $supplierNamesArr[] = $s['name'];
+}
+
+// Semua supplier aktif (untuk opsi dropdown & JS)
+$allSuppliers = [];
+$qs = mysqli_query($conn, "SELECT id, name FROM suppliers WHERE deleted_at IS NULL ORDER BY name ASC");
+while($s = mysqli_fetch_assoc($qs)){
+    $allSuppliers[] = ['id' => (int)$s['id'], 'name' => $s['name']];
+}
+
+// Semua satuan dari Master Unit (untuk dropdown select2 di form edit).
+// Kalau satuan produk saat ini belum ada di Master Unit, tetap diikutkan
+// sebagai opsi supaya nilainya tidak hilang saat disimpan.
+$unitVal    = !empty($d['unit']) ? $d['unit'] : '';
+$unitInList = false;
+$allUnits   = [];
+$qu = mysqli_query($conn, "SELECT name FROM units WHERE deleted_at IS NULL ORDER BY name ASC");
+while($u = mysqli_fetch_assoc($qu)){
+    $allUnits[] = $u['name'];
+    if(strtolower($u['name']) === strtolower($unitVal)) $unitInList = true;
+}
+if($unitVal !== '' && !$unitInList) $allUnits[] = $unitVal;
+
+// Bangun opsi <option> untuk satu baris supplier (filter supplier yang sudah dipilih di row lain)
+function buildSupplierOptions($selectedId, $excludeIds, $allSuppliers){
+    $html = '<option value="">Supplier (opsional)</option>';
+    foreach($allSuppliers as $s){
+        if(in_array((int)$s['id'], $excludeIds)) continue;
+        $sel = ((int)$selectedId === (int)$s['id']) ? ' selected' : '';
+        $html .= '<option value="' . (int)$s['id'] . '"' . $sel . '>' . htmlspecialchars($s['name']) . '</option>';
+    }
+    return $html;
+}
+
+$photo = !empty($d['photo']) ? BASE_URL . '/assets/img/products/' . htmlspecialchars($d['photo']) : '';
+$code  = htmlspecialchars($d['code']);
+$name  = htmlspecialchars($d['name']);
+$cat   = ucwords(strtolower(htmlspecialchars($d['category'])));
+$unit  = !empty($d['unit']) ? htmlspecialchars($d['unit']) : '-';
+$price = number_format($d['sell_price'], 0, ',', '.');
+$totalQty    = number_format($di['total_qty'], 0, ',', '.');
+$totalTrans  = (int)$do['total_terjual'];
+$totalTransFmt = number_format($totalTrans, 0, ',', '.');
+
+$stockGudangFmt = fmt($stockGudang);
+$stockKantinFmt = fmt($stockKantin);
+$stockTotalFmt  = fmt($stockTotal);
+$lowStockFmt    = fmt($lowStock);
+$lowStockKantinFmt = fmt($lowStockKantin);
+
+$bulan = [1=>'Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
+$created = isset($d['created_at']) ? $d['created_at'] : date('Y-m-d H:i:s');
+$tgl = strtotime($created);
+$tglStr = date('d', $tgl) . ' ' . $bulan[(int)date('n', $tgl)] . ' ' . date('Y', $tgl) . ', ' . date('H:i', $tgl);
+
+$currentCategory = isset($d['category']) ? $d['category'] : '';
+$currentPrice    = isset($d['sell_price']) ? $d['sell_price'] : 0;
+
+// Kategori additional: tidak pakai stok/supplier/batas menipis
+$isAdditional = (!empty($d['category']) && strtolower($d['category']) === 'additional');
+$hid = $isAdditional ? ' style="display:none"' : '';
+
+// Konversi unit untuk produk ini (base_unit konversi == satuan produk)
+$conv       = product_matched_conversions($conn, $d['id']);
+$hasConvUnit = (!$isAdditional && $unitVal !== '');
+$hidConv     = $hasConvUnit ? '' : ' style="display:none"';
+?>
+
+<!doctype html>
+<html lang="id">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title><?= $name ?> - Detail Produk</title>
+    <?php include '../../script/headscript.php'; ?>
+
+    <link rel="stylesheet" href="<?php echo BASE_URL; ?>/css/pages/master-product-detail.css?v=<?= filemtime(__DIR__ . '/../../css/pages/master-product-detail.css') ?>">
+</head>
+
+<body>
+<?php include '../components/sidebar.php'; ?>
+
+<main class="content">
+<?php include '../components/navbar.php'; ?>
+
+<div class="detail-bg">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+    <div class="particles">
+        <div class="particle"></div><div class="particle"></div><div class="particle"></div>
+        <div class="particle"></div><div class="particle"></div><div class="particle"></div>
+        <div class="particle"></div><div class="particle"></div>
+    </div>
+</div>
+
+<div class="detail-wrapper">
+
+    <!-- TOP BAR -->
+    <div class="top-bar">
+        <a href="<?php echo BASE_URL; ?>/pages/master/master-product.php" class="back-btn">
+            <i class="fas fa-arrow-left"></i> Kembali
+        </a>
+
+        <!-- QUICK PRODUCT SEARCH -->
+        <div class="product-search-wrap">
+            <div class="product-search-input-box">
+                <i class="fas fa-search search-icon"></i>
+                <input type="text" id="quickProductSearch" placeholder="Cari & ganti produk master..." autocomplete="off">
+                <i class="fas fa-times clear-search-icon" id="clearSearchBtn" style="display:none;"></i>
+            </div>
+            <div class="product-search-results" id="searchResultDropdown"></div>
+        </div>
+
+        <div class="top-actions">
+            <button type="button" class="act-btn act-edit" id="btnToggleEdit">
+                <i class="fas fa-pen"></i> Edit Produk
+            </button>
+            <button type="button" class="act-btn act-delete" id="btnDeleteProduct" data-id="<?= (int)$d['id'] ?>">
+                <i class="fas fa-trash"></i> Hapus
+            </button>
+        </div>
+    </div>
+
+    <!-- HERO CARD -->
+    <div class="hero-card premium-card">
+        <div class="hero-top">
+            <div class="hero-photo">
+                <?php if($photo): ?>
+                    <img src="<?= $photo ?>" alt="<?= $name ?>">
+                    <button type="button" class="btn-photo-delete" id="btnDeletePhoto" title="Hapus foto produk">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                <?php else: ?>
+                    <div class="hero-photo-placeholder"><i class="fas fa-box-open"></i><span>Tidak ada foto</span></div>
+                <?php endif; ?>
+            </div>
+            <div class="hero-info">
+                <div class="hero-category" id="heroCategory"><i class="fas fa-tag"></i> <?= $cat ?></div>
+                <div class="hero-add-notice" id="heroAddNotice"<?= $isAdditional ? '' : ' style="display:none"' ?>>
+                    <i class="fas fa-circle-info"></i>
+                    <span>Produk kategori <b>Additional</b> tidak memiliki stok dan tidak bisa dipakai di <b>Daftar Belanja</b> &amp; <b>Restock</b>, dan otomatis muncul di <b>katalog produk kantin</b>.</span>
+                </div>
+                <div class="hero-status-row" id="heroStatusRow"<?= $hid ?>>
+                    <span class="st-badge st-badge-lg <?= $statusInfo['css'] ?>" id="heroStatusBadge">
+                        <i class="fas <?= $statusInfo['icon'] ?>"></i> <?= $statusInfo['label'] ?>
+                    </span>
+                    <span class="st-limit-hint" id="limitHint"><i class="fas fa-gauge-high"></i> Gudang: <?= $lowStockFmt ?> <?= $unit ?> &middot; Kantin: <?= $lowStockKantinFmt ?> <?= $unit ?></span>
+                </div>
+                <h1 class="hero-name" id="heroName"><?= $name ?></h1>
+                <div class="hero-code"><i class="fas fa-barcode"></i> Kode: <span class="code-tag" id="heroCode"><?= $code ?></span></div>
+                <div class="hero-supplier"><i class="fas fa-truck"></i> Supplier: <span class="supp-badge-list" id="heroSupplierName"><?php if(empty($supplierNamesArr)): ?><span class="supp-badge"><i class="fas fa-store"></i> -</span><?php else: foreach($supplierNamesArr as $nm): ?><span class="supp-badge"><i class="fas fa-store"></i> <?= htmlspecialchars($nm) ?></span><?php endforeach; endif; ?></span></div>
+                <div class="hero-price" id="heroPrice">Rp <?= $price ?></div>
+                <div class="hero-date"><i class="fas fa-calendar-alt"></i> Ditambahkan: <?= $tglStr ?></div>
+            </div>
+        </div>
+        <div class="stats-row<?= $isAdditional ? ' stats-row--add' : '' ?>" id="statsRow">
+            <div class="stat-item">
+                <div class="stat-icon stat-icon-purple"><i class="fas fa-shopping-cart"></i></div>
+                <div class="stat-value"><?= $totalTransFmt ?></div>
+                <div class="stat-label">Total Terjual <span class="stat-note">(Order)</span></div>
+            </div>
+            <div class="stat-item" id="statTotalQty"<?= $hid ?>>
+                <div class="stat-icon stat-icon-green"><i class="fas fa-cubes"></i></div>
+                <div class="stat-value"><?= $totalQty ?></div>
+                <div class="stat-label">Total Qty Dibeli <span class="stat-note">(Keseluruhan)</span></div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-icon stat-icon-amber"><i class="fas fa-coins"></i></div>
+                <div class="stat-value">Rp <?= $price ?></div>
+                <div class="stat-label">Harga Jual</div>
+            </div>
+        </div>
+
+        <div class="stock-ov-row" id="stockOverviewRow"<?= $hid ?>>
+            <div class="stock-ov-item ov-status ov-st-<?= $statusInfo['key'] ?>" id="ovStatusTile">
+                <div class="ov-icon"><i class="fas <?= $statusInfo['icon'] ?>"></i></div>
+                <div class="ov-info">
+                    <div class="ov-value" id="ovStatusLabel"><?= $statusInfo['label'] ?></div>
+                    <div class="ov-label">Ketersediaan</div>
+                </div>
+            </div>
+            <div class="stock-ov-item ov-gudang" id="ovGudangTile">
+                <div class="ov-icon"><i class="fas fa-warehouse"></i></div>
+                <div class="ov-info">
+                    <div class="ov-value" id="ovGudang"><?= $stockGudangFmt ?></div>
+                    <div class="ov-label">Stok Gudang</div>
+                    <div class="ov-layer-status ov-ls-<?= $statusGudang['key'] ?>" id="ovGudangStatus">
+                        <i class="fas <?= $statusGudang['icon'] ?>"></i> <?= $statusGudang['label'] ?>
+                    </div>
+                </div>
+                <div class="ov-unit"><?= $unit ?></div>
+            </div>
+            <div class="stock-ov-item ov-kantin" id="ovKantinTile">
+                <div class="ov-icon"><i class="fas fa-store"></i></div>
+                <div class="ov-info">
+                    <div class="ov-value" id="ovKantin"><?= $stockKantinFmt ?></div>
+                    <div class="ov-label">Stok Kantin</div>
+                    <div class="ov-layer-status ov-ls-<?= $statusKantin['key'] ?>" id="ovKantinStatus">
+                        <i class="fas <?= $statusKantin['icon'] ?>"></i> <?= $statusKantin['label'] ?>
+                    </div>
+                </div>
+                <div class="ov-unit"><?= $unit ?></div>
+            </div>
+            <div class="stock-ov-item ov-total" id="ovTotalTile">
+                <div class="ov-icon"><i class="fas fa-boxes-stacked"></i></div>
+                <div class="ov-info">
+                    <div class="ov-value" id="ovTotal"><?= $stockTotalFmt ?></div>
+                    <div class="ov-label">Total Stok</div>
+                </div>
+                <div class="ov-unit"><?= $unit ?></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- EDIT CARD (inline, hidden by default) -->
+    <div class="edit-card premium-card" id="editCard">
+        <div class="edit-card-inner">
+            <div class="edit-card-header">
+                <div class="edit-card-icon"><i class="fas fa-pen"></i></div>
+                <div class="edit-card-title">Edit Data Produk</div>
+            </div>
+
+        <form id="editProductForm" enctype="multipart/form-data">
+            <input type="hidden" name="id" value="<?= (int)$d['id'] ?>">
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label"><i class="fas fa-barcode"></i> Kode Produk</label>
+                    <div class="form-input-wrap">
+                        <div class="form-input-icon"><i class="fas fa-barcode"></i></div>
+                        <input type="text" name="code" class="form-input" value="<?= $code ?>" required>
+                    </div>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label class="form-label"><i class="fas fa-box"></i> Nama Produk</label>
+                    <div class="form-input-wrap">
+                        <div class="form-input-icon"><i class="fas fa-box"></i></div>
+                        <input type="text" name="name" class="form-input" value="<?= $name ?>" required>
+                    </div>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label class="form-label"><i class="fas fa-tags"></i> Kategori</label>
+                    <div class="form-input-wrap">
+                        <div class="form-input-icon"><i class="fas fa-tags"></i></div>
+                        <?php $catLower = strtolower($currentCategory); ?>
+                        <select name="category" class="form-input" required>
+                            <option value="">Kategori</option>
+                            <option value="Makanan" <?= $catLower === 'makanan' ? 'selected' : '' ?>>Makanan</option>
+                            <option value="Minuman" <?= $catLower === 'minuman' ? 'selected' : '' ?>>Minuman</option>
+                            <option value="Jajanan" <?= $catLower === 'jajanan' ? 'selected' : '' ?>>Jajanan</option>
+                            <option value="Pelengkap" <?= $catLower === 'pelengkap' ? 'selected' : '' ?>>Pelengkap</option>
+                            <option value="Additional" <?= $catLower === 'additional' ? 'selected' : '' ?>>Additional</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label class="form-label"><i class="fas fa-tag"></i> Harga Jual (Rp)</label>
+                    <div class="form-input-wrap">
+                        <div class="form-input-icon"><i class="fas fa-tag"></i></div>
+                        <input type="number" name="price" class="form-input" value="<?= $currentPrice ?>" min="0" step="100" required>
+                    </div>
+                </div>
+                <div class="col-md-12 mb-3" id="editFieldUnit"<?= $hid ?>>
+                    <label class="form-label"><i class="fas fa-ruler"></i> Satuan</label>
+                    <div class="form-input-wrap">
+                        <div class="form-input-icon"><i class="fas fa-ruler"></i></div>
+                        <div class="select-wrap">
+                            <select name="unit" id="editProductUnit" class="form-input">
+                                <option value="">Pilih satuan</option>
+                                <?php foreach($allUnits as $un): ?>
+                                <option value="<?= htmlspecialchars($un) ?>" <?= (strtolower($un) === strtolower($unitVal)) ? 'selected' : '' ?>><?= htmlspecialchars(ucwords($un)) ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-12 mb-3" id="editFieldLowStock"<?= $hid ?>>
+                    <label class="form-label"><i class="fas fa-warehouse"></i> Batas Stok Menipis Gudang</label>
+                    <div class="form-input-wrap">
+                        <div class="form-input-icon"><i class="fas fa-warehouse"></i></div>
+                        <input type="number" name="low_stock" class="form-input" value="<?= $lowStock ?>" min="0">
+                    </div>
+                </div>
+                <div class="col-md-12 mb-3" id="editFieldLowStockKantin"<?= $hid ?>>
+                    <label class="form-label"><i class="fas fa-store"></i> Batas Stok Menipis Kantin</label>
+                    <div class="form-input-wrap">
+                        <div class="form-input-icon"><i class="fas fa-store"></i></div>
+                        <input type="number" name="low_stock_kantin" class="form-input" value="<?= $lowStockKantin ?>" min="0">
+                    </div>
+                </div>
+                <div class="col-md-12 mb-4" id="editFieldSupplier"<?= $hid ?>>
+                    <label class="form-label"><i class="fas fa-truck"></i> Supplier</label>
+                    <div id="supplierFields" class="supplier-fields">
+                        <?php
+                        $rowsRender = !empty($currentSupplierIds) ? $currentSupplierIds : [''];
+                        foreach($rowsRender as $rowVal):
+                            $exclude = array_filter($currentSupplierIds, function($v) use ($rowVal){
+                                return $rowVal !== '' && (int)$v !== (int)$rowVal;
+                            });
+                        ?>
+                        <div class="supplier-field-row">
+                            <div class="form-input-wrap">
+                                <div class="form-input-icon"><i class="fas fa-truck"></i></div>
+                                <div class="select-wrap">
+                                    <select name="supplier_id[]" class="form-input">
+                                        <?= buildSupplierOptions($rowVal, $exclude, $allSuppliers) ?>
+                                    </select>
+                                </div>
+                                <button type="button" class="btn-remove-supplier" data-remove title="Hapus supplier"><i class="fas fa-minus"></i></button>
+                            </div>
+                        </div>
+                        <?php endforeach; ?>
+                    </div>
+                    <button type="button" class="btn-add-supplier" id="btnAddSupplier">
+                        <i class="fas fa-plus"></i><span>Tambah Supplier</span>
+                    </button>
+                    <template id="supplierFieldTemplate">
+                        <div class="supplier-field-row">
+                            <div class="form-input-wrap">
+                                <div class="form-input-icon"><i class="fas fa-truck"></i></div>
+                                <div class="select-wrap">
+                                    <select name="supplier_id[]" class="form-input">
+                                        <option value="">Supplier (opsional)</option>
+                                    </select>
+                                </div>
+                                <button type="button" class="btn-remove-supplier" data-remove title="Hapus supplier"><i class="fas fa-minus"></i></button>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+                <div class="col-md-12">
+                    <div class="photo-upload-box">
+                        <div class="photo-preview" id="editPhotoPreview">
+                            <?php if(!empty($d['photo'])): ?>
+                                <img src="<?php echo BASE_URL; ?>/assets/img/products/<?= htmlspecialchars($d['photo']) ?>" alt="Preview">
+                            <?php else: ?>
+                                <i class="fas fa-camera"></i>
+                            <?php endif; ?>
+                        </div>
+                        <div class="photo-input-details">
+                            <label><i class="fas fa-image me-1"></i> Foto Produk</label>
+                            <input type="file" name="photo" accept="image/*" class="form-control">
+                            <small class="text-muted">Format: JPG, PNG, WEBP. Maks 2MB. Kosongkan jika tidak ingin mengganti.</small>
+                            <?php if(!empty($d['photo'])): ?>
+                                <input type="hidden" name="old_photo" value="<?= htmlspecialchars($d['photo']) ?>">
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <button type="button" class="btn-cancel" id="btnCancelEdit">Batal</button>
+                <button type="submit" class="btn-update"><i class="fas fa-save me-1"></i> Update Produk</button>
+            </div>
+        </form>
+        </div>
+    </div>
+
+    <!-- INFO CARD -->
+    <div class="detail-card premium-card">
+        <div class="detail-card-inner">
+            <div class="detail-card-header">
+                <div class="detail-card-icon"><i class="fas fa-th-large"></i></div>
+                <div class="detail-card-title">Informasi Lengkap</div>
+            </div>
+            <div class="info-grid">
+                <div class="info-item">
+                    <div class="info-item-icon"><i class="fas fa-barcode"></i></div>
+                    <div class="info-item-label">Kode Produk</div>
+                    <div class="info-item-value" id="infoCode"><?= $code ?></div>
+                </div>
+                <div class="info-item">
+                    <div class="info-item-icon"><i class="fas fa-tags"></i></div>
+                    <div class="info-item-label">Kategori</div>
+                    <div class="info-item-value" id="infoCategory"><?= $cat ?></div>
+                </div>
+                <div class="info-item">
+                    <div class="info-item-icon"><i class="fas fa-coins"></i></div>
+                    <div class="info-item-label">Harga Jual</div>
+                    <div class="info-item-value price-val" id="infoPrice">Rp <?= $price ?></div>
+                </div>
+                <div class="info-item" id="infoItemUnit"<?= $hid ?>>
+                    <div class="info-item-icon"><i class="fas fa-ruler"></i></div>
+                    <div class="info-item-label">Satuan</div>
+                    <div class="info-item-value" id="infoUnit"><?= $unit ?></div>
+                </div>
+                <div class="info-item" id="infoItemSupplier"<?= $hid ?>>
+                    <div class="info-item-icon"><i class="fas fa-truck"></i></div>
+                    <div class="info-item-label">Supplier</div>
+                    <div class="info-item-value"><div class="supp-badge-list" id="infoSupplier"><?php if(empty($supplierNamesArr)): ?><span class="supp-badge"><i class="fas fa-store"></i> -</span><?php else: foreach($supplierNamesArr as $nm): ?><span class="supp-badge"><i class="fas fa-store"></i> <?= htmlspecialchars($nm) ?></span><?php endforeach; endif; ?></div></div>
+                </div>
+                <div class="info-item" id="infoItemTotalQty"<?= $hid ?>>
+                    <div class="info-item-icon"><i class="fas fa-cubes"></i></div>
+                    <div class="info-item-label">Total Qty Dibeli</div>
+                    <div class="info-item-value" id="infoTotalQty"><?= $totalQty ?> unit</div>
+                    <div class="info-item-note"><i class="fas fa-infinity"></i> Keseluruhan / overall</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-item-icon"><i class="fas fa-shopping-cart"></i></div>
+                    <div class="info-item-label">Total Terjual</div>
+                    <div class="info-item-value" id="infoTotalTrans"><?= $totalTransFmt ?> unit</div>
+                    <div class="info-item-note"><i class="fas fa-receipt"></i> Total order produk</div>
+                </div>
+                <div class="info-item" id="infoItemLowStock"<?= $hid ?>>
+                    <div class="info-item-icon"><i class="fas fa-warehouse"></i></div>
+                    <div class="info-item-label">Batas Stok Menipis Gudang</div>
+                    <div class="info-item-value" id="infoLowStock"><?= $lowStockFmt ?> unit</div>
+                    <div class="info-item-note">status <b>Habis</b> bila 0</div>
+                </div>
+                <div class="info-item" id="infoItemLowStockKantin"<?= $hid ?>>
+                    <div class="info-item-icon"><i class="fas fa-store"></i></div>
+                    <div class="info-item-label">Batas Stok Menipis Kantin</div>
+                    <div class="info-item-value" id="infoLowStockKantin"><?= $lowStockKantinFmt ?> unit</div>
+                    <div class="info-item-note">status <b>Habis</b> bila 0</div>
+                </div>
+                <div class="info-item" id="infoItemStockGudang"<?= $hid ?>>
+                    <div class="info-item-icon"><i class="fas fa-warehouse"></i></div>
+                    <div class="info-item-label">Stok Gudang</div>
+                    <div class="info-item-value" id="infoStockGudang"><?= $stockGudangFmt ?> unit</div>
+                </div>
+                <div class="info-item" id="infoItemStockKantin"<?= $hid ?>>
+                    <div class="info-item-icon"><i class="fas fa-store"></i></div>
+                    <div class="info-item-label">Stok Kantin</div>
+                    <div class="info-item-value" id="infoStockKantin"><?= $stockKantinFmt ?> unit</div>
+                </div>
+                <div class="info-item" id="infoItemStockTotal"<?= $hid ?>>
+                    <div class="info-item-icon"><i class="fas fa-boxes-stacked"></i></div>
+                    <div class="info-item-label">Total Stok</div>
+                    <div class="info-item-value" id="infoStockTotal"><?= $stockTotalFmt ?> unit</div>
+                    <div class="info-item-note">Gudang + Kantin</div>
+                </div>
+                <div class="info-item" id="infoItemStockStatus"<?= $hid ?>>
+                    <div class="info-item-icon"><i class="fas fa-circle-check"></i></div>
+                    <div class="info-item-label">Status Stok</div>
+                    <div class="info-item-value">
+                        <span class="st-badge <?= $statusInfo['css'] ?>" id="infoStockStatus">
+                            <i class="fas <?= $statusInfo['icon'] ?>"></i> <?= $statusInfo['label'] ?>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- KONVERSI UNIT CARD -->
+    <div class="detail-card premium-card convert-card" id="convertCardWrap"<?= $hidConv ?>>
+        <div class="detail-card-inner">
+            <div class="detail-card-header convert-card-header">
+                <div class="detail-card-icon"><i class="fas fa-right-left"></i></div>
+                <div class="detail-card-title">Konversi Unit</div>
+                <span class="convert-card-unit" id="convertCardUnit"><i class="fas fa-ruler-combined"></i> <?= $unit ?></span>
+            </div>
+            <div class="convert-card-body" id="convertPanelBody"></div>
+        </div>
+    </div>
+
+</div>
+</main>
+
+<?php include '../../script/footscript.php'; ?>
+
+<script>
+// Toggle edit card
+var contentEl = document.querySelector('.content');
+document.getElementById('btnToggleEdit').addEventListener('click', function(){
+    var card = document.getElementById('editCard');
+    card.classList.toggle('show');
+    if(card.classList.contains('show')){
+        setTimeout(function(){
+            try {
+                card.scrollIntoView({ behavior:'smooth', block:'start' });
+            } catch(e){
+                card.scrollIntoView();
+            }
+        }, 150);
+    }
+});
+
+document.getElementById('btnCancelEdit').addEventListener('click', function(){
+    document.getElementById('editCard').classList.remove('show');
+    // Kembalikan UI ke kondisi awal sesuai kategori asli produk
+    applyAdditionalMode(<?= $isAdditional ? 'true' : 'false' ?>);
+    var catSelect = document.querySelector('#editProductForm select[name="category"]');
+    if(catSelect){
+        var origCat = '<?= htmlspecialchars($d['category'], ENT_QUOTES) ?>';
+        catSelect.value = origCat;
+    }
+    var ls = document.querySelector('#editProductForm input[name="low_stock"]');
+    if(ls) ls.value = <?= (int)$lowStock ?>;
+    var lsk = document.querySelector('#editProductForm input[name="low_stock_kantin"]');
+    if(lsk) lsk.value = <?= (int)$lowStockKantin ?>;
+    try { contentEl.scrollTo({ top: 0, behavior: 'smooth' }); }
+    catch(e){ contentEl.scrollTop = 0; }
+});
+
+// Photo preview — klik area upload membuka file dialog
+var photoBox = document.querySelector('.photo-upload-box');
+var photoInput = document.querySelector('input[name="photo"]');
+if(photoBox && photoInput){
+    photoBox.addEventListener('click', function(e){
+        if(photoInput.contains(e.target)) return;
+        photoInput.click();
+    });
+}
+if(photoInput){
+    photoInput.addEventListener('change', function(){
+        var file = this.files[0];
+        var preview = document.getElementById('editPhotoPreview');
+        if(file){
+            var reader = new FileReader();
+            reader.onload = function(e){ preview.innerHTML = '<img src="' + e.target.result + '" alt="Preview">'; };
+            reader.readAsDataURL(file);
+        }
+    });
+}
+
+// Supplier tambahan — tambah / hapus dropdown dengan desain yang sama
+var SUPPLIER_LIST = <?= json_encode($allSuppliers) ?>;
+var supplierFields = document.getElementById('supplierFields');
+var supplierTemplate = document.getElementById('supplierFieldTemplate');
+
+function escHtml(s){
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function renderStatusBadge(el, status, big){
+    if(!el || !status) return;
+    el.className = 'st-badge' + (big ? ' st-badge-lg' : '') + ' ' + (status.css || 'st-ready');
+    el.innerHTML = '<i class="fas ' + (status.icon || 'fa-circle-check') + '"></i> ' + (status.label || 'Ready');
+}
+
+function stockStatusOf(total, low){
+    total = parseInt(total) || 0;
+    low = parseInt(low) || 0;
+    if(total <= 0) return {key:'habis', label:'Habis', css:'st-habis', icon:'fa-circle-xmark'};
+    if(total <= low) return {key:'menipis', label:'Menipis', css:'st-menipis', icon:'fa-triangle-exclamation'};
+    return {key:'ready', label:'Ready', css:'st-ready', icon:'fa-circle-check'};
+}
+
+window.__stockData = { gudang: <?= $stockGudang ?>, kantin: <?= $stockKantin ?>, total: <?= $stockTotal ?>, lowStockKantin: <?= (int)$lowStockKantin ?> };
+var IS_KASIR = <?= $isKasir ? 'true' : 'false' ?>;
+
+function renderLimitHint(gudang, kantin, unitTxt){
+    var hint = document.getElementById('limitHint');
+    if(hint) hint.innerHTML = '<i class="fas fa-gauge-high"></i> Gudang: ' + gudang + ' ' + unitTxt + ' &middot; Kantin: ' + kantin + ' ' + unitTxt;
+}
+
+function renderLayerStatus(el, status){
+    if(!el || !status) return;
+    el.className = 'ov-layer-status ov-ls-' + (status.key || 'ready');
+    el.innerHTML = '<i class="fas ' + (status.icon || 'fa-circle-check') + '"></i> ' + (status.label || 'Ready');
+}
+
+function applyAdditionalMode(additional){
+    var ids = ['heroStatusRow','stockOverviewRow','statTotalQty','infoItemSupplier','infoItemUnit','infoItemTotalQty','infoItemLowStock','infoItemLowStockKantin','infoItemStockGudang','infoItemStockKantin','infoItemStockTotal','infoItemStockStatus','editFieldUnit','editFieldLowStock','editFieldLowStockKantin','editFieldSupplier'];
+    for(var i = 0; i < ids.length; i++){
+        var el = document.getElementById(ids[i]);
+        if(el) el.style.display = additional ? 'none' : '';
+    }
+    var statsRow = document.getElementById('statsRow');
+    if(statsRow) statsRow.classList.toggle('stats-row--add', additional);
+
+    // Notice khusus Additional: tampil HANYA saat kategori additional
+    var addNotice = document.getElementById('heroAddNotice');
+    if(addNotice) addNotice.style.display = additional ? '' : 'none';
+}
+
+function supplierOptionsHtml(selectedId, excludeIds){
+    var html = '<option value="">Supplier (opsional)</option>';
+    for(var i = 0; i < SUPPLIER_LIST.length; i++){
+        var s = SUPPLIER_LIST[i];
+        var sid = String(s.id);
+        if(excludeIds.indexOf(sid) >= 0) continue;
+        var sel = sid === String(selectedId) ? ' selected' : '';
+        html += '<option value="' + s.id + '"' + sel + '>' + escHtml(s.name) + '</option>';
+    }
+    return html;
+}
+
+// ===== SELECT2 UNTUK PICK SUPPLIER =====
+// Opsi <select> asli tetap dipakai sebagai sumber data (dibaca via .value
+// saat submit), select2 hanya mengganti tampilannya jadi bisa diketik & dicari.
+function supplierSelect2Config(){
+    return {
+        width: '100%',
+        placeholder: 'Cari / pilih supplier...',
+        allowClear: true,
+        // dropdown di-append ke <body> supaya tidak terpotong .edit-card,
+        // z-index diatur lewat CSS
+        dropdownParent: document.body,
+        language: {
+            noResults: function(){ return 'Supplier tidak ditemukan'; },
+            searching: function(){ return 'Mencari...' },
+            inputTooShort: function(){ return 'Ketik nama supplier...'; }
+        }
+    };
+}
+
+function isSupplierSelect2(sel){
+    return !!($.fn.select2) && $(sel).hasClass('select2-hidden-accessible');
+}
+
+// Hancurkan select2 di dalam scope (atau semua row kalau scope tidak diisi).
+// Wajib dipanggil SEBELUM sel.innerHTML diganti, karena select2 menyimpan
+// tampilan hasil render di sibling terpisah yang tidak ikut ter-update.
+function destroySupplierSelect2(scope){
+    var root = (scope && scope.querySelectorAll) ? scope : supplierFields;
+    if(!root) return;
+    root.querySelectorAll('select').forEach(function(sel){
+        if(isSupplierSelect2(sel)) $(sel).select2('destroy');
+    });
+}
+
+function initSupplierSelect2(){
+    if(!$.fn.select2 || !supplierFields) return;
+    supplierFields.querySelectorAll('select').forEach(function(sel){
+        if(isSupplierSelect2(sel)) return;
+        $(sel).select2(supplierSelect2Config());
+    });
+}
+
+// Select2 bisa menyisakan dropdown yang keburu terbuka - misalnya saat event
+// "mousedown" tombol clear masih berjalan lalu select2 di-rebuild. Tutup
+// semua dropdown supaya hasil refresh selalu deterministik: tertutup.
+// Baris yang memang mau terbuka dibuka eksplisit di handler-nya.
+function closeSupplierSelect2Dropdowns(scope){
+    var root = (scope && scope.querySelectorAll) ? scope : supplierFields;
+    if(!root || !$.fn.select2) return;
+    root.querySelectorAll('select').forEach(function(sel){
+        if(isSupplierSelect2(sel)) $(sel).select2('close');
+    });
+}
+
+// Select2 kadang menyisakan container dropdown yatim: 0x0, tidak terlihat, tapi
+// tetap menempel di parent. Contohnya saat tombol clear diklik, event
+// mouseup/click berikutnya mendarat di container select2 yang baru dibuat lalu
+// dropdown-nya dibuka, sementara instance yangDicetak sudah di-destroy.
+// Node yatim begitu tidak bisa ditutup lagi karena instance pemiliknya sudah
+// tidak ada, jadi harus dibersihkan manual.
+function sweepSupplierSelect2Orphans(){
+    if(!$.fn.select2) return;
+
+    // dropdown yang masih "hidup" = milik instance select2 yang sedang aktif,
+    // termasuk select2 milik komponen lain di halaman ini (mis. navbar)
+    var live = new Set();
+    document.querySelectorAll('select.select2-hidden-accessible').forEach(function(sel){
+        var box = window.qieosSelect2Container(sel);
+        if(box) live.add(box);
+    });
+
+    Array.prototype.forEach.call(document.body.children, function(node){
+        if(!node.classList || !node.classList.contains('select2-container')) return;
+        if(live.has(node)) return;
+        node.remove();
+    });
+}
+
+$(document).on('click', sweepSupplierSelect2Orphans);
+
+function refreshAllSupplierRows(){
+    destroySupplierSelect2(supplierFields);
+
+    var rows = supplierFields.querySelectorAll('.supplier-field-row');
+    // Hilangkan duplikat nilai antar row
+    var seen = {};
+    rows.forEach(function(r){
+        var sel = r.querySelector('select');
+        if(sel.value && seen[sel.value] && sel.value !== ''){ sel.value = ''; }
+        seen[sel.value || ''] = true;
+    });
+    // Bangun ulang opsi tiap row: exclude supplier yang dipilih di row lain
+    rows.forEach(function(r){
+        var sel = r.querySelector('select');
+        var selected = sel.value;
+        var others = [];
+        rows.forEach(function(o){
+            var s = o.querySelector('select');
+            if(o !== r && s.value) others.push(s.value);
+        });
+        sel.innerHTML = supplierOptionsHtml(selected, others);
+    });
+
+    initSupplierSelect2();
+    closeSupplierSelect2Dropdowns(supplierFields);
+    sweepSupplierSelect2Orphans();
+}
+
+function getSelectedSupplierNames(){
+    var names = [];
+    var rows = supplierFields.querySelectorAll('.supplier-field-row');
+    rows.forEach(function(r){
+        var v = r.querySelector('select').value;
+        if(!v) return;
+        for(var i = 0; i < SUPPLIER_LIST.length; i++){
+            if(String(SUPPLIER_LIST[i].id) === String(v)){
+                names.push(SUPPLIER_LIST[i].name);
+                break;
+            }
+        }
+    });
+    return names;
+}
+
+function getSelectedSupplierIds(){
+    var ids = [];
+    supplierFields.querySelectorAll('.supplier-field-row').forEach(function(r){
+        var v = r.querySelector('select').value;
+        if(v) ids.push(v);
+    });
+    return ids;
+}
+
+function renderSupplierBadges(el, names){
+    if(!el) return;
+    if(names && names.length){
+        el.innerHTML = names.map(function(n){
+            return '<span class="supp-badge"><i class="fas fa-store"></i> ' + escHtml(n) + '</span>';
+        }).join('');
+    } else {
+        el.innerHTML = '<span class="supp-badge"><i class="fas fa-store"></i> -</span>';
+    }
+}
+
+function setSupplierRows(ids){
+    ids = ids || [];
+    var need = ids.length > 0 ? ids.length : 1;
+    var rows = supplierFields.querySelectorAll('.supplier-field-row');
+    while(rows.length < need){
+        supplierFields.appendChild(supplierTemplate.content.cloneNode(true));
+        rows = supplierFields.querySelectorAll('.supplier-field-row');
+    }
+    // Isi opsi dulu agar .value bisa diterapkan pada row kloningan
+    refreshAllSupplierRows();
+    for(var i = 0; i < rows.length; i++){
+        if(i < need){
+            rows[i].querySelector('select').value = ids[i] || '';
+        } else {
+            // hapus select2-nya dulu supaya dropdown-nya tidak nyangkut di <body>
+            destroySupplierSelect2(rows[i]);
+            rows[i].remove();
+        }
+    }
+    refreshAllSupplierRows();
+}
+
+document.getElementById('btnAddSupplier').addEventListener('click', function(){
+    if(!supplierFields || !supplierTemplate) return;
+    var clone = supplierTemplate.content.cloneNode(true);
+    var row = clone.querySelector('.supplier-field-row');
+    supplierFields.appendChild(clone);
+    refreshAllSupplierRows();
+    if(row){
+        try { row.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
+        catch(e){}
+        /* Dropdown sengaja TIDAK dibuka di sini. User baru melihat daftar
+           supplier setelah klik field select-nya sendiri. */
+        var sel = row.querySelector('select');
+        if(sel && !isSupplierSelect2(sel)) sel.focus();
+    }
+});
+
+supplierFields.addEventListener('change', function(e){
+    if(e.target.tagName !== 'SELECT') return;
+    // Ditunda satu tick: 'change' dipancarkan select2 dari dalam handler
+    // mouseup miliknya sendiri, jadi destroy() di tengah dispatch itu
+    // menyisakan container dropdown yatim di <body>.
+    setTimeout(refreshAllSupplierRows, 0);
+});
+
+supplierFields.addEventListener('click', function(e){
+    var btn = e.target.closest('[data-remove]');
+    if(!btn) return;
+    var row = btn.closest('.supplier-field-row');
+    if(row){
+        destroySupplierSelect2(row);
+        row.remove();
+    }
+    refreshAllSupplierRows();
+});
+
+// Inisialisasi opsi dropdown sesuai data awal
+refreshAllSupplierRows();
+
+// ===== SELECT2 UNTUK PILIH SATUAN (opsi dari Master Unit) =====
+(function(){
+    var unitSel = document.getElementById('editProductUnit');
+    if(!unitSel || !$.fn.select2) return;
+    $(unitSel).select2({
+        width: '100%',
+        placeholder: 'Pilih satuan',
+        allowClear: true,
+        // dropdown di-append ke <body> supaya tidak terpotong .edit-card
+        dropdownParent: document.body,
+        language: {
+            noResults: function(){ return 'Satuan tidak ditemukan'; },
+            searching: function(){ return 'Mencari...'; }
+        }
+    });
+})();
+
+// Toggle additional mode saat kategori di-edit form berubah
+(function(){
+    var catSelect = document.querySelector('#editProductForm select[name="category"]');
+    if(!catSelect) return;
+    catSelect.addEventListener('change', function(){
+        var isAdd = (this.value || '').toLowerCase() === 'additional';
+        applyAdditionalMode(isAdd);
+        if(isAdd){
+            var ls = document.querySelector('#editProductForm input[name="low_stock"]');
+            if(ls) ls.value = '';
+            var lsk = document.querySelector('#editProductForm input[name="low_stock_kantin"]');
+            if(lsk) lsk.value = '';
+        }
+    });
+})();
+
+// Update action — in-place tanpa refresh
+document.getElementById('editProductForm').addEventListener('submit', function(e){
+    e.preventDefault();
+    var formData = new FormData(this);
+    var id = formData.get('id');
+
+    fetch('master-product-action.php?action=update&id=' + id, {
+        method: 'POST',
+        body: formData
+    })
+    .then(function(res){ return res.json(); })
+    .then(function(res){
+        if(res.status === 'success'){
+            try {
+                // Ambil nilai baru dari form
+                var newCode = formData.get('code');
+                var newName = formData.get('name');
+                var newCat  = formData.get('category');
+                var newPrice = formData.get('price');
+                var newUnit  = formData.get('unit');
+
+                // Update hero card
+                document.getElementById('heroName').textContent = newName;
+                document.getElementById('heroCode').textContent = newCode;
+                document.getElementById('heroCategory').innerHTML = '<i class="fas fa-tag"></i> ' + newCat;
+                document.getElementById('heroPrice').textContent = 'Rp ' + parseInt(newPrice).toLocaleString('id-ID');
+
+                // Toggle additional mode sesuai kategori baru
+                applyAdditionalMode(newCat.toLowerCase() === 'additional');
+
+                // Update supplier (bisa lebih dari satu)
+                var supNames = getSelectedSupplierNames();
+                renderSupplierBadges(document.getElementById('heroSupplierName'), supNames);
+                renderSupplierBadges(document.getElementById('infoSupplier'), supNames);
+
+                // Update info card
+                document.getElementById('infoCode').textContent = newCode;
+                document.getElementById('infoCategory').textContent = newCat;
+                document.getElementById('infoPrice').textContent = 'Rp ' + parseInt(newPrice).toLocaleString('id-ID');
+                document.getElementById('infoUnit').textContent = newUnit ? newUnit : '-';
+
+                // Update batas stok menipis gudang & kantin + status per layer
+                var newLow = formData.get('low_stock');
+                var newLowKantin = formData.get('low_stock_kantin');
+                var isAddCat = newCat.toLowerCase() === 'additional';
+                var lowInt = isAddCat ? 0 : (parseInt(newLow) || 0);
+                var lowKantinInt = isAddCat ? 0 : (parseInt(newLowKantin) || 0);
+                window.__stockData.lowStockKantin = lowKantinInt;
+                var unitTxt = newUnit ? newUnit : 'unit';
+                renderLimitHint(lowInt, lowKantinInt, unitTxt);
+                document.getElementById('infoLowStock').textContent = lowInt + ' unit';
+                document.getElementById('infoLowStockKantin').textContent = lowKantinInt + ' unit';
+                var st = IS_KASIR
+                    ? stockStatusOf(window.__stockData.kantin, lowKantinInt)
+                    : stockStatusOf(window.__stockData.gudang, lowInt);
+                renderStatusBadge(document.getElementById('heroStatusBadge'), st, true);
+                renderStatusBadge(document.getElementById('infoStockStatus'), st, false);
+                document.getElementById('ovStatusLabel').textContent = st.label;
+                var tile = document.getElementById('ovStatusTile');
+                if(tile){
+                    tile.classList.remove('ov-st-ready','ov-st-menipis','ov-st-habis');
+                    tile.classList.add('ov-st-' + st.key);
+                }
+                renderLayerStatus(document.getElementById('ovGudangStatus'), stockStatusOf(window.__stockData.gudang, lowInt));
+                renderLayerStatus(document.getElementById('ovKantinStatus'), stockStatusOf(window.__stockData.kantin, lowKantinInt));
+
+                // Segarkan panel konversi (mengikuti satuan baru)
+                if(window.__refreshConvertPanel){ window.__refreshConvertPanel(newUnit); }
+
+                // Update foto hero jika ada file baru
+                var photoFile = formData.get('photo');
+                if(photoFile && photoFile.name){
+                    var reader = new FileReader();
+                    reader.onload = function(ev){
+                        var heroImg = document.querySelector('.hero-photo img');
+                        if(heroImg){
+                            heroImg.src = ev.target.result;
+                        } else {
+                            var placeholder = document.querySelector('.hero-photo-placeholder');
+                            if(placeholder){
+                                placeholder.outerHTML = '<img src="' + ev.target.result + '" alt="' + newName + '">';
+                            }
+                        }
+                        syncDeletePhotoButton(true);
+                    };
+                    reader.readAsDataURL(photoFile);
+                }
+
+                // Tutup edit card & scroll ke atas
+                document.getElementById('editCard').classList.remove('show');
+                setTimeout(function(){
+                    try { contentEl.scrollTo({ top: 0, behavior: 'smooth' }); }
+                    catch(e){ contentEl.scrollTop = 0; }
+                }, 150);
+            } catch(e){
+                console.error(e);
+            }
+            QToast('Berhasil', 'Data produk berhasil diperbarui', 'success');
+        } else {
+            QToast('Gagal', res.message || 'Terjadi kesalahan', 'error');
+        }
+    })
+    .catch(function(){ QToast('Error', 'Gagal memproses update', 'error'); });
+});
+
+// Delete action
+document.getElementById('btnDeleteProduct').addEventListener('click', function(){
+    var id = this.getAttribute('data-id') || <?= (int)$d['id'] ?>;
+    var nameEl = document.getElementById('heroName');
+    var name = nameEl ? nameEl.textContent : 'produk ini';
+
+    QConfirm('Hapus Produk?', 'Produk ' + name + ' akan dihapus permanen.', {
+        confirmText: 'Hapus',
+        icon: 'fa-trash-can',
+        confirmClass: 'q-confirm-btn-danger',
+        iconClass: 'q-confirm-icon-danger'
+    }).then(function(ok){
+        if(ok){
+            fetch('master-product-action.php?action=destroy', {
+                method: 'POST',
+                body: new URLSearchParams({ id: id })
+            })
+            .then(function(res){ return res.json(); })
+            .then(function(res){
+                if(res.status === 'success'){
+                    QToast('Terhapus', 'Produk berhasil dihapus', 'success');
+                    setTimeout(function(){
+                        window.location.href = BASE_URL + '/pages/master/master-product.php';
+                    }, 600);
+                }
+            });
+        }
+    });
+});
+
+// DELETE PHOTO — tombol trash di pojok foto produk
+function currentProductId(){
+    var idInput = document.querySelector('#editProductForm input[name="id"]');
+    if(idInput) return idInput.value;
+    var delBtn = document.getElementById('btnDeleteProduct');
+    return delBtn ? delBtn.getAttribute('data-id') : '';
+}
+
+function showHeroPhotoPlaceholder(){
+    var wrap = document.querySelector('.hero-photo');
+    if(!wrap) return;
+    var img = wrap.querySelector('img');
+    if(img) img.remove();
+    var ph = wrap.querySelector('.hero-photo-placeholder');
+    if(!ph){
+        ph = document.createElement('div');
+        ph.className = 'hero-photo-placeholder';
+        ph.innerHTML = '<i class="fas fa-box-open"></i><span>Tidak ada foto</span>';
+        wrap.appendChild(ph);
+    }
+    syncDeletePhotoButton(false);
+}
+
+function syncDeletePhotoButton(has){
+    var wrap = document.querySelector('.hero-photo');
+    if(!wrap) return;
+    var btn = document.getElementById('btnDeletePhoto');
+    if(has){
+        if(!btn){
+            btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'btn-photo-delete';
+            btn.id = 'btnDeletePhoto';
+            btn.title = 'Hapus foto produk';
+            btn.innerHTML = '<i class="fas fa-trash"></i>';
+            wrap.appendChild(btn);
+        }
+        // Pasang listener sekali saja, baik tombol berasal dari PHP maupun dibuat JS
+        if(!btn.dataset.bound){
+            btn.addEventListener('click', onDeletePhotoClick);
+            btn.dataset.bound = '1';
+        }
+        btn.style.display = '';
+    } else if(btn){
+        btn.style.display = 'none';
+    }
+}
+
+function onDeletePhotoClick(){
+    var id = currentProductId();
+    QConfirm('Hapus Foto?', 'Foto produk ini akan dihapus dan tidak bisa dikembalikan.', {
+        confirmText: 'Hapus',
+        icon: 'fa-trash-can',
+        confirmClass: 'q-confirm-btn-danger',
+        iconClass: 'q-confirm-icon-danger'
+    }).then(function(ok){
+        if(!ok) return;
+        fetch('master-product-action.php?action=delete_photo', {
+            method: 'POST',
+            body: new URLSearchParams({ id: id })
+        })
+        .then(function(res){ return res.json(); })
+        .then(function(res){
+            if(res.status === 'success'){
+                showHeroPhotoPlaceholder();
+                var prev = document.getElementById('editPhotoPreview');
+                if(prev) prev.innerHTML = '<i class="fas fa-camera"></i>';
+                var op = document.querySelector('#editProductForm input[name="old_photo"]');
+                if(op) op.remove();
+                QToast('Terhapus', 'Foto produk berhasil dihapus', 'success');
+            } else {
+                QToast('Gagal', res.message || 'Terjadi kesalahan', 'error');
+            }
+        })
+        .catch(function(){ QToast('Error', 'Gagal memproses hapus foto', 'error'); });
+    });
+}
+
+// Sinkronkan kondisi tombol saat halaman pertama dimuat (true bila ada foto)
+syncDeletePhotoButton(!!(document.querySelector('.hero-photo img')));
+
+// QUICK PRODUCT SEARCH — AJAX tanpa reload
+(function(){
+    var input = document.getElementById('quickProductSearch');
+    var dropdown = document.getElementById('searchResultDropdown');
+    var clearBtn = document.getElementById('clearSearchBtn');
+    var searchTimeout = null;
+
+    if(!input || !dropdown) return;
+
+    // Fungsi update semua konten halaman
+    function switchProduct(item){
+        // Hero photo
+        var heroImg = document.querySelector('.hero-photo img');
+        var heroPh = document.querySelector('.hero-photo-placeholder');
+        if(item.photo){
+            if(heroImg){ heroImg.src = item.photo; heroImg.alt = item.name; }
+            else if(heroPh){ heroPh.outerHTML = '<img src="' + item.photo + '" alt="' + item.name + '" style="width:100%;height:100%;object-fit:cover;">'; }
+            syncDeletePhotoButton(true);
+        } else {
+            showHeroPhotoPlaceholder();
+        }
+
+        // Hero info
+        var set = function(id, val){ var el = document.getElementById(id); if(el) el.textContent = val; };
+        set('heroName', item.name);
+        set('heroCode', item.code);
+        set('heroCategory', item.category);
+        set('heroPrice', 'Rp ' + item.priceFormatted);
+        var isAddCat = (item.category || '').toLowerCase() === 'additional';
+        applyAdditionalMode(isAddCat);
+        // Segarkan panel konversi untuk produk yang baru dipilih
+        if(window.__refreshConvertPanel){
+            window.__refreshConvertPanel(isAddCat ? '' : (item.unit || ''), item.id);
+        }
+        var supNames = item.supplierNames || [];
+        renderSupplierBadges(document.getElementById('heroSupplierName'), supNames);
+        renderSupplierBadges(document.getElementById('infoSupplier'), supNames);
+
+        // Info card
+        set('infoCode', item.code);
+        set('infoName', item.name);
+        set('infoCategory', item.category);
+        set('infoPrice', 'Rp ' + item.priceFormatted);
+        set('infoUnit', item.unit || '-');
+        set('infoTotalQty', item.totalQtyFormatted + ' unit');
+        set('infoTotalTrans', item.totalTransaksiFormatted + ' unit');
+
+        // Status stok & stok per layer (ketersediaan ikut layer sesuai peran)
+        var ovStatus = IS_KASIR ? item.stockKantinStatus : item.stockGudangStatus;
+        renderStatusBadge(document.getElementById('heroStatusBadge'), ovStatus, true);
+        renderStatusBadge(document.getElementById('infoStockStatus'), ovStatus, false);
+        set('ovStatusLabel', ovStatus.label);
+        var ovTile = document.getElementById('ovStatusTile');
+        if(ovTile){
+            ovTile.classList.remove('ov-st-ready','ov-st-menipis','ov-st-habis');
+            ovTile.classList.add('ov-st-' + (ovStatus.key || 'ready'));
+        }
+        renderLimitHint(item.lowStock, item.lowStockKantin, (item.unit || 'unit'));
+
+        set('ovGudang', item.stockGudangFormatted);
+        set('ovKantin', item.stockKantinFormatted);
+        set('ovTotal', item.stockTotalFormatted);
+        set('infoLowStock', item.lowStock + ' unit');
+        set('infoLowStockKantin', item.lowStockKantin + ' unit');
+        set('infoStockGudang', item.stockGudangFormatted + ' unit');
+        set('infoStockKantin', item.stockKantinFormatted + ' unit');
+        set('infoStockTotal', item.stockTotalFormatted + ' unit');
+
+        // Status per layer (gudang & kantin punya batas menipis sendiri)
+        renderLayerStatus(document.getElementById('ovGudangStatus'), item.stockGudangStatus);
+        renderLayerStatus(document.getElementById('ovKantinStatus'), item.stockKantinStatus);
+        window.__stockData.gudang = item.stockGudang;
+        window.__stockData.kantin = item.stockKantin;
+        window.__stockData.total = item.stockTotal;
+        window.__stockData.lowStockKantin = item.lowStockKantin;
+
+        // Stats
+        var sv = document.querySelectorAll('.stat-value');
+        if(sv.length >= 3){
+            sv[0].textContent = item.totalTransaksiFormatted;
+            sv[1].textContent = item.totalQtyFormatted;
+            sv[2].textContent = 'Rp ' + item.priceFormatted;
+        }
+
+        // Edit form id
+        var idInput = document.querySelector('#editProductForm input[name="id"]');
+        if(idInput) idInput.value = item.id;
+
+        // Update edit form fields
+        var setForm = function(name, val){ var el = document.querySelector('#editProductForm [name="' + name + '"]'); if(el) el.value = val; };
+        setForm('code', item.code);
+        setForm('name', item.name);
+        setForm('category', item.category);
+        setForm('price', item.price);
+        setForm('unit', item.unit || '');
+        // select2 tidak ikut ter-update lewat .value; pancing lewat 'change'
+        var unitSelEl = document.querySelector('#editProductForm select[name="unit"]');
+        if(unitSelEl && $.fn.select2 && $(unitSelEl).hasClass('select2-hidden-accessible')){
+            $(unitSelEl).trigger('change');
+        }
+        setForm('low_stock', item.lowStock !== undefined && item.lowStock !== null ? item.lowStock : '');
+        setForm('low_stock_kantin', item.lowStockKantin !== undefined && item.lowStockKantin !== null ? item.lowStockKantin : '');
+
+        // Update category select
+        var catSelect = document.querySelector('#editProductForm select[name="category"]');
+        if(catSelect){
+            var catLower = (item.category || '').toLowerCase();
+            for(var i = 0; i < catSelect.options.length; i++){
+                if(catSelect.options[i].value.toLowerCase() === catLower){
+                    catSelect.selectedIndex = i;
+                    break;
+                }
+            }
+        }
+
+        // Update supplier select (sesuaikan jumlah row dengan supplier produk)
+        setSupplierRows(item.supplierIds || (item.supplierId ? [item.supplierId] : []));
+
+        // Update photo preview
+        var photoPrev = document.getElementById('editPhotoPreview');
+        if(photoPrev){
+            if(item.photo){
+                photoPrev.innerHTML = '<img src="' + item.photo + '" alt="Preview">';
+            } else {
+                photoPrev.innerHTML = '<i class="fas fa-camera"></i>';
+            }
+        }
+
+        // Delete button
+        var delBtn = document.getElementById('btnDeleteProduct');
+        if(delBtn) delBtn.setAttribute('data-id', item.id);
+
+        // URL & title
+        window.history.pushState({}, '', BASE_URL + '/pages/master/master-product-detail.php?id=' + item.id);
+        document.title = item.name + ' - Detail Produk';
+
+        // Animasi hero card
+        var heroCard = document.querySelector('.hero-card');
+        if(heroCard){ heroCard.style.animation = 'none'; heroCard.offsetHeight; heroCard.style.animation = 'cardEnter .5s ease both'; }
+
+        QToast('Berhasil', 'Beralih ke: ' + item.name, 'success');
+    }
+
+    input.addEventListener('input', function(){
+        var val = this.value.trim();
+        if(clearBtn) clearBtn.style.display = val.length > 0 ? 'block' : 'none';
+
+        if(searchTimeout) clearTimeout(searchTimeout);
+
+        if(val.length < 1){
+            dropdown.style.display = 'none';
+            dropdown.innerHTML = '';
+            return;
+        }
+
+        searchTimeout = setTimeout(function(){
+            var url = BASE_URL + '/pages/master/master-product-search.php?q=' + encodeURIComponent(val);
+            fetch(url)
+            .then(function(res){ return res.json(); })
+            .then(function(data){
+                if(data.length === 0){
+                    dropdown.innerHTML = '<div class="search-item-empty"><i class="fas fa-search"></i>Produk tidak ditemukan</div>';
+                } else {
+                    var html = '';
+                    data.forEach(function(item){
+                        var photoHtml = item.photo
+                            ? '<img src="' + item.photo + '" class="search-item-img">'
+                            : '<div class="search-item-icon"><i class="fas fa-box"></i></div>';
+
+                        html += '<div class="search-item-link" data-id="' + item.id + '" data-name="' + (item.name||'').replace(/"/g,'&quot;') + '">' +
+                            photoHtml +
+                            '<div class="search-item-info">' +
+                                '<div class="search-item-name">' + item.name + '</div>' +
+                                '<div class="search-item-meta"><span>' + item.code + '</span><span>' + item.category + '</span></div>' +
+                            '</div>' +
+                            '<div class="search-item-price">Rp ' + item.priceFormatted + '</div>' +
+                        '</div>';
+                    });
+                    dropdown.innerHTML = html;
+                }
+                dropdown.style.display = 'block';
+            })
+            .catch(function(err){ console.log('Search error:', err); });
+        }, 250);
+    });
+
+    // Klik item → AJAX switch tanpa reload
+    dropdown.addEventListener('click', function(e){
+        var link = e.target.closest('.search-item-link');
+        if(!link) return;
+
+        var itemId = link.getAttribute('data-id');
+
+        fetch(BASE_URL + '/pages/master/master-product-search.php?q=' + encodeURIComponent(link.getAttribute('data-name')))
+        .then(function(res){ return res.json(); })
+        .then(function(data){
+            var found = null;
+            for(var i = 0; i < data.length; i++){
+                if(data[i].id == itemId){ found = data[i]; break; }
+            }
+            if(found) switchProduct(found);
+        });
+
+        dropdown.style.display = 'none';
+        dropdown.innerHTML = '';
+        input.value = '';
+        if(clearBtn) clearBtn.style.display = 'none';
+    });
+
+    input.addEventListener('focus', function(){
+        if(this.value.trim().length > 0 && dropdown.innerHTML !== ''){
+            dropdown.style.display = 'block';
+        }
+    });
+
+    if(clearBtn){
+        clearBtn.addEventListener('click', function(){
+            input.value = '';
+            clearBtn.style.display = 'none';
+            dropdown.style.display = 'none';
+            dropdown.innerHTML = '';
+            input.focus();
+        });
+    }
+
+    document.addEventListener('click', function(e){
+        var wrap = document.querySelector('.product-search-wrap');
+        if(wrap && !wrap.contains(e.target)){
+            dropdown.style.display = 'none';
+        }
+    });
+})();
+
+// ===== KONVERSI UNIT — per produk =====
+(function(){
+    var wrap = document.getElementById('convertCardWrap');
+    if(!wrap) return;
+
+    var panelBody = document.getElementById('convertPanelBody');
+
+    var STATE = {
+        productId: <?= (int)$d['id'] ?>,
+        unit: <?= json_encode($unitVal) ?>,
+        units: <?= json_encode(array_values($allUnits)) ?>,
+        conv: <?= json_encode(!empty($conv['matched']) ? $conv['matched'][0] : null) ?>,
+        editing: false,
+        draft: []
+    };
+
+    function esc(s){
+        return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+    function ucwords(s){
+        return String(s == null ? '' : s).replace(/(^|\s)\S/g, function(m){ return m.toUpperCase(); });
+    }
+    function fmtQty(n){
+        n = parseFloat(n);
+        if(isNaN(n)) n = 0;
+        if(Math.round(n) === n) return n.toLocaleString('id-ID');
+        return n.toLocaleString('id-ID', { maximumFractionDigits: 4 });
+    }
+    function convItems(){
+        return (STATE.conv && STATE.conv.items) ? STATE.conv.items : [];
+    }
+
+    // ===== SELECT2 untuk pemilih satuan di editor konversi =====
+    function convertSelect2Config(){
+        return {
+            width: '100%',
+            placeholder: 'Cari / pilih satuan...',
+            minimumResultsForSearch: 0,
+            dropdownParent: document.body,
+            language: {
+                noResults: function(){ return 'Satuan tidak ditemukan'; },
+                searching: function(){ return 'Mencari...'; }
+            }
+        };
+    }
+    function isConvertSelect2(sel){
+        return !!($.fn.select2) && $(sel).hasClass('select2-hidden-accessible');
+    }
+    function destroyConvertSelect2(){
+        var box = document.getElementById('convertEditRows');
+        if(box){
+            Array.prototype.forEach.call(box.querySelectorAll('select'), function(sel){
+                if(isConvertSelect2(sel)) $(sel).select2('destroy');
+            });
+        }
+        if(typeof sweepSupplierSelect2Orphans === 'function') sweepSupplierSelect2Orphans();
+    }
+    function initConvertSelect2(){
+        if(!$.fn.select2) return;
+        var box = document.getElementById('convertEditRows');
+        if(!box) return;
+        Array.prototype.forEach.call(box.querySelectorAll('select'), function(sel){
+            if(isConvertSelect2(sel)) return;
+            $(sel).select2(convertSelect2Config());
+        });
+    }
+    function rowsHtml(conv, base){
+        if(!conv || !conv.items || !conv.items.length){
+            return '<div class="convert-row-empty">Konversi ini belum punya baris satuan.</div>';
+        }
+        var h = '';
+        for(var i = 0; i < conv.items.length; i++){
+            var it = conv.items[i];
+            h += '<div class="convert-detail-row">' +
+                    '<span class="convert-detail-seq">' + (i + 1) + '</span>' +
+                    '<span class="convert-detail-name">1 <b class="text-capitalize">' + esc(it.unit_name) + '</b></span>' +
+                    '<span class="convert-detail-eq">= ' + fmtQty(it.qty) + ' <span class="text-capitalize">' + esc(base) + '</span></span>' +
+                 '</div>';
+        }
+        return h;
+    }
+
+    function renderEmpty(){
+        panelBody.innerHTML =
+            '<div class="convert-empty">' +
+                '<div class="convert-empty-icon"><i class="fas fa-link-slash"></i></div>' +
+                '<div class="convert-empty-title">Belum ada konversi untuk satuan <b class="text-capitalize">' + esc(STATE.unit) + '</b></div>' +
+                '<div class="convert-empty-sub">Buat konversi khusus produk ini. Contoh: 1 karton = 100 <b class="text-capitalize">' + esc(STATE.unit) + '</b>.</div>' +
+                '<button type="button" class="convert-btn convert-btn-primary" id="convertCreateBtn"><i class="fas fa-plus me-1"></i> Buat Konversi</button>' +
+            '</div>';
+        document.getElementById('convertCreateBtn').addEventListener('click', function(){ startEdit([]); });
+    }
+
+    function renderView(){
+        var c = STATE.conv;
+        panelBody.innerHTML =
+            '<div class="convert-selected">' +
+                '<div class="convert-selected-head">' +
+                    '<span class="convert-pill-ok"><i class="fas fa-circle-check"></i> Terpasang</span>' +
+                    '<span class="convert-selected-base"><i class="fas fa-ruler-combined"></i> Unit Base <b class="text-capitalize">' + esc(c.base_unit) + '</b></span>' +
+                '</div>' +
+                '<div class="convert-detail-rows">' + rowsHtml(c, c.base_unit) + '</div>' +
+                '<div class="convert-selected-actions">' +
+                    '<button type="button" class="convert-btn convert-btn-danger" id="convertDeleteBtn"><i class="fas fa-trash-alt me-1"></i> Hapus</button>' +
+                    '<button type="button" class="convert-btn convert-btn-ghost" id="convertEditBtn"><i class="fas fa-pen me-1"></i> Ubah</button>' +
+                '</div>' +
+            '</div>';
+        document.getElementById('convertEditBtn').addEventListener('click', function(){
+            startEdit(convItems().map(function(it){ return { unit: it.unit_name, qty: it.qty }; }));
+        });
+        document.getElementById('convertDeleteBtn').addEventListener('click', askDelete);
+    }
+
+    function unitOptions(selected){
+        var h = '<option value="">Pilih satuan...</option>';
+        for(var i = 0; i < STATE.units.length; i++){
+            var u = STATE.units[i];
+            if(String(u).toLowerCase() === String(STATE.unit).toLowerCase()) continue;
+            var sel = (String(u).toLowerCase() === String(selected == null ? '' : selected).toLowerCase()) ? ' selected' : '';
+            h += '<option value="' + esc(u) + '"' + sel + '>' + esc(ucwords(u)) + '</option>';
+        }
+        return h;
+    }
+
+    function editRowHtml(unit, qty){
+        var qv = (qty === null || qty === undefined || qty === '') ? '' : qty;
+        return '<div class="convert-edit-row">' +
+            '<span class="convert-one">1</span>' +
+            '<select class="form-input convert-unit-sel">' + unitOptions(unit) + '</select>' +
+            '<span class="convert-eq">=</span>' +
+            '<input type="number" class="form-input convert-qty-input" min="0" step="any" inputmode="decimal" placeholder="qty" value="' + esc(qv) + '">' +
+            '<span class="convert-base-lbl text-capitalize">' + esc(STATE.unit) + '</span>' +
+            '<button type="button" class="convert-row-remove" title="Hapus satuan" aria-label="Hapus satuan"><i class="fas fa-times"></i></button>' +
+        '</div>';
+    }
+
+    function renderEditRows(){
+        var box = document.getElementById('convertEditRows');
+        if(!box) return;
+        destroyConvertSelect2();
+        if(!STATE.draft.length) STATE.draft.push({ unit: '', qty: '' });
+        var h = '';
+        for(var i = 0; i < STATE.draft.length; i++){
+            h += editRowHtml(STATE.draft[i].unit, STATE.draft[i].qty);
+        }
+        box.innerHTML = h;
+        initConvertSelect2();
+    }
+
+    function readDraftFromDom(){
+        var box = document.getElementById('convertEditRows');
+        if(!box) return;
+        var rows = box.querySelectorAll('.convert-edit-row');
+        STATE.draft = [];
+        Array.prototype.forEach.call(rows, function(r){
+            var u = r.querySelector('.convert-unit-sel').value;
+            var q = r.querySelector('.convert-qty-input').value;
+            STATE.draft.push({ unit: u, qty: q });
+        });
+    }
+
+    function renderEditor(){
+        destroyConvertSelect2();
+        panelBody.innerHTML =
+            '<div class="convert-editor">' +
+                '<div class="convert-editor-note"><i class="fas fa-circle-info"></i> Isi satuan konversi: 1 satuan = berapa <b class="text-capitalize">' + esc(STATE.unit) + '</b>.</div>' +
+                '<div id="convertEditRows"></div>' +
+                '<button type="button" class="convert-btn convert-btn-ghost convert-btn-block" id="convertAddRow"><i class="fas fa-plus me-1"></i> Tambah Satuan</button>' +
+                '<div class="convert-editor-actions">' +
+                    '<button type="button" class="convert-btn convert-btn-ghost" id="convertCancelBtn">Batal</button>' +
+                    '<button type="button" class="convert-btn convert-btn-primary" id="convertSaveBtn"><i class="fas fa-save me-1"></i> Simpan</button>' +
+                '</div>' +
+            '</div>';
+        renderEditRows();
+        document.getElementById('convertAddRow').addEventListener('click', function(){
+            readDraftFromDom();
+            STATE.draft.push({ unit: '', qty: '' });
+            renderEditRows();
+        });
+        document.getElementById('convertCancelBtn').addEventListener('click', cancelEdit);
+        document.getElementById('convertSaveBtn').addEventListener('click', saveConv);
+    }
+
+    function startEdit(items){
+        STATE.editing = true;
+        STATE.draft = (items || []).map(function(it){ return { unit: it.unit, qty: it.qty }; });
+        renderEditor();
+    }
+
+    function cancelEdit(){
+        STATE.editing = false;
+        render();
+    }
+
+    function setSaving(on){
+        var btn = document.getElementById('convertSaveBtn');
+        if(!btn) return;
+        btn.disabled = !!on;
+        btn.innerHTML = on ? '<i class="fas fa-spinner fa-spin me-1"></i> Menyimpan...' : '<i class="fas fa-save me-1"></i> Simpan';
+    }
+
+    function saveConv(){
+        readDraftFromDom();
+        var body = new URLSearchParams();
+        body.append('id', STATE.productId);
+        STATE.draft.forEach(function(r){
+            body.append('unit[]', r.unit);
+            body.append('qty[]', r.qty);
+        });
+        setSaving(true);
+        fetch('master-product-action.php?action=save_conversion', { method: 'POST', body: body })
+        .then(function(r){ return r.json(); })
+        .then(function(res){
+            if(res.status === 'success'){
+                STATE.editing = false;
+                STATE.conv = (res.data && res.data.matched && res.data.matched.length) ? res.data.matched[0] : null;
+                render();
+                QToast('Berhasil', 'Konversi unit disimpan', 'success');
+            } else {
+                setSaving(false);
+                QToast('Gagal', res.message || 'Terjadi kesalahan', 'error');
+            }
+        })
+        .catch(function(){
+            setSaving(false);
+            QToast('Error', 'Gagal menyimpan konversi', 'error');
+        });
+    }
+
+    function askDelete(){
+        QConfirm('Hapus Konversi?', 'Konversi unit produk ini akan dihapus.', {
+            confirmText: 'Hapus',
+            icon: 'fa-trash-alt',
+            confirmClass: 'q-confirm-btn-danger',
+            iconClass: 'q-confirm-icon-danger'
+        }).then(function(ok){
+            if(!ok) return;
+            fetch('master-product-action.php?action=delete_conversion', {
+                method: 'POST',
+                body: new URLSearchParams({ id: STATE.productId })
+            })
+            .then(function(r){ return r.json(); })
+            .then(function(res){
+                if(res.status === 'success'){
+                    STATE.conv = null;
+                    render();
+                    QToast('Terhapus', 'Konversi unit dihapus', 'success');
+                } else {
+                    QToast('Gagal', res.message || 'Terjadi kesalahan', 'error');
+                }
+            })
+            .catch(function(){ QToast('Error', 'Gagal menghapus konversi', 'error'); });
+        });
+    }
+
+    function render(){
+        if(!panelBody) return;
+        if(STATE.editing){ renderEditor(); return; }
+        destroyConvertSelect2();
+        if(!STATE.unit){ panelBody.innerHTML = ''; return; }
+        if(STATE.conv){ renderView(); return; }
+        renderEmpty();
+    }
+
+    // Delegasi klik tombol hapus baris (aman saat baris di-render ulang)
+    panelBody.addEventListener('click', function(e){
+        var btn = e.target.closest('.convert-row-remove');
+        if(!btn) return;
+        readDraftFromDom();
+        var row = btn.closest('.convert-edit-row');
+        var rows = Array.prototype.slice.call(panelBody.querySelectorAll('#convertEditRows .convert-edit-row'));
+        var idx = rows.indexOf(row);
+        if(idx >= 0) STATE.draft.splice(idx, 1);
+        renderEditRows();
+    });
+
+    // Dipanggil setelah satuan produk diubah lewat form edit, atau saat
+    // berganti produk lewat quick search (productId diisi).
+    window.__refreshConvertPanel = function(unit, productId){
+        if(productId !== undefined && productId !== null && productId !== ''){
+            STATE.productId = parseInt(productId, 10) || STATE.productId;
+        }
+        STATE.unit = unit || '';
+        STATE.editing = false;
+        STATE.draft = [];
+        var unitEl = document.getElementById('convertCardUnit');
+        if(unitEl) unitEl.innerHTML = '<i class="fas fa-ruler-combined"></i> ' + esc(STATE.unit || '-');
+        wrap.style.display = STATE.unit ? '' : 'none';
+
+        if(!STATE.unit){
+            STATE.conv = null;
+            render();
+            return;
+        }
+        fetch('master-product-action.php?action=get_conversions', {
+            method: 'POST',
+            body: new URLSearchParams({ id: STATE.productId })
+        })
+        .then(function(r){ return r.json(); })
+        .then(function(res){
+            if(res.status === 'success' && res.data){
+                STATE.unit = res.data.unit || '';
+                STATE.conv = (res.data.matched && res.data.matched.length) ? res.data.matched[0] : null;
+                render();
+            }
+        })
+        .catch(function(){});
+    };
+
+    render();
+})();
+</script>
+
+</body>
+</html>

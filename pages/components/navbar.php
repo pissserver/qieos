@@ -1,0 +1,1514 @@
+<?php
+if (!defined('BASE_URL')) {
+    require_once __DIR__ . '/../../script/connection.php';
+}
+?>
+<link rel="stylesheet" href="<?php echo BASE_URL; ?>/css/pages/navbar.css?v=<?php echo filemtime(__DIR__ . '/../../css/pages/navbar.css'); ?>">
+
+<nav class="premium-navbar">
+
+    <!-- Twinkling Stars Background -->
+    <div class="premium-navbar-stars" aria-hidden="true">
+        <?php
+            for ($i = 0; $i < 28; $i++) {
+                $t = 5 + ($i * 7) % 82;
+                $l = 5 + ($i * 13) % 88;
+                $s = 2 + ($i % 3);
+                $starDelay = ($i % 10) * 0.3 + (($i * 5) % 9) * 0.08;
+                echo '<span class="star" style="top:' . $t . '%;left:' . $l . '%;width:' . $s . 'px;height:' . $s . 'px;--d:' . round($starDelay, 2) . 's;"></span>';
+            }
+        ?>
+    </div>
+
+    <div class="premium-brand">
+        <div class="brand-content">
+            <h4>Dashboard</h4>
+            <span>Point Of Sales Management</span>
+        </div>
+    </div>
+
+    <div class="premium-actions">
+        <!-- SEARCH -->
+        <div class="search-trigger" id="searchTrigger" onclick="openSearch()">
+            <i class="fas fa-search"></i>
+            <span class="kbd-hint">⌘K</span>
+        </div>
+
+        <!-- WHAT'S NEW -->
+        <div
+            class="premium-action-btn"
+            id="whatsNewBtn">
+
+            <i class="fas fa-bullhorn"></i>
+
+            <span class="cart-badge" style="font-size:8px;">
+                NEW
+            </span>
+
+        </div>
+
+        <!-- CHAT -->
+        <a
+            class="premium-action-btn chat-nav-btn"
+            href="<?php echo BASE_URL; ?>/pages/chat/chat.php"
+            id="chatNavBtn"
+            aria-label="Chat">
+
+            <i class="fas fa-comments"></i>
+
+            <span class="cart-badge chat-unread-badge d-none" id="chatBadge">0</span>
+        </a>
+
+        <!-- STOCK NOTIFICATION -->
+        <div class="premium-action-btn stock-notif-btn" id="stockNotifBtn" role="button" tabindex="0" aria-label="Notifikasi Stok">
+            <i class="fas fa-bell"></i>
+            <span class="cart-badge stock-notif-badge d-none" id="stockNotifBadge">0</span>
+            <span class="stock-notif-ring d-none" id="stockNotifRing"></span>
+        </div>
+
+        <?php if ($user['role'] == 'developer' || $user['role'] == 'staff kasir') { ?>
+        
+        <!-- CART -->
+        <div
+            class="premium-action-btn"
+            onclick="openCart()">
+
+            <i class="fas fa-shopping-cart"></i>
+
+            <span id="cart-count"
+                class="cart-badge d-none">
+                0
+            </span>
+        </div>
+
+        <!-- OMZET -->
+        <?php
+        $today = date('Y-m-d');
+
+        $omzetQuery = $conn->prepare("
+            SELECT SUM(total) as omzet
+            FROM orders
+            WHERE DATE(tanggal)=?
+            AND status_payment='paid'
+        ");
+
+        $omzetQuery->bind_param("s", $today);
+        $omzetQuery->execute();
+
+        $omzetResult = $omzetQuery->get_result();
+
+        $omzet = 0;
+
+        if ($omzetResult && $omzetResult->num_rows > 0) {
+            $omzet = $omzetResult->fetch_assoc()['omzet'];
+
+            if ($omzet === null) {
+                $omzet = 0;
+            }
+        }
+        ?>
+
+
+        <div class="premium-omzet">
+
+            <div class="premium-omzet-icon">
+                <i class="fas fa-coins"></i>
+            </div>
+
+            <div>
+
+                <span class="omzet-label">
+                    Omzet Hari Ini
+                </span>
+
+                <div class="omzet-value">
+                    Rp <span id="omzet-today">0</span>
+                </div>
+
+            </div>
+
+        </div>
+
+<?php } ?>
+
+
+        <!-- PROFILE -->
+        <div class="dropdown" style="position: relative; z-index: 1050;">
+
+            <a href="#"
+                class="text-decoration-none"
+                data-bs-toggle="dropdown"
+                data-bs-auto-close="true">
+
+                <div class="premium-profile">
+
+                    <img
+                        src="<?php echo $user['photo'] ? BASE_URL . '/assets/img/uploads/' . $user['photo'] : BASE_URL . '/assets/img/default-avatar.jpg'; ?>"
+                        class="premium-avatar">
+
+                    <div class="premium-user">
+
+                        <div class="premium-name">
+                            <?php echo $user['fullname'] != '' ? $user['fullname'] : $_SESSION['username']; ?>
+                        </div>
+
+                        <div class="premium-role">
+                            <?= ucwords(strtolower($user['role'])) ?>
+                        </div>
+
+                    </div>
+
+                    <i class="fas fa-chevron-down text-white premium-chevron"></i>
+
+                </div>
+
+            </a>
+
+            <div class="dropdown-menu dropdown-menu-end premium-dropdown">
+
+                <a class="dropdown-item"
+                href="<?php echo BASE_URL; ?>/pages/profile/profile.php">
+                    <i class="fas fa-user-circle"></i>
+                    <span>Profil</span>
+                </a>
+
+                <div class="dropdown-divider"></div>
+
+                <a class="dropdown-item text-danger"
+                href="<?php echo BASE_URL; ?>/sessions/logout.php">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Sign Out</span>
+                </a>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</nav>
+
+<!-- Global Search Overlay -->
+<div class="search-overlay" id="searchOverlay">
+    <div class="search-container">
+        <div class="search-input-wrap">
+            <i class="fas fa-search"></i>
+            <input type="text" class="search-input" id="searchInput" placeholder="Cari halaman, produk, tenant..." autocomplete="off" spellcheck="false">
+            <button class="search-close-btn" onclick="closeSearch()">ESC</button>
+        </div>
+        <div class="search-body" id="searchBody">
+            <div class="search-recent" id="searchRecent"></div>
+            <div id="searchResults"></div>
+        </div>
+        <div class="search-footer">
+            <div class="search-hint">
+                <span><kbd>&uarr;</kbd><kbd>&darr;</kbd> Navigasi</span>
+                <span><kbd>&crarr;</kbd> Buka</span>
+                <span><kbd>ESC</kbd> Tutup</span>
+            </div>
+            <div class="search-result-count" id="searchCount"></div>
+        </div>
+    </div>
+</div>
+
+<!-- Screensaver (appended to body via JS) -->
+
+<script>
+(function(){
+    var overlay = document.getElementById('searchOverlay');
+    var input = document.getElementById('searchInput');
+    var results = document.getElementById('searchResults');
+    var recentEl = document.getElementById('searchRecent');
+    var countEl = document.getElementById('searchCount');
+    var focusIndex = -1;
+    var allItems = [];
+    var debounceTimer = null;
+    var isSearchOpen = false;
+    var recentSearches = JSON.parse(localStorage.getItem('qieos_recent_search') || '[]');
+
+    function renderRecent(){
+        if(!recentSearches.length){ recentEl.innerHTML = ''; return; }
+        var html = '<div class="search-section-label"><i class="fas fa-clock-rotate-left"></i> Pencarian Terakhir</div>';
+        recentSearches.slice(0,5).forEach(function(s,i){
+            html += '<div class="search-recent-item" onclick="window._searchSelect(\''+s.replace(/'/g,"\\'")+'\')"><i class="fas fa-clock"></i><span>'+escapeHtml(s)+'</span><span class="clear-recent" onclick="event.stopPropagation();window._removeRecent('+i+')"><i class="fas fa-times"></i></span></div>';
+        });
+        recentEl.innerHTML = html;
+    }
+
+    function addRecent(q){
+        recentSearches = recentSearches.filter(function(s){ return s.toLowerCase() !== q.toLowerCase(); });
+        recentSearches.unshift(q);
+        if(recentSearches.length > 8) recentSearches.pop();
+        localStorage.setItem('qieos_recent_search', JSON.stringify(recentSearches));
+    }
+
+    window._removeRecent = function(i){
+        recentSearches.splice(i,1);
+        localStorage.setItem('qieos_recent_search', JSON.stringify(recentSearches));
+        renderRecent();
+    };
+
+    window._searchSelect = function(q){
+        input.value = q;
+        doSearch(q);
+        input.focus();
+    };
+
+    function escapeHtml(t){
+        var d = document.createElement('div');
+        d.appendChild(document.createTextNode(t));
+        return d.innerHTML;
+    }
+
+    function doSearch(q){
+        if(!q || q.length < 1){
+            results.innerHTML = '';
+            countEl.textContent = '';
+            focusIndex = -1;
+            allItems = [];
+            renderRecent();
+            return;
+        }
+
+        results.innerHTML = '<div class="search-loading"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>';
+        recentEl.innerHTML = '';
+        countEl.textContent = '';
+
+        var role = '<?php echo $user["role"]; ?>';
+        fetch(BASE_URL + '/pages/components/data/search-api.php?q='+encodeURIComponent(q)+'&role='+encodeURIComponent(role))
+        .then(function(r){ return r.json(); })
+        .then(function(data){
+            if(data.status !== 'success') return;
+            var r = data.results;
+            var html = '';
+            var total = 0;
+            allItems = [];
+            focusIndex = -1;
+
+            if(r.pages && r.pages.length){
+                html += '<div class="search-section-label"><i class="fas fa-compass"></i> Halaman</div>';
+                r.pages.forEach(function(p){
+                    var idx = allItems.length;
+                    allItems.push(p.url);
+                    html += '<div class="search-item" data-idx="'+idx+'" onclick="window._goSearchItem('+idx+')">';
+                    html += '<div class="search-item-icon"><i class="'+p.icon+'"></i></div>';
+                    html += '<div class="search-item-info"><div class="search-item-name">'+escapeHtml(p.name)+'</div><div class="search-item-meta">'+escapeHtml(p.category)+'</div></div>';
+                    html += '<span class="search-item-badge badge-page">Halaman</span>';
+                    html += '</div>';
+                    total++;
+                });
+            }
+
+            if(r.products && r.products.length){
+                html += '<div class="search-section-label"><i class="fas fa-cube"></i> Produk</div>';
+                r.products.forEach(function(p){
+                    var idx = allItems.length;
+                    allItems.push(p.url);
+                    html += '<div class="search-item" data-idx="'+idx+'" onclick="window._goSearchItem('+idx+')">';
+                    html += '<div class="search-item-icon product-icon"><i class="'+p.icon+'"></i></div>';
+                    html += '<div class="search-item-info"><div class="search-item-name">'+escapeHtml(p.name)+'</div><div class="search-item-meta">'+escapeHtml(p.code)+' &middot; '+escapeHtml(p.category)+' &middot; '+p.price+'</div></div>';
+                    html += '<span class="search-item-badge badge-product">Produk</span>';
+                    html += '</div>';
+                    total++;
+                });
+            }
+
+            if(r.suppliers && r.suppliers.length){
+                html += '<div class="search-section-label"><i class="fas fa-truck"></i> Supplier</div>';
+                r.suppliers.forEach(function(s){
+                    var idx = allItems.length;
+                    allItems.push(s.url);
+                    html += '<div class="search-item" data-idx="'+idx+'" onclick="window._goSearchItem('+idx+')">';
+                    html += '<div class="search-item-icon supplier-icon"><i class="'+s.icon+'"></i></div>';
+                    html += '<div class="search-item-info"><div class="search-item-name">'+escapeHtml(s.name)+'</div><div class="search-item-meta">'+escapeHtml(s.phone)+' &middot; '+escapeHtml(s.address)+'</div></div>';
+                    html += '<span class="search-item-badge badge-supplier">Supplier</span>';
+                    html += '</div>';
+                    total++;
+                });
+            }
+
+            if(r.customers && r.customers.length){
+                html += '<div class="search-section-label"><i class="fas fa-users"></i> Customer</div>';
+                r.customers.forEach(function(c){
+                    var idx = allItems.length;
+                    allItems.push(c.url);
+                    html += '<div class="search-item" data-idx="'+idx+'" onclick="window._goSearchItem('+idx+')">';
+                    html += '<div class="search-item-icon customer-icon"><i class="'+c.icon+'"></i></div>';
+                    html += '<div class="search-item-info"><div class="search-item-name">'+escapeHtml(c.name)+'</div><div class="search-item-meta">'+escapeHtml(c.phone)+'</div></div>';
+                    html += '<span class="search-item-badge badge-customer">Customer</span>';
+                    html += '</div>';
+                    total++;
+                });
+            }
+
+            if(r.orders && r.orders.length){
+                html += '<div class="search-section-label"><i class="fas fa-receipt"></i> Pesanan</div>';
+                r.orders.forEach(function(o){
+                    var idx = allItems.length;
+                    allItems.push(o.url);
+                    html += '<div class="search-item" data-idx="'+idx+'" onclick="window._goSearchItem('+idx+')">';
+                    html += '<div class="search-item-icon" style="background:rgba(239,68,68,.1);color:#f87171"><i class="'+o.icon+'"></i></div>';
+                    html += '<div class="search-item-info"><div class="search-item-name">'+escapeHtml(o.code)+'</div><div class="search-item-meta">'+o.date+' &middot; '+o.total+' &middot; '+escapeHtml(o.status)+'</div></div>';
+                    html += '<span class="search-item-badge" style="background:rgba(239,68,68,.1);color:#f87171">Pesanan</span>';
+                    html += '</div>';
+                    total++;
+                });
+            }
+
+            if(r.tenants && r.tenants.length){
+                html += '<div class="search-section-label"><i class="fas fa-store"></i> Tenant</div>';
+                r.tenants.forEach(function(t){
+                    var idx = allItems.length;
+                    allItems.push(t.url);
+                    html += '<div class="search-item" data-idx="'+idx+'" onclick="window._goSearchItem('+idx+')">';
+                    html += '<div class="search-item-icon tenant-icon"><i class="'+t.icon+'"></i></div>';
+                    html += '<div class="search-item-info"><div class="search-item-name">'+escapeHtml(t.name)+'</div><div class="search-item-meta">'+escapeHtml(t.owner)+'</div></div>';
+                    html += '<span class="search-item-badge badge-tenant">Tenant</span>';
+                    html += '</div>';
+                    total++;
+                });
+            }
+
+            if(total === 0){
+                html = '<div class="search-empty"><i class="fas fa-search"></i><p>Tidak ditemukan hasil untuk "<strong>'+escapeHtml(q)+'</strong>"</p></div>';
+            }
+
+            results.innerHTML = html;
+            countEl.textContent = total + ' hasil ditemukan';
+        })
+        .catch(function(){
+            results.innerHTML = '<div class="search-empty"><i class="fas fa-exclamation-triangle"></i><p>Gagal memuat pencarian</p></div>';
+        });
+    }
+
+    window._goSearchItem = function(idx){
+        if(allItems[idx]){
+            var q = input.value.trim();
+            if(q) addRecent(q);
+            window.location.href = allItems[idx];
+        }
+    };
+
+    window.openSearch = function(){
+        overlay.classList.add('active');
+        isSearchOpen = true;
+        input.value = '';
+        results.innerHTML = '';
+        countEl.textContent = '';
+        allItems = [];
+        focusIndex = -1;
+        renderRecent();
+        history.pushState({search:true}, '');
+        setTimeout(function(){ input.focus(); },100);
+    };
+
+    window.closeSearch = function(){
+        overlay.classList.remove('active');
+        isSearchOpen = false;
+        input.value = '';
+        results.innerHTML = '';
+        countEl.textContent = '';
+        allItems = [];
+        focusIndex = -1;
+    };
+
+    overlay.addEventListener('click', function(e){
+        if(e.target === overlay){
+            closeSearch();
+            history.back();
+        }
+    });
+
+    input.addEventListener('input', function(){
+        clearTimeout(debounceTimer);
+        var v = this.value.trim();
+        debounceTimer = setTimeout(function(){ doSearch(v); }, 180);
+    });
+
+    input.addEventListener('keydown', function(e){
+        var items = results.querySelectorAll('.search-item');
+        if(!items.length) return;
+
+        if(e.key === 'ArrowDown'){
+            e.preventDefault();
+            focusIndex = Math.min(focusIndex + 1, items.length - 1);
+            updateFocus(items);
+        } else if(e.key === 'ArrowUp'){
+            e.preventDefault();
+            focusIndex = Math.max(focusIndex - 1, 0);
+            updateFocus(items);
+        } else if(e.key === 'Enter'){
+            e.preventDefault();
+            if(focusIndex >= 0 && allItems[focusIndex]){
+                var q = input.value.trim();
+                if(q) addRecent(q);
+                window.location.href = allItems[focusIndex];
+            }
+        }
+    });
+
+    function updateFocus(items){
+        items.forEach(function(it){ it.classList.remove('focused'); });
+        if(focusIndex >= 0 && items[focusIndex]){
+            items[focusIndex].classList.add('focused');
+            items[focusIndex].scrollIntoView({block:'nearest'});
+        }
+    }
+
+    document.addEventListener('keydown', function(e){
+        if((e.ctrlKey || e.metaKey) && e.key === 'k'){
+            e.preventDefault();
+            if(overlay.classList.contains('active')) closeSearch();
+            else openSearch();
+        }
+        if(e.key === 'Escape' && overlay.classList.contains('active')){
+            closeSearch();
+            history.back();
+        }
+    });
+
+    window.addEventListener('popstate', function(e){
+        if(isSearchOpen){
+            overlay.classList.remove('active');
+            isSearchOpen = false;
+            input.value = '';
+            results.innerHTML = '';
+            countEl.textContent = '';
+            allItems = [];
+            focusIndex = -1;
+        }
+    });
+
+    renderRecent();
+})();
+</script>
+
+<!-- Modal Cart -->
+<div class="modal fade" id="cartModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header cart-modal-header">
+                <h5 class="mb-0 cart-modal-title"><i class="fas fa-shopping-cart"></i> Keranjang</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body">
+                <!-- CUSTOMER (opsional, kalau kosong berarti null) -->
+                <div class="cart-customer" id="cartCustomerBox">
+                    <div class="cc-glow"></div>
+
+                    <div class="cc-head">
+                        <span class="cc-icon"><i class="fas fa-user"></i></span>
+                        <div class="cc-head-text">
+                            <div class="cc-title">Nama Customer</div>
+                            <div class="cc-sub">Opsional &mdash; kosongkan untuk pesanan tanpa nama</div>
+                        </div>
+                    </div>
+
+                    <div class="cc-body">
+                        <select id="cartCustomerSelect" class="cc-select" aria-label="Pilih customer">
+                            <option value=""></option>
+                        </select>
+                    </div>
+
+                    <div class="cc-selected" id="cartCustomerSelected" style="display:none;">
+                        <span class="cc-sel-avatar"><i class="fas fa-user-check"></i></span>
+                        <div class="cc-sel-text">
+                            <div class="cc-sel-name" id="cartCustomerName">&mdash;</div>
+                            <div class="cc-sel-phone" id="cartCustomerPhone"></div>
+                        </div>
+                    </div>
+
+                    <div class="cc-hint" id="cartCustomerEmpty">
+                        <i class="fas fa-circle-info"></i>
+                        Belum ada customer terdaftar.
+                        <a href="<?php echo BASE_URL; ?>/pages/master/master-customer.php" target="_blank" rel="noopener">Tambah di Master Customer</a>
+                    </div>
+                </div>
+
+                <div id="cart-items" class="cart-container"></div>
+            </div>
+
+            <div class="modal-footer cart-footer">
+                <!-- TOTAL -->
+                <div class="cart-total-box">
+                    <div class="total-label">
+                        <i class="fas fa-receipt me-1"></i> Total keseluruhan:
+                    </div>
+
+                    <div class="total-value">
+                        <i class="fas fa-money-bill-wave"></i>&nbsp;
+                        Rp <span id="cart-total">0</span>
+                    </div>
+                </div>
+
+                <!-- BUTTON -->
+                <button class="btn btn-checkout" onclick="checkout()">
+                    Pesan <i class="fas fa-shopping-bag ms-1"></i>
+                </button>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Detail Racikan (Combine) -->
+<div class="modal fade" id="comboDetailModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content cdm-content">
+            <div class="cdm-header">
+                <div class="cdm-head-left">
+                    <div class="cdm-head-icon"><i class="fas fa-blender"></i></div>
+                    <div class="cdm-head-text">
+                        <h5 class="cdm-title" id="cdmTitle">Racikan</h5>
+                        <div class="cdm-sub">Detail bahan racikan</div>
+                    </div>
+                </div>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Tutup"></button>
+            </div>
+            <div class="modal-body cdm-body" id="cdmBody">
+                <div class="text-center py-4"><i class="fas fa-spinner fa-spin"></i> Memuat...</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Update Overlay -->
+<div class="update-overlay" id="updateOverlay">
+    <div class="update-modal">
+        <div class="update-header">
+            <div>
+                <div class="update-icon">
+                    <i class="fas fa-rocket"></i>
+                </div>
+                <h4 id="updateTitle"></h4>
+                <div class="update-meta">
+                    <span id="updateVersion" class="update-chip"></span>
+                    <span id="updateType"></span>
+                    <span id="updateDate" class="update-chip"></span>
+                </div>
+            </div>
+            <button class="closeUpdate">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="update-body">
+            <h6 class="mb-3">
+                <i class="fas fa-sparkles me-2"></i>
+                What's New
+            </h6>
+            <div id="updateDetailList" class="mb-5"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).on("click", ".closeUpdate", function () {
+        $("#updateOverlay").fadeOut(150);
+    });
+
+    $(document).on("click", "#updateOverlay", function (e) {
+        if (e.target === this) {
+            $(this).fadeOut(150);
+        }
+    });
+
+    // Show Latest Update Details
+    function showLatestUpdate() {
+        $.get(BASE_URL + "/pages/other/update-detail.php", function(res) {
+            if (res.status != "success") {
+                QToast("Error", "Tidak dapat memuat update terbaru", "error");
+                return;
+            }
+
+            $("#updateTitle").text(res.update_name);
+            $("#updateVersion").text(res.update_version);
+            $("#updateType").html(res.badge);
+            $("#updateDate").text(res.update_date);
+
+            let html = "";
+            res.details.forEach(function(item) {
+                html += `
+                    <div class="update-item">
+                        <i class="fas fa-check-circle"></i>
+                        <div>${item.description}</div>
+                    </div>
+                `;
+            });
+
+            $("#updateDetailList").html(html);
+            $("#updateOverlay").css("display","flex").hide().fadeIn(200);
+        }, "json");
+    }
+
+    // Attach event to Whats New button
+    document.getElementById("whatsNewBtn").addEventListener("click", showLatestUpdate);
+    var mobileWnb = document.getElementById("whatsNewBtnMobile");
+    if(mobileWnb) mobileWnb.addEventListener("click", showLatestUpdate);
+</script>
+
+<?php if ($user['role'] == 'developer' || $user['role'] == 'staff kasir') { ?>
+<script>
+    // Load cart from localStorage
+    let cart = JSON.parse(localStorage.getItem('cart')) || [];
+
+    // Daftar customer untuk dropdown Select2 di keranjang
+    const CUSTOMER_LIST = <?php
+        $__cust = [];
+        $__cq = mysqli_query($conn, "SELECT id, name, phone FROM customers WHERE deleted_at IS NULL ORDER BY name ASC");
+        if ($__cq) {
+            while ($__c = mysqli_fetch_assoc($__cq)) {
+                $__cust[] = [
+                    'id'    => (int)$__c['id'],
+                    'name'  => $__c['name'],
+                    'phone' => $__c['phone'] ?: '',
+                ];
+            }
+        }
+        echo json_encode($__cust, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+    ?>;
+
+    // Customer terpilih (null = pesanan tanpa nama customer)
+    let cartCustomer = JSON.parse(localStorage.getItem('cartCustomer') || 'null');
+
+    // Bersihkan item lama yang photo-nya masih data-URI (ikon SVG versi lama).
+    // Foto produk asli adalah nama file, bukan data URI, sehingga aman dikosongkan
+    // agar template render memakai ikon open-box yang sama dengan katalog.
+    cart.forEach(item => {
+        if (item.photo && /^data:/.test(item.photo)) {
+            item.photo = '';
+        }
+    });
+
+    let cartModalInstance = null;
+
+    function openCart() {
+        if (!cartModalInstance) {
+            cartModalInstance = new bootstrap.Modal(document.getElementById('cartModal'));
+        }
+        cartModalInstance.show();
+    }
+
+    // ==========================================================
+    // CUSTOMER DI KERANJANG (opsional)
+    // ==========================================================
+
+    function escHtml(s) {
+        let d = document.createElement('div');
+        d.appendChild(document.createTextNode(String(s == null ? '' : s)));
+        return d.innerHTML;
+    }
+
+    // Bangun <option> dari CUSTOMER_LIST
+    function buildCustomerOptions(selectedId) {
+        let html = '<option value=""></option>';
+        (Array.isArray(CUSTOMER_LIST) ? CUSTOMER_LIST : []).forEach(function(c) {
+            let sel = (selectedId && String(selectedId) === String(c.id)) ? ' selected' : '';
+            html += '<option value="' + c.id + '" data-name="' + escHtml(c.name) +
+                    '" data-phone="' + escHtml(c.phone) + '"' + sel + '>' + escHtml(c.name) + '</option>';
+        });
+        return html;
+    }
+
+    // Guard: pastikan CUSTOMER_LIST selalu array valid
+    function custList() {
+        return Array.isArray(CUSTOMER_LIST) ? CUSTOMER_LIST : [];
+    }
+
+    // Tampilan kartu customer terpilih
+    function renderCartCustomer() {
+        let box     = document.getElementById('cartCustomerBox');
+        if (!box) return;
+        let picked  = document.getElementById('cartCustomerSelected');
+        let empty   = document.getElementById('cartCustomerEmpty');
+        let nameEl  = document.getElementById('cartCustomerName');
+        let phoneEl = document.getElementById('cartCustomerPhone');
+
+        if (cartCustomer) {
+            picked.style.display = 'flex';
+            nameEl.textContent = cartCustomer.name;
+            phoneEl.textContent = cartCustomer.phone || '';
+            phoneEl.style.display = cartCustomer.phone ? '' : 'none';
+        } else {
+            picked.style.display = 'none';
+            empty.style.display = (custList().length === 0) ? 'flex' : 'none';
+        }
+    }
+
+    // select2('val') mem-fired event 'change', yang memanggil setCartCustomer()
+    // lagi. Tanpa guard, pemanggilan dari kode (mis. reset setelah checkout)
+    // akan recursive sampai stack overflow sebelum renderCartCustomer() jalan.
+    let syncingCustomerSelect = false;
+
+    function setCartCustomer(id) {
+        if (syncingCustomerSelect) return;
+
+        if (!id) {
+            cartCustomer = null;
+        } else {
+            let found = custList().find(c => String(c.id) === String(id));
+            cartCustomer = found ? { id: found.id, name: found.name, phone: found.phone } : null;
+        }
+
+        try {
+            if (cartCustomer) localStorage.setItem('cartCustomer', JSON.stringify(cartCustomer));
+            else localStorage.removeItem('cartCustomer');
+        } catch (e) {}
+
+        // sinkronkan tampilan select2 (mis. setelah checkout mengosongkan cart)
+        // JANGAN pakai $(el).select2('val', ...): bridge jQuery Select2 memanggil
+        // instance[method].apply(instance, args) sehingga argumen jadi string
+        // (bukan array). Select2.prototype.val() lalu early-return saat
+        // args.length === 0, jadi nilai '' tidak pernah ter-set dan select tetap
+        // menampilkan customer lama setelah checkout. Pakai .val() jQuery biasa.
+        let el = document.getElementById('cartCustomerSelect');
+        if (el) {
+            let nextVal = cartCustomer ? String(cartCustomer.id) : '';
+            syncingCustomerSelect = true;
+            try {
+                if (typeof $ !== 'undefined' && $.fn) {
+                    $(el).val(nextVal).trigger('change');
+                } else {
+                    el.value = nextVal;
+                }
+            } finally {
+                syncingCustomerSelect = false;
+            }
+        }
+
+        renderCartCustomer();
+    }
+
+    function initCartCustomerSelect() {
+        let el = document.getElementById('cartCustomerSelect');
+        if (!el) return;
+
+        el.innerHTML = buildCustomerOptions(cartCustomer ? cartCustomer.id : '');
+
+        if (typeof $ === 'undefined' || !$.fn || !$.fn.select2) return;
+
+        let $el = $(el);
+        if ($el.hasClass('select2-hidden-accessible')) $el.select2('destroy');
+
+        $el.select2({
+            width: '100%',
+            placeholder: 'Cari / pilih nama customer...',
+            allowClear: true,
+            dropdownParent: $('#cartModal'),
+            language: {
+                noResults: function () { return 'Customer tidak ditemukan'; },
+                searching: function () { return 'Mencari...'; }
+            }
+        });
+
+        $el.on('change', function () {
+            setCartCustomer(this.value);
+        });
+    }
+
+    function addToCart(btn, id, name, price, category){
+
+        let qty = 1;
+        let input = null;
+        let isAdditional = category.toLowerCase() === 'additional';
+        let isCombo = category.toLowerCase() === 'racikan';
+
+        if (!isAdditional) {
+            input = document.getElementById('qty-' + id);
+            qty = parseInt(input.value || 0);
+
+            if(qty <= 0){
+                QToast('Tambahkan qty produk terlebih dahulu!', '', 'warning');
+                return;
+            }
+        }
+
+        let imgEl = btn.closest('.product-item')
+                        .querySelector('.product-img');
+        let img = (imgEl && imgEl.tagName === 'IMG') ? imgEl.src : '';
+
+        let existing = cart.find(item => item.id == id);
+
+        if(existing){
+            if (!isAdditional) {
+                existing.qty += qty;
+            } else {
+                QToast(name + ' sudah ditambahkan!', '', 'warning');
+                return;
+            }
+        } else {
+            cart.push({
+                id,
+                name,
+                price,
+                qty,
+                photo: img,
+                category,
+                type: isCombo ? 'combo' : 'product'
+            });
+        }
+
+        updateCart();
+
+        if (input) {
+            input.value = 0;
+        }
+
+        QToast('Ditambahkan', name+' masuk keranjang', 'success');
+    }
+
+    function updateCart() {
+        localStorage.setItem('cart', JSON.stringify(cart));
+
+        let count = cart.length;
+        let total = 0;
+        let html = '';
+
+        const cartBadge = document.getElementById('cart-count');
+
+        // form customer disembunyikan saat keranjang kosong
+        const ccBox = document.getElementById('cartCustomerBox');
+        if (ccBox) ccBox.style.display = (cart.length === 0) ? 'none' : '';
+
+        // 👉 JIKA KOSONG
+        if (cart.length === 0) {
+            html = `
+            <div class="empty-cart">
+                <div class="empty-icon">
+                    <i class="fas fa-shopping-basket"></i>
+                </div>
+
+                <h5>Keranjang kosong</h5>
+                <p>Yuk tambahkan produk ke keranjang kamu</p>
+                <a href="${BASE_URL}/pages/sales/catalog.php" class="btn btn-primary mt-2">
+                    Mulai Belanja
+                </a>
+            </div>
+            `;
+
+            document.getElementById('cart-items').innerHTML = html;
+
+            // 🔴 badge disembunyikan
+            cartBadge.innerText = 0;
+            cartBadge.classList.add('d-none');
+
+            // ❌ sembunyikan footer
+            document.querySelector('.cart-footer').style.display = 'none';
+
+            return;
+        }
+
+        // ✅ tampilkan footer
+        document.querySelector('.cart-footer').style.display = 'flex';
+
+        cart.forEach((item, index) => {
+            let subtotal = item.qty * item.price;
+
+            total += subtotal;
+
+            const thumb = item.photo
+                ? `<img src="${item.photo}" class="cart-img">`
+                : `<div class="cart-img cart-img-empty"><i class="fas fa-box-open"></i></div>`;
+
+            html += `
+                <div class="cart-card">
+
+                    <!-- LEFT -->
+                    <div class="cart-left">
+                        ${thumb}
+
+                        <div>
+                            <div class="cart-title-row">
+                                <div class="cart-title text-capitalize">${item.name}</div>
+                                ${
+                                    item.type === 'combo'
+                                    ? `<button type="button" class="combo-eye" onclick="event.stopPropagation();showComboDetail('${item.id}', ${item.qty})" title="Lihat detail racikan"><i class="fas fa-eye"></i></button>`
+                                    : ''
+                                }
+                            </div>
+
+                            <div class="cart-meta">
+                                <span class="badge-price">
+                                    Rp ${Number(item.price).toLocaleString('id-ID', {
+                                        minimumFractionDigits: 0,
+                                        maximumFractionDigits: 0
+                                    })}
+                                </span>
+
+                                <span class="badge-qty">
+                                    Qty: ${item.qty}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- CENTER -->
+                    <div class="cart-qty">
+                        ${
+                            item.category.toLowerCase() !== 'additional'
+                            ? `
+                                <button onclick="changeQty(${index}, -1)">-</button>
+                                <span>${item.qty}</span>
+                                <button onclick="changeQty(${index}, 1)">+</button>
+                            `
+                            : ''
+                        }
+                    </div>
+
+                    <!-- RIGHT -->
+                    <div class="cart-right">
+                        <div class="cart-subtotal">
+                            Rp ${subtotal.toLocaleString()}
+                        </div>
+
+                        <div class="remove-btn" onclick="removeItem(${index})">
+                            <i class="fas fa-trash"></i>
+                        </div>
+                    </div>
+
+                </div>
+            `;
+        });
+
+        // 🔥 UPDATE BADGE (TOTAL QTY)
+        cartBadge.innerText = count > 99 ? '99+' : count;
+
+        // tampilkan badge kalau ada isi
+        if (count > 0) {
+            cartBadge.classList.remove('d-none');
+        } else {
+            cartBadge.classList.add('d-none');
+        }
+
+        // render cart
+        document.getElementById('cart-items').innerHTML = html;
+        document.getElementById('cart-total').innerText = total.toLocaleString();
+    }
+
+    function changeQty(index, change) {
+        cart[index].qty += change;
+
+        if (cart[index].qty <= 0) {
+            cart.splice(index, 1);
+        }
+
+        updateCart();
+    }
+
+    function removeItem(index) {
+        cart.splice(index, 1);
+        updateCart();
+    }
+
+    // Load cart on page load
+    window.onload = function() {
+        updateCart();
+        initCartCustomerSelect();
+        renderCartCustomer();
+    };
+
+    // Checkout
+    function checkout() {
+        if (cart.length === 0) {
+            QToast('Keranjang kosong', '', 'warning');
+            return;
+        }
+
+        fetch(BASE_URL + '/pages/checkout.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                // customer_id null = pesanan tanpa nama customer
+                body: JSON.stringify({
+                    cart: cart,
+                    customer_id: cartCustomer ? cartCustomer.id : null
+                })
+            })
+            .then(res => res.json())
+            .then(res => {
+                if (res.status === 'success') {
+
+                    QToast('Berhasil!', 'Pesanan berhasil dibuat', 'success');
+
+                    const receiptUrl = BASE_URL + `/pages/receipt.php?id=${res.order_id}`;
+                    window.open(receiptUrl, '_blank');
+
+                    if (navigator.share) {
+                        navigator.share({
+                            title: 'Struk Pembelian',
+                            text: 'Berikut struk pembelian',
+                            url: receiptUrl
+                        });
+                    }
+
+                    // reset cart
+                    cart = [];
+                    cartCustomer = null;
+                    localStorage.removeItem('cart');
+                    localStorage.removeItem('cartCustomer');
+                    updateCart();
+                    setCartCustomer('');
+
+                    let modal = bootstrap.Modal.getInstance(document.getElementById('cartModal'));
+                    modal.hide();
+
+                    // kasih tahu halaman lain (mis. daftar pesanan) tanpa perlu refresh
+                    notifyOrderCreated(res.order_id);
+                    if (typeof syncStock === 'function') syncStock();
+                }
+            })
+    }
+
+    // Broadcast "ada pesanan baru" ke tab ini + tab lain.
+    // Dipakai halaman order.php & catalog.php supaya data langsung sinkron.
+    function notifyOrderCreated(orderId) {
+        // 1. omzet di navbar
+        if (typeof updateOmzet === 'function') updateOmzet();
+
+        // 2. tab ini (CustomEvent, tidak perlu cek storage event)
+        document.dispatchEvent(new CustomEvent('qieos:order-created', {
+            detail: { order_id: orderId }
+        }));
+
+        // 3. tab lain (event 'storage' hanya kena di tab LAIN, itu yang kita mau)
+        try {
+            localStorage.setItem('qieos_order_ping', String(Date.now()));
+        } catch (e) {}
+    }
+
+    // Update Omzet
+    function updateOmzet() {
+        fetch(BASE_URL + '/pages/components/data/get-omzet.php')
+            .then(res => res.json())
+            .then(data => {
+                const el = document.getElementById('omzet-today');
+
+                el.style.transform = "scale(1.2)";
+                el.style.transition = "0.2s";
+
+                setTimeout(() => {
+                    el.innerText = data.omzet.toLocaleString('id-ID');
+                    el.style.transform = "scale(1)";
+                }, 150);
+            });
+    }
+
+    // jalan tiap 30 detik (ringan untuk mobile)
+    setInterval(updateOmzet, 30000);
+
+    // pertama kali load
+    updateOmzet();
+</script>
+
+<script>
+    function animateValue(id, end, duration = 800) {
+        const obj = document.getElementById(id);
+        let startTimestamp = null;
+
+        function step(timestamp) {
+            if (!startTimestamp) startTimestamp = timestamp;
+            const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+
+            const value = Math.floor(progress * end);
+            obj.innerHTML = value.toLocaleString('id-ID');
+
+            if (progress < 1) {
+                window.requestAnimationFrame(step);
+            } else {
+                obj.innerHTML = end.toLocaleString('id-ID');
+
+                // trigger pulse
+                obj.classList.add("pulse");
+                setTimeout(() => obj.classList.remove("pulse"), 600);
+            }
+        }
+
+        window.requestAnimationFrame(step);
+    }
+
+    // dari PHP
+    let omzet = <?php echo $omzet; ?>;
+    animateValue("omzet-today", omzet, 800); // cepat & smooth
+</script>
+<?php } ?>
+
+<script>
+(function(){
+    // Screensaver di-nonaktifkan di HP kecil (hemat baterai & GPU)
+    if (window.innerWidth < 768 && window.matchMedia('(hover: none)').matches) { return; }
+
+    var userName = '<?php echo addslashes($user["fullname"] ? $user["fullname"] : $user["username"]); ?>';
+
+    var ss = document.createElement('div');
+    ss.className = 'screensaver';
+    ss.id = 'screensaver';
+    ss.innerHTML = '<div class="ss-aurora"></div><div class="ss-content"><div class="ss-clock-wrap"><div class="ss-clock-ring"></div><div class="screensaver-time" id="ssTime"></div></div><div class="screensaver-date" id="ssDate"></div><div class="screensaver-greeting">Halo, <span>'+userName+'</span></div><div class="ss-quote-divider"></div><div class="screensaver-quote" id="ssQuote"></div></div><div class="screensaver-hint">SENTUH ATAU TEKAN TOMBOL APAPUN</div>';
+    document.body.appendChild(ss);
+
+    var ssTime = document.getElementById('ssTime');
+    var ssDate = document.getElementById('ssDate');
+    var ssQuote = document.getElementById('ssQuote');
+    var timer = null;
+    var IDLE = 120000;
+    var isActive = false;
+    var clockInterval = null;
+
+    var quotes = [
+        "Kerja keras mengalahkan bakat saat bakat tidak bekerja keras.",
+        "Produktivitas bukan tentang bekerja lebih lama, tapi bekerja lebih cerdas.",
+        "Setiap detail kecil menentukan hasil akhir yang besar.",
+        "Konsistensi adalah kunci dari setiap pencapaian besar.",
+        "Jangan tunda pekerjaan yang bisa dilakukan hari ini.",
+        "Fokus pada satu hal, selesaikan dengan sempurna.",
+        "Disiplin adalah jembatan antara tujuan dan pencapaian.",
+        "Kemajuan kecil setiap hari menghasilkan perubahan besar.",
+        "Jangan takut membuat kesalahan, takutlah tidak belajar darinya.",
+        "Tim yang solid menghasilkan karya yang luar biasa.",
+        "Waktu tidak menunggu siapapun, manfaatkan setiap detiknya.",
+        "Bekerja dengan passion membuat hidup tidak terasa seperti bekerja.",
+        "Kesuksesan dimulai dari langkah kecil yang berani diambil.",
+        "Profesionalisme terlihat dari bagaimana kamu menyelesaikan masalah.",
+        "Komunikasi yang baik adalah fondasi dari tim yang sukses.",
+        "Perencanaan yang matang menghemat waktu dan tenaga.",
+        "Setiap tantangan adalah kesempatan untuk menjadi lebih baik.",
+        "Hasil tidak pernah berbohong tentang usaha yang telah dilakukan.",
+        "Pekerjaan yang ditunda hanya menumpuk menjadi masalah.",
+        "Kolaborasi yang baik menghasilkan ide yang revolusioner.",
+        "Jadilah solusi, bukan bagian dari masalah.",
+        "Kualitas pekerjaan mencerminkan karakter seseorang.",
+        "Jangan bandingkan kemajuanmu dengan orang lain.",
+        "Investasi terbaik adalah investasi pada diri sendiri.",
+        "Pikiran yang tenang menghasilkan keputusan yang tepat."
+    ];
+
+    var dayNames = ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabit'];
+    var monthNames = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+
+    function updateClock(){
+        var now = new Date();
+        var h = String(now.getHours()).padStart(2,'0');
+        var m = String(now.getMinutes()).padStart(2,'0');
+        var s = String(now.getSeconds()).padStart(2,'0');
+        ssTime.innerHTML = h+'<span class="ss-time-colon">:</span>'+m+'<span class="ss-time-colon">:</span>'+s;
+        ssDate.textContent = dayNames[now.getDay()]+', '+now.getDate()+' '+monthNames[now.getMonth()]+' '+now.getFullYear();
+    }
+
+    function showSS(){
+        if(isActive) return;
+        isActive = true;
+        ssQuote.textContent = quotes[Math.floor(Math.random()*quotes.length)];
+        updateClock();
+        clockInterval = setInterval(updateClock, 1000);
+        ss.classList.add('active');
+    }
+
+    function hideSS(){
+        if(!isActive) return;
+        isActive = false;
+        ss.classList.remove('active');
+        if(clockInterval){ clearInterval(clockInterval); clockInterval = null; }
+        resetTimer();
+    }
+
+    function resetTimer(){
+        clearTimeout(timer);
+        timer = setTimeout(showSS, IDLE);
+    }
+
+    var events = ['mousemove','mousedown','keydown','scroll','touchstart','touchmove','click','resize'];
+    events.forEach(function(evt){
+        document.addEventListener(evt, function(){
+            if(isActive) hideSS();
+            else resetTimer();
+        }, {passive:true});
+    });
+
+    updateClock();
+    resetTimer();
+})();
+</script>
+
+<!-- STOCK NOTIFICATION: Dropdown + Toast -->
+<div class="stock-notif-dropdown" id="stockNotifDropdown" aria-hidden="true">
+    <div class="snd-header">
+        <div class="snd-header-left">
+            <span class="snd-header-icon"><i class="fas fa-boxes-stacked"></i></span>
+            <div>
+                <div class="snd-title">Notifikasi Stok</div>
+                <div class="snd-subtitle" id="sndSubtitle">Memuat...</div>
+            </div>
+        </div>
+        <span class="snd-count" id="sndCount">0</span>
+    </div>
+    <div class="snd-body" id="sndBody">
+        <div class="snd-loading"><span class="snd-spinner"></span> Memuat data stok...</div>
+    </div>
+</div>
+
+<div class="stock-alert" id="stockToast" aria-hidden="true">
+    <div class="sta-icon"><i class="fas fa-triangle-exclamation"></i></div>
+    <div class="sta-track"><div class="sta-runner" id="stockToastText"></div></div>
+    <button type="button" class="sta-close" id="stockToastClose" aria-label="Tutup"><i class="fas fa-times"></i></button>
+</div>
+
+<script>
+(function(){
+    var btns = document.querySelectorAll('.stock-notif-btn');
+    var dropdown = document.getElementById('stockNotifDropdown');
+    var sndSubtitle = document.getElementById('sndSubtitle');
+    var sndCount = document.getElementById('sndCount');
+    var sndBody = document.getElementById('sndBody');
+    var toast = document.getElementById('stockToast');
+    var toastText = document.getElementById('stockToastText');
+    var toastTimer = null;
+    var dismissedUntil = 0;
+    var activeBtn = null;
+
+    var roleLabel = '<?php echo $user['role'] === 'staff kasir' ? 'Stok kantin menipis/ habis' : 'Stok gudang menipis/ habis'; ?>';
+
+    function escapeHtml(t){
+        var d = document.createElement('div');
+        d.appendChild(document.createTextNode(t));
+        return d.innerHTML;
+    }
+
+    function fetchStock(cb){
+        fetch('<?php echo BASE_URL; ?>/pages/components/data/stock-notification-api.php', { cache: 'no-store' })
+        .then(function(r){ return r.json(); })
+        .then(function(data){ if(data.status === 'success') cb(data.items); })
+        .catch(function(){});
+    }
+
+    function renderList(items){
+        if(!items.length){
+            sndBody.innerHTML = '<div class="snd-empty"><i class="fas fa-circle-check"></i><div>Semua stok aman</div></div>';
+            return;
+        }
+        var html = '';
+        items.forEach(function(it){
+            var st = it.status === 'habis'
+                ? '<span class="snd-st st-habis"><i class="fas fa-circle-xmark"></i> Habis</span>'
+                : '<span class="snd-st st-menipis"><i class="fas fa-triangle-exclamation"></i> Menipis</span>';
+            html += '<div class="snd-item">'
+                + '<div class="snd-item-icon"><i class="fas fa-cube"></i></div>'
+                + '<div class="snd-item-info">'
+                + '<div class="snd-item-name">' + escapeHtml(it.name) + '</div>'
+                + '<div class="snd-item-meta">' + escapeHtml(it.code) + ' &middot; sisa ' + it.stock + ' / min ' + it.low_stock + '</div>'
+                + '</div>'
+                + st
+                + '</div>';
+        });
+        sndBody.innerHTML = html;
+    }
+
+    function buildAlertText(items){
+        var habis = items.filter(function(i){ return i.status === 'habis'; });
+        var menipis = items.filter(function(i){ return i.status === 'menipis'; });
+        var seg = [];
+        if(habis.length){
+            seg.push('<span class="sta-badge"><i class="fas fa-circle-xmark"></i> <b>' + habis.length + ' produk habis</b></span> ' + habis.map(function(i){ return '<span class="sta-prod">' + escapeHtml(i.name) + '</span> (sisa ' + i.stock + ')'; }).join(' &nbsp;&bull;&nbsp; '));
+        }
+        if(menipis.length){
+            seg.push('<span class="sta-badge"><i class="fas fa-triangle-exclamation"></i> <b>' + menipis.length + ' produk menipis</b></span> ' + menipis.map(function(i){ return '<span class="sta-prod">' + escapeHtml(i.name) + '</span> (sisa ' + i.stock + ')'; }).join(' &nbsp;&bull;&nbsp; '));
+        }
+        return seg.join(' &nbsp;&nbsp;&nbsp; ');
+    }
+
+    function showToast(items){
+        if(!items || !items.length){ hideToast(); return; }
+        if(Date.now() < dismissedUntil) return;
+        var txt = buildAlertText(items);
+        toastText.innerHTML = '<span class="sta-msg">' + txt + '</span><span class="sta-msg">' + txt + '</span>';
+        toast.classList.add('show');
+        toast.setAttribute('aria-hidden', 'false');
+        if(toastTimer){ clearTimeout(toastTimer); toastTimer = null; }
+    }
+
+    function hideToast(){
+        toast.classList.remove('show');
+        toast.setAttribute('aria-hidden', 'true');
+        if(toastTimer){ clearTimeout(toastTimer); toastTimer = null; }
+        try{
+            var mc = document.querySelector('main.content');
+            if(mc) mc.classList.remove('has-stock-alert');
+        }catch(e){}
+    }
+
+    function update(items){
+        var count = items.length;
+        try{
+            var mc = document.querySelector('main.content');
+            if(mc) mc.classList.toggle('has-stock-alert', count > 0);
+        }catch(e){}
+        if(count > 0){
+            document.querySelectorAll('.stock-notif-badge').forEach(function(b){
+                b.textContent = count > 99 ? '99+' : count;
+                b.classList.remove('d-none');
+            });
+            document.querySelectorAll('.stock-notif-ring').forEach(function(r){
+                r.classList.remove('d-none');
+            });
+            btns.forEach(function(b){ b.classList.add('has-critical'); });
+            showToast(items);
+        } else {
+            document.querySelectorAll('.stock-notif-badge').forEach(function(b){
+                b.classList.add('d-none');
+            });
+            document.querySelectorAll('.stock-notif-ring').forEach(function(r){
+                r.classList.add('d-none');
+            });
+            btns.forEach(function(b){ b.classList.remove('has-critical'); });
+            hideToast();
+        }
+
+        sndSubtitle.textContent = roleLabel;
+        sndCount.textContent = count;
+        renderList(items);
+    }
+
+    document.getElementById('stockToastClose').addEventListener('click', function(){
+        dismissedUntil = Date.now() + 10 * 60 * 1000;
+        hideToast();
+    });
+
+    function setDropdownPos(btn){
+        var r = btn.getBoundingClientRect();
+        var w = Math.min(400, window.innerWidth - 24);
+        var left = r.left + r.width / 2 - w / 2;
+        left = Math.max(12, Math.min(left, window.innerWidth - w - 12));
+        var arrowX = r.left + r.width / 2 - left;
+        arrowX = Math.max(16, Math.min(arrowX, w - 16));
+        dropdown.style.width = w + 'px';
+        dropdown.style.left = left + 'px';
+        dropdown.style.top = (r.bottom + 12) + 'px';
+        dropdown.style.setProperty('--arrow-x', arrowX + 'px');
+    }
+
+    function closeDropdown(){
+        dropdown.classList.remove('open');
+        dropdown.setAttribute('aria-hidden', 'true');
+        activeBtn = null;
+    }
+
+    btns.forEach(function(btn){
+        btn.addEventListener('click', function(e){
+            e.stopPropagation();
+            var willOpen = !dropdown.classList.contains('open');
+            if(willOpen){
+                activeBtn = btn;
+                setDropdownPos(btn);
+                dropdown.classList.add('open');
+            } else {
+                closeDropdown();
+            }
+            dropdown.setAttribute('aria-hidden', willOpen ? 'false' : 'true');
+        });
+    });
+
+    window.addEventListener('resize', function(){
+        if(dropdown.classList.contains('open') && activeBtn) setDropdownPos(activeBtn);
+    });
+
+    document.addEventListener('scroll', function(){
+        if(dropdown.classList.contains('open')) closeDropdown();
+    }, true);
+
+    document.addEventListener('click', function(e){
+        if(dropdown.classList.contains('open')){
+            var hit = dropdown.contains(e.target);
+            btns.forEach(function(b){ if(b.contains(e.target)) hit = true; });
+            if(!hit) closeDropdown();
+        }
+    });
+
+    document.addEventListener('keydown', function(e){
+        if(e.key === 'Escape' && dropdown.classList.contains('open')){
+            closeDropdown();
+        }
+    });
+
+    fetchStock(update);
+    setInterval(function(){ fetchStock(update); }, 120000);
+})();
+</script>
+
+<script>
+// ==========================================================
+// DETAIL RACIKAN (combine) — dipakai katalog, keranjang,
+// dan modal detail pesanan. Modal + fungsi global di navbar
+// supaya tidak diduplikasi di tiap halaman.
+// ==========================================================
+(function(){
+    var comboDetailModalInstance = null;
+
+    function comboEsc(s){
+        var d = document.createElement('div');
+        d.appendChild(document.createTextNode(String(s == null ? '' : s)));
+        return d.innerHTML;
+    }
+
+    window.showComboDetail = function(id, qty){
+        var modalEl = document.getElementById('comboDetailModal');
+        if(!modalEl || typeof bootstrap === 'undefined') return;
+
+        // Modal ini berada di dalam <main>, sedangkan modal halaman (mis.
+        // detail pesanan) berada di body. Pindahkan ke body sekali supaya
+        // racikan selalu tampil DI ATAS modal yang sedang terbuka.
+        if(modalEl.parentNode !== document.body){
+            document.body.appendChild(modalEl);
+        }
+
+        if(!comboDetailModalInstance){
+            comboDetailModalInstance = new bootstrap.Modal(modalEl);
+        }
+
+        var mult = parseInt(qty, 10);
+        if(!mult || mult < 1) mult = 1;
+
+        var body  = document.getElementById('cdmBody');
+        var title = document.getElementById('cdmTitle');
+        title.textContent = 'Racikan';
+        body.innerHTML = '<div class="text-center py-4"><i class="fas fa-spinner fa-spin"></i> Memuat...</div>';
+        comboDetailModalInstance.show();
+
+        fetch(BASE_URL + '/pages/sales/combo-detail.php?id=' + encodeURIComponent(id), { cache: 'no-store' })
+            .then(function(r){ return r.json(); })
+            .then(function(data){
+                if(data.status !== 'success'){
+                    body.innerHTML = '<div class="cdm-error"><i class="fas fa-exclamation-triangle"></i> ' + comboEsc(data.message) + '</div>';
+                    return;
+                }
+
+                title.textContent = data.combo.name;
+
+                if(!data.items.length){
+                    body.innerHTML = '<div class="cdm-empty"><i class="fas fa-box-open"></i><div>Racikan ini belum punya bahan.</div></div>';
+                    return;
+                }
+
+                var html = '<div class="cdm-recipe">';
+                data.items.forEach(function(it, i){
+                    var thumb = it.photo
+                        ? '<img src="' + BASE_URL + '/assets/img/products/' + encodeURIComponent(it.photo) + '" class="cdm-thumb" alt="">'
+                        : '<span class="cdm-thumb cdm-thumb-ph"><i class="fas fa-box"></i></span>';
+                    html += '<div class="cdm-row">'
+                        + '<span class="cdm-seq">' + (i + 1) + '</span>'
+                        + '<span class="cdm-product">' + thumb
+                        + '<span class="cdm-name">' + comboEsc(it.product_name)
+                        + (it.code ? '<small>' + comboEsc(it.code) + '</small>' : '') + '</span></span>'
+                        + '<span class="cdm-qty">&times;' + mult + '</span>'
+                        + '<span class="cdm-price">Rp ' + Number(it.price).toLocaleString('id-ID') + '</span>'
+                        + '</div>';
+                });
+                html += '</div>';
+                html += '<div class="cdm-total"><span><i class="fas fa-coins"></i> Harga per racikan</span>'
+                     + '<strong>Rp ' + Number(data.total).toLocaleString('id-ID') + '</strong></div>';
+                body.innerHTML = html;
+            })
+            .catch(function(){
+                body.innerHTML = '<div class="cdm-error"><i class="fas fa-exclamation-triangle"></i> Terjadi kesalahan memuat data.</div>';
+            });
+    };
+})();
+</script>

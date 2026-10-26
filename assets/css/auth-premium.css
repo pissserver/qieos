@@ -1,0 +1,2063 @@
+﻿/* ============================================
+   PREMIUM AUTH STYLES v2.0 - QIEOS
+   Glassmorphism, Micro-interactions & Fully Responsive
+   ============================================ */
+
+:root {
+    --primary-50: #f0f5ff;
+    --primary-100: #e0eafe;
+    --primary-500: #6366f1;
+    --primary-600: #4f46e5;
+    --primary-700: #4338ca;
+    
+    --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e1b4b 35%, #311042 70%, #0f172a 100%);
+    --card-bg: rgba(255, 255, 255, 0.85);
+    --card-bg-dark: rgba(15, 23, 42, 0.75);
+    
+    --glass-border: rgba(255, 255, 255, 0.25);
+    --glass-shadow: 0 20px 50px rgba(0, 0, 0, 0.3), 0 0 30px rgba(99, 102, 241, 0.15);
+    
+    --radius-sm: 10px;
+    --radius-md: 16px;
+    --radius-lg: 24px;
+    
+    --transition-fast: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-smooth: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    --transition-bounce: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* Base Body Layout */
+body.auth-container {
+    min-height: 100vh;
+    min-height: 100dvh;
+    margin: 0;
+    padding: 0;
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    background: var(--bg-gradient);
+    background-size: 300% 300%;
+    animation: gradientShift 18s ease infinite;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow-x: hidden;
+    color: #1e293b;
+}
+
+@keyframes gradientShift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+/* Background Ambient Glow Orbs */
+.auth-shapes {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+    z-index: 0;
+    pointer-events: none;
+}
+
+.shape {
+    position: absolute;
+    filter: blur(80px);
+    border-radius: 50%;
+    opacity: 0.45;
+    animation: orbFloat 22s infinite ease-in-out;
+}
+
+.shape:nth-child(1) {
+    top: -10%;
+    left: -10%;
+    width: 450px;
+    height: 450px;
+    background: #6366f1;
+    animation-delay: 0s;
+}
+
+.shape:nth-child(2) {
+    bottom: -10%;
+    right: -10%;
+    width: 500px;
+    height: 500px;
+    background: #ec4899;
+    animation-delay: -5s;
+}
+
+.shape:nth-child(3) {
+    top: 40%;
+    left: 60%;
+    width: 350px;
+    height: 350px;
+    background: #8b5cf6;
+    animation-delay: -10s;
+}
+
+.shape:nth-child(4) {
+    bottom: 20%;
+    left: 10%;
+    width: 300px;
+    height: 300px;
+    background: #06b6d4;
+    animation-delay: -15s;
+}
+
+.shape:nth-child(5) {
+    top: 20%;
+    right: 20%;
+    width: 250px;
+    height: 250px;
+    background: #f59e0b;
+    animation-delay: -8s;
+}
+
+@keyframes orbFloat {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    25% { transform: translate(40px, -50px) scale(1.1); }
+    50% { transform: translate(-30px, 40px) scale(0.95); }
+    75% { transform: translate(50px, 20px) scale(1.05); }
+}
+
+/* Particle Canvas Effect */
+.particle {
+    position: fixed;
+    width: 4px;
+    height: 4px;
+    background: rgba(255, 255, 255, 0.4);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 1;
+    animation: particleUp 8s linear infinite;
+}
+
+@keyframes particleUp {
+    0% {
+        opacity: 0;
+        transform: translateY(100vh) scale(0);
+    }
+    20% { opacity: 0.8; }
+    80% { opacity: 0.8; }
+    100% {
+        opacity: 0;
+        transform: translateY(-10vh) scale(1.5);
+    }
+}
+
+/* Card Wrapper Centering */
+.auth-card-wrapper {
+    position: relative;
+    z-index: 10;
+    width: 100%;
+    max-width: 460px;
+    padding: 1.5rem;
+    margin: auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    box-sizing: border-box;
+}
+
+/* Main Glass Card */
+.auth-card {
+    background: rgba(255, 255, 255, 0.88);
+    backdrop-filter: blur(24px) saturate(180%);
+    -webkit-backdrop-filter: blur(24px) saturate(180%);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--glass-shadow);
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    padding: 2.5rem 2.25rem;
+    position: relative;
+    overflow: hidden;
+    animation: cardEntrance 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    transition: var(--transition-smooth);
+}
+
+@keyframes cardEntrance {
+    0% {
+        opacity: 0;
+        transform: translateY(40px) scale(0.96);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* Top Glow Line */
+.auth-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #6366f1, #a855f7, #ec4899, #6366f1);
+    background-size: 200% 100%;
+    animation: topGlow 4s linear infinite;
+}
+
+@keyframes topGlow {
+    0% { background-position: 0% 0%; }
+    100% { background-position: 200% 0%; }
+}
+
+/* Back Link Button */
+.auth-back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #475569;
+    text-decoration: none;
+    font-size: 0.875rem;
+    font-weight: 600;
+    padding: 0.5rem 1rem;
+    border-radius: var(--radius-sm);
+    background: rgba(241, 245, 249, 0.8);
+    border: 1px solid rgba(226, 232, 240, 0.8);
+    transition: var(--transition-fast);
+    margin-bottom: 1.5rem;
+}
+
+.auth-back-link:hover {
+    color: var(--primary-600);
+    background: #ffffff;
+    transform: translateX(-4px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+/* Logo Styling */
+.auth-logo {
+    display: block;
+    margin: 0 auto 1.5rem;
+    max-width: 180px;
+    height: auto;
+    transition: var(--transition-bounce);
+    filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.06));
+}
+
+.auth-logo:hover {
+    transform: scale(1.06) rotate(-1.5deg);
+}
+
+/* Title Block */
+.auth-title-wrap {
+    text-align: center;
+    margin-bottom: 1.75rem;
+}
+
+.auth-title {
+    font-size: 1.85rem;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    margin: 0 0 0.35rem;
+    background: linear-gradient(135deg, #0f172a 0%, #312e81 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.auth-subtitle {
+    font-size: 0.925rem;
+    color: #64748b;
+    margin: 0;
+    font-weight: 500;
+}
+
+.auth-title-underline {
+    width: 45px;
+    height: 4px;
+    border-radius: 10px;
+    background: linear-gradient(90deg, #6366f1, #a855f7);
+    margin: 0.85rem auto 0;
+    transition: var(--transition-smooth);
+}
+
+.auth-card:hover .auth-title-underline {
+    width: 70px;
+}
+
+/* Alerts Styling */
+.auth-alert {
+    padding: 0.875rem 1.15rem;
+    border-radius: var(--radius-md);
+    margin-bottom: 1.5rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    animation: alertSlide 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.04);
+}
+
+@keyframes alertSlide {
+    0% { opacity: 0; transform: translateY(-10px); }
+    100% { opacity: 1; transform: translateY(0); }
+}
+
+.auth-alert-success {
+    background: #ecfdf5;
+    color: #047857;
+    border: 1px solid #a7f3d0;
+}
+
+.auth-alert-danger {
+    background: #fef2f2;
+    color: #b91c1c;
+    border: 1px solid #fecaca;
+}
+
+/* Form Layout */
+.auth-form-group {
+    margin-bottom: 1.25rem;
+    position: relative;
+}
+
+.auth-label {
+    display: block;
+    margin-bottom: 0.4rem;
+    font-weight: 600;
+    font-size: 0.85rem;
+    color: #334155;
+    letter-spacing: 0.01em;
+}
+
+/* Input Wrappers */
+.auth-input-group {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.auth-input-icon {
+    position: absolute;
+    left: 1rem;
+    color: #94a3b8;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+    transition: var(--transition-fast);
+    z-index: 5;
+}
+
+.auth-input-icon svg {
+    width: 1.15rem;
+    height: 1.15rem;
+}
+
+/* Inputs */
+.auth-input {
+    width: 100%;
+    padding: 0.825rem 1rem 0.825rem 2.85rem;
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: #0f172a;
+    background: #f8fafc;
+    border: 1.5px solid #e2e8f0;
+    border-radius: var(--radius-md);
+    outline: none;
+    transition: var(--transition-fast);
+    box-sizing: border-box;
+}
+
+.auth-input::placeholder {
+    color: #94a3b8;
+    font-weight: 400;
+}
+
+.auth-input:hover {
+    background: #ffffff;
+    border-color: #cbd5e1;
+}
+
+.auth-input:focus {
+    background: #ffffff;
+    border-color: var(--primary-500);
+    box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.15);
+}
+
+.auth-input:focus + .auth-input-icon,
+.auth-input-group:focus-within .auth-input-icon {
+    color: var(--primary-600);
+    transform: scale(1.1);
+}
+
+/* Password Toggle Eye Icon */
+.auth-password-toggle {
+    position: absolute;
+    right: 0.85rem;
+    background: transparent;
+    border: none;
+    color: #94a3b8;
+    padding: 0.4rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: var(--transition-fast);
+    z-index: 5;
+}
+
+.auth-password-toggle:hover {
+    color: var(--primary-600);
+    background: #f1f5f9;
+}
+
+/* Password Strength Bar */
+.password-strength {
+    height: 5px;
+    background: #e2e8f0;
+    border-radius: 10px;
+    margin-top: 0.5rem;
+    overflow: hidden;
+    position: relative;
+}
+
+.password-strength-fill {
+    height: 100%;
+    width: 0%;
+    border-radius: 10px;
+    transition: width 0.35s ease, background-color 0.35s ease;
+}
+
+/* Checkbox & Links Row */
+.auth-checkbox-wrapper {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    cursor: pointer;
+    font-size: 0.875rem;
+    color: #475569;
+    font-weight: 500;
+    user-select: none;
+}
+
+.auth-checkbox {
+    width: 1.15rem;
+    height: 1.15rem;
+    border-radius: 6px;
+    border: 1.5px solid #cbd5e1;
+    appearance: none;
+    outline: none;
+    cursor: pointer;
+    background: #f8fafc;
+    transition: var(--transition-fast);
+    position: relative;
+    margin: 0;
+}
+
+.auth-checkbox:checked {
+    background: var(--primary-600);
+    border-color: var(--primary-600);
+}
+
+.auth-checkbox:checked::after {
+    content: '';
+    position: absolute;
+    top: 45%;
+    left: 50%;
+    width: 4px;
+    height: 8px;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: translate(-50%, -50%) rotate(45deg);
+}
+
+.auth-link {
+    color: var(--primary-600);
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.875rem;
+    transition: var(--transition-fast);
+}
+
+.auth-link:hover {
+    color: var(--primary-700);
+    text-decoration: underline;
+}
+
+/* Primary Button */
+.auth-btn {
+    width: 100%;
+    padding: 0.875rem 1.5rem;
+    border-radius: var(--radius-md);
+    border: none;
+    font-size: 0.975rem;
+    font-weight: 700;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    transition: var(--transition-smooth);
+    position: relative;
+    overflow: hidden;
+}
+
+.auth-btn:disabled,
+.auth-btn[disabled] {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
+    box-shadow: none !important;
+    transform: none !important;
+}
+
+.auth-btn-primary {
+    background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+    color: #ffffff;
+    box-shadow: 0 8px 20px rgba(79, 70, 229, 0.35);
+}
+
+.auth-btn-primary:hover {
+    background: linear-gradient(135deg, #4f46e5 0%, #4338ca 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 12px 25px rgba(79, 70, 229, 0.45);
+}
+
+.auth-btn-primary:active {
+    transform: translateY(0);
+    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.25);
+}
+
+/* Button Loading State */
+.auth-btn-loading {
+    pointer-events: none;
+    opacity: 0.85;
+}
+
+.auth-loading-spinner {
+    width: 1.25rem;
+    height: 1.25rem;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-top-color: #ffffff;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+    100% { transform: rotate(360deg); }
+}
+
+/* Footer Section */
+.auth-footer {
+    margin-top: 1.75rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid rgba(226, 232, 240, 0.8);
+    text-align: center;
+}
+
+.auth-footer-text {
+    font-size: 0.875rem;
+    color: #64748b;
+    margin: 0;
+}
+
+/* Helper Flex Utility */
+.d-flex { display: flex; }
+.justify-content-between { justify-content: space-between; }
+.align-items-center { align-items: center; }
+.text-muted { color: #64748b; }
+.small { font-size: 0.775rem; }
+.mt-1 { margin-top: 0.25rem; }
+
+/* Mobile & Touch Responsive Optimization */
+@media (max-width: 520px) {
+    .auth-card-wrapper {
+        padding: 1rem;
+    }
+    
+    .auth-card {
+        padding: 2rem 1.35rem;
+        border-radius: var(--radius-md);
+    }
+    
+    .auth-title {
+        font-size: 1.55rem;
+    }
+
+    .auth-logo {
+        max-width: 150px;
+    }
+
+    .auth-input {
+        padding-top: 0.75rem;
+        padding-bottom: 0.75rem;
+        font-size: 0.9rem;
+    }
+    
+    .shape {
+        filter: blur(60px);
+        opacity: 0.35;
+    }
+}
+
+@media (max-height: 680px) {
+    .auth-card-wrapper {
+        padding-top: 1rem;
+        padding-bottom: 1rem;
+    }
+    .auth-logo {
+        margin-bottom: 1rem;
+    }
+    .auth-title-wrap {
+        margin-bottom: 1.25rem;
+    }
+}
+
+/* ============================================
+   LOGIN SUCCESS OVERLAY ANIMATION
+   ============================================ */
+.login-success-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 99999;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 35%, #311042 70%, #0f172a 100%);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.5s ease, visibility 0.5s ease;
+}
+
+.login-success-overlay.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* Ambient glow behind circle */
+.login-success-overlay::before {
+    content: '';
+    position: absolute;
+    width: 300px;
+    height: 300px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(99,102,241,0.2) 0%, transparent 70%);
+    opacity: 0;
+    transition: opacity 0.8s ease 0.2s;
+}
+.login-success-overlay.active::before { opacity: 1; }
+
+/* Success checkmark circle */
+.login-success-circle {
+    width: 90px;
+    height: 90px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #22c55e, #16a34a);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 0 50px rgba(34,197,94,0.35), 0 0 100px rgba(34,197,94,0.1);
+    transform: scale(0);
+    opacity: 0;
+    margin-bottom: 2rem;
+}
+
+.login-success-overlay.active .login-success-circle {
+    animation: successCircleBounce 0.6s cubic-bezier(0.34,1.56,0.64,1) 0.4s forwards;
+}
+
+.login-success-check {
+    stroke-dasharray: 50;
+    stroke-dashoffset: 50;
+    stroke: #fff;
+    stroke-width: 3;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    fill: none;
+}
+
+.login-success-overlay.active .login-success-check {
+    animation: checkDraw 0.5s ease 0.85s forwards;
+}
+
+/* Ripple rings */
+.login-success-ripple {
+    position: absolute;
+    width: 90px;
+    height: 90px;
+    border-radius: 50%;
+    border: 2px solid rgba(34,197,94,0.35);
+    opacity: 0;
+}
+.login-success-overlay.active .login-success-ripple:nth-child(1) {
+    animation: rippleOut 1s ease 0.6s forwards;
+}
+.login-success-overlay.active .login-success-ripple:nth-child(2) {
+    animation: rippleOut 1s ease 0.85s forwards;
+}
+.login-success-overlay.active .login-success-ripple:nth-child(3) {
+    animation: rippleOut 1s ease 1.1s forwards;
+}
+
+/* Welcome text */
+.login-welcome-name {
+    color: #f8fafc;
+    font-size: 1.6rem;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    opacity: 0;
+    transform: translateY(16px);
+    text-align: center;
+    margin-bottom: 4px;
+}
+.login-success-overlay.active .login-welcome-name {
+    animation: fadeSlideUp 0.5s ease 1.3s forwards;
+}
+
+.login-welcome-sub {
+    color: #94a3b8;
+    font-size: 0.9rem;
+    font-weight: 500;
+    opacity: 0;
+    transform: translateY(12px);
+    text-align: center;
+}
+.login-success-overlay.active .login-welcome-sub {
+    animation: fadeSlideUp 0.5s ease 1.55s forwards;
+}
+
+/* Loading dots */
+.login-loading-dots {
+    display: flex;
+    gap: 6px;
+    margin-top: 1.8rem;
+    opacity: 0;
+}
+.login-success-overlay.active .login-loading-dots {
+    animation: fadeSlideUp 0.3s ease 2s forwards;
+}
+.login-loading-dots span {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #6e7191;
+    animation: dotPulse 1.2s ease-in-out infinite;
+}
+.login-loading-dots span:nth-child(2) { animation-delay: 0.15s; }
+.login-loading-dots span:nth-child(3) { animation-delay: 0.3s; }
+
+/* Progress bar at bottom */
+.login-progress-bar {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #22c55e, #4ade80, #86efac);
+    border-radius: 0 4px 4px 0;
+    width: 0;
+}
+.login-success-overlay.active .login-progress-bar {
+    animation: progressFill 2.8s ease 0.3s forwards;
+}
+
+/* Card exit */
+.auth-card-wrapper.login-exit {
+    animation: cardExit 0.4s cubic-bezier(0.4,0,0.2,1) forwards;
+}
+
+/* Keyframes */
+@keyframes successCircleBounce {
+    0% { transform: scale(0); opacity: 0; }
+    50% { opacity: 1; }
+    100% { transform: scale(1); opacity: 1; }
+}
+@keyframes checkDraw { to { stroke-dashoffset: 0; } }
+@keyframes fadeSlideUp { to { opacity: 1; transform: translateY(0); } }
+@keyframes rippleOut {
+    0% { transform: scale(1); opacity: 0.5; }
+    100% { transform: scale(2.8); opacity: 0; }
+}
+@keyframes dotPulse {
+    0%, 100% { transform: scale(1); opacity: 0.4; }
+    50% { transform: scale(1.4); opacity: 1; }
+}
+@keyframes progressFill { to { width: 100%; } }
+@keyframes cardExit {
+    0% { opacity: 1; transform: scale(1); }
+    100% { opacity: 0; transform: scale(0.93); filter: blur(6px); }
+}
+
+/* ============================================
+   LOGIN FAILED OVERLAY
+   ============================================ */
+.login-fail-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 99999;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #1a0a0a 0%, #2d1015 35%, #3b1018 70%, #1a0a0a 100%);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.5s ease, visibility 0.5s ease;
+}
+.login-fail-overlay.active {
+    opacity: 1;
+    visibility: visible;
+}
+.login-fail-overlay::before {
+    content: '';
+    position: absolute;
+    width: 300px;
+    height: 300px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(239,68,68,0.15) 0%, transparent 70%);
+    opacity: 0;
+    transition: opacity 0.8s ease 0.2s;
+}
+.login-fail-overlay.active::before {
+    opacity: 1;
+}
+
+/* Fail circle */
+.login-fail-circle {
+    width: 90px;
+    height: 90px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 0 50px rgba(239,68,68,0.35), 0 0 100px rgba(239,68,68,0.1);
+    transform: scale(0);
+    opacity: 0;
+    margin-bottom: 2rem;
+}
+.login-fail-overlay.active .login-fail-circle {
+    animation: failBounce 0.55s cubic-bezier(0.34,1.56,0.64,1) 0.35s forwards;
+}
+
+.login-fail-x {
+    stroke: #fff;
+    stroke-width: 3;
+    stroke-linecap: round;
+    fill: none;
+    stroke-dasharray: 30;
+    stroke-dashoffset: 30;
+}
+.login-fail-x.x2 {
+    stroke-dasharray: 30;
+    stroke-dashoffset: 30;
+}
+.login-fail-overlay.active .login-fail-x {
+    animation: xDraw 0.4s ease 0.8s forwards;
+}
+.login-fail-overlay.active .login-fail-x.x2 {
+    animation: xDraw 0.4s ease 1s forwards;
+}
+
+/* Ripple */
+.login-fail-ripple {
+    position: absolute;
+    width: 90px;
+    height: 90px;
+    border-radius: 50%;
+    border: 2px solid rgba(239,68,68,0.3);
+    opacity: 0;
+}
+.login-fail-overlay.active .login-fail-ripple:nth-child(1) {
+    animation: rippleOut 0.9s ease 0.5s forwards;
+}
+.login-fail-overlay.active .login-fail-ripple:nth-child(2) {
+    animation: rippleOut 0.9s ease 0.75s forwards;
+}
+.login-fail-overlay.active .login-fail-ripple:nth-child(3) {
+    animation: rippleOut 0.9s ease 1s forwards;
+}
+
+/* Fail text */
+.login-fail-name {
+    color: #ffe4e6;
+    text-shadow: 0 2px 5px rgba(69, 10, 10, 0.75);
+    font-size: 1.6rem;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    opacity: 0;
+    transform: translateY(16px);
+    text-align: center;
+    margin-bottom: 4px;
+}
+.login-fail-overlay.active .login-fail-name {
+    animation: fadeSlideUp 0.5s ease 1.3s forwards;
+}
+
+.login-fail-sub {
+    color: #fecdd3;
+    text-shadow: 0 1px 4px rgba(60, 10, 10, 0.6);
+    font-size: 0.9rem;
+    font-weight: 500;
+    opacity: 0;
+    transform: translateY(12px);
+    text-align: center;
+}
+.login-fail-overlay.active .login-fail-sub {
+    animation: fadeSlideUp 0.5s ease 1.5s forwards;
+}
+
+.login-fail-dismiss {
+    margin-top: 1.8rem;
+    font-size: 0.78rem;
+    color: rgba(255, 228, 230, 0.72);
+    text-shadow: 0 1px 4px rgba(60, 10, 10, 0.5);
+    font-weight: 500;
+    opacity: 0;
+}
+.login-fail-overlay.active .login-fail-dismiss {
+    animation: fadeSlideUp 0.3s ease 2s forwards;
+}
+
+/* Fail keyframes */
+@keyframes failBounce {
+    0% { transform: scale(0); opacity: 0; }
+    50% { opacity: 1; }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes xDraw {
+    to { stroke-dashoffset: 0; }
+}
+
+@keyframes failShake {
+    0%, 100% { transform: translateX(0); }
+    10% { transform: translateX(-10px); }
+    20% { transform: translateX(10px); }
+    30% { transform: translateX(-8px); }
+    40% { transform: translateX(8px); }
+    50% { transform: translateX(-5px); }
+    60% { transform: translateX(5px); }
+    70% { transform: translateX(-2px); }
+    80% { transform: translateX(2px); }
+    90% { transform: translateX(0); }
+}
+
+.failShake {
+    animation: failShake .6s ease !important;
+}
+
+/* ============================================
+   PREMIUM AUTH v3.0 - QIEOS SPACE THEME
+   Deep space night sky: moon, twinkling stars,
+   falling meteors & nebula orbs (lightweight,
+   transform/opacity only).
+   ============================================ */
+
+/* --- Body: richer space gradient (static; motion lives in layers) --- */
+body.auth-container {
+    background:
+        radial-gradient(circle at 20% 30%, rgba(99, 102, 241, 0.14) 0%, transparent 40%),
+        radial-gradient(circle at 80% 70%, rgba(139, 92, 246, 0.1) 0%, transparent 40%),
+        radial-gradient(circle at 40% 80%, rgba(236, 72, 153, 0.06) 0%, transparent 35%),
+        linear-gradient(180deg, #0f172a 0%, #1e293b 100%);
+    background-size: cover;
+    animation: none;
+}
+
+/* --- Nebula orbs: quieter so stars & moon pop --- */
+.auth-shapes .shape {
+    opacity: 0.2;
+    filter: blur(70px);
+}
+
+/* --- Twinkling stars --- */
+.auth-shapes .auth-stars,
+.auth-shapes .auth-meteors {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+}
+
+.auth-shapes .star {
+    position: absolute;
+    width: var(--s, 2px);
+    height: var(--s, 2px);
+    border-radius: 50%;
+    background: #ffffff;
+    box-shadow: var(--glow, 0 0 6px rgba(186, 230, 253, 0.8));
+    opacity: 0.12;
+    animation: authStarTwinkle var(--r, 2.8s) ease-in-out infinite;
+    animation-delay: var(--d, 0s);
+    will-change: opacity, transform;
+}
+
+@keyframes authStarTwinkle {
+    0%, 100% { opacity: 0.12; transform: scale(0.7); }
+    50% { opacity: 1; transform: scale(1.2); }
+}
+
+/* --- Glowing moon --- */
+.auth-shapes .auth-moon {
+    position: absolute;
+    top: 9%;
+    right: 9%;
+    width: 92px;
+    height: 92px;
+    border-radius: 50%;
+    background:
+        radial-gradient(circle at 32% 28%, #fff7d6 0%, #fde68a 45%, #f59e0b 100%);
+    box-shadow:
+        0 0 40px rgba(253, 230, 138, 0.45),
+        0 0 90px rgba(245, 158, 11, 0.22),
+        0 0 170px rgba(245, 158, 11, 0.12);
+    animation: authMoonGlow 6s ease-in-out infinite;
+}
+
+/* Moon craters */
+.auth-shapes .auth-moon::before,
+.auth-shapes .auth-moon::after {
+    content: '';
+    position: absolute;
+    border-radius: 50%;
+    background: rgba(180, 120, 30, 0.28);
+}
+.auth-shapes .auth-moon::before {
+    width: 22px;
+    height: 22px;
+    top: 22%;
+    left: 20%;
+    box-shadow: 10px 26px 0 -6px rgba(180, 120, 30, 0.22);
+}
+.auth-shapes .auth-moon::after {
+    width: 13px;
+    height: 13px;
+    bottom: 20%;
+    right: 26%;
+    box-shadow: -16px -34px 0 -4px rgba(180, 120, 30, 0.2);
+}
+
+@keyframes authMoonGlow {
+    0%, 100% { opacity: 0.9; }
+    50% { opacity: 1; transform: scale(1.03); }
+}
+
+/* --- Falling meteors (full screen, mirrors sidebar meteorFall) --- */
+.auth-shapes .meteor {
+    position: absolute;
+    width: 170px;
+    height: 2.5px;
+    border-radius: 999px;
+    background: linear-gradient(to right, rgba(255, 255, 255, 0) 0%, rgba(249, 115, 22, 0.15) 35%, rgba(249, 115, 22, 0.55) 70%, rgba(254, 215, 170, 0.9) 95%, #fff 100%);
+    transform: rotate(135deg) translate3d(0, 0, 0);
+    opacity: 0;
+    animation: authMeteorFall 7s linear infinite;
+    will-change: transform, opacity;
+}
+
+.auth-shapes .meteor::after {
+    content: '';
+    position: absolute;
+    right: -2px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 0 7px 1px rgba(251, 146, 60, 0.9), 0 0 16px 4px rgba(244, 63, 94, 0.5);
+}
+
+.auth-meteors .meteor:nth-child(1) { top: 6%;  left: 12%; --tx: -560px; --ty: 980px;  animation-duration: 7s;   animation-delay: -1.2s; }
+.auth-meteors .meteor:nth-child(2) { top: 9%;  left: 44%; --tx: -640px; --ty: 1060px; animation-duration: 8s;   animation-delay: -3.4s; }
+.auth-meteors .meteor:nth-child(3) { top: 2%;  left: 68%; --tx: -520px; --ty: 920px;  animation-duration: 6.6s; animation-delay: -2s; }
+.auth-meteors .meteor:nth-child(4) { top: 14%; left: 86%; --tx: -700px; --ty: 1140px; animation-duration: 9s;   animation-delay: -0.6s; }
+
+@keyframes authMeteorFall {
+    0% { opacity: 0; transform: rotate(135deg) translate3d(0, 0, 0); }
+    4% { opacity: 1; }
+    85% { opacity: 1; }
+    100% { opacity: 0; transform: rotate(135deg) translate3d(var(--tx, -560px), var(--ty, 980px), 0); }
+}
+
+/* --- Floating particles: softened for cohesion --- */
+.particle {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+/* --- Dark glass card --- */
+.auth-card {
+    background: linear-gradient(165deg, rgba(17, 24, 39, 0.86) 0%, rgba(23, 18, 47, 0.84) 55%, rgba(30, 16, 42, 0.82) 100%);
+    backdrop-filter: blur(22px) saturate(150%);
+    -webkit-backdrop-filter: blur(22px) saturate(150%);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    box-shadow:
+        0 30px 70px rgba(0, 0, 0, 0.5),
+        0 0 50px rgba(99, 102, 241, 0.12),
+        inset 0 1px 0 rgba(255, 255, 255, 0.07),
+        inset -120px -160px 160px -80px rgba(139, 92, 246, 0.12);
+}
+
+.auth-card:hover {
+    box-shadow:
+        0 34px 80px rgba(0, 0, 0, 0.55),
+        0 0 60px rgba(99, 102, 241, 0.18),
+        inset 0 1px 0 rgba(255, 255, 255, 0.08),
+        inset -120px -160px 160px -80px rgba(139, 92, 246, 0.14);
+    transform: translateY(-2px);
+}
+
+/* --- Back link --- */
+.auth-back-link {
+    color: #cbd5e1;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+}
+.auth-back-link:hover {
+    color: #a5b4fc;
+    background: rgba(255, 255, 255, 0.12);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+}
+
+/* --- Title / subtitle on dark --- */
+.auth-title {
+    background: linear-gradient(120deg, #f8fafc 0%, #c7d2fe 45%, #e9d5ff 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-shadow: 0 0 30px rgba(139, 92, 246, 0.25);
+}
+.auth-subtitle {
+    color: #94a3b8;
+}
+.auth-title-underline {
+    background: linear-gradient(90deg, #6366f1, #a855f7, #ec4899);
+    box-shadow: 0 0 12px rgba(168, 85, 247, 0.55);
+}
+
+/* --- Alerts on dark glass --- */
+.auth-alert {
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+}
+.auth-alert-success {
+    background: rgba(16, 185, 129, 0.14);
+    color: #6ee7b7;
+    border: 1px solid rgba(16, 185, 129, 0.35);
+}
+.auth-alert-danger {
+    background: rgba(239, 68, 68, 0.14);
+    color: #fca5a5;
+    border: 1px solid rgba(239, 68, 68, 0.35);
+}
+
+/* --- Labels & inputs  --- */
+.auth-label {
+    color: #cbd5e1;
+}
+.auth-input {
+    color: #f1f5f9;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1.5px solid rgba(255, 255, 255, 0.1);
+}
+.auth-input::placeholder {
+    color: #64748b;
+}
+.auth-input:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.18);
+}
+.auth-input:focus {
+    background: rgba(255, 255, 255, 0.09);
+    border-color: var(--primary-500);
+    box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.2);
+}
+.auth-input:focus + .auth-input-icon,
+.auth-input-group:focus-within .auth-input-icon {
+    color: #a5b4fc;
+}
+
+.auth-password-toggle {
+    color: #64748b;
+}
+.auth-password-toggle:hover {
+    color: #a5b4fc;
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.password-strength {
+    background: rgba(255, 255, 255, 0.08);
+}
+
+/* --- Checkbox & links --- */
+.auth-checkbox-wrapper {
+    color: #94a3b8;
+}
+.auth-checkbox {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1.5px solid rgba(255, 255, 255, 0.2);
+}
+.auth-checkbox:checked {
+    background: var(--primary-600);
+    border-color: var(--primary-600);
+}
+.auth-link {
+    color: #a5b4fc;
+}
+.auth-link:hover {
+    color: #c7d2fe;
+}
+
+/* --- Primary button: animated gradient + sheen --- */
+.auth-btn-primary {
+    background: linear-gradient(120deg, #6366f1, #8b5cf6, #ec4899, #6366f1);
+    background-size: 220% 100%;
+    box-shadow: 0 8px 24px rgba(139, 92, 246, 0.4);
+}
+.auth-btn-primary:hover {
+    background-position: 90% 0;
+    transform: translateY(-2px);
+    box-shadow: 0 14px 30px rgba(139, 92, 246, 0.5);
+}
+.auth-btn-primary::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -80%;
+    width: 55%;
+    height: 100%;
+    background: linear-gradient(105deg, transparent, rgba(255, 255, 255, 0.35), transparent);
+    transform: skewX(-20deg);
+    transition: left 0.55s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.auth-btn-primary:hover::after {
+    left: 120%;
+}
+
+/* --- Footer --- */
+.auth-footer {
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+.auth-footer-text {
+    color: #94a3b8;
+}
+.text-muted {
+    color: #94a3b8;
+}
+
+/* --- Success / fail overlays: keep space theme --- */
+.login-success-overlay {
+    background-image:
+        radial-gradient(circle at 30% 25%, rgba(99, 102, 241, 0.16) 0%, transparent 40%),
+        radial-gradient(circle at 78% 70%, rgba(139, 92, 246, 0.12) 0%, transparent 40%),
+        radial-gradient(circle 2px at 12% 18%, rgba(255, 255, 255, 0.55) 49%, transparent 50%),
+        radial-gradient(circle 1.5px at 28% 74%, rgba(186, 230, 253, 0.7) 49%, transparent 50%),
+        radial-gradient(circle 2px at 47% 12%, rgba(255, 255, 255, 0.45) 49%, transparent 50%),
+        radial-gradient(circle 1.5px at 63% 82%, rgba(186, 230, 253, 0.6) 49%, transparent 50%),
+        radial-gradient(circle 2px at 79% 30%, rgba(255, 255, 255, 0.5) 49%, transparent 50%),
+        radial-gradient(circle 1.5px at 90% 64%, rgba(186, 230, 253, 0.65) 49%, transparent 50%),
+        radial-gradient(circle 2px at 8% 88%, rgba(255, 255, 255, 0.4) 49%, transparent 50%),
+        radial-gradient(circle 1.5px at 96% 10%, rgba(255, 255, 255, 0.5) 49%, transparent 50%),
+        linear-gradient(180deg, #0f172a 0%, #1e293b 100%);
+    background-size: cover;
+}
+
+.login-fail-overlay {
+    background-image:
+        radial-gradient(circle at 30% 25%, rgba(239, 68, 68, 0.16) 0%, transparent 40%),
+        radial-gradient(circle at 78% 70%, rgba(249, 115, 22, 0.1) 0%, transparent 40%),
+        radial-gradient(circle 2px at 12% 18%, rgba(255, 255, 255, 0.4) 49%, transparent 50%),
+        radial-gradient(circle 1.5px at 28% 74%, rgba(186, 230, 253, 0.5) 49%, transparent 50%),
+        radial-gradient(circle 2px at 47% 12%, rgba(255, 255, 255, 0.35) 49%, transparent 50%),
+        radial-gradient(circle 1.5px at 63% 82%, rgba(186, 230, 253, 0.45) 49%, transparent 50%),
+        radial-gradient(circle 2px at 79% 30%, rgba(255, 255, 255, 0.4) 49%, transparent 50%),
+        radial-gradient(circle 1.5px at 90% 64%, rgba(186, 230, 253, 0.5) 49%, transparent 50%),
+        radial-gradient(circle 2px at 8% 88%, rgba(255, 255, 255, 0.3) 49%, transparent 50%),
+        radial-gradient(circle 1.5px at 96% 10%, rgba(255, 255, 255, 0.4) 49%, transparent 50%),
+        linear-gradient(180deg, #1a0f12 0%, #29151b 100%);
+    background-size: cover;
+}
+
+/* --- Mobile --- */
+@media (max-width: 520px) {
+    .auth-shapes .auth-moon {
+        top: 5%;
+        right: 7%;
+        width: 56px;
+        height: 56px;
+    }
+}
+
+/* --- Reduced motion --- */
+@media (prefers-reduced-motion: reduce) {
+    body.auth-container,
+    .auth-shapes .shape,
+    .auth-shapes .star,
+    .auth-shapes .auth-moon,
+    .auth-shapes .meteor,
+    .particle,
+    .auth-btn-primary,
+    .auth-btn-primary::after,
+    .auth-card::before {
+        animation: none !important;
+    }
+    .auth-shapes .star {
+        opacity: 0.5;
+    }
+    .auth-shapes .meteor,
+    .auth-shapes .auth-moon {
+        display: none;
+    }
+    .auth-card {
+        transform: none;
+    }
+}
+
+/* ============================================
+   PREMIUM AUTH v3.1 - SPACE TRAVEL OVERLAYS
+   Warp-speed starfield while "exploring" +
+   preparing the workspace status pill.
+   ============================================ */
+
+/* --- Warp starfield container --- */
+.login-warp-stars {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+    z-index: 0;
+}
+
+.ws {
+    position: absolute;
+    left: 50%;
+    top: 52%;
+    width: var(--len, 34px);
+    height: 2.5px;
+    border-radius: 3px;
+    background: linear-gradient(90deg, transparent 0%, var(--c, #ffffff) 100%);
+    box-shadow: 0 0 10px var(--c, rgba(255, 255, 255, 0.9));
+    transform-origin: center;
+    opacity: 0;
+    animation: warpStreak var(--dur, 0.8s) linear infinite;
+    animation-delay: var(--d, 0s);
+    will-change: transform, opacity;
+}
+
+@keyframes warpStreak {
+    0% {
+        opacity: 0;
+        transform: translate3d(var(--ox, 0px), var(--oy, 0px), 0) rotate(var(--rot, 0deg)) scale(0.55);
+    }
+    8% { opacity: 1; }
+    100% {
+        opacity: 0;
+        transform: translate3d(var(--tx, 420px), var(--ty, 420px), 0) rotate(var(--rot, 0deg)) scale(1.5);
+    }
+}
+
+/* Keep content above the traveling stars */
+.login-success-overlay > *:not(.login-warp-stars):not(.login-success-ripple):not(.login-progress-bar):not(.login-moon):not(.login-meteors):not(.login-explosion),
+.login-fail-overlay > *:not(.login-warp-stars):not(.login-fail-ripple):not(.login-moon) {
+    position: relative;
+    z-index: 1;
+}
+
+/* Slow the failing overlay a touch for a calmer mood */
+.login-fail-overlay .ws {
+    animation-duration: calc(var(--dur, 2s) + 0.8s);
+}
+
+/* --- "Preparing your workspace" status pill --- */
+.login-preparing {
+    margin-top: 0.9rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.42rem 0.95rem;
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #a5b4fc;
+    background: rgba(139, 92, 246, 0.12);
+    border: 1px solid rgba(139, 92, 246, 0.28);
+    border-radius: 999px;
+    box-shadow: 0 0 20px rgba(139, 92, 246, 0.18);
+    opacity: 0;
+    transform: translateY(12px);
+}
+.login-success-overlay.active .login-preparing {
+    animation: fadeSlideUp 0.45s ease 1.75s forwards;
+}
+
+.preparing-dots {
+    display: inline-flex;
+    gap: 3px;
+}
+.preparing-dots i {
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: #c7d2fe;
+    animation: dotPulse 1.1s ease-in-out infinite;
+}
+.preparing-dots i:nth-child(2) { animation-delay: 0.15s; }
+.preparing-dots i:nth-child(3) { animation-delay: 0.3s; }
+
+/* Loader dots come after the preparing pill */
+.login-success-overlay.active .login-loading-dots {
+    animation: fadeSlideUp 0.3s ease 2.3s forwards;
+}
+
+/* Hush everything for reduced motion */
+@media (prefers-reduced-motion: reduce) {
+    .ws,
+    .login-success-overlay.active .login-preparing,
+    .preparing-dots i {
+        animation: none !important;
+    }
+    .ws {
+        display: none;
+    }
+    .login-preparing,
+    .login-success-overlay.active .login-loading-dots {
+        opacity: 1 !important;
+        transform: none !important;
+    }
+}
+
+/* ============================================
+   PREMIUM AUTH v3.2 - POV MOON APPROACH
+   Destination moon rushing toward the viewer,
+   accompanied by side-flying meteors + arrival flash.
+   ============================================ */
+
+/* --- Destination moon: centered, tiny at first, grows smoothly to fill the view --- */
+.login-moon {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background:
+        radial-gradient(circle at 38% 32%, #fef3c7 0%, #fbd38d 45%, #d97706 100%);
+    box-shadow: 0 0 14px rgba(252, 211, 77, 0.22);
+    transform: translate(-50%, -50%) scale(0.5);
+    --moon-end: 34;
+    opacity: 0;
+    pointer-events: none;
+    z-index: 0;
+    animation: moonApproach 8s linear 0.15s forwards;
+    will-change: transform, opacity;
+    backface-visibility: hidden;
+}
+
+.login-moon::before,
+.login-moon::after {
+    content: '';
+    position: absolute;
+    border-radius: 50%;
+    background: rgba(180, 120, 30, 0.28);
+}
+.login-moon::before {
+    width: 14px;
+    height: 14px;
+    top: 24%;
+    left: 20%;
+    box-shadow:
+        8px 20px 0 -4px rgba(180, 120, 30, 0.22),
+        -18px 30px 0 -3px rgba(180, 120, 30, 0.18);
+}
+.login-moon::after {
+    width: 9px;
+    height: 9px;
+    bottom: 22%;
+    right: 24%;
+    box-shadow: -12px -26px 0 -3px rgba(180, 120, 30, 0.2);
+}
+
+/* Moon approaches the POV: continuous, accelerating growth (no jumps) */
+@keyframes moonApproach {
+    0%   { opacity: 0; transform: translate(-50%, -50%) scale(0.5); }
+    5%   { opacity: 1; }
+    8%   { transform: translate(-50%, -50%) scale(0.63); }
+    16%  { transform: translate(-50%, -50%) scale(1.10); }
+    24%  { transform: translate(-50%, -50%) scale(1.95); }
+    32%  { transform: translate(-50%, -50%) scale(3.23); }
+    40%  { transform: translate(-50%, -50%) scale(4.96); }
+    48%  { transform: translate(-50%, -50%) scale(7.17); }
+    56%  { transform: translate(-50%, -50%) scale(9.86); }
+    64%  { transform: translate(-50%, -50%) scale(13.05); }
+    72%  { transform: translate(-50%, -50%) scale(16.76); }
+    80%  { transform: translate(-50%, -50%) scale(21.00); }
+    88%  { transform: translate(-50%, -50%) scale(25.80); }
+    94%  { transform: translate(-50%, -50%) scale(29.70); }
+    100% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(var(--moon-end, 34));
+    }
+}
+
+/* Fail overlay: same slow approach, softer ember-red moon */
+.login-fail-overlay .login-moon {
+    background:
+        radial-gradient(circle at 38% 32%, #fecaca 0%, #f87171 45%, #991b1b 100%);
+    box-shadow:
+        0 0 16px rgba(252, 165, 165, 0.3),
+        0 0 48px rgba(185, 28, 28, 0.16),
+        0 0 90px rgba(185, 28, 28, 0.1);
+    animation: moonApproachFail 2.6s linear 0.15s forwards;
+    --moon-end: 4.5;
+}
+
+@keyframes moonApproachFail {
+    0% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.5);
+    }
+    5% { opacity: 0.9; }
+    100% {
+        opacity: 0.9;
+        transform: translate(-50%, -50%) scale(var(--moon-end, 4.5));
+    }
+}
+
+/* --- Side meteors racing toward the moon --- */
+.login-meteors {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+    z-index: 0;
+}
+
+.lmeteor {
+    position: absolute;
+    width: 160px;
+    height: 2.5px;
+    border-radius: 999px;
+    background: linear-gradient(to right, rgba(255, 255, 255, 0) 0%, rgba(249, 115, 22, 0.15) 35%, rgba(249, 115, 22, 0.55) 70%, rgba(254, 215, 170, 0.9) 95%, #fff 100%);
+    transform-origin: left center;
+    opacity: 0;
+    animation: lmeteorFly var(--dur, 3.4s) linear infinite;
+    animation-delay: var(--d, 0s);
+    will-change: transform, opacity;
+}
+
+.lmeteor::after {
+    content: '';
+    position: absolute;
+    right: -3px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 0 8px 2px rgba(251, 146, 60, 0.9), 0 0 20px 5px rgba(244, 63, 94, 0.5);
+}
+
+@keyframes lmeteorFly {
+    0% {
+        opacity: 0;
+        transform: translate3d(var(--ox, 0px), var(--oy, 0px), 0) rotate(var(--mrot, -24deg));
+    }
+    6% { opacity: 1; }
+    82% { opacity: 1; }
+    100% {
+        opacity: 0;
+        transform: translate3d(var(--tx, 640px), var(--ty, -320px), 0) rotate(var(--mrot, -24deg));
+    }
+}
+
+/* Progress bar now spans the full 8s journey */
+.login-success-overlay.active .login-progress-bar {
+    animation: progressFill 7.4s ease 0.2s forwards;
+}
+
+/* --- Mobile: scale the destination moon down --- */
+@media (max-width: 520px) {
+    .login-moon {
+        width: 50px;
+        height: 50px;
+        --moon-end: 20;
+    }
+}
+
+/* --- Reduced motion: keep a static little moon, hush the travel --- */
+@media (prefers-reduced-motion: reduce) {
+    .login-moon,
+    .lmeteor,
+    .login-explosion,
+    .cr,
+    .cr2 {
+        animation: none !important;
+    }
+    .lmeteor,
+    .login-explosion {
+        display: none;
+    }
+    .login-moon {
+        opacity: 0.5;
+        transform: translate(-50%, -50%) scale(1) !important;
+        z-index: 0 !important;
+    }
+}
+
+/* ============================================
+   PREMIUM AUTH v3.3 - REFINED SUCCESS / FAIL
+   Orbiting rings, gradient headline, glass pill.
+   ============================================ */
+
+/* --- Orbiting rings around the result circle --- */
+.login-success-circle,
+.login-fail-circle {
+    position: relative;
+}
+
+.cr,
+.cr2 {
+    position: absolute;
+    border-radius: 50%;
+    pointer-events: none;
+    opacity: 0;
+}
+.cr {
+    inset: -13px;
+    border: 1.5px solid rgba(255, 255, 255, 0.06);
+    border-top-color: rgba(255, 255, 255, 0.95);
+    border-right-color: rgba(165, 180, 252, 0.5);
+    animation: ringSpin 2.8s linear infinite;
+}
+.cr2 {
+    inset: -24px;
+    border: 1px dashed rgba(255, 255, 255, 0.18);
+    animation: ringSpin 7s linear infinite reverse;
+}
+.login-success-overlay.active .cr,
+.login-success-overlay.active .cr2 {
+    opacity: 1;
+    transition: opacity 0.4s ease 0.55s;
+}
+
+.login-fail-overlay .cr {
+    border-top-color: rgba(252, 165, 165, 0.95);
+    border-right-color: rgba(251, 146, 60, 0.5);
+}
+.login-fail-overlay .cr2 {
+    border-color: rgba(255, 255, 255, 0.12);
+    border-right-color: rgba(248, 113, 113, 0.35);
+}
+.login-fail-overlay.active .cr,
+.login-fail-overlay.active .cr2 {
+    opacity: 1;
+    transition: opacity 0.4s ease 0.45s;
+}
+
+@keyframes ringSpin {
+    to { transform: rotate(360deg); }
+}
+
+/* --- Headline: shifts from light to deep ember so it stays
+       readable while the moon grows bright and fills the view --- */
+.login-welcome-name {
+    --txt-a: #fff7ea;
+    --txt-b: #48290a;
+    color: var(--txt-a);
+    filter: drop-shadow(0 1px 3px rgba(90, 50, 0, 0.45));
+}
+.login-welcome-sub {
+    --txt-a: #f0d9b5;
+    --txt-b: #5a3a12;
+    color: var(--txt-a);
+    text-shadow: 0 1px 3px rgba(90, 50, 0, 0.4);
+}
+
+@keyframes txtShift {
+    0%, 46% { color: var(--txt-a); }
+    64% { color: #8f5c25; }
+    82%, 100% { color: var(--txt-b); }
+}
+
+/* --- Explosion: a soft warm bloom (no harsh white), then the app opens --- */
+.login-explosion {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 60px;
+    height: 60px;
+    margin: -30px 0 0 -30px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255, 250, 235, 0.9) 0%, rgba(253, 224, 150, 0.72) 30%, rgba(251, 191, 36, 0.4) 55%, rgba(244, 114, 22, 0.18) 72%, transparent 80%);
+    opacity: 0;
+    pointer-events: none;
+    z-index: 6;
+    transform: scale(0.2);
+}
+
+.login-explosion::before,
+.login-explosion::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    border: 2px solid rgba(255, 240, 200, 0.65);
+    opacity: 0;
+}
+
+.login-success-overlay.active .login-explosion {
+    animation: explode 1s ease-out 7.15s forwards;
+}
+.login-success-overlay.active .login-explosion::before {
+    animation: explodeRing 1s ease-out 7.15s forwards;
+}
+.login-success-overlay.active .login-explosion::after {
+    animation: explodeRing 1s ease-out 7.32s forwards;
+}
+
+@keyframes explode {
+    0% {
+        opacity: 0;
+        transform: scale(0.2);
+    }
+    24% { opacity: 0.85; }
+    100% {
+        opacity: 0;
+        transform: scale(30);
+    }
+}
+
+@keyframes explodeRing {
+    0% {
+        opacity: 0.7;
+        transform: scale(1);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(18);
+    }
+}
+
+/* --- Preparing pill: fuller glass with stronger glow --- */
+.login-preparing {
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.2) 0%, rgba(99, 102, 241, 0.1) 100%);
+    border-color: rgba(139, 92, 246, 0.42);
+    box-shadow: 0 0 26px rgba(139, 92, 246, 0.24), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+/* ============================================
+   PREMIUM AUTH v3.4 - MOON FILLS THE VIEW + BURST
+   The moon grows behind the content; the headline
+   shifts to ember as the sky turns gold; then the
+   moon bursts into light before the app opens.
+   ============================================ */
+
+@keyframes contentFadeOut {
+    to {
+        opacity: 0;
+        transform: translateY(-8px);
+    }
+}
+
+/* Success content fades ~7.4s, just before redirect */
+.login-success-overlay.active .login-success-circle {
+    animation: successCircleBounce 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) 0.4s forwards,
+               contentFadeOut 0.6s ease 7.1s forwards;
+}
+.login-success-overlay.active .login-success-check {
+    animation: checkDraw 0.5s ease 0.85s forwards;
+}
+.login-success-overlay.active .login-welcome-name {
+    animation: fadeSlideUp 0.5s ease 1.3s forwards,
+               txtShift 8s linear 0.2s forwards,
+               contentFadeOut 0.6s ease 7.1s forwards;
+}
+.login-success-overlay.active .login-welcome-sub {
+    animation: fadeSlideUp 0.5s ease 1.55s forwards,
+               txtShift 8s linear 0.2s forwards,
+               contentFadeOut 0.6s ease 7.1s forwards;
+}
+.login-success-overlay.active .login-preparing {
+    animation: fadeSlideUp 0.45s ease 1.75s forwards,
+               contentFadeOut 0.6s ease 7.1s forwards;
+}
+.login-success-overlay.active .login-loading-dots {
+    animation: fadeSlideUp 0.3s ease 2s forwards,
+               contentFadeOut 0.6s ease 7.1s forwards;
+}
+.login-success-overlay.active .cr {
+    animation: ringSpin 2.8s linear infinite,
+               contentFadeOut 0.6s ease 7.1s forwards;
+}
+.login-success-overlay.active .cr2 {
+    animation: ringSpin 7s linear infinite reverse,
+               contentFadeOut 0.6s ease 7.1s forwards;
+}
+
+/* Fail content fades ~2.5s, just before the overlay closes */
+.login-fail-overlay.active .login-fail-circle {
+    animation: failBounce 0.55s cubic-bezier(0.34, 1.56, 0.64, 1) 0.35s forwards,
+               contentFadeOut 0.6s ease 2.5s forwards;
+}
+.login-fail-overlay.active .login-fail-x {
+    animation: xDraw 0.4s ease 0.8s forwards;
+}
+.login-fail-overlay.active .login-fail-x.x2 {
+    animation: xDraw 0.4s ease 1s forwards;
+}
+.login-fail-overlay.active .login-fail-name {
+    animation: fadeSlideUp 0.5s ease 1.3s forwards,
+               contentFadeOut 0.6s ease 2.5s forwards;
+}
+.login-fail-overlay.active .login-fail-sub {
+    animation: fadeSlideUp 0.5s ease 1.5s forwards,
+               contentFadeOut 0.6s ease 2.5s forwards;
+}
+.login-fail-overlay.active .login-fail-dismiss {
+    animation: fadeSlideUp 0.3s ease 2s forwards,
+               contentFadeOut 0.6s ease 2.5s forwards;
+}
+.login-fail-overlay.active .cr {
+    animation: ringSpin 2.8s linear infinite,
+               contentFadeOut 0.6s ease 2.5s forwards;
+}
+.login-fail-overlay.active .cr2 {
+    animation: ringSpin 7s linear infinite reverse,
+               contentFadeOut 0.6s ease 2.5s forwards;
+}
+
+/* ============================================
+   PREMIUM AUTH v4 - SEAMLESS FORWARD LAUNCH
+   The sign-in sky and its moon stay exactly where
+   they are; the card flies away and the stars
+   warp forward at full speed. Success shows the
+   welcome + workspace text, failure shows a cross
+   on the same sky (no red wash).
+   ============================================ */
+
+/* Same universe as sign-in: show the page sky through the overlay */
+.login-success-overlay,
+.login-fail-overlay {
+    background: transparent;
+}
+.login-success-overlay::before,
+.login-fail-overlay::before {
+    display: none;
+}
+
+/* Failure now travels at the same full speed */
+.login-fail-overlay .ws {
+    animation-duration: var(--dur, 0.8s);
+}
+
+/* --- Centered result block --- */
+.login-result {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 1rem 1.5rem;
+}
+
+.login-result-icon {
+    width: 96px;
+    height: 96px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1.5rem;
+    background: rgba(15, 23, 42, 0.42);
+    border: 1.5px solid rgba(255, 255, 255, 0.16);
+    transform: scale(0);
+    opacity: 0;
+}
+.login-result-icon.is-success {
+    box-shadow:
+        0 0 0 1px rgba(74, 222, 128, 0.22),
+        0 0 45px rgba(34, 197, 94, 0.28),
+        0 18px 50px rgba(0, 0, 0, 0.45);
+}
+.login-result-icon.is-fail {
+    box-shadow:
+        0 0 0 1px rgba(248, 113, 113, 0.22),
+        0 0 45px rgba(239, 68, 68, 0.24),
+        0 18px 50px rgba(0, 0, 0, 0.45);
+}
+
+.login-success-overlay.active .login-result-icon,
+.login-fail-overlay.active .login-result-icon {
+    animation: resultPop 0.55s cubic-bezier(0.34, 1.56, 0.64, 1) 0.1s forwards;
+}
+@keyframes resultPop {
+    0% { transform: scale(0); opacity: 0; }
+    55% { opacity: 1; }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+.login-result-check,
+.login-result-x {
+    fill: none;
+    stroke-width: 3.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-dasharray: 60;
+    stroke-dashoffset: 60;
+}
+.login-result-check { stroke: #4ade80; }
+.login-result-x { stroke: #f87171; }
+.login-success-overlay.active .login-result-check {
+    animation: resultDraw 0.45s ease 0.45s forwards;
+}
+.login-fail-overlay.active .login-result-x {
+    animation: resultDraw 0.35s ease 0.45s forwards;
+}
+.login-fail-overlay.active .login-result-x.x2 {
+    animation-delay: 0.62s;
+}
+@keyframes resultDraw {
+    to { stroke-dashoffset: 0; }
+}
+
+/* --- Result text over the night sky --- */
+.login-result .login-welcome-name,
+.login-result .login-fail-name {
+    font-size: 1.5rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    color: #f8fafc;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.55);
+    opacity: 0;
+    transform: translateY(14px);
+}
+.login-result .login-welcome-sub,
+.login-result .login-fail-sub {
+    margin-top: 0.35rem;
+    font-size: 0.9rem;
+    color: #cbd5e1;
+    text-shadow: 0 1px 6px rgba(0, 0, 0, 0.5);
+    opacity: 0;
+    transform: translateY(10px);
+}
+.login-success-overlay.active .login-welcome-name,
+.login-fail-overlay.active .login-fail-name {
+    animation: fadeSlideUp 0.5s ease 0.3s forwards;
+}
+.login-success-overlay.active .login-welcome-sub,
+.login-fail-overlay.active .login-fail-sub {
+    animation: fadeSlideUp 0.5s ease 0.45s forwards;
+}
+
+/* --- Preparing pill: shimmer sweep + gentle float --- */
+.login-preparing {
+    position: relative;
+    overflow: hidden;
+    margin-top: 1.1rem;
+    color: #c7d2fe;
+    text-shadow: 0 1px 6px rgba(0, 0, 0, 0.5);
+    opacity: 0;
+}
+.login-success-overlay.active .login-preparing {
+    animation: fadeSlideUp 0.5s ease 0.6s forwards,
+               prepFloat 3s ease-in-out 1.2s infinite;
+}
+.login-preparing::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 60%;
+    height: 100%;
+    background: linear-gradient(100deg, transparent 0%, rgba(255, 255, 255, 0.35) 50%, transparent 100%);
+    transform: translateX(-160%) skewX(-12deg);
+    animation: prepShimmer 2.4s ease-in-out 1.1s infinite;
+}
+@keyframes prepFloat {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-4px); }
+}
+@keyframes prepShimmer {
+    0% { transform: translateX(-160%) skewX(-12deg); }
+    60%, 100% { transform: translateX(320%) skewX(-12deg); }
+}
+
+.login-fail-dismiss {
+    color: rgba(203, 213, 225, 0.7);
+    text-shadow: 0 1px 6px rgba(0, 0, 0, 0.5);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .login-result-icon,
+    .login-preparing::after {
+        animation: none !important;
+    }
+    .login-result-icon,
+    .login-result .login-welcome-name,
+    .login-result .login-welcome-sub,
+    .login-result .login-fail-name,
+    .login-result .login-fail-sub {
+        opacity: 1 !important;
+        transform: none !important;
+    }
+}
+
+/* ============================================
+   MOBILE PERF MODE (max-width: 520px)
+   Efek berat (filter blur besar, backdrop-filter,
+   re-raster box-shadow glow) ditukar versi murah
+   agar animasi tetap 60fps di HP.
+   ============================================ */
+@media (max-width: 520px) {
+
+    /* Nebula orbs: gradient blur-friendly, tanpa filter */
+    .auth-shapes .shape {
+        filter: none;
+        opacity: 0.16;
+    }
+    .auth-shapes .shape:nth-child(1) { background: radial-gradient(circle, rgba(99,102,241,0.75) 0%, transparent 70%); }
+    .auth-shapes .shape:nth-child(2) { background: radial-gradient(circle, rgba(236,72,153,0.7) 0%, transparent 70%); }
+    .auth-shapes .shape:nth-child(3) { background: radial-gradient(circle, rgba(139,92,246,0.7) 0%, transparent 70%); }
+    .auth-shapes .shape:nth-child(4) { background: radial-gradient(circle, rgba(6,182,212,0.65) 0%, transparent 70%); }
+    .auth-shapes .shape:nth-child(5) { background: radial-gradient(circle, rgba(245,158,11,0.6) 0%, transparent 70%); }
+
+    /* Bintang: twinkle opacity saja, tanpa re-raster glow */
+    .auth-shapes .star {
+        box-shadow: none;
+        animation-name: authStarTwinkleLite;
+    }
+
+    /* Bulan: glow statis */
+    .auth-shapes .auth-moon { animation: none; }
+
+    /* Meteor: 2 cukup */
+    .auth-shapes .meteor:nth-child(3),
+    .auth-shapes .meteor:nth-child(4) { display: none; }
+
+    /* Card: backdrop-filter off — kemenangan terbesar */
+    .auth-card {
+        -webkit-backdrop-filter: none;
+        backdrop-filter: none;
+        background: linear-gradient(165deg, rgba(17, 24, 39, 0.95) 0%, rgba(23, 18, 47, 0.94) 55%, rgba(30, 16, 42, 0.93) 100%);
+    }
+    .auth-card::before { animation: none; }
+
+    /* Card exit tanpa blur filter */
+    .auth-card-wrapper.login-exit {
+        animation: cardExitLite 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    }
+
+    /* Warp stars overlay: setengah saja + tanpa glow */
+    .login-warp-stars .ws:nth-child(even) { display: none; }
+    .login-warp-stars .ws { box-shadow: none; }
+
+    /* Partikel: layer komposit stabil sejak awal */
+    .particle { will-change: transform, opacity; }
+}
+
+@keyframes authStarTwinkleLite {
+    0%, 100% { opacity: 0.15; }
+    50% { opacity: 0.85; }
+}
+
+@keyframes cardExitLite {
+    to { opacity: 0; transform: scale(0.93); }
+}

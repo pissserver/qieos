@@ -1,0 +1,90 @@
+﻿/* ============================================
+    TABEL STOK KANTIN
+    Desain disamakan dengan tabel Stok Gudang
+    (stock.css menangani bagian besar tabel ini)
+   ============================================ */
+
+/* Baris tidak diklik, hanya tombol katalog yang interaktif */
+.stock-row{
+    cursor:default;
+}
+
+/* Badge status inline di samping kode — hanya untuk mobile */
+#stockTable .st-inline{
+    display:none;
+}
+
+/* ===== KATALOG TOGGLE (switch kompak) ===== */
+.toggle-switch{
+    position:relative;
+    display:inline-block;
+    width:44px;
+    height:24px;
+    cursor:pointer;
+    vertical-align:middle;
+}
+
+.toggle-switch input{
+    position:absolute;
+    opacity:0;
+    pointer-events:none;
+}
+
+.toggle-track{
+    position:absolute;
+    inset:0;
+    border-radius:999px;
+    background:#e2e8f0;
+    box-shadow:inset 0 1px 3px rgba(15,23,42,.15);
+    transition:background .25s ease;
+}
+
+.toggle-thumb{
+    position:absolute;
+    left:3px;
+    top:3px;
+    width:18px;
+    height:18px;
+    border-radius:50%;
+    background:#fff;
+    box-shadow:0 1px 3px rgba(15,23,42,.35);
+    transition:transform .25s cubic-bezier(.4,0,.2,1);
+}
+
+/* AKTIF */
+.toggle-switch input:checked + .toggle-track{
+    background:#22c55e;
+}
+
+.toggle-switch input:checked + .toggle-track .toggle-thumb{
+    transform:translateX(20px);
+}
+
+.toggle-switch input:checked:not(:disabled) + .toggle-track{
+    box-shadow:inset 0 1px 3px rgba(21,128,61,.25);
+}
+
+/* Hover */
+.toggle-switch:hover .toggle-thumb{
+    transform:scale(1.08);
+}
+
+.toggle-switch input:checked:hover + .toggle-track .toggle-thumb{
+    transform:translateX(20px) scale(1.08);
+}
+
+/* ===== MOBILE =====
+   Batalkan table-layout fixed + lebar kolom persen
+   dari stock.css supaya kolom menyesuaikan isinya
+   (badge tidak berdempetan saat tabel digeser) */
+@media (max-width:991.98px){
+    #stockTable{
+        table-layout:auto;
+        width:100% !important;
+    }
+
+    #stockTable thead th,
+    #stockTable tbody td{
+        width:auto !important;
+    }
+}

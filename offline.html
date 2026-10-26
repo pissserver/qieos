@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="id">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <title>Offline - Qieos</title>
+    <link rel="manifest" href="./manifest.php">
+    <meta name="theme-color" content="#4f46e5">
+    <style>
+        *{box-sizing:border-box;margin:0;padding:0}
+        body{
+            font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+            min-height:100vh;
+            min-height:100dvh;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            text-align:center;
+            padding:24px;
+            color:#f8fafc;
+            background:linear-gradient(135deg,#0f172a,#1e1b4b 55%,#311042);
+        }
+        .box{max-width:420px}
+        .icon{
+            width:96px;height:96px;margin:0 auto 24px;
+            border-radius:28px;
+            display:flex;align-items:center;justify-content:center;
+            font-size:44px;
+            background:rgba(255,255,255,.1);
+            box-shadow:0 20px 50px rgba(0,0,0,.35);
+        }
+        h1{font-size:24px;font-weight:800;margin-bottom:10px}
+        p{color:#94a3b8;line-height:1.7;font-size:15px;margin-bottom:26px}
+        button{
+            border:none;
+            padding:13px 26px;
+            border-radius:14px;
+            font-weight:700;
+            font-size:15px;
+            color:#fff;
+            cursor:pointer;
+            background:linear-gradient(90deg,#4f46e5,#7c3aed);
+            box-shadow:0 10px 25px rgba(79,70,229,.4);
+            transition:.25s;
+        }
+        button:hover{transform:translateY(-2px)}
+    </style>
+</head>
+<body>
+    <div class="box">
+        <div class="icon">&#128246;</div>
+        <h1>Tidak Ada Koneksi</h1>
+        <p>Anda sedang offline. Periksa koneksi internet Anda lalu coba muat ulang halaman.</p>
+        <button onclick="location.reload()">Coba Lagi</button>
+    </div>
+</body>
+</html>

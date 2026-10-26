@@ -1,0 +1,640 @@
+﻿    /* TENANT PAYMENT WRAPPER */
+    .tenant-payment-wrapper{
+        background:#fff;
+        border-radius:20px;
+        padding:20px;
+        box-shadow:0 8px 20px rgba(15,23,42,.08);
+    }
+
+    /* HEADER RIWAYAT PEMBAYARAN — gradient di semua breakpoint */
+    .tpw-header{
+        display:flex;
+        align-items:center;
+        justify-content:space-between;
+        gap:12px;
+        flex-wrap:wrap;
+
+        margin-bottom:20px;
+        padding:18px 20px;
+        border-radius:18px;
+
+        background:linear-gradient(135deg,#6366f1,#8b5cf6);
+        box-shadow:0 8px 24px rgba(99,102,241,.3);
+    }
+
+    .tpw-header-left{
+        display:flex;
+        align-items:center;
+        gap:12px;
+
+        font-size:16px;
+        font-weight:700;
+        color:#fff;
+    }
+
+    .tpw-header-left i{
+        width:46px;
+        height:46px;
+        border-radius:14px;
+
+        display:flex;
+        align-items:center;
+        justify-content:center;
+
+        background:rgba(255,255,255,.2);
+        backdrop-filter:blur(8px);
+
+        color:#fff;
+        font-size:17px;
+    }
+
+    .tpw-add-btn{
+        display:inline-flex;
+        align-items:center;
+        gap:8px;
+        padding:10px 18px;
+        border:none;
+        border-radius:12px;
+        background:linear-gradient(135deg,#6366f1,#8b5cf6);
+        color:#fff;
+        font-size:13px;
+        font-weight:700;
+        cursor:pointer;
+        transition:all .25s;
+        box-shadow:0 4px 14px rgba(99,102,241,.3);
+    }
+
+    .tpw-add-btn:hover{
+        background:linear-gradient(135deg,#4f46e5,#7c3aed);
+        transform:translateY(-2px);
+        box-shadow:0 6px 20px rgba(99,102,241,.4);
+    }
+
+    .tpw-add-btn i{
+        font-size:14px;
+    }
+
+    .tpw-search{
+        display:none;
+    }
+
+    .payment-cards-mobile{
+        display:none;
+    }
+
+    .stock-wrapper {
+        background: #f4f6f9;
+        padding: 20px;
+        border-radius: 12px;
+    }
+
+    .stock-card {
+        border: none;
+        border-radius: 20px;
+        box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+        overflow: hidden;
+    }
+
+    .stock-header-detail {
+        background: linear-gradient(135deg,#0f2027,#203a43,#2c5364);
+        color: #fff;
+        padding: 16px 20px;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 20px;
+    }
+
+    .table-stock thead {
+        background: transparent;
+    }
+
+    /* Baris kosong / hasil search tidak ditemukan */
+    #paymentTableWrapper tbody .empty-search{
+        padding:50px 20px;
+        text-align:center;
+    }
+
+    #paymentTableWrapper tbody .empty-img{
+        width:370px;
+        max-width:100%;
+        opacity:.9;
+        margin-bottom:18px;
+    }
+
+    #paymentTableWrapper tbody .empty-title{
+        font-size:18px;
+        font-weight:700;
+        color:#0f172a;
+        margin-bottom:6px;
+    }
+
+    #paymentTableWrapper tbody .empty-sub{
+        font-size:14px;
+        color:#64748b;
+    }
+
+    .table-stock th {
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: .6px;
+        color: #555;
+    }
+
+    .table-stock td {
+        vertical-align: middle;
+        font-size: 14px;
+    }
+
+    .badge-qty {
+        background: #e7f1ff;
+        color: #1d4ed8;
+        padding: 6px 10px;
+        border-radius: 8px;
+        font-size: 13px;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .badge-price {
+        background: #fff3cd;
+        color: #856404;
+        padding: 6px 10px;
+        border-radius: 8px;
+        font-size: 13px;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .date-block {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    /* ACTION */
+    .action-btn{
+        width:38px;
+        height:38px;
+        border:none;
+        border-radius:10px;
+        margin:0 4px;
+        color:#fff;
+        transition:.25s;
+    }
+
+    .btn-edit{
+        background:#f59e0b;
+    }
+
+    .btn-delete{
+        background:#ef4444;
+    }
+
+    .btn-print{
+        background:linear-gradient(135deg,#334155,#0f172a);
+    }
+
+    .date-main {
+        font-weight: 600;
+        color: #111;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .form-badge {
+        font-size: 12px;
+        color: #64748b;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .form-badge i {
+        color: #0ea5e9;
+    }
+
+    /* ---------- SEARCH, "SHOW n ENTRIES", PAGINASI ----------
+
+   Blok styling DataTables yang tadinya ada di file ini
+   (#paymentTableWrapper #tablePayment_filter / _length / _paging) sudah
+   DIHAPUS dan digantikan oleh css/components/datatable-premium.css, supaya
+   tabel pembayaran ini benar-benar sama dengan halaman Master, Purchasing,
+   Stok Gudang, Mutasi, Transfer, dan Sales.
+
+   Alasannya bukan sekadar biar lebih pendek: selector halaman itu berawalan
+   ID (#paymentTableWrapper #tablePayment_filter), dan spesifisitas ID selalu
+   menang atas selector premium yang hanya pakai kelas. Akibatnya styling
+   premium diam-diam tidak berlaku di sini - pil pager desktop 30px/11px
+   (premium 34px/12px), search 8px ketajaman (premium 13px), border abu
+  .visible (premium transparan), dan lebar search dikunci 180px. Semua itu
+   bikin halaman ini terlihat beda dari halaman lain.
+
+   Yang TETAP di file ini hanya yang memang spesifik halaman: .tpw-* (header +
+   tombol tambah), .table-stock (header/sel tabel), dan .paym-card* (kartu
+   mobile). */
+
+    .table-action-wrapper{
+        display:flex;
+        align-items:center;
+        justify-content:flex-end;
+        gap:12px;
+        width:auto;
+        margin-bottom:0;
+    }
+
+.tpw-add-btn{
+        display:inline-flex;
+        align-items:center;
+        gap:8px;
+        height:42px;
+        padding:0 20px;
+        border:none;
+        border-radius:12px;
+        background:linear-gradient(135deg,#4f46e5,#7c3aed);
+        color:#fff;
+        font-size:13.5px;
+        font-weight:600;
+        white-space:nowrap;
+        cursor:pointer;
+        transition:all .25s;
+        box-shadow:0 8px 18px rgba(79,70,229,.3);
+        flex-shrink:0;
+    }
+
+.tpw-add-btn:hover{
+    background:linear-gradient(135deg,#4338ca,#6d28d9);
+    transform:translateY(-2px);
+    box-shadow:0 12px 24px rgba(79,70,229,.4);
+}
+
+    .tpw-add-btn i{
+        font-size:14px;
+    }
+
+    /* Blok ".dataTables_wrapper .dataTables_paginate" di sini dan blok
+       "#paymentTableWrapper .dataTables_paginate ..." di bawahnya sudah
+       dihapus; premium.css yang menata pagination (termasuk justify-content
+       rata kanan di desktop dan rata tengah di mobile). */
+
+    @media (max-width:768px){
+        .stock-wrapper{
+            padding:12px;
+        }
+
+        .stock-header-detail{
+            padding:14px 16px;
+            font-size:15px;
+        }
+
+        .table-stock th{
+            font-size:11px;
+        }
+
+        .table-stock td{
+            font-size:13px;
+        }
+
+        .badge-price,
+        .badge-qty{
+            font-size:11px;
+            padding:5px 8px;
+        }
+
+        .action-btn{
+            width:34px;
+            height:34px;
+            margin:2px;
+        }
+
+        #btnContainer{
+            width:100%;
+        }
+
+        #btnContainer .btn{
+            width:100%;
+        }
+    }
+
+    /* ---------- PAGINASI ----------
+       Blok lama "#paymentTableWrapper .dataTables_paginate ..." sudah
+       dihapus. Nilai yang di dalamnya (min-width 30px, font-size 11px,
+       border-radius 10px, active gradient, disabled abu-abu) memang sama
+       dengan premium.css untuk mobile, tapi selector-nya berawalan ID sehingga
+       menimpa premium juga di desktop - dan di desktop premium memang memakai
+       ukuran 34px/12px. Sekarang premium.css jadi satu-satunya sumber. */
+
+    @media(max-width:575px){
+        .tenant-payment-wrapper{
+            padding:0;
+            box-shadow:none;
+            background:transparent;
+        }
+
+        .tpw-header{
+            background:linear-gradient(135deg,#6366f1,#8b5cf6);
+            padding:16px;
+            border-radius:18px;
+            margin-bottom:16px;
+            box-shadow:0 8px 24px rgba(99,102,241,.3);
+        }
+
+        .tpw-header-left{
+            font-size:15px;
+            color:#fff;
+            flex:1;
+        }
+
+        .tpw-header-left i{
+            width:42px;
+            height:42px;
+            font-size:16px;
+            background:rgba(255,255,255,.2);
+            backdrop-filter:blur(8px);
+        }
+
+        /* Di mobile tombol "Tambah Pembayaran" ditumpuk di bawah search, bukan
+           berdiri di sampingnya. Selector .table-action-wrapper (1 kelas)
+           dipakai, bukan .table-action-wrapper #tablePayment_filter - yang
+           terakhir berawalan ID sehingga akan menimpa premium.css (tinggi
+           search 44px + font 13px) padahal premium sudah menata search mobile
+           ke 40px/12px seperti halaman lain. */
+        .table-action-wrapper{
+            width:100%;
+            flex-direction:column;
+            align-items:stretch;
+            justify-content:flex-start;
+            gap:10px;
+            margin-bottom:16px;
+        }
+
+        .tpw-add-btn{
+            width:100%;
+            flex:0 0 auto;
+            height:44px;
+            justify-content:center;
+            padding:11px 16px;
+            font-size:13px;
+        }
+
+        .tpw-add-btn span{
+            display:inline;
+        }
+
+        /* Rata tengah untuk pagination dan "Show n entries"/baris info di mobile
+           sudah ditangani premium.css, jadi blok
+           "#paymentTableWrapper .dataTables_*" yang lama dihapus.
+
+           PENTING: "Show n entries" + baris info TIDAK lagi disembunyikan
+           di <=575px. DULU di sini ada
+           "#paymentTableWrapper .dataTables_length/_info{display:none}",
+           jadi di mobile tidak ada chip info maupun dropdown jumlah baris.
+           Sekarang keduanya tampil, sama seperti halaman lain. */
+
+        .table-stock thead th{
+            font-size:10px;
+            padding:10px 8px;
+        }
+
+        .table-stock td{
+            font-size:12px;
+            padding:12px 8px;
+        }
+
+        .date-main{
+            font-size:11px;
+        }
+
+        .badge-price,
+        .badge-qty{
+            font-size:10px;
+            padding:4px 8px;
+        }
+
+        .action-btn{
+            width:30px;
+            height:30px;
+            font-size:11px;
+            margin:0 2px;
+        }
+    }
+
+        /* ============================================================
+   MOBILE CARD â€” data pembayaran (premium minimalis)
+   ============================================================ */
+.paym-cards{
+    display:none;
+}
+
+.paym-card{
+    position:relative;
+    display:grid;
+    grid-template-columns:44px minmax(0,1fr) auto;
+    align-items:center;
+    gap:12px;
+
+    padding:14px 14px;
+    overflow:hidden;
+
+    background:#fff;
+    border:1px solid rgba(99,102,241,.10);
+    border-radius:18px;
+
+    box-shadow:0 4px 14px rgba(15,23,42,.05);
+
+    transition:transform .2s ease, box-shadow .2s ease, border-color .2s ease;
+}
+
+.paym-card:active{
+    transform:scale(.99);
+}
+
+/* Aksen tipis di sisi kiri */
+.paym-card::before{
+    content:"";
+    position:absolute;
+    left:0;
+    top:12px;
+    bottom:12px;
+
+    width:3px;
+    border-radius:0 3px 3px 0;
+
+    background:linear-gradient(180deg,#6366f1,#8b5cf6);
+    opacity:.85;
+}
+
+.paym-card-icon{
+    width:44px;
+    height:44px;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    border-radius:14px;
+
+    background:linear-gradient(135deg,#eef2ff,#f5f3ff);
+    color:#6366f1;
+
+    font-size:17px;
+}
+
+.paym-card-main{
+    min-width:0;
+}
+
+.paym-card-date{
+    font-size:12px;
+    font-weight:600;
+    color:#94a3b8;
+    letter-spacing:.2px;
+}
+
+.paym-card-row{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    flex-wrap:wrap;
+    margin-top:3px;
+}
+
+.paym-card-amount{
+    font-size:15.5px;
+    font-weight:800;
+    color:#0f172a;
+    letter-spacing:-.2px;
+    white-space:nowrap;
+}
+
+.paym-card-badge{
+    display:inline-flex;
+    align-items:center;
+    gap:4px;
+
+    padding:3px 8px;
+
+    border-radius:999px;
+
+    font-size:10.5px;
+    font-weight:700;
+    line-height:1.5;
+}
+
+.paym-card-badge i{
+    font-size:9px;
+}
+
+.paym-card-badge.is-paid{
+    background:#ecfdf5;
+    color:#059669;
+}
+
+.paym-card-badge.is-pending{
+    background:#fffbeb;
+    color:#d97706;
+}
+
+.paym-card-actions{
+    display:flex;
+    align-items:center;
+    gap:6px;
+    flex-shrink:0;
+}
+
+.paym-card-btn{
+    width:34px;
+    height:34px;
+
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+
+    border:none;
+    border-radius:11px;
+
+    color:#fff;
+    font-size:13px;
+    cursor:pointer;
+
+    box-shadow:0 4px 10px rgba(15,23,42,.14);
+
+    transition:transform .18s ease, box-shadow .18s ease;
+}
+
+.paym-card-btn.is-edit{
+    background:linear-gradient(135deg,#6366f1,#4f46e5);
+    box-shadow:0 4px 12px rgba(79,70,229,.35);
+}
+
+.paym-card-btn.is-edit:hover{
+    background:linear-gradient(135deg,#4f46e5,#4338ca);
+    box-shadow:0 6px 16px rgba(79,70,229,.45);
+}
+
+.paym-card-btn.is-delete{
+    background:linear-gradient(135deg,#ef4444,#dc2626);
+    box-shadow:0 4px 12px rgba(239,68,68,.35);
+}
+
+.paym-card-btn.is-delete:hover{
+    background:linear-gradient(135deg,#dc2626,#b91c1c);
+    box-shadow:0 6px 16px rgba(239,68,68,.45);
+}
+
+.paym-card-btn.is-print{
+    background:linear-gradient(135deg,#0ea5e9,#0284c7);
+    box-shadow:0 4px 12px rgba(14,165,233,.35);
+}
+
+.paym-card-btn.is-print:hover{
+    background:linear-gradient(135deg,#0284c7,#0369a1);
+    box-shadow:0 6px 16px rgba(14,165,233,.45);
+}
+
+.paym-card-btn:active{
+    transform:scale(.94);
+}
+
+/* Empty state di dalam cards (mobile) — class sama dengan master */
+.paym-cards .empty-search{
+    padding:26px 16px 22px;
+    text-align:center;
+}
+
+.paym-cards .empty-img{
+    display:block;
+    width:120px;
+    margin:0 auto 8px;
+    opacity:.8;
+}
+
+.paym-cards .empty-title{
+    font-size:12.5px;
+    font-weight:700;
+    color:#0f172a;
+    margin-bottom:4px;
+}
+
+.paym-cards .empty-sub{
+    font-size:10.5px;
+    color:#64748b;
+}
+
+@media(max-width:575px){
+    /* Tabel disembunyikan, data tampil sebagai kartu */
+    #tablePayment{
+        display:none !important;
+    }
+
+    .paym-cards{
+        display:flex;
+        flex-direction:column;
+        gap:10px;
+        margin:14px 0 0;
+    }
+}

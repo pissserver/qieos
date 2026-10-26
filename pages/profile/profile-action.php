@@ -1,0 +1,47 @@
+<?php
+include '../../sessions/session.php';
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $fullname = $_POST['fullname'];
+
+    $password = $_POST['password'] ? $_POST['password'] : '';
+    $password_confirm = $_POST['password_confirm'] ? $_POST['password_confirm'] : '';
+
+    $username = $_SESSION['username'];
+
+    // update password hanya jika diisi
+    if (!empty($password)) {
+        if ($password !== $password_confirm) {
+            header("Location: profile.php?status=error&msg=Password tidak sama");
+            exit();
+        }
+
+        $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
+
+        $sql = "UPDATE users 
+                SET fullname='$fullname', 
+                    password='$hashedPassword'
+                WHERE username='$username'";
+
+        $resultPassword = mysqli_query($conn, $sql);
+    } else {
+        $sql = "UPDATE users 
+                SET fullname='$fullname'
+                WHERE username='$username'";
+
+        $result = mysqli_query($conn, $sql);
+    }
+
+
+    if ($resultPassword) {
+        session_destroy();
+        header("Location: ../../sessions/sign-in.php?success=reset");
+        exit();
+    } elseif ($result) {
+        header("Location: profile.php?status=success&msg=Profil berhasil diperbarui");
+        exit();
+    } else {
+        header("Location: profile.php?status=error&msg=Profil gagal diperbarui");
+        exit();
+    }
+}

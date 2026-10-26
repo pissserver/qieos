@@ -1,0 +1,1818 @@
+/* ===== SECTION ===== */
+.section-card{
+    background:#fff;
+    border-radius:24px;
+    padding:24px;
+    box-shadow:0 8px 24px rgba(15,23,42,.05);
+}
+
+/* ===== PANEL ===== */
+.panel-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:18px 22px;
+    border-radius:18px;
+}
+
+.panel-left{
+    display:flex;
+    align-items:center;
+    gap:16px;
+    min-width:0;
+    flex:1 1 auto;
+}
+
+.panel-left > div{
+    min-width:0;
+}
+
+.panel-icon{
+    width:58px;
+    height:58px;
+    border-radius:16px;
+    background:rgba(255,255,255,.12);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:22px;
+}
+
+.panel-title{
+    font-size:17px;
+    font-weight:700;
+}
+
+.panel-subtitle{
+    font-size:13px;
+    opacity:.85;
+}
+
+.panel-primary{
+    background:linear-gradient(135deg, #0f172a, #1e293b, #334155);
+    color:#fff;
+}
+
+/* ===== TOGGLE ===== */
+.panel-toggle-wrap{
+    display:flex;
+    align-items:center;
+    gap:10px;
+}
+
+.toggle-label{
+    font-size:13px;
+    color:#cbd5e1;
+    font-weight:500;
+    transition:.25s;
+}
+
+.toggle-label.active{
+    color:#fff;
+    font-weight:700;
+}
+
+/* counter stok — hanya tampil di mobile */
+.stock-head-meta{
+    display:none;
+}
+
+.switch-toggle{
+    position:relative;
+    display:inline-block;
+    width:54px;
+    height:28px;
+}
+
+.switch-toggle input{
+    opacity:0;
+    width:0;
+    height:0;
+}
+
+.slider-toggle{
+    position:absolute;
+    cursor:pointer;
+    inset:0;
+    background:#475569;
+    border-radius:50px;
+    transition:.3s;
+}
+
+.slider-toggle:before{
+    content:"";
+    position:absolute;
+    width:22px;
+    height:22px;
+    left:3px;
+    top:3px;
+    background:#fff;
+    border-radius:50%;
+    transition:.3s;
+}
+
+.switch-toggle input:checked + .slider-toggle{
+    background:#22c55e;
+}
+
+.switch-toggle input:checked + .slider-toggle:before{
+    transform:translateX(26px);
+}
+
+.panel-mode{
+    display:none;
+    animation:fadeSlide .3s ease;
+}
+
+.panel-mode.active{
+    display:block;
+}
+
+@keyframes fadeSlide{
+    from{opacity:0; transform:translateY(8px);}
+    to{opacity:1; transform:translateY(0);}
+}
+
+/* ===== REQ HERO (Nomor Request) ===== */
+.req-hero{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:20px;
+    padding:24px 28px;
+    border-radius:18px;
+    background:
+        radial-gradient(600px 200px at 85% -30%, rgba(129,140,248,.35), transparent 60%),
+        linear-gradient(135deg,#1e293b,#0f172a);
+    color:#fff;
+    box-shadow:0 12px 28px rgba(15,23,42,.18);
+    position:relative;
+    overflow:hidden;
+}
+
+.req-hero::after{
+    content:"";
+    position:absolute;
+    inset:0;
+    background-image:radial-gradient(rgba(255,255,255,.12) 1px, transparent 1px);
+    background-size:22px 22px;
+    pointer-events:none;
+    opacity:.25;
+}
+
+.req-hero-left,
+.req-hero-right{
+    position:relative;
+    z-index:1;
+}
+
+.req-hero-label{
+    font-size:11px;
+    text-transform:uppercase;
+    letter-spacing:1.8px;
+    color:#a5b4fc;
+    font-weight:700;
+    margin-bottom:8px;
+}
+
+.req-hero-number{
+    font-size:30px;
+    font-weight:800;
+    font-family:'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    letter-spacing:1px;
+    display:flex;
+    align-items:center;
+    gap:14px;
+    flex-wrap:wrap;
+}
+
+.req-hero-status{
+    display:inline-flex;
+    align-items:center;
+    gap:7px;
+    font-size:12px;
+    font-weight:700;
+    color:#fca5a5;
+    font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    letter-spacing:0;
+    background:rgba(248,113,113,.12);
+    border:1px solid rgba(248,113,113,.35);
+    padding:5px 12px;
+    border-radius:50px;
+}
+
+.req-hero-status.status-pending{
+    color:#fcd34d;
+    background:rgba(251,191,36,.14);
+    border:1px solid rgba(251,191,36,.4);
+}
+
+.req-hero-status.status-pending .status-dot{
+    background:#fbbf24;
+}
+
+.status-dot{
+    width:7px;
+    height:7px;
+    border-radius:50%;
+    background:#f87171;
+    animation:pulse 1.6s infinite;
+}
+
+@keyframes pulse{
+    0%,100%{opacity:1; transform:scale(1);}
+    50%{opacity:.4; transform:scale(.8);}
+}
+
+.req-hero-right{
+    text-align:right;
+}
+
+.req-hero-date{
+    font-size:14px;
+    font-weight:600;
+    color:#e2e8f0;
+    display:flex;
+    align-items:center;
+    gap:8px;
+    justify-content:flex-end;
+}
+
+.req-hero-date i{
+    color:#a5b4fc;
+}
+
+.req-hero-hint{
+    font-size:12px;
+    color:#94a3b8;
+    margin-top:6px;
+    display:flex;
+    align-items:center;
+    gap:6px;
+    justify-content:flex-end;
+}
+
+/* ===== ITEM ROW ===== */
+.req-item{
+    display:flex;
+    align-items:stretch;
+    gap:16px;
+    background:#fff;
+    border:1px solid #e2e8f0;
+    border-radius:16px;
+    padding:18px;
+    margin-bottom:14px;
+    box-shadow:0 4px 14px rgba(15,23,42,.04);
+    transition:box-shadow .25s, border-color .25s, transform .25s;
+    position:relative;
+    overflow:hidden;
+}
+
+.req-item:hover{
+    box-shadow:0 10px 22px rgba(15,23,42,.08);
+    border-color:#c7d2fe;
+}
+
+.req-item.over-stock{
+    border-color:#fecaca;
+    background:#fffbfb;
+    box-shadow:0 8px 22px rgba(220,38,38,.08);
+    animation:rowWarn .45s ease;
+}
+
+@keyframes rowWarn{
+    0%,100%{transform:translateX(0);}
+    25%{transform:translateX(-4px);}
+    50%{transform:translateX(4px);}
+    75%{transform:translateX(-2px);}
+}
+
+.req-item.removing{
+    margin-bottom:0;
+    opacity:0;
+    overflow:hidden;
+    transition:all .3s ease;
+}
+
+.req-item-index{
+    flex:0 0 38px;
+    height:38px;
+    border-radius:12px;
+    background:linear-gradient(135deg, #0f172a, #1e293b, #334155);
+    color:#fff;
+    font-weight:800;
+    font-size:13px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    box-shadow:0 4px 10px rgba(79,70,229,.3);
+}
+
+.req-item-body{
+    flex:1 1 auto;
+    display:grid;
+    grid-template-columns:1fr 150px 170px;
+    gap:16px;
+    min-width:0;
+}
+
+.req-f label{
+    display:flex;
+    align-items:center;
+    gap:6px;
+    font-size:11px;
+    font-weight:700;
+    text-transform:uppercase;
+    letter-spacing:.6px;
+    color:#64748b;
+    margin-bottom:7px;
+}
+
+.req-f label i{
+    color:#818cf8;
+    font-size:11px;
+}
+
+.item-select,
+.item-qty{
+    width:100%;
+    min-height:46px;
+    border-radius:12px;
+    border:1.5px solid #e2e8f0;
+    background:#f8fafc;
+    padding:0 14px;
+    font-size:14px;
+    color:#0f172a;
+    outline:none;
+    transition:border-color .2s, box-shadow .2s, background .2s;
+    appearance:auto;
+}
+
+.item-select{
+    padding-right:38px;
+    cursor:pointer;
+}
+
+.req-item .select2-container{
+    width:100% !important;
+}
+
+.req-item .select2-container--default .select2-selection--single{
+    min-height:46px;
+    border-radius:12px;
+    border:1.5px solid #e2e8f0;
+    background:#f8fafc;
+    padding:0 38px 0 14px;
+    display:flex;
+    align-items:center;
+    transition:border-color .2s, box-shadow .2s, background .2s;
+}
+
+.req-item .select2-container--default .select2-selection--single .select2-selection__rendered{
+    padding:0;
+    line-height:44px;
+    font-size:14px;
+    color:#0f172a;
+}
+
+.req-item .select2-container--default .select2-selection--single .select2-selection__placeholder{
+    color:#94a3b8;
+}
+
+.req-item .select2-container--default.select2-container--open .select2-selection--single,
+.req-item .select2-container--default.select2-container--focus .select2-selection--single,
+.req-item .select2-container--default .select2-selection--single:hover{
+    border-color:#6366f1;
+    background:#fff;
+    box-shadow:0 0 0 4px rgba(99,102,241,.12);
+}
+
+.req-item .select2-container--default .select2-selection--single .select2-selection__arrow{
+    top:50%;
+    right:10px;
+    transform:translateY(-50%);
+    transition:transform .3s;
+}
+
+.req-item .select2-container--default.select2-container--open .select2-selection--single .select2-selection__arrow{
+    transform:translateY(-50%) rotate(180deg);
+}
+
+.item-qty::-webkit-outer-spin-button,
+.item-qty::-webkit-inner-spin-button{
+    opacity:1;
+}
+
+.item-select:focus,
+.item-qty:focus{
+    border-color:#6366f1;
+    background:#fff;
+    box-shadow:0 0 0 4px rgba(99,102,241,.12);
+}
+
+.over-stock .item-qty{
+    border-color:#ef4444;
+    background:#fef2f2;
+    box-shadow:0 0 0 4px rgba(239,68,68,.10);
+}
+
+.maks-hint{
+    display:block;
+    font-size:12px;
+    color:#64748b;
+    margin-top:6px;
+}
+
+.over-stock .maks-hint{
+    color:#dc2626;
+    font-weight:600;
+}
+
+.stock-chip{
+    display:inline-flex;
+    align-items:center;
+    gap:7px;
+    padding:10px 14px;
+    border-radius:12px;
+    background:#ecfdf5;
+    border:1px solid #a7f3d0;
+    color:#065f46;
+    font-size:13px;
+    font-weight:700;
+    min-height:46px;
+}
+
+.stock-chip i{
+    color:#10b981;
+    font-size:12px;
+}
+
+.stock-chip.chip-empty{
+    background:#fef2f2;
+    border-color:#fecaca;
+    color:#b91c1c;
+}
+
+.stock-chip.chip-empty i{
+    color:#ef4444;
+}
+
+.over-stock .stock-chip{
+    background:#fef2f2;
+    border-color:#fecaca;
+    color:#b91c1c;
+}
+
+.over-stock .stock-chip i{
+    color:#ef4444;
+}
+
+.item-remove{
+    flex:0 0 38px;
+    align-self:center;
+    height:38px;
+    border:none;
+    border-radius:12px;
+    background:#fef2f2;
+    color:#ef4444;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:13px;
+    transition:.2s;
+}
+
+.item-remove:hover{
+    background:#ef4444;
+    color:#fff;
+    transform:scale(1.05);
+}
+
+/* ===== TAMBAH PRODUK ===== */
+.btn-add-item{
+    width:100%;
+    min-height:52px;
+    border-radius:14px;
+    border:1.6px dashed #a5b4fc;
+    background:#f5f6ff;
+    color:#4338ca;
+    font-weight:700;
+    font-size:14px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    cursor:pointer;
+    transition:.25s;
+    margin-top:6px;
+}
+
+.btn-add-item:hover{
+    background:linear-gradient(135deg, #0f172a, #1e293b, #334155);
+    color:#fff;
+    border-color:transparent;
+    box-shadow:0 10px 22px rgba(79,70,229,.25);
+    transform:translateY(-1px);
+}
+
+/* ===== RINGKASAN ===== */
+.req-summary{
+    margin-top:22px;
+    padding:18px 20px;
+    border-radius:16px;
+    background:#f8fafc;
+    border:1px solid #e2e8f0;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:16px;
+    flex-wrap:wrap;
+}
+
+.req-summary-stats{
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+}
+
+.summary-pill{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    padding:9px 15px;
+    border-radius:12px;
+    background:#fff;
+    border:1px solid #e2e8f0;
+    color:#475569;
+    font-size:13px;
+}
+
+.summary-pill i{
+    color:#818cf8;
+}
+
+.summary-pill b{
+    color:#0f172a;
+    font-size:15px;
+}
+
+.btn-request{
+    min-width:200px;
+    height:48px;
+    border-radius:12px;
+    font-weight:700;
+    font-size:14px;
+    border:none;
+    background:linear-gradient(135deg, #0f172a, #1e293b, #334155);
+    color:#fff;
+    box-shadow:0 10px 20px rgba(79,70,229,.3);
+    transition:.25s;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    cursor:pointer;
+}
+
+.btn-request:hover:not(:disabled){
+    transform:translateY(-2px);
+    box-shadow:0 14px 26px rgba(79,70,229,.38);
+}
+
+.btn-request:disabled{
+    opacity:.7;
+    cursor:not-allowed;
+}
+
+.btn-request.has-error{
+    background:linear-gradient(135deg,#ef4444,#dc2626);
+    box-shadow:0 10px 20px rgba(239,68,68,.3);
+    animation:rowWarn .5s ease;
+}
+
+/* ===== EMPTY SEARCH ===== */
+.empty-search{
+    padding:50px 20px;
+    text-align:center;
+}
+
+.empty-img{
+    width:370px;
+    opacity:.9;
+    margin-bottom:18px;
+}
+
+.empty-title{
+    font-size:18px;
+    font-weight:700;
+    color:#0f172a;
+    margin-bottom:6px;
+}
+
+.empty-sub{
+    font-size:14px;
+    color:#64748b;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width:991.98px){
+    .section-card{
+        padding:18px;
+        border-radius:18px;
+    }
+
+    .panel-header{
+        flex-direction:column;
+        align-items:flex-start;
+        gap:14px;
+        padding:16px 18px;
+    }
+
+    .panel-left{
+        width:100%;
+    }
+
+    .panel-toggle-wrap{
+        width:100%;
+        justify-content:space-between;
+    }
+
+    .req-item-body{
+        grid-template-columns:1fr 1fr;
+    }
+
+    .req-item-body .input-stok{
+        grid-column:1 / -1;
+    }
+}
+
+@media (max-width:575.98px){
+    .section-card{
+        padding:14px;
+    }
+
+    .panel-icon{
+        width:48px;
+        height:48px;
+        font-size:18px;
+        border-radius:14px;
+    }
+
+    .panel-title{
+        font-size:15px;
+    }
+
+    .panel-subtitle{
+        font-size:12px;
+    }
+
+    .mt-4.px-4{
+        padding-left:0 !important;
+        padding-right:0 !important;
+    }
+
+    /* ===== REQUEST STOK GUDANG — MOBILE MINIMALIS ===== */
+    .request-stock-card{
+        padding:12px !important;
+        border-radius:20px;
+    }
+
+    /* isi card (form request & riwayat) sejajar kiri-kanan dengan header */
+    .request-stock-card .my-4.px-4{
+        margin-top:12px !important;
+        margin-bottom:0 !important;
+        padding-left:0 !important;
+        padding-right:0 !important;
+    }
+
+    .request-stock-card .panel-header{
+        flex-direction:column;
+        align-items:stretch;
+        justify-content:center;
+        gap:11px;
+        padding:12px;
+        border-radius:16px;
+    }
+
+    .request-stock-card .panel-left{
+        width:auto;
+        flex:1 1 auto;
+        gap:10px;
+        min-width:0;
+    }
+
+    .request-stock-card .panel-icon{
+        width:36px;
+        height:36px;
+        flex:0 0 36px;
+        border-radius:12px;
+        font-size:14px;
+    }
+
+    .request-stock-card .panel-title{
+        font-size:13px;
+        line-height:1.2;
+    }
+
+    .request-stock-card .panel-subtitle{
+        display:block;
+        font-size:10px;
+        line-height:1.3;
+        margin-top:2px;
+    }
+
+    /* segmented switch (besar & di tengah) */
+    .request-stock-card .panel-toggle-wrap{
+        width:100%;
+        flex:0 0 auto;
+        justify-content:center;
+        gap:0;
+        padding:4px;
+        border-radius:14px;
+        background:rgba(255,255,255,.1);
+        border:1px solid rgba(255,255,255,.14);
+    }
+
+    .request-stock-card .switch-toggle{
+        display:none;
+    }
+
+    .request-stock-card .toggle-label{
+        flex:1 1 0;
+        text-align:center;
+        padding:9px 12px;
+        border-radius:11px;
+        font-size:11.5px;
+        font-weight:700;
+        letter-spacing:.2px;
+        color:rgba(255,255,255,.65);
+        cursor:pointer;
+        user-select:none;
+    }
+
+    .request-stock-card .toggle-label.active{
+        color:#0f172a;
+        background:#fff;
+        box-shadow:0 4px 10px rgba(2,6,23,.35);
+    }
+
+    /* hero */
+    .request-stock-card .req-hero{
+        flex-direction:row;
+        align-items:flex-start;
+        justify-content:space-between;
+        gap:10px;
+        padding:13px 14px;
+        border-radius:16px;
+    }
+
+    .request-stock-card .req-hero::after{
+        display:none;
+    }
+
+    .request-stock-card .req-hero-left{
+        flex:1 1 auto;
+        min-width:0;
+    }
+
+    .request-stock-card .req-hero-label{
+        font-size:8.5px;
+        letter-spacing:1.4px;
+        margin-bottom:5px;
+    }
+
+    .request-stock-card .req-hero-number{
+        font-size:19px;
+        letter-spacing:.4px;
+        gap:8px;
+    }
+
+    .request-stock-card .req-hero-status{
+        font-size:9.5px;
+        padding:3px 8px;
+        gap:5px;
+    }
+
+    .request-stock-card .req-hero-status .status-dot{
+        width:6px;
+        height:6px;
+    }
+
+    .request-stock-card .req-hero-right{
+        flex:0 0 auto;
+        width:auto;
+        text-align:right;
+    }
+
+    .request-stock-card .req-hero-date{
+        font-size:10.5px;
+        gap:5px;
+        justify-content:flex-end;
+    }
+
+    .request-stock-card .req-hero-date i{
+        font-size:10px;
+    }
+
+    .request-stock-card .req-hero-hint{
+        display:none;
+    }
+
+    /* item */
+    .request-stock-card #itemsContainer{
+        margin-top:10px !important;
+    }
+
+    .request-stock-card .req-item{
+        flex-direction:row;
+        align-items:flex-start;
+        gap:10px;
+        padding:12px;
+        border-radius:16px;
+        margin-bottom:10px;
+    }
+
+    .request-stock-card .req-item-index{
+        flex:0 0 28px;
+        width:28px;
+        height:28px;
+        border-radius:9px;
+        font-size:11px;
+    }
+
+    .request-stock-card .req-item-body{
+        flex:1 1 auto;
+        min-width:0;
+        display:grid;
+        grid-template-columns:1fr 1fr;
+        gap:10px;
+    }
+
+    .request-stock-card .req-item-body .input-produk{
+        grid-column:1 / -1;
+    }
+
+    .request-stock-card .req-item-body .input-stok{
+        grid-column:auto;
+    }
+
+    .request-stock-card .req-f label{
+        font-size:9px;
+        letter-spacing:.5px;
+        margin-bottom:5px;
+        gap:5px;
+    }
+
+    .request-stock-card .req-f label i{
+        font-size:9px;
+    }
+
+    .request-stock-card .item-select,
+    .request-stock-card .item-qty{
+        min-height:42px;
+        border-radius:11px;
+        font-size:13px;
+        padding:0 12px;
+    }
+
+    .request-stock-card .item-select{
+        padding-right:34px;
+    }
+
+    .request-stock-card .req-item .select2-container--default .select2-selection--single{
+        min-height:42px;
+        border-radius:11px;
+        padding:0 34px 0 12px;
+    }
+
+    .request-stock-card .req-item .select2-container--default .select2-selection--single .select2-selection__rendered{
+        line-height:40px;
+        font-size:11.5px;
+    }
+
+    /* select2: teks dropdown (daftar produk + pencarian) lebih kecil */
+    .request-stock-card .select2-container--default .select2-results__option{
+        font-size:11.5px;
+        line-height:1.35;
+        padding:8px 10px;
+    }
+
+    .request-stock-card .select2-container--default .select2-results__option--highlighted[aria-selected],
+    .request-stock-card .select2-container--default .select2-results__option[aria-selected="true"]{
+        font-size:11.5px;
+    }
+
+    .request-stock-card .select2-container--default .select2-search--dropdown .select2-search__field{
+        font-size:11.5px;
+        padding:7px 10px;
+    }
+
+    .request-stock-card .select2-container--default .select2-results__message{
+        font-size:11.5px;
+    }
+
+    .request-stock-card .maks-hint{
+        font-size:10px;
+        margin-top:4px;
+    }
+
+    .request-stock-card .stock-chip{
+        min-height:42px;
+        padding:8px 10px;
+        border-radius:11px;
+        font-size:11.5px;
+        gap:5px;
+    }
+
+    .request-stock-card .stock-chip i{
+        font-size:10px;
+    }
+
+    .request-stock-card .item-remove{
+        flex:0 0 30px;
+        width:30px;
+        height:30px;
+        border-radius:10px;
+        font-size:11px;
+        align-self:flex-start;
+    }
+
+    /* tambah + ringkasan */
+    .request-stock-card .btn-add-item{
+        min-height:46px;
+        border-radius:13px;
+        font-size:12.5px;
+        border-width:1.4px;
+        margin-top:2px;
+    }
+
+    .request-stock-card .req-summary{
+        margin-top:14px;
+        padding:12px;
+        border-radius:16px;
+        gap:10px;
+        flex-direction:column;
+        align-items:stretch;
+    }
+
+    .request-stock-card .req-summary-stats{
+        gap:8px;
+        justify-content:center;
+    }
+
+    .request-stock-card .summary-pill{
+        flex:1 1 0;
+        justify-content:center;
+        padding:7px 11px;
+        font-size:11px;
+        gap:6px;
+        border-radius:10px;
+    }
+
+    .request-stock-card .summary-pill i{
+        font-size:10px;
+    }
+
+    .request-stock-card .summary-pill b{
+        font-size:12.5px;
+    }
+
+    .request-stock-card .btn-request{
+        width:100%;
+        min-width:0;
+        height:48px;
+        border-radius:13px;
+        font-size:13.5px;
+    }
+
+    /* ===== RIWAYAT REQUEST — MOBILE MINIMALIS 2 BARIS ===== */
+    .request-stock-card #requestHistory{
+        width:100% !important;
+        min-width:0 !important;
+        table-layout:auto !important;
+        border-collapse:separate;
+        border-spacing:0 !important;
+        margin:0;
+    }
+
+    .request-stock-card #requestHistory thead{
+        display:none;
+    }
+
+    .request-stock-card #requestHistory > tbody{
+        border-top:0 !important;
+    }
+
+    .request-stock-card #requestHistory tbody{
+        display:flex;
+        flex-direction:column;
+        gap:8px;
+    }
+
+    .request-stock-card #requestHistory tbody > tr.history-row{
+        display:grid !important;
+        grid-template-columns:minmax(0,1fr) auto auto;
+        grid-template-areas:
+            "code   status actions"
+            "meta   date   qty";
+        align-items:center;
+        gap:5px 8px;
+        width:100%;
+        margin:0;
+        padding:11px 12px;
+        border-radius:16px;
+        border:1px solid rgba(15,23,42,.06);
+        background:#fff;
+        box-shadow:none;
+        cursor:default;
+    }
+
+    .request-stock-card .history-row > td{
+        display:block !important;
+        width:auto !important;
+        max-width:none;
+        padding:0 !important;
+        border:none !important;
+        border-radius:0 !important;
+        background:transparent !important;
+        vertical-align:middle;
+    }
+
+    .request-stock-card .history-row > td:nth-child(1){ grid-column:1; grid-row:1 / span 2; min-width:0; }
+    .request-stock-card .history-row > td:nth-child(2){ grid-area:qty; justify-self:end; }
+    .request-stock-card .history-row > td:nth-child(3){ grid-area:status; justify-self:end; }
+    .request-stock-card .history-row > td:nth-child(4){ grid-area:date; justify-self:start; min-width:0; }
+    .request-stock-card .history-row > td:nth-child(5){ grid-area:actions; justify-self:end; }
+
+    .request-stock-card #requestHistory.table-hover > tbody > tr.history-row:hover > *{
+        background-color:transparent !important;
+        box-shadow:none !important;
+    }
+
+    /* baris 1: no. request (tanpa badge gelap) */
+    .request-stock-card .history-row .product-wrap{
+        display:flex;
+        flex-direction:column;
+        align-items:flex-start;
+        gap:3px;
+        min-width:0;
+    }
+
+    .request-stock-card .history-row .req-code-badge{
+        display:inline-flex;
+        align-items:center;
+        gap:5px;
+        padding:0;
+        max-width:100%;
+        border-radius:0;
+        background:none;
+        box-shadow:none;
+        color:#0f172a;
+        font-size:clamp(11px,3.4vw,12.5px);
+        font-weight:800;
+        letter-spacing:0;
+        white-space:normal;
+        overflow-wrap:anywhere;
+    }
+
+    .request-stock-card .history-row .req-code-badge i{
+        flex:0 0 auto;
+        font-size:11px;
+        color:#94a3b8;
+    }
+
+    /* baris 2: meta tipis (produk di atas, user di bawah) */
+    .request-stock-card .history-row .product-wrap > div:last-child{
+        display:flex;
+        flex-direction:column;
+        align-items:flex-start;
+        gap:1px;
+        min-width:0;
+    }
+
+    .request-stock-card .history-row .product-name,
+    .request-stock-card .history-row .product-code{
+        font-size:10px;
+        font-weight:600;
+        line-height:1.3;
+        color:#94a3b8;
+        text-transform:capitalize;
+        white-space:normal;
+        overflow-wrap:anywhere;
+    }
+
+    .request-stock-card .history-row .product-name{
+        color:#64748b;
+    }
+
+    /* tanggal jadi teks meta */
+    /* tanggal jadi teks meta (tanpa karakter pemisah tambahan) */
+    .request-stock-card .history-row .date-badge{
+        display:inline-flex;
+        align-items:center;
+        gap:4px;
+        padding:0;
+        max-width:100%;
+        border:none;
+        background:none;
+        color:#94a3b8;
+        font-size:9px;
+        font-weight:600;
+        white-space:normal;
+        overflow-wrap:anywhere;
+    }
+
+    .request-stock-card .history-row .date-badge::before{
+        content:none;
+    }
+
+    .request-stock-card .history-row .date-badge i{
+        display:none;
+    }
+
+    /* total pcs */
+    .request-stock-card .history-row .qty-badge{
+        display:inline-flex;
+        align-items:center;
+        gap:4px;
+        padding:0;
+        background:none;
+        color:#4338ca;
+        font-size:10.5px;
+        font-weight:800;
+        white-space:nowrap;
+    }
+
+    .request-stock-card .history-row .qty-badge i{
+        font-size:9.5px;
+        color:#818cf8;
+    }
+
+    /* status pill */
+    .request-stock-card .history-row .status-badge{
+        gap:4px;
+        padding:3px 7px;
+        border-radius:8px;
+        font-size:9px;
+        font-weight:700;
+        white-space:nowrap;
+    }
+
+    .request-stock-card .history-row .status-badge i{
+        font-size:8px;
+    }
+
+    .request-stock-card .history-row .status-approved{
+        background:#ecfdf5;
+        color:#15803d;
+    }
+
+    .request-stock-card .history-row .status-rejected{
+        background:#fef2f2;
+        color:#b91c1c;
+    }
+
+    .request-stock-card .history-row .status-pending{
+        background:#fffbeb;
+        color:#b45309;
+    }
+
+    /* aksi */
+    .request-stock-card .history-row .row-actions{
+        gap:4px;
+    }
+
+    .request-stock-card .history-row .act-btn,
+    .request-stock-card .history-row .lock-hint{
+        flex:0 0 27px;
+        width:27px;
+        height:27px;
+        border-radius:8px;
+        font-size:10px;
+    }
+
+    .request-stock-card .history-row .lock-hint{
+        background:#f1f5f9;
+        color:#94a3b8;
+    }
+
+    /* kosong */
+    .request-stock-card .empty-search{
+        padding:16px 12px 18px;
+        text-align:center;
+    }
+
+    .request-stock-card .empty-img{
+        display:block;
+        width:120px;
+        margin:0 auto 8px;
+        opacity:.8;
+    }
+
+    .request-stock-card .empty-title{
+        font-size:12.5px;
+        font-weight:700;
+        color:#0f172a;
+        margin-bottom:4px;
+    }
+
+    .request-stock-card .empty-sub{
+        font-size:10.5px;
+        color:#64748b;
+    }
+
+    /* baris kosong: tanpa garis, tanpa kartu, isi penuh & di tengah */
+    .request-stock-card #requestHistory tbody tr:has(.empty-search){
+        display:block !important;
+        width:100%;
+        padding:0;
+        margin:0;
+        border:0;
+        background:transparent;
+        box-shadow:none;
+    }
+
+    .request-stock-card #requestHistory tbody tr:has(.empty-search) > td{
+        display:block;
+        width:100% !important;
+        padding:0 !important;
+        border:0 !important;
+        text-align:center;
+    }
+
+    .request-stock-card .empty-state{
+        padding:26px 16px;
+        border:1px dashed #e2e8f0;
+        border-radius:16px;
+        background:#fbfcfe;
+    }
+
+    .request-stock-card .empty-state i{
+        font-size:30px;
+        opacity:.35;
+        margin-bottom:6px;
+    }
+
+    .request-stock-card .empty-state h6{
+        font-size:12.5px;
+        color:#334155;
+    }
+
+    .request-stock-card .empty-state small{
+        font-size:10.5px;
+        color:#94a3b8;
+    }
+
+    .dataTables_wrapper .dataTables_paginate,
+    .dataTables_wrapper .dataTables_paginate .pagination{
+        justify-content:center;
+    }
+
+    .dataTables_wrapper .dataTables_info{
+        text-align:center;
+    }
+
+    .dataTables_wrapper .dataTables_length,
+    .dataTables_wrapper .dataTables_filter{
+        width:100%;
+        justify-content:center;
+    }
+
+    .dataTables_filter input{
+        width:100% !important;
+    }
+
+    /* ===== STOK KANTIN — MOBILE PREMIUM CARD (putih) ===== */
+    .section-card.sales-stock-card{
+        background:#fff;
+        border:0;
+        border-radius:24px;
+        padding:0;
+        box-shadow:0 24px 44px -26px rgba(15,23,42,.5);
+        overflow:hidden;
+        position:relative;
+    }
+
+    /* header menjorok: blok gelap inset dengan sudut bulat (seperti desktop) */
+    .sales-stock-card .panel-header{
+        margin:12px 12px 0;
+        border-radius:18px;
+        padding:14px 16px;
+    }
+
+    /* body: tanpa garis pemisah, transisi halus dari header */
+    .sales-stock-card .mt-4.px-4,
+    .sales-stock-card .mt-4.px-4 .dataTables_wrapper,
+    .sales-stock-card .mt-4.px-4 .row,
+    .sales-stock-card .mt-4.px-4 .col-sm-12{
+        border-top:0 !important;
+    }
+
+    .sales-stock-card .mt-4.px-4{
+        padding:12px 12px 18px !important;
+        margin-top:0 !important;
+        background:#fff;
+    }
+
+    .sales-stock-card .dataTables_wrapper .col-sm-12:has(> table.dataTable){
+        overflow-x:visible;
+    }
+
+    /* ===== SEARCH ===== */
+    .sales-stock-card .dataTables_wrapper .dataTables_filter,
+    .request-stock-card .dataTables_wrapper .dataTables_filter{
+        display:flex;
+        width:100%;
+        margin:0 0 10px;
+        padding:0;
+    }
+
+    .sales-stock-card .dataTables_wrapper .dataTables_filter label,
+    .request-stock-card .dataTables_wrapper .dataTables_filter label{
+        display:flex;
+        width:100%;
+        margin:0;
+        padding:0;
+    }
+
+    .sales-stock-card .dataTables_wrapper .dataTables_filter input,
+    .request-stock-card .dataTables_wrapper .dataTables_filter input{
+        width:100% !important;
+        height:40px;
+        margin:0;
+        border-radius:14px !important;
+        border:1px solid transparent !important;
+        background-color:#f1f5f9;
+        background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='M20.5 20.5l-4-4'/%3E%3C/svg%3E");
+        background-repeat:no-repeat;
+        background-position:13px center;
+        background-size:15px 15px;
+        padding:0 12px 0 35px !important;
+        font-size:12px;
+        color:#0f172a;
+        box-shadow:inset 0 1px 2px rgba(15,23,42,.04);
+        outline:none;
+        transition:background-color .2s, box-shadow .2s;
+    }
+
+    .sales-stock-card .dataTables_wrapper .dataTables_filter input::placeholder,
+    .request-stock-card .dataTables_wrapper .dataTables_filter input::placeholder{
+        color:#94a3b8;
+    }
+
+    .sales-stock-card .dataTables_wrapper .dataTables_filter input:focus,
+    .request-stock-card .dataTables_wrapper .dataTables_filter input:focus{
+        background-color:#fff;
+        box-shadow:
+            0 0 0 2px #fff,
+            0 0 0 4px rgba(99,102,241,.35),
+            0 10px 20px -10px rgba(79,70,229,.6);
+    }
+
+    /* ===== BARIS DATA (kartu putih, tanpa shadow) ===== */
+    .sales-stock-card #stockTable{
+        min-width:0 !important;
+        width:100% !important;
+        border-spacing:0 !important;
+        border-collapse:separate;
+        table-layout:auto !important;
+        margin:0;
+    }
+
+    .sales-stock-card #stockTable thead{
+        display:none;
+    }
+
+    /* .table > :not(:first-child) memberi border-top 2px di tbody (volt.css) */
+    .sales-stock-card #stockTable > tbody,
+    .sales-stock-card #stockTable > tfoot{
+        border-top:0 !important;
+    }
+
+    .sales-stock-card #stockTable tbody{
+        display:flex;
+        flex-direction:column;
+        gap:7px;
+    }
+
+    .sales-stock-card #stockTable tbody tr{
+        display:flex !important;
+        align-items:center;
+        gap:10px;
+        width:100%;
+        margin:0 !important;
+        padding:9px 11px;
+        border-radius:18px;
+        border:1px solid rgba(15,23,42,.055);
+        background:#fff;
+        box-shadow:none;
+        transition:background-color .2s ease, border-color .2s ease;
+        position:relative;
+        overflow:hidden;
+    }
+
+    /* wash + aksen status di sisi kiri */
+    .sales-stock-card #stockTable tbody tr.row-st-ready{
+        background:linear-gradient(90deg, rgba(34,197,94,.08), #fff 42%);
+    }
+
+    .sales-stock-card #stockTable tbody tr.row-st-menipis{
+        background:linear-gradient(90deg, rgba(245,158,11,.10), #fff 42%);
+    }
+
+    .sales-stock-card #stockTable tbody tr.row-st-habis{
+        background:linear-gradient(90deg, rgba(244,63,94,.08), #fff 42%);
+    }
+
+    .sales-stock-card #stockTable tbody tr::before{
+        content:"";
+        position:absolute;
+        left:0;
+        top:9px;
+        bottom:9px;
+        width:4px;
+        border-radius:0 4px 4px 0;
+        background:linear-gradient(180deg,#4ade80,#16a34a);
+        box-shadow:none;
+    }
+
+    .sales-stock-card #stockTable tbody tr.row-st-menipis::before{
+        background:linear-gradient(180deg,#fcd34d,#f59e0b);
+        box-shadow:none;
+    }
+
+    .sales-stock-card #stockTable tbody tr.row-st-habis::before{
+        background:linear-gradient(180deg,#fb7185,#e11d48);
+        box-shadow:none;
+    }
+
+    .sales-stock-card #stockTable tbody tr:hover{
+        transform:none;
+        box-shadow:none;
+    }
+
+    .sales-stock-card #stockTable tbody tr:active{
+        transform:none;
+    }
+
+    /* matikan efek hover abu-abu (.table-hover) di mobile */
+    .sales-stock-card #stockTable.table-hover > tbody > tr:hover > *,
+    .sales-stock-card #stockTable.table-hover > tbody > tr:hover > td,
+    .sales-stock-card #stockTable.table-hover > tbody > tr:hover > th{
+        box-shadow:none !important;
+        background-color:transparent !important;
+        color:inherit;
+    }
+
+    .sales-stock-card #stockTable tbody tr.catalog-active{
+        box-shadow:0 0 0 1px rgba(34,197,94,.22);
+    }
+
+    .sales-stock-card #stockTable tbody td{
+        display:block !important;
+        width:auto !important;
+        border:none !important;
+        padding:0 !important;
+        background:transparent !important;
+        vertical-align:middle;
+    }
+
+    .sales-stock-card #stockTable tbody td:first-child{
+        flex:1 1 auto;
+        min-width:0;
+        margin-bottom:0;
+    }
+
+    .sales-stock-card #stockTable tbody td.st-cell-status{
+        display:none !important;
+    }
+
+    .sales-stock-card #stockTable tbody td:nth-child(2){
+        display:flex !important;
+        flex:0 0 auto;
+        justify-content:flex-end;
+    }
+
+    .sales-stock-card #stockTable tbody td:last-child{
+        flex:0 0 auto;
+        float:none;
+        margin:0;
+    }
+
+    /* produk */
+    .sales-stock-card .product-wrap{
+        display:flex;
+        align-items:center;
+        gap:10px;
+        min-width:0;
+    }
+
+    .sales-stock-card .product-wrap > div{
+        flex:1 1 auto;
+        min-width:0;
+    }
+
+    .sales-stock-card .product-img,
+    .sales-stock-card .product-icon{
+        width:36px;
+        height:36px;
+        flex:0 0 36px;
+        border-radius:12px;
+    }
+
+    .sales-stock-card .product-img{
+        object-fit:cover;
+        border:none;
+        box-shadow:0 0 0 2px #fff, 0 0 0 3px rgba(15,23,42,.10);
+    }
+
+    .sales-stock-card .product-icon{
+        font-size:16px;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        color:#fff;
+        background:linear-gradient(140deg,#334155,#0f172a);
+        box-shadow:0 0 0 2px #fff, 0 0 0 3px rgba(15,23,42,.14);
+    }
+
+    .sales-stock-card #stockTable tbody tr.row-st-ready .product-img,
+    .sales-stock-card #stockTable tbody tr.row-st-ready .product-icon{
+        box-shadow:0 0 0 2px #fff, 0 0 0 3px rgba(34,197,94,.38);
+    }
+
+    .sales-stock-card #stockTable tbody tr.row-st-menipis .product-img,
+    .sales-stock-card #stockTable tbody tr.row-st-menipis .product-icon{
+        box-shadow:0 0 0 2px #fff, 0 0 0 3px rgba(245,158,11,.40);
+    }
+
+    .sales-stock-card #stockTable tbody tr.row-st-habis .product-img,
+    .sales-stock-card #stockTable tbody tr.row-st-habis .product-icon{
+        box-shadow:0 0 0 2px #fff, 0 0 0 3px rgba(244,63,94,.36);
+    }
+
+    .sales-stock-card .product-wrap .fw-bold{
+        font-size:12px;
+        font-weight:700;
+        color:#0f172a;
+        margin-bottom:3px;
+        line-height:1.3;
+        text-transform:capitalize;
+        white-space:normal;
+        overflow-wrap:anywhere;
+    }
+
+    .sales-stock-card .product-meta{
+        display:flex;
+        align-items:center;
+        gap:6px;
+        min-width:0;
+    }
+
+    .sales-stock-card .product-wrap small{
+        font-size:9.5px;
+        font-weight:600;
+        letter-spacing:.5px;
+        color:#94a3b8;
+        line-height:1.3;
+        white-space:normal;
+        overflow-wrap:anywhere;
+    }
+
+    /* status di samping kode */
+    .sales-stock-card #stockTable .st-inline{
+        display:inline-flex !important;
+        align-items:center;
+        gap:4px;
+        flex:0 0 auto;
+        padding:2px 7px;
+        border-radius:999px;
+        font-size:8.5px;
+        font-weight:800;
+        letter-spacing:.3px;
+        text-transform:uppercase;
+        white-space:nowrap;
+    }
+
+    .sales-stock-card #stockTable .st-inline i{
+        font-size:7.5px;
+    }
+
+    .sales-stock-card #stockTable .st-inline.st-ready{
+        background:#ecfdf5;
+        border:1px solid #bbf7d0;
+        color:#15803d;
+        box-shadow:none;
+    }
+
+    .sales-stock-card #stockTable .st-inline.st-menipis{
+        background:#fffbeb;
+        border:1px solid #fde68a;
+        color:#b45309;
+        box-shadow:none;
+    }
+
+    .sales-stock-card #stockTable .st-inline.st-habis{
+        background:#fef2f2;
+        border:1px solid #fecaca;
+        color:#b91c1c;
+        box-shadow:none;
+    }
+
+    /* angka stok */
+    .sales-stock-card #stockTable tbody .st-badge{
+        flex-direction:column;
+        align-items:flex-end;
+        gap:0;
+        padding:5px 11px;
+        border-radius:13px;
+        background:linear-gradient(160deg,#f8fafc,#eef2f7);
+        border:1px solid #e8eef6;
+        box-shadow:inset 0 1px 2px rgba(255,255,255,.9), 0 2px 6px rgba(15,23,42,.05);
+    }
+
+    .sales-stock-card #stockTable tbody .st-badge i{
+        display:none;
+    }
+
+    .sales-stock-card #stockTable tbody .stock-qty{
+        font-size:15px;
+        font-weight:800;
+        line-height:1;
+        letter-spacing:-.2px;
+        color:#0f172a;
+    }
+
+    .sales-stock-card #stockTable tbody .stock-unit{
+        font-size:8px;
+        font-weight:700;
+        letter-spacing:.7px;
+        color:#94a3b8;
+    }
+
+    .sales-stock-card #stockTable tbody .toggle-switch{
+        transform:scale(.85);
+        transform-origin:right center;
+    }
+
+    /* empty state: tanpa kartu, tanpa garis, gambar di tengah */
+    .sales-stock-card #stockTable tbody tr:has(.empty-search){
+        padding:0;
+        background:transparent;
+        border:none;
+        box-shadow:none;
+        overflow:visible;
+        justify-content:center;
+    }
+
+    /* tanpa garis status hijau di sisi kiri */
+    .sales-stock-card #stockTable tbody tr:has(.empty-search)::before{
+        content:none;
+    }
+
+    .sales-stock-card #stockTable tbody tr:has(.empty-search) > td{
+        flex:1 1 100% !important;
+        width:100% !important;
+        padding:0 !important;
+        border:0 !important;
+    }
+
+    .sales-stock-card #stockTable tbody .empty-search{
+        padding:14px 10px 18px;
+        text-align:center;
+    }
+
+    .sales-stock-card #stockTable tbody .empty-img{
+        display:block;
+        width:120px;
+        margin:0 auto 8px;
+        opacity:.8;
+    }
+
+    .sales-stock-card #stockTable tbody .empty-title{
+        font-size:12.5px;
+        font-weight:700;
+        color:#0f172a;
+        margin-bottom:4px;
+    }
+
+    .sales-stock-card #stockTable tbody .empty-sub{
+        font-size:10.5px;
+        color:#64748b;
+    }
+
+    /* pagination */
+    .sales-stock-card .dataTables_wrapper .dataTables_paginate,
+    .request-stock-card .dataTables_wrapper .dataTables_paginate{
+        float:none;
+        display:flex;
+        flex-wrap:wrap;
+        justify-content:center;
+        align-items:center;
+        gap:5px;
+        margin:10px 0 12px;
+        padding:0;
+    }
+
+    .sales-stock-card .dataTables_wrapper .dataTables_paginate .pagination,
+    .request-stock-card .dataTables_wrapper .dataTables_paginate .pagination{
+        margin:0;
+        flex-wrap:wrap;
+        justify-content:center;
+        gap:5px;
+    }
+
+    .sales-stock-card .dataTables_wrapper .dataTables_paginate .page-item,
+    .request-stock-card .dataTables_wrapper .dataTables_paginate .page-item{
+        margin:0 !important;
+    }
+
+    .sales-stock-card .dataTables_wrapper .dataTables_paginate .page-link,
+    .request-stock-card .dataTables_wrapper .dataTables_paginate .page-link{
+        min-width:30px;
+        height:30px;
+        padding:0 8px;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        border-radius:10px !important;
+        font-size:11px;
+        font-weight:700;
+        color:#475569 !important;
+        background:#fff !important;
+        border:1px solid #e2e8f0 !important;
+        box-shadow:0 2px 6px rgba(15,23,42,.05) !important;
+        transition:transform .18s ease, box-shadow .18s ease;
+    }
+
+    .sales-stock-card .dataTables_wrapper .dataTables_paginate .page-link:hover,
+    .request-stock-card .dataTables_wrapper .dataTables_paginate .page-link:hover{
+        transform:translateY(-1px);
+        box-shadow:0 6px 12px -6px rgba(15,23,42,.35) !important;
+    }
+
+    .sales-stock-card .dataTables_wrapper .dataTables_paginate .page-item.active .page-link,
+    .request-stock-card .dataTables_wrapper .dataTables_paginate .page-item.active .page-link{
+        color:#fff !important;
+        background:linear-gradient(135deg,#4f46e5,#6366f1) !important;
+        border-color:transparent !important;
+        box-shadow:0 8px 16px -7px rgba(79,70,229,.95) !important;
+    }
+
+    .sales-stock-card .dataTables_wrapper .dataTables_paginate .page-item.disabled .page-link,
+    .request-stock-card .dataTables_wrapper .dataTables_paginate .page-item.disabled .page-link{
+        color:#94a3b8 !important;
+        background:#f8fafc !important;
+    }
+
+    /* "Show n entries" + baris info TIDAK lagi disembunyikan di
+       <=575.98px. Rule display:none dihapus supaya sama dengan Master,
+       Purchasing, Stok Gudang, Mutasi, dan Transfer: mobile pakai dom
+       "fltip" sehingga length, filter, table, info, dan paginate semuanya
+       tampil. Styling kontrolnya sekarang datang dari
+       css/components/datatable-premium.css. */
+
+    /* search tetap tersembunyi di halaman lain (mis. transfer), hanya aktif di card request & stok */
+    .section-card:not(.request-stock-card) #history-table .dataTables_filter{
+        display:none;
+    }
+
+    .dataTables_wrapper .dataTables_paginate{
+        justify-content:center;
+        margin-top:10px;
+    }
+}
+
+/* ===== DATATABLES WRAPPER (mencegah pecah & overflow mobile) ===== */
+.section-card > .px-4,
+.section-card > div > .px-4{
+    min-width:0;
+}
+
+.dataTables_wrapper{
+    width:100%;
+    overflow:visible;
+}
+
+.dataTables_wrapper .col-sm-12:has(> table.dataTable){
+    overflow-x:auto;
+    -webkit-overflow-scrolling:touch;
+}
+
+.dataTables_wrapper .dataTables_paginate{
+    float:none;
+    margin-top:14px;
+    display:flex;
+    flex-wrap:wrap;
+    justify-content:flex-end;
+    gap:4px;
+}
+
+.dataTables_wrapper .dataTables_paginate .pagination{
+    margin:0;
+    flex-wrap:wrap;
+    justify-content:flex-end;
+}
+
+.dataTables_wrapper .dataTables_info{
+    padding-top:14px;
+}

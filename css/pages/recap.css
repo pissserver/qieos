@@ -1,0 +1,128 @@
+            /* HERO */
+            .sales-header{
+                background:linear-gradient(135deg,#334155,#0f172a);
+                color:#fff;
+                border-radius:24px;
+                padding:30px;
+                display:flex;
+                justify-content:space-between;
+                align-items:center;
+                margin-bottom:25px;
+                box-shadow:0 12px 30px rgba(15,23,42,.15);
+            }
+
+            .sales-header h3{
+                font-weight:800;
+                margin:5px 0;
+                color:#fff;
+            }
+
+            .sales-header small{
+                text-transform:uppercase;
+                letter-spacing:1px;
+                opacity:.8;
+            }
+
+            .sales-icon{
+                width:90px;
+                height:90px;
+                border-radius:22px;
+                background:rgba(255,255,255,.08);
+                display:flex;
+                align-items:center;
+                justify-content:center;
+                font-size:35px;
+            }
+
+            /* SECTION */
+
+            .section-card{
+                background:#fff;
+                border-radius:24px;
+                padding:24px;
+                box-shadow:0 8px 24px rgba(15,23,42,.05);
+            }
+
+            /* PANEL */
+            
+            .panel-header{
+                display:flex;
+                justify-content:space-between;
+                align-items:center;
+                padding:18px 22px;
+                border-radius:18px;
+            }
+
+            .panel-left{
+                display:flex;
+                align-items:center;
+                gap:16px;
+            }
+
+            .panel-icon{
+                width:58px;
+                height:58px;
+                border-radius:16px;
+                background:rgba(255,255,255,.12);
+                display:flex;
+                align-items:center;
+                justify-content:center;
+                font-size:22px;
+            }
+
+            .panel-title{
+                font-size:17px;
+                font-weight:700;
+            }
+
+            .panel-subtitle{
+                font-size:13px;
+                opacity:.85;
+            }
+
+            .panel-primary{
+                background:linear-gradient(135deg, #0f172a, #1e293b, #334155);
+                color:#fff;
+            }
+
+            .panel-success{
+                background:linear-gradient(
+                    135deg,
+                    #16a34a,
+                    #15803d
+                );
+                color:#fff;
+            }
+
+            .panel-dark{
+                background:linear-gradient(
+                    135deg,
+                    #334155,
+                    #0f172a
+                );
+                color:#fff;
+            }
+
+            /* FORM */
+
+            .form-label-modern{
+                font-weight:600;
+                margin-bottom:8px;
+                color:#334155;
+            }
+
+            .input-group-text{
+                border-radius:12px 0 0 12px;
+            }
+
+            .form-product,
+            .form-qty{
+                border-radius:12px;
+                min-height:45px;
+            }
+
+            .btn-request{
+                height:40px;
+                border-radius:12px;
+                font-weight:600;
+            }

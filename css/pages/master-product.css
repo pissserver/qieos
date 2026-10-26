@@ -1,0 +1,3082 @@
+:root {
+    --primary: #4f46e5;
+    --dark: #0f172a;
+    --muted: #64748b;
+    --border: #e2e8f0;
+}
+
+/* === CODE VALIDATION ALERT === */
+#addCodeInputWrap {
+    position: relative;
+    margin-bottom: 8px;
+}
+
+.validation-spinner {
+    position: absolute;
+    right: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #6366f1;
+    font-size: 14px;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from {
+        transform: translateY(-50%) rotate(0deg);
+    }
+
+    to {
+        transform: translateY(-50%) rotate(360deg);
+    }
+}
+
+.code-validation-alert {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 12px;
+    margin-left: 48px;
+    margin-bottom: 12px;
+    border-radius: 8px;
+    background: linear-gradient(135deg, #fef2f2, #fee2e2);
+    border: 1px solid #fecaca;
+    animation: slideDown .25s ease;
+    box-shadow: 0 2px 8px rgba(239, 68, 68, .12);
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-4px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.code-validation-alert .alert-icon {
+    color: #ef4444;
+    margin-top: 8px;
+    font-size: 12px;
+    flex-shrink: 0;
+}
+
+.code-validation-alert .alert-icon i {
+    display: block;
+}
+
+.code-validation-alert .alert-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.code-validation-alert .alert-title {
+    display: none;
+}
+
+.code-validation-alert .alert-message {
+    font-size: 11px;
+    color: #dc2626;
+    font-weight: 600;
+}
+
+#addProductCode.is-invalid {
+    border-color: #ef4444;
+    background: #fef2f2;
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, .1);
+}
+
+/* HEADER */
+
+.stock-header {
+    background: linear-gradient(135deg, #334155, #0f172a);
+    color: #fff;
+    border-radius: 24px;
+    padding: 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+    box-shadow: 0 12px 30px rgba(15, 23, 42, .15);
+}
+
+.stock-header h3 {
+    color: #fff;
+    font-weight: 800;
+    margin-top: 5px;
+}
+
+.stock-header p {
+    margin: 0;
+    opacity: .85;
+}
+
+.header-icon {
+    width: 90px;
+    height: 90px;
+    border-radius: 22px;
+    background: rgba(255, 255, 255, .08);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 36px;
+}
+
+/* SECTION */
+
+.section-card {
+    background: #fff;
+    border-radius: 24px;
+    padding: 24px;
+    box-shadow: 0 8px 24px rgba(15, 23, 42, .05);
+    position: relative;
+    overflow: hidden;
+}
+
+@keyframes premiumShimmer {
+    0% {
+        background-position: 0% 0;
+    }
+
+    100% {
+        background-position: 200% 0;
+    }
+}
+
+/* PANEL — MASTER HERO HEADER */
+
+.panel-header {
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 18px 22px;
+    border-radius: 16px;
+}
+
+.panel-left {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.panel-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 16px;
+    background: rgba(255, 255, 255, .12);
+    border: 1px solid rgba(255, 255, 255, .15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 21px;
+}
+
+.panel-title {
+    font-size: 17px;
+    font-weight: 700;
+}
+
+.panel-subtitle {
+    font-size: 13px;
+    opacity: .85;
+}
+
+.panel-primary {
+    background: linear-gradient(135deg, #0f172a, #1e293b, #334155);
+    color: #fff;
+    border: 1px solid rgba(99, 102, 241, .22);
+    box-shadow: 0 10px 26px rgba(15, 23, 42, .28),
+        inset 0 1px 0 rgba(255, 255, 255, .06);
+}
+
+.panel-dark {
+    background: linear-gradient(135deg, #334155, #0f172a);
+    color: #fff;
+}
+
+/* HERO HEADER panel utama halaman master
+   Full-bleed sampai tepi card agar terlihat premium */
+.section-card>.panel-header.panel-primary {
+    margin: -24px -24px 0;
+    padding: 26px 24px;
+    border-radius: 24px 24px 0 0;
+}
+
+/* Strip gradient biru bergerak di tepi atas */
+.section-card>.panel-header.panel-primary::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg,
+            #6366f1, #818cf8, #a78bfa, #e879f9,
+            #a78bfa, #818cf8, #6366f1);
+    background-size: 250% 100%;
+    animation: premiumShimmer 5s linear infinite;
+    z-index: 3;
+}
+
+/* Glow dekoratif di dalam panel */
+.section-card>.panel-header.panel-primary::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+        radial-gradient(620px 220px at 8% -30%, rgba(99, 102, 241, .38), transparent 60%),
+        radial-gradient(520px 220px at 96% 145%, rgba(168, 85, 247, .26), transparent 60%);
+    pointer-events: none;
+    animation: masterGlow 9s ease-in-out infinite;
+}
+
+@keyframes masterGlow {
+
+    0%,
+    100% {
+        opacity: .7;
+    }
+
+    50% {
+        opacity: 1;
+    }
+}
+
+/* Icon hero: gradient violet + glow */
+.section-card>.panel-primary .panel-icon {
+    background: linear-gradient(135deg, #6366f1, #8b5cf6, #a855f7);
+    color: #fff;
+    border: 1px solid rgba(255, 255, 255, .28);
+    box-shadow: 0 10px 22px rgba(139, 92, 246, .4),
+        inset 0 1px 0 rgba(255, 255, 255, .35);
+}
+
+/* Title + badge MASTER */
+.section-card>.panel-primary .panel-title {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+    font-size: 18px;
+    font-weight: 800;
+}
+
+.section-card>.panel-primary .panel-title::before {
+    content: 'MASTER';
+    order: -1;
+    display: inline-flex;
+    align-items: center;
+    font-size: 9.5px;
+    line-height: 1;
+    font-weight: 800;
+    letter-spacing: .28em;
+    color: #cdd4fe;
+    background: rgba(129, 140, 248, .14);
+    border: 1px solid rgba(129, 140, 248, .38);
+    padding: 5px 11px;
+    border-radius: 999px;
+}
+
+.section-card>.panel-primary .panel-subtitle {
+    color: rgba(226, 232, 240, .78);
+}
+
+/* Tombol kanan header hero di atas lapisan glow */
+.section-card>.panel-primary>.btn-stock-global,
+.section-card>.panel-primary>.btn {
+    position: relative;
+    z-index: 2;
+}
+
+/* Responsive full-bleed header */
+@media (max-width: 991.98px) {
+    .section-card>.panel-header.panel-primary {
+        margin: -18px -18px 0;
+        padding: 22px 18px;
+        border-radius: 18px 18px 0 0;
+    }
+}
+
+@media (max-width: 575.98px) {
+    .section-card>.panel-header.panel-primary {
+        margin: -14px -14px 0;
+        padding: 20px 14px;
+    }
+
+    .section-card>.panel-primary .panel-title {
+        font-size: 16px;
+    }
+}
+
+/* DATATABLE */
+
+.dataTables_filter input {
+    border-radius: 8px !important;
+    border: 1px solid #cbd5e1 !important;
+    padding: 8px 14px !important;
+    width: 180px !important;
+}
+
+.dataTables_length select {
+    min-width: 75px !important;
+    height: 38px !important;
+    padding: 0 30px 0 12px !important;
+    border-radius: 8px !important;
+    border: 1px solid #cbd5e1 !important;
+}
+
+.dataTables_wrapper .dataTables_length,
+.dataTables_wrapper .dataTables_filter {
+    margin-bottom: 18px;
+}
+
+/* TABLE */
+
+#stockTable {
+    border-collapse: separate;
+    border-spacing: 0 14px;
+}
+
+#stockTable thead th {
+    border: none !important;
+    color: #64748b;
+    font-size: 12px;
+    text-transform: uppercase;
+}
+
+.stock-row {
+    background: #fff;
+    box-shadow: 0 8px 18px rgba(15, 23, 42, .05);
+    transition: all .35s cubic-bezier(.4, 0, .2, 1);
+    border-radius: 14px;
+}
+
+.stock-row:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 16px 32px rgba(99, 102, 241, .12), 0 0 0 1px rgba(99, 102, 241, .08);
+}
+
+.stock-row td:first-child {
+    border-radius: 14px 0 0 14px;
+}
+
+.stock-row td:last-child {
+    border-radius: 0 14px 14px 0;
+}
+
+#stockTable tbody td {
+    border: none !important;
+    padding: 18px;
+    vertical-align: middle;
+}
+
+.product-wrap {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.product-img {
+    width: 50px;
+    height: 50px;
+    border-radius: 14px;
+    object-fit: cover;
+    display: block;
+    border: 2px solid #e2e8f0;
+}
+
+.product-img-placeholder {
+    width: 50px;
+    height: 50px;
+    border-radius: 14px;
+    background: linear-gradient(135deg, #334155, #0f172a);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.stock-badge {
+    padding: 8px 14px;
+    border-radius: 10px;
+    font-weight: 700;
+}
+
+.stock-success {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.stock-danger {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.stock-empty {
+    background: #e2e8f0;
+    color: #475569;
+}
+
+/* kolom Catatan supplier (desktop): teks panjang dibatasi & dibungkus */
+#supplierTableContainer .mp-col-note .stock-badge {
+    display: inline-block;
+    max-width: 280px;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    text-align: left;
+}
+
+.unit-badge {
+    padding: 8px 14px;
+    border-radius: 10px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    font-weight: 600;
+}
+
+.price-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 8px 16px;
+    border-radius: 12px;
+    font-weight: 700;
+    font-size: 13px;
+    background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%);
+    color: #fff;
+    box-shadow: 0 4px 14px rgba(99, 102, 241, .35);
+    border: 1px solid rgba(255, 255, 255, .2);
+    letter-spacing: .3px;
+    position: relative;
+    overflow: hidden;
+}
+
+.price-badge::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 60%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, .2), transparent);
+    animation: priceBadgeSweep 3s ease-in-out infinite;
+}
+
+@keyframes priceBadgeSweep {
+
+    0%,
+    70%,
+    100% {
+        left: -100%;
+    }
+
+    85% {
+        left: 150%;
+    }
+}
+
+.table-card {
+    background: #fff;
+    border-radius: 20px;
+    padding: 20px;
+    box-shadow: 0 8px 20px rgba(15, 23, 42, .05);
+}
+
+/* ACTION */
+.action-btn {
+    width: 38px;
+    height: 38px;
+    border: none;
+    border-radius: 10px;
+    margin: 0 4px;
+    color: #fff;
+    transition: all .3s cubic-bezier(.4, 0, .2, 1);
+}
+
+.btn-edit {
+    background: #f59e0b;
+}
+
+.btn-delete {
+    background: #ef4444;
+}
+
+.btn-view {
+    background: linear-gradient(135deg, #6366f1, #4f46e5);
+    text-decoration: none !important;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff !important;
+    box-shadow: 0 4px 12px rgba(99, 102, 241, .3);
+}
+
+.btn-view:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(99, 102, 241, .45);
+    color: #fff;
+}
+
+.empty-search {
+    padding: 50px 20px;
+    text-align: center;
+}
+
+.empty-img {
+    width: 370px;
+    opacity: .9;
+    margin-bottom: 18px;
+}
+
+.empty-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: #0f172a;
+    margin-bottom: 6px;
+}
+
+.empty-sub {
+    font-size: 14px;
+    color: #64748b;
+}
+
+/* Meta inline (kode + kategori) di bawah nama produk.
+   Hanya tampil di mobile, karena kolom Kode & Kategori disembunyikan di HP. */
+.mp-meta {
+    display: none;
+}
+
+/* MODAL */
+
+.modal-backdrop.show {
+    opacity: .55 !important;
+}
+
+#addProductModal .modal-content {
+    background: #fff !important;
+    border-radius: 16px !important;
+    overflow: hidden;
+    box-shadow: 0 20px 40px rgba(15, 23, 42, .25);
+}
+
+#editProductModal .modal-content {
+    background: #fff !important;
+    border-radius: 16px !important;
+    overflow: hidden;
+    box-shadow: 0 20px 40px rgba(15, 23, 42, .25);
+}
+
+/* ============================================================
+   MODAL MASTER (generik)
+
+   Semua modal master memakai class .stock-panel pada
+   .modal-content. Rule ini menyamakan border, radius, dan
+   shadow dengan modal tambah/edit produk (16px, tanpa garis,
+   overflow hidden) supaya tidak ada modal yang beda bentuk.
+   ============================================================ */
+.modal-content.stock-panel {
+    background: #fff !important;
+    border: 0 !important;
+    border-radius: 16px !important;
+    overflow: hidden;
+    box-shadow: 0 20px 40px rgba(15, 23, 42, .25);
+}
+
+.stock-panel .btn-close {
+    filter: brightness(0) invert(1);
+}
+
+/* jaga agar elemen di dalam modal tidak ikut transparan saat
+   animasi modal Bootstrap berjalan */
+.modal-content.stock-panel * {
+    opacity: 1 !important;
+}
+
+#addProductModal .btn-close,
+#editProductModal .btn-close {
+    filter: brightness(0) invert(1);
+    opacity: .85;
+}
+
+#addProductModal .modal-content *,
+#editProductModal .modal-content * {
+    opacity: 1 !important;
+}
+
+/* SECTION TITLE */
+.section-title {
+    display: inline-block;
+    background: #edf4ff;
+    color: var(--primary);
+    padding: 5px 12px;
+    border-radius: 7px;
+    font-size: 12px;
+    font-weight: 600;
+    margin-bottom: 14px;
+}
+
+/* FORM */
+.input-group-modern {
+    display: flex;
+    align-items: center;
+    margin-bottom: 14px;
+}
+
+.input-icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #334155, #1e293b);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    margin-right: 10px;
+    box-shadow: 0 4px 10px rgba(15, 23, 42, .18);
+}
+
+.form-control {
+    height: 42px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    font-size: 14px;
+}
+
+.form-control:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(63, 130, 196, .15);
+}
+
+.form-control option {
+    background: #fff;
+    color: #0f172a;
+}
+
+/* Select2 "Satuan" di form Tambah Produk: disamakan dengan .form-control di
+   dalam .input-group-modern supaya seragam dengan field lain pada form. */
+#addProductModal .input-group-modern .select2-container {
+    flex: 1;
+    min-width: 0;
+}
+
+#addProductModal .input-group-modern .select2-container--default .select2-selection--single {
+    height: 42px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: #fff;
+    display: flex;
+    align-items: center;
+}
+
+#addProductModal .input-group-modern .select2-container--default .select2-selection--single .select2-selection__rendered {
+    padding-left: 12px;
+    padding-right: 30px;
+    line-height: 40px;
+    font-size: 14px;
+    color: #0f172a;
+}
+
+#addProductModal .input-group-modern .select2-container--default .select2-selection--single .select2-selection__placeholder {
+    color: #6c757d;
+}
+
+#addProductModal .input-group-modern .select2-container--default .select2-selection--single .select2-selection__arrow {
+    height: 40px;
+    right: 6px;
+}
+
+#addProductModal .input-group-modern .select2-container--default .select2-selection--single .select2-selection__clear {
+    right: 26px;
+    color: #94a3b8;
+}
+
+#addProductModal .input-group-modern .select2-container--default .select2-selection--single .select2-selection__clear:hover {
+    color: #ef4444;
+}
+
+#addProductModal .input-group-modern .select2-container--default.select2-container--focus .select2-selection--single,
+#addProductModal .input-group-modern .select2-container--default.select2-container--open .select2-selection--single {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(63, 130, 196, .15);
+}
+
+textarea.form-control {
+    height: 65px;
+}
+
+/* FILE INPUT */
+.file-input-wrap {
+    position: relative;
+    width: 100%;
+    height: 42px;
+}
+
+.file-input-wrap input[type="file"] {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+    z-index: 2;
+}
+
+.file-input-label {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    padding: 0 14px;
+    background: #f8fafc;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 13px;
+    color: #64748b;
+    cursor: pointer;
+    z-index: 1;
+    transition: all .25s;
+}
+
+.file-input-label i {
+    margin-right: 8px;
+    color: #94a3b8;
+}
+
+/* PHOTO UPLOAD BOX */
+.photo-upload-box {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 18px;
+    background: #f8fafc;
+    border: 1.5px dashed #cbd5e1;
+    border-radius: 16px;
+    transition: all .25s;
+}
+
+.photo-upload-box:hover {
+    border-color: var(--primary);
+    background: #f1f5f9;
+}
+
+.photo-preview {
+    width: 72px;
+    height: 72px;
+    border-radius: 14px;
+    border: 2px solid #e2e8f0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    background: #fff;
+    flex-shrink: 0;
+    box-shadow: 0 4px 10px rgba(15, 23, 42, .06);
+    transition: all .25s;
+}
+
+.photo-upload-box:hover .photo-preview {
+    border-color: var(--primary);
+    transform: scale(1.05);
+}
+
+.photo-preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.photo-preview i {
+    font-size: 26px;
+    color: #94a3b8;
+}
+
+.photo-input-details {
+    flex: 1;
+    min-width: 0;
+}
+
+.photo-input-details label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #334155;
+    margin-bottom: 4px;
+    display: block;
+}
+
+.photo-input-details input[type="file"] {
+    font-size: 13px;
+    height: 42px;
+}
+
+.photo-input-details small {
+    font-size: 11px;
+    color: #94a3b8;
+}
+
+/* BUTTON */
+.btn-save {
+    background: linear-gradient(90deg, #1e293b, #334155);
+    border: none;
+    border-radius: 8px;
+    color: #fff;
+    padding: 10px 24px;
+    font-weight: 600;
+}
+
+.btn-save:hover {
+    background: linear-gradient(90deg, #334155, #475569);
+    color: #fff;
+}
+
+/* BATAS STOK GLOBAL — tombol di header panel */
+.btn-stock-global {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #eef2ff, #e0e7ff);
+    color: #4338ca;
+    border: 1px solid rgba(67, 56, 202, .18);
+    border-radius: 12px;
+    font-weight: 700;
+    font-size: 13px;
+    padding: 10px 18px;
+    box-shadow: 0 6px 18px rgba(67, 56, 202, .18);
+    white-space: nowrap;
+    transition: all .3s ease;
+}
+
+.btn-stock-global i {
+    color: #6366f1;
+}
+
+.btn-stock-global:hover {
+    color: #3730a3;
+    background: linear-gradient(135deg, #e0e7ff, #c7d2fe);
+    transform: translateY(-1px);
+    box-shadow: 0 10px 22px rgba(67, 56, 202, .25);
+}
+
+.btn-stock-global:active {
+    transform: translateY(0);
+}
+
+/* Tombol X — pojok kanan atas header biru modal */
+#stockSettingModal .panel-header {
+    position: relative;
+}
+
+/* Batal & Simpan — ukuran box identik di semua device */
+#stockSettingModal .text-end {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 10px;
+}
+
+#stockSettingModal .mp-add-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+#stockSettingModal .mp-add-footer .btn-cancel,
+#stockSettingModal .mp-add-footer .btn-save {
+    flex: 0 1 132px;
+    min-width: 0;
+    height: 44px;
+    margin: 0;
+    padding: 0 22px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-size: 13.5px;
+    font-weight: 700;
+    line-height: 1;
+    border-radius: 10px;
+    white-space: nowrap;
+}
+
+#stockSettingModal .mp-add-footer .btn-cancel {
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    color: #475569;
+}
+
+#stockSettingModal .mp-add-footer .btn-cancel:hover {
+    background: #f8fafc;
+    border-color: #cbd5e1;
+    color: #334155;
+}
+
+/* DATATABLE WRAPPER */
+.table-action-wrapper {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    flex-wrap: wrap;
+}
+
+.table-action-wrapper #stockTable_filter {
+    margin: 0;
+    display: flex;
+    align-items: center;
+}
+
+.table-action-wrapper #stockTable_filter label {
+    margin: 0;
+    display: flex;
+    align-items: center;
+}
+
+.table-action-wrapper #stockTable_filter input {
+    height: 42px;
+    margin: 0;
+}
+
+/* ADD BUTTON — sama seperti Master User */
+.mu-add-btn {
+    height: 46px;
+    border: none;
+    border-radius: 13px;
+    padding: 0 22px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #4f46e5, #7c3aed);
+    color: #fff;
+    font-weight: 600;
+    font-size: 13.5px;
+    white-space: nowrap;
+    margin: 0;
+    box-shadow: 0 8px 18px rgba(79, 70, 229, .3);
+    transition: .25s ease;
+}
+
+.mu-add-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 24px rgba(79, 70, 229, .4);
+    color: #fff;
+}
+
+.mu-add-btn:active {
+    transform: translateY(0);
+}
+
+/* LAYOUT FIX + RESPONSIVE */
+.panel-header {
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.panel-left {
+    min-width: 0;
+    flex: 1 1 auto;
+}
+
+.panel-left>div {
+    min-width: 0;
+}
+
+#stockTable {
+    width: 100% !important;
+}
+
+.table-responsive-wrap,
+.dataTables_wrapper {
+    width: 100%;
+    overflow: visible;
+}
+
+.dataTables_wrapper .col-sm-12:has(> table.dataTable) {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.dataTables_wrapper .dataTables_paginate {
+    float: none;
+    margin-top: 14px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 4px;
+}
+
+.dataTables_wrapper .dataTables_paginate .pagination {
+    margin: 0;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+}
+
+.dataTables_wrapper .dataTables_info {
+    padding-top: 14px;
+}
+
+@media (max-width: 767.98px) {
+
+    .dataTables_wrapper .dataTables_paginate,
+    .dataTables_wrapper .dataTables_paginate .pagination {
+        justify-content: center;
+    }
+
+    .dataTables_wrapper .dataTables_info {
+        text-align: center;
+    }
+}
+
+@media (max-width: 991.98px) {
+    .section-card {
+        padding: 18px;
+        border-radius: 18px;
+    }
+
+    .panel-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 14px;
+        padding: 16px 18px;
+    }
+
+    .panel-left {
+        width: 100%;
+    }
+
+    .table-action-wrapper {
+        flex-wrap: wrap;
+        justify-content: flex-start;
+        gap: 10px;
+    }
+}
+
+@media (max-width: 575.98px) {
+    .section-card {
+        padding: 14px;
+    }
+
+    .panel-icon {
+        width: 48px;
+        height: 48px;
+        font-size: 18px;
+        border-radius: 14px;
+    }
+
+    .panel-title {
+        font-size: 15px;
+    }
+
+    .panel-subtitle {
+        font-size: 12px;
+    }
+
+    .mt-4.px-4 {
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+    }
+
+    .input-icon {
+        width: 38px;
+        height: 38px;
+    }
+
+    .product-img,
+    .product-img-placeholder {
+        width: 42px;
+        height: 42px;
+        border-radius: 12px;
+    }
+
+    .product-wrap {
+        gap: 10px;
+    }
+
+    .stock-badge,
+    .unit-badge,
+    .price-badge {
+        padding: 6px 10px;
+        font-size: 12px;
+        white-space: nowrap;
+    }
+
+    .action-btn {
+        width: 34px;
+        height: 34px;
+        margin: 2px;
+    }
+
+    .table-action-wrapper #stockTable_filter input {
+        width: 100% !important;
+    }
+
+    .mu-add-btn,
+    .btn-stock-global {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .photo-upload-box {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+        padding: 14px;
+    }
+
+    .photo-preview {
+        width: 60px;
+        height: 60px;
+    }
+}
+
+/* ============================================================
+   STATUS STOK & KOLOM STOK (Master Produk)
+   ============================================================ */
+.hero-status-row .st-badge-lg {
+    box-shadow: 0 8px 22px rgba(15, 23, 42, .08);
+}
+
+.st-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 6px 12px;
+    border-radius: 999px;
+    font-size: 11.5px;
+    font-weight: 800;
+    letter-spacing: .02em;
+    border: 1px solid transparent;
+    white-space: nowrap;
+}
+
+.st-badge i {
+    font-size: 10.5px;
+}
+
+.st-badge-lg {
+    padding: 11px 22px;
+    font-size: 13px;
+    border-radius: 999px;
+}
+
+.st-ready {
+    background: linear-gradient(135deg, #dcfce7, #bbf7d0);
+    color: #15803d;
+    border-color: rgba(21, 128, 61, .18);
+    box-shadow: 0 4px 14px rgba(22, 163, 74, .15);
+}
+
+.st-menipis {
+    background: linear-gradient(135deg, #fef3c7, #fde68a);
+    color: #b45309;
+    border-color: rgba(180, 83, 9, .18);
+    box-shadow: 0 4px 14px rgba(245, 158, 11, .18);
+}
+
+.st-habis {
+    background: linear-gradient(135deg, #fee2e2, #fecaca);
+    color: #b91c1c;
+    border-color: rgba(185, 28, 28, .18);
+    box-shadow: 0 4px 14px rgba(239, 68, 68, .16);
+}
+
+.stock-cell {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+}
+
+.stock-total {
+    font-weight: 800;
+    font-size: 14.5px;
+    color: #0f172a;
+    line-height: 1.2;
+}
+
+.stock-sub {
+    font-size: 10.5px;
+    color: #94a3b8;
+    line-height: 1.2;
+    white-space: nowrap;
+}
+
+.st-hint {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 10.5px;
+    color: #94a3b8;
+    margin-top: 2px;
+    white-space: nowrap;
+}
+
+.st-hint i {
+    font-size: 9.5px;
+}
+/* ============================================================
+   MASTER TABEL MOBILE - CARD MODE (produk, customer, supplier, user)
+   Gaya kartu horizontal dengan gradient accent violet
+   ============================================================ */
+@media (max-width: 575.98px) {
+
+    /* tabel jadi daftar kartu */
+    #productTableContainer #stockTable,
+    #customerTableContainer #stockTable,
+    #supplierTableContainer #stockTable,
+    #userTableContainer #userTable {
+        min-width: 0 !important;
+        width: 100% !important;
+        border-spacing: 0 !important;
+        border-collapse: separate;
+        table-layout: auto !important;
+        margin: 0;
+    }
+
+    #productTableContainer #stockTable thead,
+    #customerTableContainer #stockTable thead,
+    #supplierTableContainer #stockTable thead,
+    #userTableContainer #userTable thead {
+        display: none;
+    }
+
+    /* .table > :not(:first-child) memberi border-top 2px di tbody */
+    #productTableContainer #stockTable > tbody,
+    #productTableContainer #stockTable > tfoot,
+    #customerTableContainer #stockTable > tbody,
+    #customerTableContainer #stockTable > tfoot,
+    #supplierTableContainer #stockTable > tbody,
+    #supplierTableContainer #stockTable > tfoot,
+    #userTableContainer #userTable > tbody,
+    #userTableContainer #userTable > tfoot {
+        border-top: 0 !important;
+    }
+
+    #productTableContainer #stockTable tbody,
+    #customerTableContainer #stockTable tbody,
+    #supplierTableContainer #stockTable tbody,
+    #userTableContainer #userTable tbody {
+        display: flex;
+        flex-direction: column;
+        gap: 7px;
+    }
+
+    #productTableContainer #stockTable tbody tr,
+    #customerTableContainer #stockTable tbody tr,
+    #supplierTableContainer #stockTable tbody tr,
+    #userTableContainer #userTable tbody tr {
+        display: flex !important;
+        align-items: center;
+        gap: 10px;
+        width: 100%;
+        margin: 0 !important;
+        padding: 9px 11px;
+        border-radius: 18px;
+        border: 1px solid rgba(99, 102, 241, .14);
+        background: linear-gradient(90deg, rgba(99, 102, 241, .07), #fff 42%);
+        box-shadow: none;
+        transition: background-color .2s ease, border-color .2s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    /* aksen ungu di sisi kiri */
+    #productTableContainer #stockTable tbody tr::before,
+    #customerTableContainer #stockTable tbody tr::before,
+    #supplierTableContainer #stockTable tbody tr::before,
+    #userTableContainer #userTable tbody tr::before {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 9px;
+        bottom: 9px;
+        width: 4px;
+        border-radius: 0 4px 4px 0;
+        background: linear-gradient(180deg, #818cf8, #7c3aed);
+        box-shadow: none;
+    }
+
+    #productTableContainer #stockTable tbody tr:hover,
+    #productTableContainer #stockTable tbody tr:active,
+    #customerTableContainer #stockTable tbody tr:hover,
+    #customerTableContainer #stockTable tbody tr:active,
+    #supplierTableContainer #stockTable tbody tr:hover,
+    #supplierTableContainer #stockTable tbody tr:active,
+    #userTableContainer #userTable tbody tr:hover,
+    #userTableContainer #userTable tbody tr:active {
+        transform: none;
+        box-shadow: none;
+    }
+
+    /* matikan efek hover abu-abu (.table-hover) di mobile */
+    #productTableContainer #stockTable.table-hover > tbody > tr:hover > *,
+    #productTableContainer #stockTable.table-hover > tbody > tr:hover > td,
+    #productTableContainer #stockTable.table-hover > tbody > tr:hover > th,
+    #customerTableContainer #stockTable.table-hover > tbody > tr:hover > *,
+    #customerTableContainer #stockTable.table-hover > tbody > tr:hover > td,
+    #customerTableContainer #stockTable.table-hover > tbody > tr:hover > th,
+    #supplierTableContainer #stockTable.table-hover > tbody > tr:hover > *,
+    #supplierTableContainer #stockTable.table-hover > tbody > tr:hover > td,
+    #supplierTableContainer #stockTable.table-hover > tbody > tr:hover > th,
+    #userTableContainer #userTable.table-hover > tbody > tr:hover > *,
+    #userTableContainer #userTable.table-hover > tbody > tr:hover > td,
+    #userTableContainer #userTable.table-hover > tbody > tr:hover > th {
+        box-shadow: none !important;
+        background-color: transparent !important;
+        color: inherit;
+    }
+
+    #productTableContainer #stockTable tbody td,
+    #customerTableContainer #stockTable tbody td,
+    #supplierTableContainer #stockTable tbody td,
+    #userTableContainer #userTable tbody td {
+        display: block !important;
+        width: auto !important;
+        border: none !important;
+        padding: 0 !important;
+        background: transparent !important;
+        vertical-align: middle;
+    }
+
+    #productTableContainer #stockTable tbody td:first-child,
+    #customerTableContainer #stockTable tbody td:first-child,
+    #supplierTableContainer #stockTable tbody td:first-child,
+    #userTableContainer #userTable tbody td:first-child {
+        flex: 1 1 auto;
+        min-width: 0;
+    }
+
+    /* kolom desktop-only disembunyikan (info inline di sel pertama) */
+    #productTableContainer #stockTable tbody td.mp-col-kode,
+    #productTableContainer #stockTable tbody td.mp-col-kat,
+    #customerTableContainer #stockTable tbody td.mp-col-phone,
+    #supplierTableContainer #stockTable tbody td.mp-col-phone,
+    #supplierTableContainer #stockTable tbody td.mp-col-address,
+    #supplierTableContainer #stockTable tbody td.mp-col-note,
+    #userTableContainer #userTable tbody td.mp-col-role,
+    #userTableContainer #userTable tbody td.mp-col-date {
+        display: none !important;
+    }
+
+    /* kolom akhir (aksi) */
+    #productTableContainer #stockTable tbody td:last-child,
+    #customerTableContainer #stockTable tbody td:last-child,
+    #supplierTableContainer #stockTable tbody td:last-child,
+    #userTableContainer #userTable tbody td:last-child {
+        flex: 0 0 auto;
+        float: none;
+        margin: 0;
+    }
+
+    /* wrap avatar + text */
+    #productTableContainer .product-wrap,
+    #customerTableContainer .product-wrap,
+    #supplierTableContainer .product-wrap,
+    #userTableContainer .product-wrap {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        min-width: 0;
+    }
+
+    #productTableContainer .product-wrap > div:not(.product-img-placeholder),
+    #customerTableContainer .product-wrap > div:not(.product-img-placeholder),
+    #supplierTableContainer .product-wrap > div:not(.product-img-placeholder),
+    #userTableContainer .product-wrap > div:not(.product-img-placeholder):not(.avatar) {
+        flex: 1 1 auto;
+        min-width: 0;
+    }
+
+
+    #productTableContainer .product-img,
+    #productTableContainer .product-img-placeholder,
+    #customerTableContainer .product-img,
+    #customerTableContainer .product-img-placeholder,
+    #supplierTableContainer .product-img,
+    #supplierTableContainer .product-img-placeholder,
+    #userTableContainer .avatar-photo,
+    #userTableContainer .avatar {
+        width: 36px;
+        height: 36px;
+        flex: 0 0 36px;
+        border-radius: 12px;
+        border: none;
+        box-shadow: 0 0 0 2px #fff, 0 0 0 3px rgba(99, 102, 241, .28);
+    }
+
+    /* placeholder tanpa foto: gradasi warna */
+    #productTableContainer .product-img-placeholder,
+    #customerTableContainer .product-img-placeholder,
+    #supplierTableContainer .product-img-placeholder {
+        font-size: 16px;
+        color: #fff;
+        background: linear-gradient(140deg, #6366f1, #8b5cf6);
+        box-shadow: 0 0 0 2px #fff, 0 0 0 3px rgba(99, 102, 241, .32);
+    }
+
+    #productTableContainer .product-img-placeholder i,
+    #customerTableContainer .product-img-placeholder i,
+    #supplierTableContainer .product-img-placeholder i,
+    #userTableContainer .avatar i {
+        font-size: 16px;
+        line-height: 1;
+    }
+
+
+    #productTableContainer .product-wrap .fw-bold,
+    #customerTableContainer .product-wrap .fw-bold,
+    #supplierTableContainer .product-wrap .fw-bold,
+    #userTableContainer .product-wrap .fw-bold {
+        font-size: 12px;
+        font-weight: 700;
+        color: #0f172a;
+        line-height: 1.3;
+        margin-bottom: 3px;
+        text-transform: capitalize;
+        white-space: normal;
+        overflow-wrap: anywhere;
+    }
+
+    /* meta inline (kode, telepon, username, dll) */
+    #productTableContainer .mp-meta,
+    #customerTableContainer .mp-meta,
+    #supplierTableContainer .mp-meta,
+    #userTableContainer .mp-meta {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        min-width: 0;
+    }
+
+    #productTableContainer .mp-meta small,
+    #customerTableContainer .mp-meta small,
+    #supplierTableContainer .mp-meta small,
+    #userTableContainer .mp-meta small {
+        font-size: 9.5px;
+        font-weight: 600;
+        letter-spacing: .5px;
+        color: #94a3b8;
+        line-height: 1.3;
+        white-space: normal;
+        overflow-wrap: anywhere;
+    }
+
+    /* meta bertumpuk (mis. telepon di atas alamat) */
+    #supplierTableContainer .mp-meta.mp-meta-col {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 2px;
+    }
+
+    #productTableContainer .mp-cat-inline {
+        display: inline-flex;
+        align-items: center;
+        flex: 0 0 auto;
+        padding: 2px 7px;
+        border-radius: 999px;
+        font-size: 8.5px;
+        font-weight: 800;
+        letter-spacing: .3px;
+        text-transform: uppercase;
+        white-space: nowrap;
+        background: #eef2ff;
+        border: 1px solid #c7d2fe;
+        color: #4338ca;
+    }
+
+    #productTableContainer .mp-cat-inline.mp-cat-additional {
+        background: #fffbeb;
+        border-color: #fde68a;
+        color: #b45309;
+    }
+
+    #productTableContainer .mp-cat-inline.mp-cat-racikan {
+        background: #faf5ff;
+        border-color: #e9d5ff;
+        color: #7e22ce;
+    }
+
+    /* badge harga: lebih ringkas */
+    #productTableContainer #stockTable tbody .price-badge {
+        padding: 4px 9px;
+        font-size: 11px;
+        border-radius: 10px;
+        letter-spacing: 0;
+        box-shadow: 0 3px 9px rgba(99, 102, 241, .26);
+    }
+
+
+    /* tombol aksi */
+    #productTableContainer #stockTable tbody .action-btn,
+    #customerTableContainer #stockTable tbody .action-btn,
+    #supplierTableContainer #stockTable tbody .action-btn,
+    #userTableContainer #userTable tbody .action-btn {
+        width: 32px;
+        height: 32px;
+        margin: 0;
+        border-radius: 10px;
+        font-size: 12px;
+    }
+
+    /* empty state: tanpa kartu, tanpa aksen, gambar di tengah */
+    #productTableContainer #stockTable tbody tr:has(.empty-search),
+    #customerTableContainer #stockTable tbody tr:has(.empty-search),
+    #supplierTableContainer #stockTable tbody tr:has(.empty-search),
+    #userTableContainer #userTable tbody tr:has(.empty-search) {
+        padding: 0;
+        background: transparent;
+        border: none;
+        box-shadow: none;
+        overflow: visible;
+        justify-content: center;
+    }
+
+    #productTableContainer #stockTable tbody tr:has(.empty-search)::before,
+    #customerTableContainer #stockTable tbody tr:has(.empty-search)::before,
+    #supplierTableContainer #stockTable tbody tr:has(.empty-search)::before,
+    #userTableContainer #userTable tbody tr:has(.empty-search)::before {
+        content: none;
+    }
+
+    #productTableContainer #stockTable tbody tr:has(.empty-search) > td,
+    #customerTableContainer #stockTable tbody tr:has(.empty-search) > td,
+    #supplierTableContainer #stockTable tbody tr:has(.empty-search) > td,
+    #userTableContainer #userTable tbody tr:has(.empty-search) > td {
+        flex: 1 1 100% !important;
+        width: 100% !important;
+        padding: 0 !important;
+        border: 0 !important;
+    }
+
+    #productTableContainer #stockTable tbody .empty-search,
+    #customerTableContainer #stockTable tbody .empty-search,
+    #supplierTableContainer #stockTable tbody .empty-search,
+    #userTableContainer #userTable tbody .empty-search {
+        padding: 14px 10px 18px;
+        text-align: center;
+    }
+
+    #productTableContainer #stockTable tbody .empty-img,
+    #customerTableContainer #stockTable tbody .empty-img,
+    #supplierTableContainer #stockTable tbody .empty-img,
+    #userTableContainer #userTable tbody .empty-img {
+        display: block;
+        width: 120px;
+        margin: 0 auto 8px;
+        opacity: .8;
+    }
+
+    #productTableContainer #stockTable tbody .empty-title,
+    #customerTableContainer #stockTable tbody .empty-title,
+    #supplierTableContainer #stockTable tbody .empty-title,
+    #userTableContainer #userTable tbody .empty-title {
+        font-size: 12.5px;
+        font-weight: 700;
+        color: #0f172a;
+        margin-bottom: 4px;
+    }
+
+    #productTableContainer #stockTable tbody .empty-sub,
+    #customerTableContainer #stockTable tbody .empty-sub,
+    #supplierTableContainer #stockTable tbody .empty-sub,
+    #userTableContainer #userTable tbody .empty-sub {
+        font-size: 10.5px;
+        color: #64748b;
+    }
+}
+/* ============================================================
+   THUMBNAIL: placeholder tanpa foto harus square & sepadan
+   dengan produk yang pakai foto (hanya di panel Master Produk,
+   karena file ini juga dipakai master customer/supplier)
+   ============================================================ */
+#productTableContainer .product-img-placeholder {
+    flex: 0 0 auto;
+    overflow: hidden;
+}
+
+@media (min-width: 576px) {
+    #productTableContainer .product-img-placeholder {
+        border: 2px solid #e2e8f0;
+    }
+
+    #productTableContainer .product-img-placeholder i {
+        font-size: 22px;
+        line-height: 1;
+    }
+}
+
+/* ============================================================
+   SEARCH + PAGINASI + TOMBOL (semua master: produk, customer, supplier, user)
+
+   Hanya mobile yang dirombak: search full width di atas,
+   tombol full width di bawahnya.
+   Desktop & tablet pakai gaya bawaan (.table-action-wrapper
+   justify-content: flex-end) supaya tidak berubah.
+   ============================================================ */
+@media (max-width: 575.98px) {
+
+    /* ---------- SEARCH ---------- */
+    #productTableContainer .dataTables_filter,
+    #customerTableContainer .dataTables_filter,
+    #supplierTableContainer .dataTables_filter,
+    #userTableContainer .dataTables_filter {
+        display: flex;
+        width: 100%;
+        margin: 0;
+        padding: 0;
+    }
+
+
+    #productTableContainer .dataTables_filter label,
+    #customerTableContainer .dataTables_filter label,
+    #supplierTableContainer .dataTables_filter label,
+    #userTableContainer .dataTables_filter label {
+        display: flex;
+        width: 100%;
+        margin: 0;
+    }
+
+    #productTableContainer .dataTables_filter input,
+    #customerTableContainer .dataTables_filter input,
+    #supplierTableContainer .dataTables_filter input,
+    #userTableContainer .dataTables_filter input {
+        width: 100% !important;
+        height: 40px;
+        border-radius: 14px !important;
+        border: 1px solid transparent !important;
+        background-color: #f1f5f9;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='M20.5 20.5l-4-4'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: 13px center;
+        background-size: 15px 15px;
+        padding: 0 12px 0 35px !important;
+        font-size: 12px;
+        color: #0f172a;
+        box-shadow: inset 0 1px 2px rgba(15, 23, 42, .04);
+        outline: none;
+        transition: background-color .2s, box-shadow .2s;
+    }
+
+    #productTableContainer .dataTables_filter input::placeholder,
+    #customerTableContainer .dataTables_filter input::placeholder,
+    #supplierTableContainer .dataTables_filter input::placeholder,
+    #userTableContainer .dataTables_filter input::placeholder {
+        color: #94a3b8;
+    }
+
+    #productTableContainer .dataTables_filter input:focus,
+    #customerTableContainer .dataTables_filter input:focus,
+    #supplierTableContainer .dataTables_filter input:focus,
+    #userTableContainer .dataTables_filter input:focus {
+        background-color: #fff;
+        box-shadow:
+            0 0 0 2px #fff,
+            0 0 0 4px rgba(99, 102, 241, .35),
+            0 10px 20px -10px rgba(79, 70, 229, .6);
+    }
+
+    /* ---------- TOMBOL: full width di bawah search ---------- */
+    #productTableContainer .table-action-wrapper,
+    #customerTableContainer .table-action-wrapper,
+    #supplierTableContainer .table-action-wrapper,
+    #userTableContainer .table-action-wrapper {
+        flex-direction: column;
+        align-items: stretch;
+        justify-content: flex-start;
+        gap: 10px;
+        margin-bottom: 12px;
+    }
+
+    #productTableContainer .table-action-wrapper #stockTable_filter,
+    #customerTableContainer .table-action-wrapper #stockTable_filter,
+    #supplierTableContainer .table-action-wrapper #stockTable_filter,
+    #userTableContainer .table-action-wrapper #userTable_filter {
+        width: 100%;
+    }
+
+    #productTableContainer #btnContainer,
+    #customerTableContainer #btnContainer,
+    #supplierTableContainer #btnContainer,
+    #unitTableContainer #btnContainer {
+        display: block;
+        width: 100%;
+    }
+
+    #productTableContainer .mu-add-btn,
+    #customerTableContainer .mu-add-btn,
+    #supplierTableContainer .mu-add-btn,
+    #unitTableContainer .mu-add-btn {
+        width: 100%;
+        height: 44px;
+        border-radius: 14px;
+        justify-content: center;
+        margin: 0;
+    }
+
+    #productTableContainer .mu-add-btn:active,
+    #customerTableContainer .mu-add-btn:active,
+    #supplierTableContainer .mu-add-btn:active,
+    #unitTableContainer .mu-add-btn:active {
+        transform: scale(.985);
+        box-shadow: 0 6px 14px rgba(79, 70, 229, .3);
+    }
+
+    /* ---------- PAGINASI ---------- */
+    #productTableContainer .dataTables_paginate,
+    #productTableContainer .dataTables_paginate .pagination,
+    #customerTableContainer .dataTables_paginate,
+    #customerTableContainer .dataTables_paginate .pagination,
+    #supplierTableContainer .dataTables_paginate,
+    #supplierTableContainer .dataTables_paginate .pagination,
+    #userTableContainer .dataTables_paginate,
+    #userTableContainer .dataTables_paginate .pagination {
+        float: none;
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        align-items: center;
+        gap: 5px;
+        margin: 12px 0 0;
+        padding: 0;
+    }
+
+    #productTableContainer .dataTables_paginate .page-item,
+    #customerTableContainer .dataTables_paginate .page-item,
+    #supplierTableContainer .dataTables_paginate .page-item,
+    #userTableContainer .dataTables_paginate .page-item {
+        margin: 0 !important;
+    }
+
+    #productTableContainer .dataTables_paginate .page-link,
+    #customerTableContainer .dataTables_paginate .page-link,
+    #supplierTableContainer .dataTables_paginate .page-link,
+    #userTableContainer .dataTables_paginate .page-link {
+        min-width: 30px;
+        height: 30px;
+        padding: 0 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 10px !important;
+        font-size: 11px;
+        font-weight: 700;
+        color: #475569 !important;
+        background: #fff !important;
+        border: 1px solid #e2e8f0 !important;
+        box-shadow: 0 2px 6px rgba(15, 23, 42, .05) !important;
+        transition: transform .18s ease, box-shadow .18s ease;
+    }
+
+    #productTableContainer .dataTables_paginate .page-link:hover,
+    #customerTableContainer .dataTables_paginate .page-link:hover,
+    #supplierTableContainer .dataTables_paginate .page-link:hover,
+    #userTableContainer .dataTables_paginate .page-link:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 6px 12px -6px rgba(15, 23, 42, .35) !important;
+    }
+
+    #productTableContainer .dataTables_paginate .page-item.active .page-link,
+    #customerTableContainer .dataTables_paginate .page-item.active .page-link,
+    #supplierTableContainer .dataTables_paginate .page-item.active .page-link,
+    #userTableContainer .dataTables_paginate .page-item.active .page-link {
+        color: #fff !important;
+        background: linear-gradient(135deg, #4f46e5, #6366f1) !important;
+        border-color: transparent !important;
+        box-shadow: 0 8px 16px -7px rgba(79, 70, 229, .95) !important;
+    }
+
+    #productTableContainer .dataTables_paginate .page-item.disabled .page-link,
+    #customerTableContainer .dataTables_paginate .page-item.disabled .page-link,
+    #supplierTableContainer .dataTables_paginate .page-item.disabled .page-link,
+    #userTableContainer .dataTables_paginate .page-item.disabled .page-link {
+        color: #94a3b8 !important;
+        background: #f8fafc !important;
+    }
+
+    /* Panah/ellipsis disabled ikut nge-lift saat di-hover kalau rule
+       hover di atas tidak dikecualikan. */
+    #productTableContainer .dataTables_paginate .page-item.disabled .page-link:hover,
+    #customerTableContainer .dataTables_paginate .page-item.disabled .page-link:hover,
+    #supplierTableContainer .dataTables_paginate .page-item.disabled .page-link:hover,
+    #userTableContainer .dataTables_paginate .page-item.disabled .page-link:hover {
+        transform: none;
+        box-shadow: 0 2px 6px rgba(15, 23, 42, .05) !important;
+    }
+
+    /* margin-left:0 wajib. volt.css punya
+       ".page-item:not(:first-child) .page-link{margin-left:-.0625rem}"
+       yang menarik tiap pil ke kiri 1px supaya saling tumpuk seperti
+       pager bawaan. Pada desain pil terpisah, itu bikin pil overlap 1px
+       dan gap yang dirancang 5px jadi efektif 4px. */
+    #productTableContainer .dataTables_paginate .page-link,
+    #customerTableContainer .dataTables_paginate .page-link,
+    #supplierTableContainer .dataTables_paginate .page-link,
+    #userTableContainer .dataTables_paginate .page-link {
+        margin-left: 0;
+    }
+
+    /* .page-link di rule utama memakai box-shadow:...!important, jadi
+       .page-link:focus bawaan volt tertimpa dan cincin fokus keyboard
+       hilang. Dibuat ulang di sini dengan !important juga. */
+    #productTableContainer .dataTables_paginate .page-link:focus-visible,
+    #customerTableContainer .dataTables_paginate .page-link:focus-visible,
+    #supplierTableContainer .dataTables_paginate .page-link:focus-visible,
+    #userTableContainer .dataTables_paginate .page-link:focus-visible {
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(99, 102, 241, .45) !important;
+    }
+
+    /* "Show n entries" dan baris info TIDAK lagi disembunyikan di mobile.
+
+       Awalnya .dataTables_length untuk produk/customer/user diberi
+       display:none di <=575.98px dengan alasan dropdown-nya terlalu makan
+       ruang. Sekarang dropdownnya tetap berukuran sama dengan halaman lain
+       (40px / radius 12px) dan seluruh barisnya DIPUSATKAN, jadi ruang
+       yang terpakai justru lebih sedikit dibanding versi full-width.
+       Baris info "Menampilkan 1-5 dari 137 produk" juga sudah jadi chip
+       kecil (30px) yang center.
+
+       Jadi blok ini sengaja tidak punya rule apa pun - tidak ada kontrol
+       tabel yang disembunyikan di <=575.98px. Kalau nanti ada kontrol yang
+       memang perlu disembunyikan, buat rule terpisah per halaman dengan
+       catatan alasan yang jelas, jangan menambahkannya ke sini. */
+}
+
+/* ============================================================
+   PAGINASI + BARIS INFO DESKTOP & TABLET
+   (produk + supplier + customer + user)
+
+   Blok premium ini dipakai bersama oleh keempat halaman Master, ditulis
+   dengan :is() supaya tidak perlu mengulang selector empat kali. :is()
+   mengambil specificity argumen paling spesifik - semuanya id - jadi
+   (1,0,0), sama persis seperti kalau selector aslinya ditulis
+   "#productTableContainer ...". Karena itu semua override !important yang
+   saling menimpa (Volt .page-link, blok mobile, .dataTables_length select)
+   tetap berperilaku sama.
+
+   Perbedaan antar halaman tetap ditangani di luar blok ini:
+     - produk: "l" (Show n entries) disembunyikan di <=575.98px
+     - user : search desktop ditaruh di .mu-search-slot (toolbar tabs),
+              bukan di .table-action-wrapper seperti tiga halaman lain
+     - customer: paling simpel, semua mengikuti pola produk
+
+   1. Baris bawah (info + pager) diratakan jadi satu flex row:
+      chip info di kiri, pil pagination di kanan, keduanya vertikal center.
+   2. "Menampilkan 1-5 dari 137" jadi chip pill setinggi pil pagination.
+   3. Bentuk pil pagination sama persis dengan mobile; hanya skalanya
+      dibesar: 34px/12px (mobile 30px/11px). Di layar lebar target sentuh
+      30px bukan masalah, tapi pil segitu terlihat terlalu kecil di samping
+      tabel yang selebar hundreds piksel.
+   4. Baris atas (Show entries + search + tombol Tambah) diratakan dengan
+      perlakuan yang sama seperti baris bawah.
+   ============================================================ */
+@media (min-width: 576px) {
+
+    /* ---------- BARIS BAWAH: info + pager satu baris ----------
+       Default DataTables Bootstrap 5 memecah "i" ke col-md-5 dan "p" ke
+       col-md-7 di dalam .row (lihat dom bawaan dataTables.bootstrap5.js).
+       Kedua kolom itu diturunkan jadi flex child yang lebarnya mengikuti
+       isinya, lalu .row-nya di-align center, jadi chip info dan pil
+       pagination benar-benar satu baris dan tidak lagi turun ke bawah
+       pada lebar 576-767.98px di mana col-sm-12 masih menumpuk.
+
+       flex-wrap TIDAK dikunci nowrap: lebar konten di 576-767.98px cuma
+       ~470px, sedangkan chip info (~215px) + pager simple_numbers (~390px)
+       sudah ~620px. Dengan nowrap, .section-card{overflow:hidden} akan
+       memotong pil pager jadi tidak terlihat. wrap dipakai sebagai
+       jaring pengaman: kalau muat, tetap satu baris; kalau tidak, pager
+       turun ke baris sendiri dan tetap rata kanan lewat margin-left:auto. */
+    :is(#productTableContainer, #supplierTableContainer, #customerTableContainer, #userTableContainer, #unitTableContainer) .dataTables_wrapper > .row:has(.dataTables_info) {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 10px 14px;
+        margin: 18px 0 0;
+    }
+
+    :is(#productTableContainer, #supplierTableContainer, #customerTableContainer, #userTableContainer, #unitTableContainer) .dataTables_wrapper > .row:has(.dataTables_info) > [class*="col-"] {
+        display: flex;
+        align-items: center;
+        flex: 0 1 auto;
+        width: auto;
+        max-width: 100%;
+        padding-left: 0;
+        padding-right: 0;
+    }
+
+    /* Hanya kolom info yang boleh merebut sisa ruang baris; kolom pager
+       menyentuh kanan dan tidak pernah dipaksa memampit. */
+    :is(#productTableContainer, #supplierTableContainer, #customerTableContainer, #userTableContainer, #unitTableContainer) .dataTables_wrapper > .row:has(.dataTables_info) > :has(.dataTables_info) {
+        flex: 1 1 auto;
+        min-width: 0;
+    }
+
+    :is(#productTableContainer, #supplierTableContainer, #customerTableContainer, #userTableContainer, #unitTableContainer) .dataTables_wrapper > .row:has(.dataTables_info) > :last-child {
+        margin-left: auto;
+    }
+
+    /* DataTable menyembunyikan container paging-nya kalau cuma ada 1 halaman,
+       dan infoCallback mengembalikan string kosong kalau tabel kosong. Kalau
+       keduanya terjadi, baris bawah jadi baris kosong - jaraknya
+       dikecilkan agar tidak menyisakan ruang sia-sia. */
+    :is(#productTableContainer, #supplierTableContainer, #customerTableContainer, #userTableContainer, #unitTableContainer) .dataTables_wrapper > .row:not(:has(.mp-info, .page-link)) {
+        margin-top: 0;
+    }
+
+    /* ---------- CHIP INFO "Menampilkan 1-5 dari 137" ---------- */
+    :is(#productTableContainer, #supplierTableContainer, #customerTableContainer, #userTableContainer, #unitTableContainer) .dataTables_info {
+        flex: 1 1 auto;
+        margin: 0;
+        padding: 0;
+        text-align: left;
+    }
+
+    :is(#productTableContainer, #supplierTableContainer, #customerTableContainer, #userTableContainer, #unitTableContainer) .mp-info {
+        display: inline-flex;
+        align-items: center;
+        gap: 9px;
+        height: 34px;
+        padding: 0 14px 0 8px;
+        border-radius: 11px;
+        background: linear-gradient(135deg, #f8fafc, #eef2ff);
+        border: 1px solid #e2e8f0;
+        box-shadow:
+            0 2px 6px rgba(15, 23, 42, .05),
+            inset 0 1px 0 rgba(255, 255, 255, .75);
+        white-space: nowrap;
+    }
+
+    :is(#productTableContainer, #supplierTableContainer, #customerTableContainer, #userTableContainer, #unitTableContainer) .mp-info-ico {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        flex: 0 0 auto;
+        width: 20px;
+        height: 20px;
+        border-radius: 7px;
+        font-size: 10px;
+        color: #fff;
+        background: linear-gradient(135deg, #4f46e5, #6366f1);
+        box-shadow: 0 4px 10px -4px rgba(79, 70, 229, .95);
+    }
+
+    :is(#productTableContainer, #supplierTableContainer, #customerTableContainer, #userTableContainer, #unitTableContainer) .mp-info-txt {
+        font-size: 12px;
+        font-weight: 600;
+        letter-spacing: .1px;
+        color: #64748b;
+    }
+
+    :is(#productTableContainer, #supplierTableContainer, #customerTableContainer, #userTableContainer, #unitTableContainer) .mp-info-txt b {
+        font-weight: 800;
+        color: #0f172a;
+    }
+
+    /* Muncul hanya kalau ada pencarian aktif: "… dari 5 produk | dari 137 produk"
+
+       .mp-info-sub adalah anak LANGSUNG .mp-info (bukan anak .mp-info-txt),
+       jadi jarak ke .mp-info-txt sudah gegeben oleh gap: 9px di .mp-info -
+       karena itu margin-left di sini 0, supaya tidak jadi 17px. */
+    :is(#productTableContainer, #supplierTableContainer, #customerTableContainer, #userTableContainer, #unitTableContainer) .mp-info-sub {
+        margin-left: 0;
+        padding-left: 9px;
+        font-weight: 500;
+        color: #94a3b8;
+        border-left: 1px solid #e2e8f0;
+    }
+
+    /* ---------- LAYOUT PAGER ---------- */
+    :is(#productTableContainer, #supplierTableContainer, #customerTableContainer, #userTableContainer, #unitTableContainer) .dataTables_paginate,
+    :is(#productTableContainer, #supplierTableContainer, #customerTableContainer, #userTableContainer, #unitTableContainer) .dataTables_paginate .pagination {
+        float: none;
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+        align-items: center;
+        gap: 6px;
+        margin: 0;
+        padding: 0;
+    }
+
+    :is(#productTableContainer, #supplierTableContainer, #customerTableContainer, #userTableContainer, #unitTableContainer) .dataTables_paginate {
+        flex: 0 0 auto;
+    }
+
+    :is(#productTableContainer, #supplierTableContainer, #customerTableContainer, #userTableContainer, #unitTableContainer) .dataTables_paginate .page-item {
+        margin: 0 !important;
+    }
+
+    /* ---------- PIL ---------- */
+    /* Lihat blok mobile di atas: volt.css menarik tiap pil 1px ke kiri
+       (.page-item:not(:first-child) .page-link{margin-left:-.0625rem}),
+       jadi harus dinolkan supaya gap 6px benar-benar 6px. */
+    :is(#productTableContainer, #supplierTableContainer, #customerTableContainer, #userTableContainer, #unitTableContainer) .dataTables_paginate .page-link {
+        min-width: 34px;
+        height: 34px;
+        padding: 0 9px;
+        margin-left: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 11px !important;
+        font-size: 12px;
+        font-weight: 700;
+        line-height: 1;
+        color: #475569 !important;
+        background: #fff !important;
+        border: 1px solid #e2e8f0 !important;
+        box-shadow: 0 2px 6px rgba(15, 23, 42, .05) !important;
+        transition: transform .18s ease, box-shadow .18s ease;
+    }
+
+    :is(#productTableContainer, #supplierTableContainer, #customerTableContainer, #userTableContainer, #unitTableContainer) .dataTables_paginate .page-link:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 18px -8px rgba(15, 23, 42, .38) !important;
+    }
+
+    :is(#productTableContainer, #supplierTableContainer, #customerTableContainer, #userTableContainer, #unitTableContainer) .dataTables_paginate .page-item.active .page-link {
+        color: #fff !important;
+        background: linear-gradient(135deg, #4f46e5, #6366f1) !important;
+        border-color: transparent !important;
+        box-shadow: 0 8px 16px -7px rgba(79, 70, 229, .95) !important;
+    }
+
+    :is(#productTableContainer, #supplierTableContainer, #customerTableContainer, #userTableContainer, #unitTableContainer) .dataTables_paginate .page-item.disabled .page-link {
+        color: #94a3b8 !important;
+        background: #f8fafc !important;
+        border-color: #eef2f7 !important;
+    }
+
+    :is(#productTableContainer, #supplierTableContainer, #customerTableContainer, #userTableContainer, #unitTableContainer) .dataTables_paginate .page-item.disabled .page-link:hover {
+        transform: none;
+        box-shadow: 0 2px 6px rgba(15, 23, 42, .05) !important;
+    }
+
+    /* .page-link di rule utama memakai box-shadow:...!important, jadi
+       .page-link:focus bawaan volt tertimpa dan cincin fokus keyboard
+       hilang. Dibuat ulang di sini dengan !important juga. */
+    :is(#productTableContainer, #supplierTableContainer, #customerTableContainer, #userTableContainer, #unitTableContainer) .dataTables_paginate .page-link:focus-visible {
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(99, 102, 241, .45) !important;
+    }
+
+    /* ---------- BARIS ATAS: SHOW ENTRIES + SEARCH + TOMBOL ---------- */
+    /* Default DataTables Bootstrap 5 memecah baris atas jadi
+       <div class="row"><div class="col-sm-12 col-md-6">l</div>
+       <div class="col-sm-12 col-md-6">f</div></div>
+       (lihat string "sDom" di dataTables.bootstrap5.js). Tanpa aturan ini
+       panjang select "Show 5 entries" dan tinggi tombol "Tambah Produk"
+       (46px) bikin kedua kontrol terlihat melayang, dan di 576-767.98px
+       masih menumpuk karena col-sm-12. Disamakan perlakuannya dengan baris
+       bawah: flex row, align center, wrap sebagai jaring pengaman.
+
+       Selector pakai :has(.dataTables_length) supaya tidak menembak baris
+       tengah (.row.dt-row) maupun baris bawah, yang tidak punya "l". */
+    :is(#productTableContainer, #supplierTableContainer, #customerTableContainer, #userTableContainer, #unitTableContainer) .dataTables_wrapper > .row:has(.dataTables_length) {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px 14px;
+        margin: 0 0 16px;
+    }
+
+    :is(#productTableContainer, #supplierTableContainer, #customerTableContainer, #userTableContainer, #unitTableContainer) .dataTables_wrapper > .row:has(.dataTables_length) > [class*="col-"] {
+        display: flex;
+        align-items: center;
+        flex: 0 1 auto;
+        width: auto;
+        max-width: 100%;
+        padding-left: 0;
+        padding-right: 0;
+    }
+
+    /* Kolom kiri (Show entries) tidak boleh melar; kolom kanan (search +
+       tombol) yang merebut sisa ruang dan tetap rata kanan. */
+    :is(#productTableContainer, #supplierTableContainer, #customerTableContainer, #userTableContainer, #unitTableContainer) .dataTables_wrapper > .row:has(.dataTables_length) > :has(.dataTables_length) {
+        flex: 0 0 auto;
+    }
+
+    :is(#productTableContainer, #supplierTableContainer, #customerTableContainer, #userTableContainer, #unitTableContainer) .dataTables_wrapper > .row:has(.dataTables_length) > :last-child {
+        flex: 1 1 auto;
+        justify-content: flex-end;
+        min-width: 0;
+    }
+
+    /* ---------- SELECT "SHOW n ENTRIES" ---------- */
+    :is(#productTableContainer, #supplierTableContainer, #customerTableContainer, #userTableContainer, #unitTableContainer) .dataTables_length {
+        margin: 0;
+        display: flex;
+        align-items: center;
+    }
+
+    :is(#productTableContainer, #supplierTableContainer, #customerTableContainer, #userTableContainer, #unitTableContainer) .dataTables_length label {
+        margin: 0;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 12px;
+        font-weight: 600;
+        color: #64748b;
+        white-space: nowrap;
+    }
+
+    /* Base-nya blok "DATATABLE" di baris ~327 file ini (min-width 75px,
+       height 38px, radius 8px, semua !important). Di sini ditimpa dengan
+       skala yang sama seperti search: 42px / radius 13px, plus chevron
+       sendiri karena volt/Bootstrap tidak menyediakan panah untuk
+       form-select yang di-override height-nya. */
+    :is(#productTableContainer, #supplierTableContainer, #customerTableContainer, #userTableContainer, #unitTableContainer) .dataTables_length select {
+        min-width: 92px !important;
+        height: 42px !important;
+        padding: 0 34px 0 14px !important;
+        border-radius: 13px !important;
+        border: 1px solid #e2e8f0 !important;
+        background-color: #fff !important;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E") !important;
+        background-repeat: no-repeat !important;
+        background-position: right 12px center !important;
+        background-size: 12px 12px !important;
+        -webkit-appearance: none !important;
+        appearance: none !important;
+        font-size: 12.5px;
+        font-weight: 700;
+        color: #0f172a;
+        cursor: pointer;
+        box-shadow: 0 2px 6px rgba(15, 23, 42, .05) !important;
+        transition: border-color .2s ease, box-shadow .2s ease;
+    }
+
+    :is(#productTableContainer, #supplierTableContainer, #customerTableContainer, #userTableContainer, #unitTableContainer) .dataTables_length select:hover {
+        border-color: #c7d2fe !important;
+    }
+
+    :is(#productTableContainer, #supplierTableContainer, #customerTableContainer, #userTableContainer, #unitTableContainer) .dataTables_length select:focus {
+        outline: none;
+        border-color: #a5b4fc !important;
+        box-shadow: 0 0 0 4px rgba(99, 102, 241, .22) !important;
+    }
+
+    /* ---------- SEARCH ---------- */
+    /* Struktur di tablet/desktop: placeProductActions() membungkus
+       #stockTable_filter dengan .table-action-wrapper lalu memasukkan
+       #btnContainer (tombol Tambah Produk) ke dalamnya, jadi search
+       tumbuh mengisi sisa baris dan tombol tetap nempel di kanan. */
+    :is(#productTableContainer, #supplierTableContainer, #customerTableContainer, #userTableContainer, #unitTableContainer) .table-action-wrapper {
+        flex: 1 1 auto;
+        min-width: 0;
+        gap: 10px;
+    }
+
+    :is(#productTableContainer, #supplierTableContainer, #customerTableContainer, #userTableContainer, #unitTableContainer) .table-action-wrapper #stockTable_filter {
+        flex: 1 1 auto;
+        min-width: 0;
+    }
+
+    :is(#productTableContainer, #supplierTableContainer, #customerTableContainer, #userTableContainer, #unitTableContainer) .table-action-wrapper #stockTable_filter input {
+        flex: 1 1 210px;
+        min-width: 170px;
+        max-width: 340px;
+        width: auto !important;
+        height: 42px !important;
+        margin: 0 !important;
+        padding: 0 14px 0 40px !important;
+        border-radius: 13px !important;
+        border: 1px solid transparent !important;
+        background-color: #f1f5f9 !important;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='M20.5 20.5l-4-4'/%3E%3C/svg%3E") !important;
+        background-repeat: no-repeat !important;
+        background-position: 14px center !important;
+        background-size: 16px 16px !important;
+        font-size: 12.5px;
+        color: #0f172a;
+        outline: none;
+        box-shadow: inset 0 1px 2px rgba(15, 23, 42, .04) !important;
+        transition: background-color .2s ease, box-shadow .2s ease;
+    }
+
+    :is(#productTableContainer, #supplierTableContainer, #customerTableContainer, #userTableContainer, #unitTableContainer) .table-action-wrapper #stockTable_filter input::placeholder {
+        color: #94a3b8;
+    }
+
+    :is(#productTableContainer, #supplierTableContainer, #customerTableContainer, #userTableContainer, #unitTableContainer) .table-action-wrapper #stockTable_filter input:focus {
+        background-color: #fff !important;
+        box-shadow:
+            0 0 0 2px #fff,
+            0 0 0 4px rgba(99, 102, 241, .3),
+            0 10px 20px -10px rgba(79, 70, 229, .6) !important;
+    }
+}
+
+/* ============================================================
+   ELLIPSIS "…" DI PAGINASI (mobile, tablet, desktop)
+
+   DataTable merender tombol ellipsis sebagai
+   <li class="paginate_button page-item disabled">
+     <a class="page-link">…</a></li>
+   - class "disabled" yang PERSIS sama dengan panah Sebelumnya/Berikutnya
+   yang sudah tidak aktif (lihat renderer pageButton.bootstrap di
+   dataTables.bootstrap5.js). Kalau dibiarkan apa adanya, "…" jadi pil
+   abu-abu selebar pil biasa dan tidak terbaca sebagai "ada halaman
+   tersembunyi di sini".
+
+   Di sini ellipsis jadi glyph tipis tanpa kotak:
+   - jelas bukan tombol (tidak ada hover, cursor default)
+   - hemat ~20px, membantu baris pager muat di layar 320-360px
+   - tetap setinggi pil sebelahnya karena .pagination pakai
+     align-items:center dan glyph-nya hanya duduk di tengah kotak 30/34px
+
+   :not(.previous):not(.next) untuk memisahkan ellipsis dari panah yang
+   memang disabled. Specificity (1 id + 6 class) di atas rule
+   .page-link mobile maupun desktop/tablet, jadi SATU rule ini cukup untuk
+   ketiga breakpoint tanpa perlu diulang per media query.
+   ============================================================ */
+:is(#productTableContainer, #supplierTableContainer, #customerTableContainer, #userTableContainer, #unitTableContainer) .dataTables_paginate .page-item.disabled:not(.previous):not(.next) .page-link {
+    min-width: 22px;
+    padding: 0 4px;
+    font-size: 15px;
+    font-weight: 700;
+    line-height: 1;
+    color: #a5b4fc !important;
+    background: transparent !important;
+    border-color: transparent !important;
+    box-shadow: none !important;
+    cursor: default;
+}
+
+/* Mobile: rapatkan gap 5px -> 4px. Dengan 9 pil (3 nomor + 2 ellipsis +
+   halaman pertama + halaman terakhir + 2 panah) ini hemat 8px, cukup
+   supaya baris pager tetap satu baris di layar 320px dan tidak wrap. */
+@media (max-width: 575.98px) {
+    :is(#productTableContainer, #supplierTableContainer, #customerTableContainer, #userTableContainer, #unitTableContainer) .dataTables_paginate,
+    :is(#productTableContainer, #supplierTableContainer, #customerTableContainer, #userTableContainer, #unitTableContainer) .dataTables_paginate .pagination {
+        gap: 4px;
+    }
+}
+
+/* ============================================================
+   SHOW ENTRIES + BARIS INFO DI MOBILE
+
+   Dua tingkat:
+
+   1. BARIS INFO ("Menampilkan 1-5 dari 137 produk") -> SEMUA halaman
+      (produk, supplier, customer, user). Di mobile dom-nya memuat "i",
+      jadi baris ini jadi penanda posisi di daftar. Tanpa itu user yang
+      sudah scroll jauh di tabel panjang tidak tahu dia di halaman berapa.
+      Chip-nya sengaja dibuat kecil (30px vs 34px di desktop) supaya
+      tidak makan ruang terlalu banyak di layar 320-360px.
+
+   2. SELECT "SHOW n ENTRIES" -> SEMUA halaman (produk, supplier, customer,
+      user). Kontrolnya DIPUSATKAN, bukan disejajarkan ke kiri/kanan:
+      di layar sempit satu-satunya elemen yang "bersuara" di baris itu
+      adalah label + dropdown-nya, jadi bikin rata tengah jauh lebih
+      rapi dibandingkan menempel ke pinggir. Baris info di bawah tabel
+      juga sudah center, jadi kolom tengahnya konsisten dari atas
+      sampai bawah.
+
+   Karena "dom" mobile dipakai langsung tanpa wrapper row/col bawaan
+   Bootstrap 5, susunan kontrolnya:
+
+      search + tombol "Tambah"     (sudah ada di blok mobile di atas)
+      select "Show n entries" (center)
+      tabel
+      chip info (center)
+      pil pagination
+
+   Chip info memakai kelas .mp-info yang sama dengan desktop, jadi teksnya
+   tidak berbeda antar breakpoint. Bedanya cuma skala + white-space normal
+   supaya bisa wrap kalau layar sempit.
+   ============================================================ */
+@media (max-width: 575.98px) {
+
+    /* ---------- SELECT "SHOW n ENTRIES" ---------- */
+    :is(#productTableContainer, #customerTableContainer, #supplierTableContainer, #userTableContainer, #unitTableContainer) .dataTables_length {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        width: 100%;
+        margin: 0 0 12px;
+    }
+
+    :is(#productTableContainer, #customerTableContainer, #supplierTableContainer, #userTableContainer, #unitTableContainer) .dataTables_length label {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin: 0;
+        font-size: 12px;
+        font-weight: 600;
+        color: #64748b;
+        white-space: nowrap;
+    }
+
+    :is(#productTableContainer, #customerTableContainer, #supplierTableContainer, #userTableContainer, #unitTableContainer) .dataTables_length select {
+        min-width: 104px !important;
+        height: 40px !important;
+        /* Dulu "auto" supaya nempel ke kanan pas justify-content:space-between.
+           Sekarang justify-content:center, jadi margin-left harus 0 - kalau
+           tetap auto, dropdown terdorong ke kanan dan baris tidak center. */
+        margin-left: 0 !important;
+        padding: 0 34px 0 14px !important;
+        border-radius: 12px !important;
+        border: 1px solid #e2e8f0 !important;
+        background-color: #fff !important;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E") !important;
+        background-repeat: no-repeat !important;
+        background-position: right 12px center !important;
+        background-size: 12px 12px !important;
+        -webkit-appearance: none !important;
+        appearance: none !important;
+        font-size: 12.5px;
+        font-weight: 700;
+        color: #0f172a;
+        cursor: pointer;
+        box-shadow: 0 2px 6px rgba(15, 23, 42, .05) !important;
+        transition: border-color .2s ease, box-shadow .2s ease;
+    }
+
+    :is(#productTableContainer, #customerTableContainer, #supplierTableContainer, #userTableContainer, #unitTableContainer) .dataTables_length select:focus {
+        outline: none;
+        border-color: #a5b4fc !important;
+        box-shadow: 0 0 0 4px rgba(99, 102, 241, .22) !important;
+    }
+
+    /* ---------- CHIP INFO ---------- */
+    :is(#productTableContainer, #supplierTableContainer, #customerTableContainer, #userTableContainer, #unitTableContainer) .dataTables_info {
+        margin: 14px 0 0;
+        padding: 0;
+        text-align: center;
+    }
+
+    :is(#productTableContainer, #supplierTableContainer, #customerTableContainer, #userTableContainer, #unitTableContainer) .mp-info {
+        display: inline-flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: center;
+        gap: 6px 8px;
+        max-width: 100%;
+        height: auto;
+        min-height: 30px;
+        padding: 5px 12px 5px 7px;
+        border-radius: 11px;
+        background: linear-gradient(135deg, #f8fafc, #eef2ff);
+        border: 1px solid #e2e8f0;
+        box-shadow:
+            0 2px 6px rgba(15, 23, 42, .05),
+            inset 0 1px 0 rgba(255, 255, 255, .75);
+
+        /* mobile: teks boleh wrap, kalau tidak "dari N produk" akan keluar
+           dari card di layar 320px */
+        white-space: normal;
+    }
+
+    :is(#productTableContainer, #supplierTableContainer, #customerTableContainer, #userTableContainer, #unitTableContainer) .mp-info-ico {
+        flex: 0 0 auto;
+        width: 18px;
+        height: 18px;
+        border-radius: 6px;
+        font-size: 9px;
+        color: #fff;
+        background: linear-gradient(135deg, #4f46e5, #6366f1);
+        box-shadow: 0 4px 10px -4px rgba(79, 70, 229, .95);
+    }
+
+    :is(#productTableContainer, #supplierTableContainer, #customerTableContainer, #userTableContainer, #unitTableContainer) .mp-info-txt {
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: .1px;
+        color: #64748b;
+    }
+
+    :is(#productTableContainer, #supplierTableContainer, #customerTableContainer, #userTableContainer, #unitTableContainer) .mp-info-txt b {
+        font-weight: 800;
+        color: #0f172a;
+    }
+
+    /* Kalau tidak muat satu baris, .mp-info yang membungkus (flex-wrap)
+       menurunkan .mp-info-sub ke baris sendiri. */
+    :is(#productTableContainer, #supplierTableContainer, #customerTableContainer, #userTableContainer, #unitTableContainer) .mp-info-sub {
+        margin-left: 0;
+        padding-left: 0;
+        border-left: 0;
+        font-size: 10.5px;
+        font-weight: 500;
+        color: #94a3b8;
+        white-space: nowrap;
+    }
+}
+
+/* ============================================================
+   MODAL TAMBAH PRODUK (spesifik untuk produk)
+
+   Desktop & tablet: tampilan tetap seperti semula
+   (header tetap my-3 mx-3, konten tetap mt-2 px-5, input foto
+   masih lengkap dengan input file + petunjuk format).
+
+   Yang dirapikan hanya mobile (<=575.98px):
+   - input foto diminimalkan (preview + label saja)
+   ============================================================ */
+
+/* ============================================================
+   MODAL FORM (generik)
+
+   .mp-add-header / .mp-add-head-text / .mp-add-body /
+   .mp-add-close / .mp-add-footer dipakai bersama oleh semua
+   modal master (produk, customer, supplier, user).
+
+   Desktop & tablet: .mp-add-body tetap mt-2 px-5 dari HTML,
+   .mp-add-footer tetap rata kanan.
+
+   Yang dirapikan hanya mobile (<=575.98px):
+   - gutter konten = gutter header (rata kiri-kanan)
+   - header satu baris, tombol X tidak jatuh ke baris sendiri
+   - tombol Save jadi baris penuh
+   ============================================================ */
+.mp-add-footer {
+    margin-top: 24px;
+    margin-bottom: 16px;
+    text-align: right;
+}
+
+.mp-add-footer .btn-save {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-width: 132px;
+    height: 44px;
+    padding: 0 22px;
+    border-radius: 10px;
+    font-size: 13.5px;
+    font-weight: 700;
+    letter-spacing: .01em;
+    box-shadow: 0 10px 20px -12px rgba(15, 23, 42, .8);
+    transition: transform .18s ease, box-shadow .18s ease, background .2s;
+}
+
+.mp-add-footer .btn-save i { font-size: 13px; }
+
+.mp-add-footer .btn-save:hover {
+    color: #fff;
+    transform: translateY(-1px);
+    box-shadow: 0 14px 24px -12px rgba(15, 23, 42, .85);
+}
+
+.mp-add-footer .btn-save:active { transform: translateY(0); }
+
+@media (max-width: 575.98px) {
+
+    /* ---------- HEADER ---------- */
+    .mp-add-header {
+        flex-direction: row !important;
+        flex-wrap: nowrap !important;
+        align-items: center !important;
+        gap: 10px;
+        margin: 12px 12px 0 !important;
+        padding: 12px 14px;
+    }
+
+    .mp-add-header .panel-left {
+        gap: 10px;
+        min-width: 0;
+        flex: 1;
+    }
+
+    .mp-add-head-text {
+        min-width: 0;
+        flex: 1;
+    }
+
+    .mp-add-header .panel-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 12px;
+        font-size: 15px;
+        flex: 0 0 auto;
+    }
+
+    .mp-add-header .panel-title {
+        font-size: 15px;
+        line-height: 1.25;
+    }
+
+    .mp-add-header .panel-subtitle {
+        font-size: 11px;
+        line-height: 1.45;
+        margin-top: 2px;
+    }
+
+    .mp-add-close {
+        flex: 0 0 auto;
+        margin: 0;
+        align-self: center;
+    }
+
+    /* ---------- BODY: gutter sama dengan header ---------- */
+    .mp-add-body {
+        margin: 0 !important;
+        padding: 12px 12px 0 !important;
+    }
+
+    /* ---------- FOOTER + TOMBOL SAVE ---------- */
+    .mp-add-footer {
+        display: flex;
+        justify-content: center;
+        margin: 16px 0 0;
+        padding: 14px 0 18px;
+        border-top: 1px solid #e2e8f0;
+        text-align: initial;
+    }
+
+    .mp-add-footer .btn-save {
+        width: 100%;
+    }
+
+    /* Modal 2 tombol (Batal + Save): dibagi rata, tetap 1 baris */
+    #stockSettingModal .mp-add-footer {
+        gap: 10px;
+    }
+
+    #stockSettingModal .mp-add-footer .btn-cancel,
+    #stockSettingModal .mp-add-footer .btn-save {
+        flex: 1 1 0;
+        width: auto;
+        min-width: 0;
+        padding: 0 12px;
+    }
+}
+
+@media (max-width: 575.98px) {
+
+    /* ---------- INPUT FOTO: MINIMAL (spesifik produk) ---------- */
+    #addProductModal .photo-upload-box {
+        position: relative;
+        flex-direction: row;
+        align-items: center;
+        gap: 10px;
+        padding: 8px 10px;
+        border-radius: 14px;
+    }
+
+    #addProductModal .photo-upload-box .photo-preview {
+        width: 44px;
+        height: 44px;
+        border-radius: 12px;
+        border-width: 1.5px;
+    }
+
+    #addProductModal .photo-upload-box .photo-preview i {
+        font-size: 16px;
+    }
+
+    /* input file & petunjuk disembunyikan -> seluruh kotak jadi area klik */
+    #addProductModal .photo-upload-box .photo-input-details input[type="file"],
+    #addProductModal .photo-upload-box .photo-input-details small {
+        display: none;
+    }
+}
+
+/* ============================================================
+   MASTER CUSTOMER — IMPORT & EXPORT
+   ============================================================ */
+
+/* Tombol aksi (Tambah / Import / Export) jadi satu baris di desktop;
+   mode mobile (<576px) tetap pakai layout rapat dari blok lama di bawah */
+@media (min-width: 576px) {
+    #productTableContainer #btnContainer,
+    #customerTableContainer #btnContainer,
+    #supplierTableContainer #btnContainer,
+    #unitTableContainer #btnContainer {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+    }
+}
+
+/* varian warna tombol: Import (teal), Export (green), Template (outline) */
+.mu-add-btn.mu-add-btn-import {
+    background: linear-gradient(135deg, #0891b2, #0e7490);
+    box-shadow: 0 8px 18px rgba(8, 145, 178, .3);
+}
+.mu-add-btn.mu-add-btn-import:hover {
+    box-shadow: 0 12px 24px rgba(8, 145, 178, .45);
+}
+.mu-add-btn.mu-add-btn-export {
+    background: linear-gradient(135deg, #16a34a, #15803d);
+    box-shadow: 0 8px 18px rgba(22, 163, 74, .3);
+    text-decoration: none;
+}
+.mu-add-btn.mu-add-btn-export:hover {
+    box-shadow: 0 12px 24px rgba(22, 163, 74, .45);
+}
+.mu-add-btn.mu-add-btn-template {
+    background: #fff;
+    color: #4f46e5;
+    border: 1.5px solid #c7d2fe;
+    box-shadow: 0 8px 18px rgba(79, 70, 229, .12);
+}
+.mu-add-btn.mu-add-btn-template:hover {
+    color: #4338ca;
+    border-color: #a5b4fc;
+    box-shadow: 0 12px 24px rgba(79, 70, 229, .18);
+}
+
+/* ---------- MODAL IMPORT ---------- */
+.import-modal-body {
+    padding-bottom: 8px;
+}
+.import-guide {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    padding: 14px 16px;
+    margin-bottom: 16px;
+    font-size: 12.5px;
+    line-height: 1.7;
+    color: #475569;
+}
+.import-guide p { margin: 0; }
+.import-guide p + p { margin-top: 6px; }
+.import-guide i { color: #4f46e5; margin-right: 6px; }
+.import-guide code {
+    background: #eef2ff;
+    color: #4f46e5;
+    font-weight: 700;
+    padding: 1px 6px;
+    border-radius: 6px;
+}
+.import-guide b { color: #0f172a; }
+
+/* dropzone unggah */
+.import-dropzone {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    margin-top: 14px;
+    padding: 30px 16px;
+    border: 2px dashed #c7d2fe;
+    border-radius: 16px;
+    background: #fbfbfe;
+    cursor: pointer;
+    text-align: center;
+    transition: border-color .2s ease, background-color .2s ease, transform .2s ease;
+}
+.import-dropzone:hover {
+    border-color: #8b5cf6;
+    background: #f5f3ff;
+    transform: translateY(-1px);
+}
+.import-drop-ico { font-size: 32px; color: #4f46e5; }
+.import-drop-title { font-size: 14px; font-weight: 600; color: #0f172a; }
+.import-drop-title span { color: #4f46e5; font-weight: 700; text-decoration: underline; }
+.import-drop-sub { font-size: 11.5px; color: #94a3b8; }
+
+/* file terpilih */
+.import-fileinfo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 14px;
+    padding: 12px 14px;
+    border: 1px solid #dbeafe;
+    background: #eff6ff;
+    border-radius: 12px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #1d4ed8;
+}
+.import-fileinfo i.fa-file-excel { font-size: 18px; color: #22c55e; }
+.import-fileinfo span {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.import-file-remove {
+    border: none;
+    background: rgba(239, 68, 68, .12);
+    color: #ef4444;
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    font-size: 12px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color .2s ease;
+}
+.import-file-remove:hover { background: rgba(239, 68, 68, .22); }
+
+/* Tombol Tambah/Import/Export di customer & supplier: ditumpuk penuh,
+   tapi beri jarak antar tombol supaya tidak menempel satu sama lain.
+   (Blok lama di atas men-set display:block + margin:0 - aturan ini
+   datang belakangan dengan spesifisitas sama sehingga menang.) */
+@media (max-width: 575.98px) {
+    #productTableContainer #btnContainer,
+    #customerTableContainer #btnContainer,
+    #supplierTableContainer #btnContainer,
+    #unitTableContainer #btnContainer {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+}
+
+/* ============================================================
+   MASTER UNIT - layout kartu di mobile
+   (mengikuti pola Master Produk/Supplier, di-scope ke
+   #unitTableContainer agar tidak memengaruhi tabel lain)
+   ============================================================ */
+@media (max-width: 575.98px) {
+
+    #unitTableContainer #stockTable {
+        min-width: 0 !important;
+        width: 100% !important;
+        border-spacing: 0 !important;
+        border-collapse: separate;
+        table-layout: auto !important;
+        margin: 0;
+    }
+
+    #unitTableContainer #stockTable thead {
+        display: none;
+    }
+
+    #unitTableContainer #stockTable > tbody,
+    #unitTableContainer #stockTable > tfoot {
+        border-top: 0 !important;
+    }
+
+    #unitTableContainer #stockTable tbody {
+        display: flex;
+        flex-direction: column;
+        gap: 7px;
+    }
+
+    #unitTableContainer #stockTable tbody tr {
+        display: flex !important;
+        align-items: center;
+        gap: 10px;
+        width: 100%;
+        margin: 0 !important;
+        padding: 9px 11px;
+        border-radius: 18px;
+        border: 1px solid rgba(99, 102, 241, .14);
+        background: linear-gradient(90deg, rgba(99, 102, 241, .07), #fff 42%);
+        box-shadow: none;
+        position: relative;
+        overflow: hidden;
+    }
+
+    #unitTableContainer #stockTable tbody tr::before {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 9px;
+        bottom: 9px;
+        width: 4px;
+        border-radius: 0 4px 4px 0;
+        background: linear-gradient(180deg, #818cf8, #7c3aed);
+    }
+
+    #unitTableContainer #stockTable.table-hover > tbody > tr:hover > * {
+        box-shadow: none !important;
+        background-color: transparent !important;
+        color: inherit;
+    }
+
+    #unitTableContainer #stockTable tbody td {
+        display: block !important;
+        width: auto !important;
+        border: none !important;
+        padding: 0 !important;
+        background: transparent !important;
+        vertical-align: middle;
+    }
+
+    #unitTableContainer #stockTable tbody td:first-child {
+        flex: 1 1 auto;
+        min-width: 0;
+    }
+
+    #unitTableContainer #stockTable tbody td.mp-col-phone,
+    #unitTableContainer #stockTable tbody td.mp-col-address {
+        display: none !important;
+    }
+
+    #unitTableContainer #stockTable tbody td:last-child {
+        flex: 0 0 auto;
+        float: none;
+        margin: 0;
+    }
+
+    #unitTableContainer .product-wrap {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        min-width: 0;
+    }
+
+    #unitTableContainer .product-wrap > div:not(.product-img-placeholder) {
+        flex: 1 1 auto;
+        min-width: 0;
+    }
+
+    #unitTableContainer .product-img,
+    #unitTableContainer .product-img-placeholder {
+        width: 36px;
+        height: 36px;
+        flex: 0 0 36px;
+        border-radius: 12px;
+        border: none;
+        box-shadow: 0 0 0 2px #fff, 0 0 0 3px rgba(99, 102, 241, .28);
+    }
+
+    #unitTableContainer .product-img-placeholder {
+        font-size: 16px;
+        color: #fff;
+        background: linear-gradient(140deg, #6366f1, #8b5cf6);
+        box-shadow: 0 0 0 2px #fff, 0 0 0 3px rgba(99, 102, 241, .32);
+    }
+
+    #unitTableContainer .product-img-placeholder i {
+        font-size: 16px;
+        line-height: 1;
+    }
+
+    #unitTableContainer .product-wrap .fw-bold {
+        font-size: 12px;
+        font-weight: 700;
+        color: #0f172a;
+        line-height: 1.3;
+        margin-bottom: 3px;
+        text-transform: capitalize;
+        white-space: normal;
+        overflow-wrap: anywhere;
+    }
+
+    #unitTableContainer .mp-meta {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 2px;
+        min-width: 0;
+    }
+
+    #unitTableContainer .mp-meta small {
+        font-size: 9.5px;
+        font-weight: 600;
+        letter-spacing: .5px;
+        color: #94a3b8;
+        line-height: 1.3;
+        white-space: normal;
+        overflow-wrap: anywhere;
+    }
+
+    #unitTableContainer #stockTable tbody .action-btn {
+        width: 32px;
+        height: 32px;
+        margin: 0;
+        border-radius: 10px;
+        font-size: 12px;
+    }
+
+    #unitTableContainer #stockTable tbody tr:has(.empty-search) {
+        padding: 0;
+        background: transparent;
+        border: none;
+        box-shadow: none;
+        overflow: visible;
+        justify-content: center;
+    }
+
+    #unitTableContainer #stockTable tbody tr:has(.empty-search)::before {
+        content: none;
+    }
+
+    #unitTableContainer #stockTable tbody tr:has(.empty-search) > td {
+        flex: 1 1 100% !important;
+        width: 100% !important;
+        padding: 0 !important;
+        border: 0 !important;
+    }
+
+    #unitTableContainer #stockTable tbody .empty-search {
+        padding: 14px 10px 18px;
+        text-align: center;
+    }
+
+    #unitTableContainer #stockTable tbody .empty-img {
+        display: block;
+        width: 120px;
+        margin: 0 auto 8px;
+        opacity: .8;
+    }
+
+    #unitTableContainer #stockTable tbody .empty-title {
+        font-size: 12.5px;
+        font-weight: 700;
+        color: #0f172a;
+        margin-bottom: 4px;
+    }
+
+    #unitTableContainer #stockTable tbody .empty-sub {
+        font-size: 10.5px;
+        color: #64748b;
+    }
+}
+
+/* ============================================================
+   MASTER UNIT - search + pagination + tombol (mobile)
+
+   Disalin dari blok bersama (produk/customer/supplier/user) di atas,
+   di-scope khusus ke #unitTableContainer supaya halaman Master Unit
+   tampil konsisten tanpa menyentuh selector halaman lain.
+   ============================================================ */
+@media (max-width: 575.98px) {
+
+    #unitTableContainer .dataTables_filter {
+        display: flex;
+        width: 100%;
+        margin: 0;
+        padding: 0;
+    }
+
+    #unitTableContainer .dataTables_filter label {
+        display: flex;
+        width: 100%;
+        margin: 0;
+    }
+
+    #unitTableContainer .dataTables_filter input {
+        width: 100% !important;
+        height: 40px;
+        border-radius: 14px !important;
+        border: 1px solid transparent !important;
+        background-color: #f1f5f9;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='M20.5 20.5l-4-4'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: 13px center;
+        background-size: 15px 15px;
+        padding: 0 12px 0 35px !important;
+        font-size: 12px;
+        color: #0f172a;
+        box-shadow: inset 0 1px 2px rgba(15, 23, 42, .04);
+        outline: none;
+        transition: background-color .2s, box-shadow .2s;
+    }
+
+    #unitTableContainer .dataTables_filter input::placeholder {
+        color: #94a3b8;
+    }
+
+    #unitTableContainer .dataTables_filter input:focus {
+        background-color: #fff;
+        box-shadow:
+            0 0 0 2px #fff,
+            0 0 0 4px rgba(99, 102, 241, .35),
+            0 10px 20px -10px rgba(79, 70, 229, .6);
+    }
+
+    #unitTableContainer .table-action-wrapper {
+        flex-direction: column;
+        align-items: stretch;
+        justify-content: flex-start;
+        gap: 10px;
+        margin-bottom: 12px;
+    }
+
+    #unitTableContainer .table-action-wrapper #stockTable_filter {
+        width: 100%;
+    }
+
+    #unitTableContainer #btnContainer {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        width: 100%;
+    }
+
+    #unitTableContainer .mu-add-btn {
+        width: 100%;
+        height: 44px;
+        border-radius: 14px;
+        justify-content: center;
+        margin: 0;
+    }
+
+    #unitTableContainer .dataTables_paginate,
+    #unitTableContainer .dataTables_paginate .pagination {
+        float: none;
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        align-items: center;
+        gap: 5px;
+        margin: 12px 0 0;
+        padding: 0;
+    }
+
+    #unitTableContainer .dataTables_paginate .page-item {
+        margin: 0 !important;
+    }
+
+    #unitTableContainer .dataTables_paginate .page-link {
+        min-width: 30px;
+        height: 30px;
+        padding: 0 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 10px !important;
+        font-size: 11px;
+        font-weight: 700;
+        color: #475569 !important;
+        background: #fff !important;
+        border: 1px solid #e2e8f0 !important;
+        box-shadow: 0 2px 6px rgba(15, 23, 42, .05) !important;
+        margin-left: 0;
+        transition: transform .18s ease, box-shadow .18s ease;
+    }
+
+    #unitTableContainer .dataTables_paginate .page-link:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 6px 12px -6px rgba(15, 23, 42, .35) !important;
+    }
+
+    #unitTableContainer .dataTables_paginate .page-item.active .page-link {
+        color: #fff !important;
+        background: linear-gradient(135deg, #4f46e5, #6366f1) !important;
+        border-color: transparent !important;
+        box-shadow: 0 8px 16px -7px rgba(79, 70, 229, .95) !important;
+    }
+
+    #unitTableContainer .dataTables_paginate .page-item.disabled .page-link {
+        color: #94a3b8 !important;
+        background: #f8fafc !important;
+    }
+
+    #unitTableContainer .dataTables_paginate .page-item.disabled .page-link:hover {
+        transform: none;
+        box-shadow: 0 2px 6px rgba(15, 23, 42, .05) !important;
+    }
+
+    #unitTableContainer .dataTables_paginate .page-link:focus-visible {
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(99, 102, 241, .45) !important;
+    }
+}
