@@ -8,6 +8,7 @@
 #reportSummarySummaryCard,
 #reportOmzetSummaryCard,
 #reportExpenseSummaryCard,
+#reportPurchaseSummaryCard,
 #reportProfitSummaryCard,
 #reportMarginSummaryCard,
 #reportUnpaidSummaryCard {
@@ -219,13 +220,13 @@
     white-space: nowrap;
 }
 
-/* Select2 "Produk" & "Kategori" di report-filter: disamakan dengan .form-control
+/* Select2 "Produk" & "Kategori" & "Purchase" di report-filter: disamakan dengan .form-control
    (report-tenant.css line 647: 48px, radius 12, border #dbe4f0) */
-:is(#productContent, #categoryContent) .select2-container {
+:is(#productContent, #categoryContent, #purchaseContent) .select2-container {
     width: 100% !important;
 }
 
-:is(#productContent, #categoryContent) .select2-container--default .select2-selection--single {
+:is(#productContent, #categoryContent, #purchaseContent) .select2-container--default .select2-selection--single {
     height: 48px;
     padding: 0 16px;
     border-radius: 12px;
@@ -234,37 +235,38 @@
     transition: .3s;
 }
 
-:is(#productContent, #categoryContent) .select2-container--default .select2-selection--single .select2-selection__rendered {
+:is(#productContent, #categoryContent, #purchaseContent) .select2-container--default .select2-selection--single .select2-selection__rendered {
     line-height: 46px;
     padding: 0;
     color: #334155;
     font-size: 14px;
 }
 
-:is(#productContent, #categoryContent) .select2-container--default .select2-selection--single .select2-selection__placeholder {
+:is(#productContent, #categoryContent, #purchaseContent) .select2-container--default .select2-selection--single .select2-selection__placeholder {
     color: #94a3b8;
 }
 
-:is(#productContent, #categoryContent) .select2-container--default .select2-selection--single .select2-selection__arrow {
+:is(#productContent, #categoryContent, #purchaseContent) .select2-container--default .select2-selection--single .select2-selection__arrow {
     height: 46px;
     right: 10px;
 }
 
-:is(#productContent, #categoryContent) .select2-container--default .select2-selection--single .select2-selection__clear {
-    margin-top: -2px;
+:is(#productContent, #categoryContent, #purchaseContent) .select2-container--default .select2-selection--single .select2-selection__clear {
+    margin-top: 10px;
+    margin-right: 24px;
 }
 
-:is(#productContent, #categoryContent) .select2-container--default.select2-container--open .select2-selection--single,
-:is(#productContent, #categoryContent) .select2-container--default.select2-container--focus .select2-selection--single {
+:is(#productContent, #categoryContent, #purchaseContent) .select2-container--default.select2-container--open .select2-selection--single,
+:is(#productContent, #categoryContent, #purchaseContent) .select2-container--default.select2-container--focus .select2-selection--single {
     border-color: #5b4cf4;
     box-shadow: 0 0 0 .2rem rgba(91, 76, 244, .12);
 }
 
-:is(#productContent, #categoryContent) .select2-container--default .select2-selection--single:hover {
+:is(#productContent, #categoryContent, #purchaseContent) .select2-container--default .select2-selection--single:hover {
     border-color: #c3cdf7;
 }
 
-:is(#productContent, #categoryContent) .select2-container--default .select2-dropdown {
+:is(#productContent, #categoryContent, #purchaseContent) .select2-container--default .select2-dropdown {
     border: 1px solid #dbe4f0;
     border-radius: 12px;
     box-shadow: 0 8px 24px rgba(15, 23, 42, .08);
@@ -1296,6 +1298,7 @@
     .report-sales-card #reportSummarySummaryCard,
     .report-sales-card #reportOmzetSummaryCard,
     .report-sales-card #reportExpenseSummaryCard,
+    .report-sales-card #reportPurchaseSummaryCard,
     .report-sales-card #reportProfitSummaryCard,
     .report-sales-card #reportMarginSummaryCard,
     .report-sales-card #reportUnpaidSummaryCard{
@@ -1314,6 +1317,7 @@
     .report-sales-card #reportSummarySummaryCard .d-flex,
     .report-sales-card #reportOmzetSummaryCard .d-flex,
     .report-sales-card #reportExpenseSummaryCard .d-flex,
+    .report-sales-card #reportPurchaseSummaryCard .d-flex,
     .report-sales-card #reportProfitSummaryCard .d-flex,
     .report-sales-card #reportMarginSummaryCard .d-flex,
     .report-sales-card #reportUnpaidSummaryCard .d-flex{
@@ -1334,6 +1338,7 @@
     .report-sales-card #reportSummarySummaryCard .d-flex > div:first-child,
     .report-sales-card #reportOmzetSummaryCard .d-flex > div:first-child,
     .report-sales-card #reportExpenseSummaryCard .d-flex > div:first-child,
+    .report-sales-card #reportPurchaseSummaryCard .d-flex > div:first-child,
     .report-sales-card #reportProfitSummaryCard .d-flex > div:first-child,
     .report-sales-card #reportMarginSummaryCard .d-flex > div:first-child,
     .report-sales-card #reportUnpaidSummaryCard .d-flex > div:first-child{

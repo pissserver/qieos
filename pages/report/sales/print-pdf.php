@@ -50,6 +50,7 @@ $tabLabels = [
     'summary'  => 'RINGKASAN KEUANGAN',
     'omzet'    => 'LAPORAN OMZET HARIAN',
     'expense'  => 'LAPORAN PENGELUARAN',
+    'purchase' => 'LAPORAN PEMBELIAN',
     'profit'   => 'LAPORAN LABA & RUGI',
     'margin'   => 'LAPORAN MARGIN PRODUK',
     'all'      => 'LAPORAN SEMUA TRANSAKSI',
@@ -65,6 +66,7 @@ $tabTitles = [
     'summary'  => 'Ringkasan Keuangan',
     'omzet'    => 'Laporan Omzet Harian',
     'expense'  => 'Laporan Pengeluaran',
+    'purchase' => 'Laporan Pembelian',
     'profit'   => 'Laporan Laba & Rugi',
     'margin'   => 'Laporan Margin Produk',
     'all'      => 'Laporan Semua Transaksi',
@@ -137,13 +139,33 @@ switch ($tab) {
         break;
 
     case 'omzet':
-        $q = mysqli_query($conn, "SELECT DATE(tanggal) AS dt, COUNT(*) AS total_order, SUM(CASE WHEN status_payment='paid' THEN 1 ELSE 0 END) AS paid_count, SUM(CASE WHEN status_payment='waiting' THEN 1 ELSE 0 END) AS waiting_count, SUM(CASE WHEN status_payment='paid' THEN total ELSE 0 END) AS omzet FROM orders WHERE $where GROUP BY DATE(tanggal) ORDER BY dt ASC");
+        $q = mysqli_query($conn, "SELECT DATE(tanggal) AS dt, COUNT(*) AS total_order, SUM(CASE WHEN status_payment='paid' THEN 1 ELSE 0 END) AS paid_count, SUM(CASE WHEN status_payment='waiting' THEN 1 ELSE 0 END) AS waiting_count, SUM(CASE WHEN status_payment='cancelled' THEN 1 ELSE 0 END) AS cancelled_count, SUM(CASE WHEN status_payment='paid' THEN total ELSE 0 END) AS omzet FROM orders WHERE $where GROUP BY DATE(tanggal) ORDER BY dt ASC");
         if ($q) while ($r = mysqli_fetch_assoc($q)) { $rows[] = $r; $total += (float) $r['omzet']; }
         break;
 
     case 'expense':
         $q = mysqli_query($conn, "SELECT p.id, p.form, p.date, COUNT(pi.id) AS total_items, COALESCE(SUM(pi.price_buy),0) AS total_price FROM purchases p LEFT JOIN purchase_items pi ON p.id=pi.purchase_id AND pi.deleted_at IS NULL WHERE p.deleted_at IS NULL AND DATE(p.date) BETWEEN '$escFirst' AND '$escLast' AND EXISTS (SELECT 1 FROM purchase_items pi2 WHERE pi2.purchase_id=p.id AND pi2.deleted_at IS NULL AND pi2.qty_buy IS NOT NULL) GROUP BY p.id, p.form, p.date ORDER BY p.date ASC, p.id ASC");
         if ($q) while ($r = mysqli_fetch_assoc($q)) { $rows[] = $r; $total += (float) $r['total_price']; }
+        break;
+
+    case 'purchase':
+        $purchase_id = isset($_GET['purchase_id']) ? (int) $_GET['purchase_id'] : 0;
+        if ($purchase_id > 0) {
+            $qPurchase = mysqli_query($conn, "SELECT p.id, p.date, p.form FROM purchases p WHERE p.id = $purchase_id AND p.deleted_at IS NULL LIMIT 1");
+            $purchase = $qPurchase ? mysqli_fetch_assoc($qPurchase) : null;
+            if ($purchase) {
+                $q = mysqli_query($conn, "SELECT pi.id, pi.product_id, pi.qty_buy, pi.price_unit, pi.price_buy, p.code AS product_code, p.name AS product_name, p.unit AS product_unit FROM purchase_items pi JOIN products p ON pi.product_id = p.id WHERE pi.purchase_id = $purchase_id AND pi.deleted_at IS NULL AND pi.qty_buy IS NOT NULL ORDER BY pi.id ASC");
+                if ($q) {
+                    while ($r = mysqli_fetch_assoc($q)) {
+                        $r['purchase_date'] = $purchase['date'];
+                        $r['purchase_form'] = $purchase['form'];
+                        $r['purchase_id'] = $purchase['id'];
+                        $rows[] = $r;
+                        $total += (float) $r['price_buy'];
+                    }
+                }
+            }
+        }
         break;
 
     case 'profit':
@@ -439,8 +461,9 @@ ob_start();
                 <?php
                 $colWidths = [
                     'summary'  => ['w5','w18','w40','w37'],
-                    'omzet'    => ['w5','w20','w12','w12','w12','w39'],
+                    'omzet'    => ['w5','w18','w12','w12','w12','w12','w29'],
                     'expense'  => ['w5','w18','w25','w15','w37'],
+                    'purchase' => ['w5','w10','w10','w10','w12','w8','w15','w8','w8','w10','w10'],
                     'profit'   => ['w5','w20','w18','w18','w20','w19'],
                     'margin'   => ['w5','w22','w12','w15','w15','w12','w19'],
                     'all'      => ['w5','w18','w17','w22','w20','w18'],
@@ -453,8 +476,9 @@ ob_start();
                 ];
                 $colMap = [
                     'summary'  => ['No', 'Komponen', 'Keterangan', 'Jumlah'],
-                    'omzet'    => ['No', 'Tanggal', 'Pesanan', 'Terbayar', 'Waiting', 'Omzet'],
+                    'omzet'    => ['No', 'Tanggal', 'Pesanan', 'Terbayar', 'Waiting', 'Cancel/Revisi', 'Omzet'],
                     'expense'  => ['No', 'Tanggal', 'Form Belanja', 'Total Item', 'Total Belanja'],
+                    'purchase' => ['No', 'Tgl Beli', 'No Penerimaan', 'No SJ/INV', 'Supplier', 'Kode', 'Nama Barang', 'Satuan', 'Qty', 'Total', 'Harga/Sat'],
                     'profit'   => ['No', 'Tanggal', 'Omzet', 'Pengeluaran', 'Laba / Rugi', 'Status'],
                     'margin'   => ['No', 'Produk', 'Qty Terjual', 'Harga Beli', 'Harga Jual', 'Margin', 'Keuntungan'],
                     'all'      => ['No', 'Kode Pesanan', 'Tanggal', 'Kasir', 'Total', 'Status'],
@@ -508,11 +532,12 @@ ob_start();
                     case 'omzet':
                 ?>
                         <td class="c w5"><?= $i + 1 ?></td>
-                        <td class="c w20"><?= sPdfDateId($r['dt']) ?></td>
+                        <td class="c w18"><?= sPdfDateId($r['dt']) ?></td>
                         <td class="c w12"><?= (int) $r['total_order'] ?></td>
                         <td class="c w12"><?= (int) $r['paid_count'] ?></td>
                         <td class="c w12"><?= (int) $r['waiting_count'] ?></td>
-                        <td class="r w39"><?= sPdfRp($r['omzet']) ?></td>
+                        <td class="c w12"><?= (int) $r['cancelled_count'] ?></td>
+                        <td class="r w29"><?= sPdfRp($r['omzet']) ?></td>
                 <?php
                         break;
 
@@ -524,6 +549,22 @@ ob_start();
                         <td class="l w25"><b><?= sPdfEscape($form) ?></b></td>
                         <td class="c w15"><?= (int) $r['total_items'] ?></td>
                         <td class="r w37"><?= sPdfRp($r['total_price']) ?></td>
+                <?php
+                        break;
+
+                    case 'purchase':
+                ?>
+                        <td class="c w5"><?= $i + 1 ?></td>
+                        <td class="c w10"><?= sPdfDateId($r['purchase_date']) ?></td>
+                        <td class="c w10"><?= (int) $r['purchase_id'] ?></td>
+                        <td class="c w10">-</td>
+                        <td class="c w12">-</td>
+                        <td class="c w8"><?= sPdfEscape($r['product_code']) ?></td>
+                        <td class="l w15"><?= sPdfEscape($r['product_name']) ?></td>
+                        <td class="c w8"><?= sPdfEscape(strtoupper($r['product_unit'])) ?></td>
+                        <td class="c w8"><?= (int) $r['qty_buy'] ?></td>
+                        <td class="r w10"><?= sPdfRp($r['price_buy']) ?></td>
+                        <td class="r w10"><?= sPdfRp($r['price_unit']) ?></td>
                 <?php
                         break;
 

@@ -11,6 +11,7 @@ $query = mysqli_query($conn, "
         COUNT(*) AS total_order,
         SUM(CASE WHEN status_payment = 'paid' THEN 1 ELSE 0 END) AS paid_count,
         SUM(CASE WHEN status_payment = 'waiting' THEN 1 ELSE 0 END) AS waiting_count,
+        SUM(CASE WHEN status_payment = 'cancelled' THEN 1 ELSE 0 END) AS cancelled_count,
         SUM(CASE WHEN status_payment = 'paid' THEN total ELSE 0 END) AS omzet
     FROM orders
     WHERE DATE(tanggal) BETWEEN '$first' AND '$last'
@@ -32,12 +33,13 @@ if ($hasData) {
             <td class="text-center"><?= (int) $row['total_order'] ?></td>
             <td class="text-center"><?= (int) $row['paid_count'] ?></td>
             <td class="text-center"><?= (int) $row['waiting_count'] ?></td>
+            <td class="text-center"><?= (int) $row['cancelled_count'] ?></td>
             <td class="text-center fw-semibold"><?= report_rp($row['omzet']) ?></td>
         </tr>
         <?php
     }
 } else {
-    report_empty(6, 'Tidak ada omzet pada periode ini.');
+    report_empty(7, 'Tidak ada omzet pada periode ini.');
 }
 
 report_foot($total);

@@ -97,6 +97,17 @@
                         </button>
 
                         <button class="report-menu-item"
+                            data-group="keuangan" data-tab="purchase"
+                            onclick="switchReportTab('purchase', this)">
+                            <i class="fas fa-file-invoice"></i>
+
+                            <div>
+                                <h6>Pembelian</h6>
+                                <small>Detail pembelian per form</small>
+                            </div>
+                        </button>
+
+                        <button class="report-menu-item"
                             data-group="keuangan" data-tab="profit"
                             onclick="switchReportTab('profit', this)">
                             <i class="fas fa-chart-pie"></i>
@@ -207,6 +218,7 @@
                 <?php include 'sales/content-summary.php' ?>
                 <?php include 'sales/content-omzet.php' ?>
                 <?php include 'sales/content-expense.php' ?>
+                <?php include 'sales/content-purchase.php' ?>
                 <?php include 'sales/content-profit.php' ?>
                 <?php include 'sales/content-margin.php' ?>
                 <?php include 'sales/content-all.php' ?>
@@ -229,8 +241,9 @@
 
     const reportTabs = {
         summary:  { body: "#reportSummaryBody",  card: "#reportSummarySummaryCard",  label: "#totalSummaryAmountLabel",  url: "sales/report-summary.php",  colspan: 4, icon: "fa-wallet",          empty: "Silakan pilih tanggal awal dan tanggal akhir untuk menampilkan ringkasan keuangan." },
-        omzet:    { body: "#reportOmzetBody",    card: "#reportOmzetSummaryCard",    label: "#totalOmzetAmountLabel",    url: "sales/report-omzet.php",    colspan: 6, icon: "fa-coins",           empty: "Silakan pilih tanggal awal dan tanggal akhir untuk menampilkan omzet harian." },
+        omzet:    { body: "#reportOmzetBody",    card: "#reportOmzetSummaryCard",    label: "#totalOmzetAmountLabel",    url: "sales/report-omzet.php",    colspan: 7, icon: "fa-coins",           empty: "Silakan pilih tanggal awal dan tanggal akhir untuk menampilkan omzet harian." },
         expense:  { body: "#reportExpenseBody",  card: "#reportExpenseSummaryCard",  label: "#totalExpenseAmountLabel",  url: "sales/report-expense.php",  colspan: 5, icon: "fa-cart-shopping",   empty: "Silakan pilih tanggal awal dan tanggal akhir untuk menampilkan pengeluaran belanja." },
+        purchase: { body: "#reportPurchaseBody", card: "#reportPurchaseSummaryCard", label: "#totalPurchaseAmountLabel", url: "sales/report-purchase.php", colspan: 11, icon: "fa-file-invoice",   empty: "Pilih form belanja untuk menampilkan detail pembelian." },
         profit:   { body: "#reportProfitBody",   card: "#reportProfitSummaryCard",   label: "#totalProfitAmountLabel",   url: "sales/report-profit.php",   colspan: 6, icon: "fa-chart-pie",       empty: "Silakan pilih tanggal awal dan tanggal akhir untuk menampilkan laba dan rugi." },
         margin:   { body: "#reportMarginBody",   card: "#reportMarginSummaryCard",   label: "#totalMarginAmountLabel",   url: "sales/report-margin.php",   colspan: 7, icon: "fa-percent",         empty: "Silakan pilih tanggal awal dan tanggal akhir untuk menampilkan margin produk." },
         all:      { body: "#reportAllBody",      card: "#reportAllSummaryCard",      label: "#totalAllAmountLabel",      url: "sales/report-all.php",      colspan: 6, icon: "fa-receipt",         empty: "Silakan pilih tanggal awal dan tanggal akhir untuk menampilkan laporan transaksi." },
@@ -246,6 +259,7 @@
         summary: "#summaryContent",
         omzet: "#omzetContent",
         expense: "#expenseContent",
+        purchase: "#purchaseContent",
         profit: "#profitContent",
         margin: "#marginContent",
         all: "#allContent",
@@ -361,6 +375,14 @@
                 return;
             }
             params.cashier_id = id;
+        } else if (tab === "purchase") {
+            let id = $("#purchase_form_id").val();
+            if (!id) {
+                $(cfg.card).hide();
+                $(cfg.body).html(emptyHtml(cfg, "Pilih form belanja untuk menampilkan detail pembelian."));
+                return;
+            }
+            params.purchase_id = id;
         } else if (tab === "best") {
             if (!first || !last) {
                 $(cfg.card).hide();
@@ -424,7 +446,7 @@
 
         setReportGroup($(el).data("group"));
 
-        $("#summaryContent, #omzetContent, #expenseContent, #profitContent, #marginContent, #allContent, #stockContent, #productContent, #categoryContent, #cashierContent, #bestContent, #unpaidContent").hide();
+        $("#summaryContent, #omzetContent, #expenseContent, #purchaseContent, #profitContent, #marginContent, #allContent, #stockContent, #productContent, #categoryContent, #cashierContent, #bestContent, #unpaidContent").hide();
         $(panelMap[tab] || "#allContent").show();
 
         loadReport(tab);
@@ -451,6 +473,7 @@
         $("#first_date_summary, #last_date_summary").on("change", function(){ loadReport("summary"); });
         $("#first_date_omzet, #last_date_omzet").on("change", function(){ loadReport("omzet"); });
         $("#first_date_expense, #last_date_expense").on("change", function(){ loadReport("expense"); });
+        $("#purchase_form_id").on("change", function(){ loadReport("purchase"); });
         $("#first_date_profit, #last_date_profit").on("change", function(){ loadReport("profit"); });
         $("#first_date_margin, #last_date_margin").on("change", function(){ loadReport("margin"); });
         $("#first_date_all, #last_date_all").on("change", function(){ loadReport("all"); });
@@ -472,6 +495,25 @@
             width: '100%',
             minimumResultsForSearch: Infinity,
             dropdownParent: $('#categoryContent')
+        });
+
+        $('#purchase_form_id').select2({
+            width: '100%',
+            placeholder: 'Pilih Form Belanja',
+            allowClear: true,
+            dropdownParent: $('#purchaseContent'),
+            ajax: {
+                url: '<?= BASE_URL ?>/pages/components/data/search-purchase-forms.php',
+                dataType: 'json',
+                delay: 250,
+                data: function(params) {
+                    return { q: params.term || '' };
+                },
+                processResults: function(data) {
+                    return { results: data };
+                },
+                cache: true
+            }
         });
 
         let activeItem = $(".report-menu-item.active").first();

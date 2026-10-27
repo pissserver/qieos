@@ -23,6 +23,7 @@ $tabLabels = [
     'summary'  => 'RINGKASAN KEUANGAN',
     'omzet'    => 'LAPORAN OMZET HARIAN',
     'expense'  => 'LAPORAN PENGELUARAN',
+    'purchase' => 'LAPORAN PEMBELIAN',
     'profit'   => 'LAPORAN LABA & RUGI',
     'margin'   => 'LAPORAN MARGIN PRODUK',
     'all'      => 'LAPORAN SEMUA TRANSAKSI',
@@ -38,6 +39,7 @@ $tabTitles = [
     'summary'  => 'Ringkasan Keuangan',
     'omzet'    => 'Laporan Omzet Harian',
     'expense'  => 'Laporan Pengeluaran',
+    'purchase' => 'Laporan Pembelian',
     'profit'   => 'Laporan Laba & Rugi',
     'margin'   => 'Laporan Margin Produk',
     'all'      => 'Laporan Semua Transaksi',
@@ -70,13 +72,33 @@ switch ($tab) {
         break;
 
     case 'omzet':
-        $q = mysqli_query($conn, "SELECT DATE(tanggal) AS dt, COUNT(*) AS total_order, SUM(CASE WHEN status_payment='paid' THEN 1 ELSE 0 END) AS paid_count, SUM(CASE WHEN status_payment='waiting' THEN 1 ELSE 0 END) AS waiting_count, SUM(CASE WHEN status_payment='paid' THEN total ELSE 0 END) AS omzet FROM orders WHERE $where GROUP BY DATE(tanggal) ORDER BY dt ASC");
+        $q = mysqli_query($conn, "SELECT DATE(tanggal) AS dt, COUNT(*) AS total_order, SUM(CASE WHEN status_payment='paid' THEN 1 ELSE 0 END) AS paid_count, SUM(CASE WHEN status_payment='waiting' THEN 1 ELSE 0 END) AS waiting_count, SUM(CASE WHEN status_payment='cancelled' THEN 1 ELSE 0 END) AS cancelled_count, SUM(CASE WHEN status_payment='paid' THEN total ELSE 0 END) AS omzet FROM orders WHERE $where GROUP BY DATE(tanggal) ORDER BY dt ASC");
         if ($q) while ($r = mysqli_fetch_assoc($q)) { $rows[] = $r; $total += (float) $r['omzet']; }
         break;
 
     case 'expense':
         $q = mysqli_query($conn, "SELECT p.id, p.form, p.date, COUNT(pi.id) AS total_items, COALESCE(SUM(pi.price_buy),0) AS total_price FROM purchases p LEFT JOIN purchase_items pi ON p.id=pi.purchase_id AND pi.deleted_at IS NULL WHERE p.deleted_at IS NULL AND DATE(p.date) BETWEEN '$escFirst' AND '$escLast' AND EXISTS (SELECT 1 FROM purchase_items pi2 WHERE pi2.purchase_id=p.id AND pi2.deleted_at IS NULL AND pi2.qty_buy IS NOT NULL) GROUP BY p.id, p.form, p.date ORDER BY p.date ASC, p.id ASC");
         if ($q) while ($r = mysqli_fetch_assoc($q)) { $rows[] = $r; $total += (float) $r['total_price']; }
+        break;
+
+    case 'purchase':
+        $purchase_id = isset($_GET['purchase_id']) ? (int) $_GET['purchase_id'] : 0;
+        if ($purchase_id > 0) {
+            $qPurchase = mysqli_query($conn, "SELECT p.id, p.date, p.form FROM purchases p WHERE p.id = $purchase_id AND p.deleted_at IS NULL LIMIT 1");
+            $purchase = $qPurchase ? mysqli_fetch_assoc($qPurchase) : null;
+            if ($purchase) {
+                $q = mysqli_query($conn, "SELECT pi.id, pi.product_id, pi.qty_buy, pi.price_unit, pi.price_buy, p.code AS product_code, p.name AS product_name, p.unit AS product_unit FROM purchase_items pi JOIN products p ON pi.product_id = p.id WHERE pi.purchase_id = $purchase_id AND pi.deleted_at IS NULL AND pi.qty_buy IS NOT NULL ORDER BY pi.id ASC");
+                if ($q) {
+                    while ($r = mysqli_fetch_assoc($q)) {
+                        $r['purchase_date'] = $purchase['date'];
+                        $r['purchase_form'] = $purchase['form'];
+                        $r['purchase_id'] = $purchase['id'];
+                        $rows[] = $r;
+                        $total += (float) $r['price_buy'];
+                    }
+                }
+            }
+        }
         break;
 
     case 'profit':
@@ -857,8 +879,9 @@ $sheet->setTitle("Laporan");
 
 $headers = [
     'summary'  => ['No', 'Komponen', 'Keterangan', 'Jumlah'],
-    'omzet'    => ['No', 'Tanggal', 'Pesanan', 'Terbayar', 'Waiting', 'Omzet'],
+    'omzet'    => ['No', 'Tanggal', 'Pesanan', 'Terbayar', 'Waiting', 'Cancel/Revisi', 'Omzet'],
     'expense'  => ['No', 'Tanggal', 'Form Belanja', 'Total Item', 'Total Belanja'],
+    'purchase' => ['No', 'Tgl Beli', 'No Penerimaan Barang', 'No SJ/INV', 'Nama Supplier', 'Kode Barang', 'Nama Barang', 'Satuan', 'Barang Masuk/Qty', 'Total Pembayaran', 'Harga/Satuan'],
     'profit'   => ['No', 'Tanggal', 'Omzet', 'Pengeluaran', 'Laba / Rugi', 'Status'],
     'margin'   => ['No', 'Produk', 'Qty Terjual', 'Harga Beli', 'Harga Jual', 'Margin', 'Keuntungan'],
     'all'      => ['No', 'Kode Pesanan', 'Tanggal', 'Kasir', 'Total', 'Status'],
@@ -949,7 +972,8 @@ for ($idx = 0; $idx < $count; $idx++) {
             $sheet->setCellValue("C$row", (int) $r['total_order']);
             $sheet->setCellValue("D$row", (int) $r['paid_count']);
             $sheet->setCellValue("E$row", (int) $r['waiting_count']);
-            $sheet->setCellValue("F$row", (float) $r['omzet']);
+            $sheet->setCellValue("F$row", (int) $r['cancelled_count']);
+            $sheet->setCellValue("G$row", (float) $r['omzet']);
             break;
 
         case 'expense':
@@ -958,6 +982,20 @@ for ($idx = 0; $idx < $count; $idx++) {
             $sheet->setCellValue("C$row", $r['form']);
             $sheet->setCellValue("D$row", (int) $r['total_items']);
             $sheet->setCellValue("E$row", (float) $r['total_price']);
+            break;
+
+        case 'purchase':
+            $sheet->setCellValue("A$row", $no);
+            $sheet->setCellValue("B$row", date('d M Y', strtotime($r['purchase_date'])));
+            $sheet->setCellValue("C$row", (int) $r['purchase_id']);
+            $sheet->setCellValue("D$row", '-');
+            $sheet->setCellValue("E$row", '-');
+            $sheet->setCellValue("F$row", $r['product_code']);
+            $sheet->setCellValue("G$row", $r['product_name']);
+            $sheet->setCellValue("H$row", strtoupper($r['product_unit']));
+            $sheet->setCellValue("I$row", (int) $r['qty_buy']);
+            $sheet->setCellValue("J$row", (float) $r['price_buy']);
+            $sheet->setCellValue("K$row", (float) $r['price_unit']);
             break;
 
         case 'profit':
@@ -1079,6 +1117,7 @@ $totalLabels = [
     'summary'  => 'LABA BERSIH',
     'omzet'    => 'TOTAL OMZET',
     'expense'  => 'TOTAL PENGELUARAN',
+    'purchase' => 'TOTAL PEMBAYARAN',
     'profit'   => 'TOTAL LABA / RUGI',
     'margin'   => 'TOTAL KEUNTUNGAN',
     'all'      => 'TOTAL OMZET (TERBAYAR)',
@@ -1094,8 +1133,9 @@ $totalLabel = isset($totalLabels[$tab]) ? $totalLabels[$tab] : 'TOTAL';
 // Kolom angka yang dijumlah, sesuai urutan header di layar
 $totalColMap = [
     'summary'  => 'D',
-    'omzet'    => 'F',
+    'omzet'    => 'G',
     'expense'  => 'E',
+    'purchase' => 'J',
     'profit'   => 'E',
     'margin'   => 'G',
     'all'      => 'E',
