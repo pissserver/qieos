@@ -42,7 +42,7 @@ $q = mysqli_query($conn,"
 <?php
     while($d=mysqli_fetch_assoc($q)): 
 ?>
-<tr class="purchase-row<?= (int)$d['used_flag'] === 1 ? ' is-restocked' : '' ?><?= !empty($d['receipt']) ? ' has-receipt' : '' ?>" data-id="<?= $d['id'] ?>">
+<tr class="purchase-row<?= (int)$d['used_flag'] === 1 ? ' is-restocked' : '' ?><?= !empty($d['receipt']) ? ' has-receipt' : '' ?>" data-id="<?= $d['id'] ?>" data-date="<?= htmlspecialchars($d['date'], ENT_QUOTES, 'UTF-8') ?>">
 
     <!-- ID -->
     <td>
@@ -120,13 +120,10 @@ $q = mysqli_query($conn,"
     <td class="text-center">
         <div class="mp-actions">
 
-            <button class="action-btn btn-edit editPurchaseBtn" data-id="<?= $d['id'] ?>">
-                <i class="fas fa-edit"></i>
-            </button>
-
             <?php if(empty($d['receipt']) && (int)$d['used_flag'] === 0): ?>
             <button class="action-btn btn-delete deletePurchaseBtn"
                 data-id="<?= $d['id'] ?>"
+                title="Hapus daftar belanja"
                 data-date="<?= $d['date'] ?>">
                 <i class="fas fa-trash"></i>
             </button>
@@ -134,8 +131,13 @@ $q = mysqli_query($conn,"
 
             <button class="action-btn btn-print printPurchaseBtn"
                 data-id="<?= $d['id'] ?>"
+                title="Print daftar belanja"
                 data-date="<?= $d['date'] ?>">
                 <i class="fas fa-print"></i>
+            </button>
+
+            <button class="action-btn btn-edit editPurchaseBtn" data-id="<?= $d['id'] ?>" title="Edit daftar belanja">
+                <i class="fas fa-edit"></i>
             </button>
 
             <?php if(!empty($d['receipt']) && (int)$d['used_flag'] === 0): ?>

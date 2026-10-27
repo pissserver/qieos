@@ -7,7 +7,6 @@
         $product_ids = isset($_POST['product_id']) ? $_POST['product_id'] : [];
         $qtys_buy    = isset($_POST['qty_buy']) ? $_POST['qty_buy'] : [];
         $units_buy   = isset($_POST['unit_buy']) ? $_POST['unit_buy'] : [];
-        $unit_prices = isset($_POST['unit_price']) ? $_POST['unit_price'] : [];
         $prices_buy  = isset($_POST['price_buy']) ? $_POST['price_buy'] : [];
 
         if (count($product_ids) === 0) {
@@ -43,19 +42,14 @@
 
             $qty_buy   = mysqli_real_escape_string($conn, isset($qtys_buy[$i]) ? $qtys_buy[$i] : 0);
             $unit_buy  = mysqli_real_escape_string($conn, isset($units_buy[$i]) ? $units_buy[$i] : '');
-            $unit_price = isset($unit_prices[$i]) && $unit_prices[$i] !== ''
-                ? (float)$unit_prices[$i]
-                : null;
             $price_buy = isset($prices_buy[$i]) && $prices_buy[$i] !== ''
                 ? (float)$prices_buy[$i]
                 : 0;
 
-            $unit_price_sql = $unit_price === null ? 'NULL' : $unit_price;
-
             $itemSaved = mysqli_query($conn, "INSERT INTO purchase_items
                 (purchase_id, product_id, qty_buy, unit_buy, price_unit, price_buy)
                 VALUES
-                ($purchase_id, $product_id, $qty_buy, '$unit_buy', $unit_price_sql, $price_buy)");
+                ($purchase_id, $product_id, $qty_buy, '$unit_buy', NULL, $price_buy)");
             if (!$itemSaved) {
                 mysqli_rollback($conn);
                 echo json_encode(['status' => 'error', 'msg' => 'Gagal menyimpan produk: ' . mysqli_error($conn)]);
@@ -137,13 +131,32 @@
             exit;
         }
 
+        $summaryQuery = mysqli_query($conn, "
+            SELECT
+                COUNT(*) AS total_items,
+                COALESCE(SUM(price_buy), 0) AS total_price,
+                MAX(CASE WHEN qty_stock IS NOT NULL THEN 1 ELSE 0 END) AS used_flag
+            FROM purchase_items
+            WHERE purchase_id = '$id'
+              AND deleted_at IS NULL
+        ");
+        if(!$summaryQuery){
+            mysqli_rollback($conn);
+            echo json_encode(['status' => 'error', 'msg' => 'Gagal membaca ringkasan receipt: ' . mysqli_error($conn)]);
+            exit;
+        }
+        $summary = mysqli_fetch_assoc($summaryQuery);
+
         mysqli_commit($conn);
         echo json_encode([
             'status' => 'success',
             'msg' => 'Receipt pembelian berhasil dibuat',
             'purchase_id' => $id,
             'form' => $purchase['form'],
-            'receipt' => $receiptNumber
+            'receipt' => $receiptNumber,
+            'total_items' => (int)$summary['total_items'],
+            'total_price' => (float)$summary['total_price'],
+            'used_flag' => (int)$summary['used_flag']
         ]);
         exit;
     }
@@ -211,7 +224,6 @@ if ($_GET['action'] == 'update') {
         $product_ids  = isset($_POST['product_id']) ? $_POST['product_id'] : [];
         $qtys_buy     = isset($_POST['qty_buy']) ? $_POST['qty_buy'] : [];
         $units_buy    = isset($_POST['unit_buy']) ? $_POST['unit_buy'] : [];
-        $unit_prices  = isset($_POST['unit_price']) ? $_POST['unit_price'] : [];
         $prices_buy   = isset($_POST['price_buy']) ? $_POST['price_buy'] : [];
         $supplier_ids = isset($_POST['supplier_id']) ? $_POST['supplier_id'] : [];
         $invoice_nos  = isset($_POST['invoice_no']) ? $_POST['invoice_no'] : [];
@@ -266,14 +278,9 @@ if ($_GET['action'] == 'update') {
             $qty_buy   = isset($qtys_buy[$key]) ? mysqli_real_escape_string($conn, $qtys_buy[$key]) : 0;
             $unit_buy  = isset($units_buy[$key]) ? mysqli_real_escape_string($conn, $units_buy[$key]) : '';
             $invoice_no = mysqli_real_escape_string($conn, $invoice_no);
-            $unit_price = isset($unit_prices[$key]) && $unit_prices[$key] !== ''
-                ? (float)$unit_prices[$key]
-                : null;
             $price_buy = isset($prices_buy[$key]) && $prices_buy[$key] !== ''
                 ? (float)$prices_buy[$key]
                 : 0;
-
-            $unit_price_sql = $unit_price === null ? 'NULL' : $unit_price;
 
             if ($item_id > 0) {
                 // update baris yang sama, qty/remaining_qty tidak disentuh
@@ -282,7 +289,7 @@ if ($_GET['action'] == 'update') {
                     SET product_id = '$product_id',
                         qty_buy    = '$qty_buy',
                         unit_buy   = '$unit_buy',
-                        price_unit = $unit_price_sql,
+                        price_unit = NULL,
                         price_buy  = '$price_buy',
                         supplier_id = '$supplier_id',
                         invoice_no = '$invoice_no'
@@ -307,7 +314,7 @@ if ($_GET['action'] == 'update') {
                         '$product_id',
                         '$qty_buy',
                         '$unit_buy',
-                        $unit_price_sql,
+                        NULL,
                         $price_buy,
                         '$supplier_id',
                         '$invoice_no'
@@ -338,11 +345,31 @@ if ($_GET['action'] == 'update') {
             ");
         }
 
+        $summaryQuery = mysqli_query($conn, "
+            SELECT
+                COUNT(*) AS total_items,
+                COALESCE(SUM(price_buy), 0) AS total_price,
+                MAX(CASE WHEN qty_stock IS NOT NULL THEN 1 ELSE 0 END) AS used_flag
+            FROM purchase_items
+            WHERE purchase_id = '$id'
+              AND deleted_at IS NULL
+        ");
+        if(!$summaryQuery){
+            mysqli_rollback($conn);
+            echo json_encode(['status' => 'error', 'msg' => 'Gagal memperbarui ringkasan pembelian: ' . mysqli_error($conn)]);
+            exit;
+        }
+        $summary = mysqli_fetch_assoc($summaryQuery);
+
         mysqli_commit($conn);
 
         echo json_encode([
             "status" => "success",
-            "msg" => "Daftar belanja berhasil diupdate"
+            "msg" => "Daftar belanja berhasil diupdate",
+            "purchase_id" => $id,
+            "total_items" => (int)$summary['total_items'],
+            "total_price" => (float)$summary['total_price'],
+            "used_flag" => (int)$summary['used_flag']
         ]);
         exit;
     }
@@ -501,7 +528,7 @@ if ($_GET['action'] == 'update') {
         foreach ($pending as $item_id) {
 
             $qi = mysqli_query($conn,"
-                SELECT product_id, qty_buy, unit_buy
+                SELECT product_id, qty_buy, unit_buy, price_buy
                 FROM purchase_items
                 WHERE id = '$item_id'
                   AND purchase_id = '$id'
@@ -519,6 +546,7 @@ if ($_GET['action'] == 'update') {
 
             $product_id = (int)$it['product_id'];
             $qty_buy    = (float)$it['qty_buy'];
+            $price_buy  = (float)$it['price_buy'];
             $unit_buy   = isset($it['unit_buy']) ? $it['unit_buy'] : '';
 
             // Bila produk punya konversi yang cocok dengan satuan beli,
@@ -535,11 +563,15 @@ if ($_GET['action'] == 'update') {
             }
 
             $unitStockEsc = mysqli_real_escape_string($conn, $unitStock);
+            $unitPriceStock = $qtyStock > 0
+                ? sprintf('%.4f', $price_buy / $qtyStock)
+                : '0';
 
             $run = mysqli_query($conn,"
                 UPDATE purchase_items
                 SET qty_stock     = $qtyStock,
                     unit_stock    = '$unitStockEsc',
+                    price_unit    = $unitPriceStock,
                     remaining_qty = $qtyStock
                 WHERE id = $item_id
                   AND purchase_id = '$id'

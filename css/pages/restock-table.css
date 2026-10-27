@@ -636,6 +636,61 @@
     flex:0 0 auto;
 }
 
+.rv-conversion-row{
+    flex:1 1 100%;
+    display:flex;
+    align-items:stretch;
+    gap:10px;
+    min-width:0;
+}
+
+.rv-conversion-row .rv-convert{
+    flex:1 1 360px;
+    min-width:0;
+}
+
+.rv-unit-price-detail{
+    flex:0 1 250px;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    gap:6px;
+    min-width:200px;
+    padding:12px 15px;
+    border:1px solid #a7f3d0;
+    border-radius:14px;
+    background:linear-gradient(145deg,#ecfdf5,#fff);
+    box-shadow:0 4px 12px rgba(5,150,105,.06);
+}
+
+.rv-unit-price-label{
+    display:flex;
+    align-items:center;
+    gap:7px;
+    color:#047857;
+    font-size:9px;
+    font-weight:800;
+    letter-spacing:.6px;
+    text-transform:uppercase;
+}
+
+.rv-unit-price-label i{
+    font-size:12px;
+}
+
+.rv-unit-price-detail strong{
+    color:#065f46;
+    font-size:18px;
+    font-weight:900;
+    line-height:1.15;
+}
+
+.rv-unit-price-detail small{
+    color:#64748b;
+    font-size:10px;
+    line-height:1.4;
+}
+
 .rv-stat{
     display:flex;
     flex-direction:column;
@@ -822,7 +877,7 @@
     .rv-stats{
         flex:1 1 100%;
         display:grid;
-        grid-template-columns:repeat(3, 1fr);
+        grid-template-columns:repeat(2, 1fr);
         gap:6px;
     }
 
@@ -1176,7 +1231,7 @@
 .rv-fields{
     flex:1 1 100%;
     display:grid;
-    grid-template-columns:repeat(3, minmax(0, 1fr));
+    grid-template-columns:repeat(4, minmax(0, 1fr));
     gap:7px;
     margin-top:2px;
 }
@@ -1665,6 +1720,17 @@ body.restock-busy .modal-backdrop{
     .rv-convert{
         padding:12px 13px;
         gap:8px;
+    }
+
+    .rv-conversion-row{
+        flex-direction:column;
+    }
+
+    .rv-conversion-row .rv-convert,
+    .rv-unit-price-detail{
+        flex:1 1 auto;
+        width:100%;
+        min-width:0;
     }
 
     .rvc-qty-big,

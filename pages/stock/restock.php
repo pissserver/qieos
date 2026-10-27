@@ -137,6 +137,24 @@ while($supplier = mysqli_fetch_assoc($qProductSuppliers)){
 
                         <input type="hidden" name="form_number" value="<?= $formNumber ?>">
 
+                        <section class="purchase-flow-guide purchase-flow-create" aria-labelledby="purchaseFlowTitle">
+                            <div class="purchase-flow-heading">
+                                <span class="purchase-flow-icon" aria-hidden="true"><i class="fas fa-route"></i></span>
+                                <div class="purchase-flow-copy">
+                                    <span class="purchase-flow-kicker">PANDUAN PROSES</span>
+                                    <strong id="purchaseFlowTitle">Dari daftar belanja sampai stok siap</strong>
+                                    <span>Ikuti tahapan ini agar barang datang dan stok tercatat dengan rapi.</span>
+                                </div>
+                            </div>
+                            <ol class="purchase-flow-steps">
+                                <li><span class="purchase-flow-number">01</span><span class="purchase-flow-label">Buat form belanja</span></li>
+                                <li><span class="purchase-flow-number">02</span><span class="purchase-flow-label">Print form belanja</span></li>
+                                <li><span class="purchase-flow-number">03</span><span>Edit sesuai barang datang</span></li>
+                                <li><span class="purchase-flow-number">04</span><span>Buat form receipt</span></li>
+                                <li><span class="purchase-flow-number">05</span><span>Restock ke gudang</span></li>
+                            </ol>
+                        </section>
+
                         <div id="itemsContainer">
 
                             <div class="item-row row mb-3">
@@ -187,7 +205,7 @@ while($supplier = mysqli_fetch_assoc($qProductSuppliers)){
                                     </div>
                                 </div>
 
-                                <div class="col-md-3 item-price">
+                                <div class="col-md-5 item-price">
                                     <div class="input-group-modern">
                                         <div class="input-icon input-icon-price">
                                             <i class="fas fa-wallet"></i>
@@ -196,20 +214,6 @@ while($supplier = mysqli_fetch_assoc($qProductSuppliers)){
                                             name="price_buy[]"
                                             class="form-control"
                                             placeholder="Total Harga Produk"
-                                            min="0"
-                                            required>
-                                    </div>
-                                </div>
-
-                                <div class="col-md-2 item-unit-price">
-                                    <div class="input-group-modern">
-                                        <div class="input-icon input-icon-price">
-                                            <i class="fas fa-coins"></i>
-                                        </div>
-                                        <input type="number"
-                                            name="unit_price[]"
-                                            class="form-control"
-                                            placeholder="Harga Satuan"
                                             min="0"
                                             required>
                                     </div>
@@ -372,7 +376,6 @@ while($supplier = mysqli_fetch_assoc($qProductSuppliers)){
             let sel = r.querySelector('select[name="product_id[]"]');
             let qty = r.querySelector('input[name="qty_buy[]"]');
             let unit = r.querySelector('select[name="unit_buy[]"]');
-            let unitPrice = r.querySelector('input[name="unit_price[]"]');
             let priceBuy = r.querySelector('input[name="price_buy[]"]');
             
             if(!sel || !sel.value){
@@ -387,11 +390,6 @@ while($supplier = mysqli_fetch_assoc($qProductSuppliers)){
             }
             if(!unit || !unit.value.trim()){
                 QToast('Error', 'Satuan wajib diisi', 'error');
-                valid = false;
-                return;
-            }
-            if(!unitPrice || !unitPrice.value.trim()){
-                QToast('Error', 'Harga satuan wajib diisi', 'error');
                 valid = false;
                 return;
             }
@@ -438,16 +436,10 @@ while($supplier = mysqli_fetch_assoc($qProductSuppliers)){
                     </select>
                 </div>
             </div>
-            <div class="col-md-3 item-price">
+            <div class="col-md-5 item-price">
                 <div class="input-group-modern">
                     <div class="input-icon input-icon-price"><i class="fas fa-wallet"></i></div>
                     <input type="number" name="price_buy[]" class="form-control" placeholder="Total Harga Produk" min="0">
-                </div>
-            </div>
-            <div class="col-md-2 item-unit-price">
-                <div class="input-group-modern">
-                    <div class="input-icon input-icon-price"><i class="fas fa-coins"></i></div>
-                    <input type="number" name="unit_price[]" class="form-control" placeholder="Harga Satuan" min="0">
                 </div>
             </div>
         `;
@@ -809,6 +801,64 @@ while($supplier = mysqli_fetch_assoc($qProductSuppliers)){
         });
     }
 
+    function updatePurchaseTableRow(summary){
+        if(!$.fn.DataTable.isDataTable('#purchaseTable')) return;
+
+        const purchaseId = String(summary.purchase_id || '');
+        const dt = $('#purchaseTable').DataTable();
+        const $row = dt.rows().nodes().to$().filter(function(){
+            return String(this.getAttribute('data-id')) === purchaseId;
+        });
+        if(!$row.length) return;
+
+        const $purchaseRow = $row.first();
+        const totalItems = Number(summary.total_items) || 0;
+        const totalPrice = Number(summary.total_price) || 0;
+        const receipt = summary.receipt ? String(summary.receipt) : '';
+        const used = Number(summary.used_flag) === 1;
+        const formattedPrice = 'Rp ' + totalPrice.toLocaleString('id-ID');
+
+        if(receipt){
+            $purchaseRow.find('.purchase-box-text > .text-muted').remove();
+            $purchaseRow.addClass('has-receipt');
+            let $badge = $purchaseRow.find('.table-receipt-badge');
+            if(!$badge.length){
+                $badge = $(`
+                    <span class="purchase-receipt-badge table-receipt-badge mt-1">
+                        <i class="fas fa-circle-check"></i>
+                        <span><small>RECEIPT</small><strong></strong></span>
+                    </span>
+                `);
+                $purchaseRow.find('.purchase-box-text > .fw-bold').after($badge);
+            }
+            $badge.find('strong').text(receipt);
+        }
+
+        $purchaseRow.find('.note-badge').html('<i class="fas fa-box"></i> ' + totalItems);
+        $purchaseRow.find('.created-badge').html('<i class="fas fa-money-bill"></i> ' + formattedPrice);
+        $purchaseRow.find('.mp-meta-item').has('i.fa-box').html('<i class="fas fa-box"></i> ' + totalItems + ' item');
+        $purchaseRow.find('.mp-meta-total-value').text(formattedPrice);
+
+        if(used){
+            $purchaseRow.addClass('is-restocked');
+            $purchaseRow.find('.btn-delete').remove();
+            $purchaseRow.find('.restockPurchaseBtn')
+                .removeClass('btn-restock')
+                .addClass('btn-restocked')
+                .attr('title', 'Sudah direstock ke stok gudang')
+                .html('<i class="fas fa-circle-check"></i>');
+        }else if(receipt){
+            $purchaseRow.find('.btn-delete').remove();
+            if(!$purchaseRow.find('.restockPurchaseBtn').length){
+                const $restock = $('<button type="button" class="action-btn btn-restock restockPurchaseBtn" title="Validasi &amp; Restock ke stok gudang"><i class="fas fa-truck-ramp-box"></i></button>');
+                $restock.attr('data-id', purchaseId).attr('data-date', $purchaseRow.attr('data-date') || '');
+                $purchaseRow.find('.mp-actions').append($restock);
+            }
+        }
+
+        dt.row($purchaseRow.get(0)).invalidate('dom').draw(false);
+    }
+
     // Update baris purchase menjadi state "restocked" tanpa reload tabel.
     // Animasi smooth: tombol berubah, class ditambahkan, pulse effect.
     function markPurchaseRestocked(purchaseId){
@@ -926,7 +976,7 @@ while($supplier = mysqli_fetch_assoc($qProductSuppliers)){
                     </div>
                 </div>
 
-                <div class="col-md-2 item-price">
+                <div class="col-md-4 item-price">
                     <div class="input-group-modern">
                         <div class="input-icon input-icon-price">
                             <i class="fas fa-wallet"></i>
@@ -935,19 +985,6 @@ while($supplier = mysqli_fetch_assoc($qProductSuppliers)){
                             name="price_buy[]"
                             class="form-control"
                             placeholder="Total Harga Produk"
-                            min="0">
-                    </div>
-                </div>
-
-                <div class="col-md-2 item-unit-price">
-                    <div class="input-group-modern">
-                        <div class="input-icon input-icon-price">
-                            <i class="fas fa-coins"></i>
-                        </div>
-                        <input type="number"
-                            name="unit_price[]"
-                            class="form-control"
-                            placeholder="Harga Satuan"
                             min="0">
                     </div>
                 </div>
@@ -1030,7 +1067,7 @@ while($supplier = mysqli_fetch_assoc($qProductSuppliers)){
                     </div>
                 </div>
 
-                <div class="col-md-2 item-price">
+                <div class="col-md-4 item-price">
                     <div class="input-group-modern">
                         <div class="input-icon input-icon-price">
                             <i class="fas fa-wallet"></i>
@@ -1039,20 +1076,6 @@ while($supplier = mysqli_fetch_assoc($qProductSuppliers)){
                             name="price_buy[]"
                             class="form-control"
                             placeholder="Total Harga Produk"
-                            min="0"
-                            value="">
-                    </div>
-                </div>
-
-                <div class="col-md-2 item-unit-price">
-                    <div class="input-group-modern">
-                        <div class="input-icon input-icon-price">
-                            <i class="fas fa-coins"></i>
-                        </div>
-                        <input type="number"
-                            name="unit_price[]"
-                            class="form-control"
-                            placeholder="Harga Satuan"
                             min="0"
                             value="">
                     </div>
@@ -1140,7 +1163,6 @@ while($supplier = mysqli_fetch_assoc($qProductSuppliers)){
             let sel = r.find('select[name="product_id[]"]');
             let qty = r.find('input[name="qty_buy[]"]');
             let unit = r.find('select[name="unit_buy[]"]');
-            let unitPrice = r.find('input[name="unit_price[]"]');
             let priceBuy = r.find('input[name="price_buy[]"]');
             let supplier = r.find('select[name="supplier_id[]"]');
             let invoiceNo = r.find('input[name="invoice_no[]"]');
@@ -1157,11 +1179,6 @@ while($supplier = mysqli_fetch_assoc($qProductSuppliers)){
             }
             if(!unit.val() || !String(unit.val()).trim()){
                 QToast('Error', 'Satuan wajib diisi', 'error');
-                valid = false;
-                return false;
-            }
-            if(!unitPrice.val() || !String(unitPrice.val()).trim()){
-                QToast('Error', 'Harga satuan wajib diisi', 'error');
                 valid = false;
                 return false;
             }
@@ -1201,10 +1218,8 @@ while($supplier = mysqli_fetch_assoc($qProductSuppliers)){
         saveEditPurchaseForm(this)
         .then(function(result){
             if(result.status === 'success'){
-
+                updatePurchaseTableRow(result);
                 QToast('Berhasil', 'Data berhasil diperbarui', 'success');
-                $('#editPurchaseModal').modal('hide');
-                loadPurchaseTable();
             }else{
                 QToast('Gagal', result.msg || 'Terjadi kesalahan', 'error');
             }
@@ -1272,7 +1287,7 @@ while($supplier = mysqli_fetch_assoc($qProductSuppliers)){
             $('#editPurchaseContent .purchase-form-badges').append(`
                 <span class="purchase-receipt-badge">
                     <i class="fas fa-circle-check"></i>
-                    <span><small>RECEIPT PENERIMAAN</small><strong></strong></span>
+                    <span><small>FORM RECEIPT</small><strong></strong></span>
                 </span>
             `);
             $('#editPurchaseContent .purchase-receipt-badge strong').text(receiptResult.receipt);
@@ -1292,6 +1307,7 @@ while($supplier = mysqli_fetch_assoc($qProductSuppliers)){
                 </div>
             `);
             $('#itemsContainerEdit :input').prop('disabled', true);
+            $('#itemsContainerEdit .item-remove').remove();
             $('#editPurchaseForm .mp-add-footer').remove();
             steps.filter('[data-receipt-step="create"]').removeClass('is-active').addClass('is-done');
             steps.filter('[data-receipt-step="done"]').addClass('is-active is-done');
@@ -1301,7 +1317,7 @@ while($supplier = mysqli_fetch_assoc($qProductSuppliers)){
             document.getElementById('receiptProcessingTitle').textContent = 'Receipt berhasil dibuat';
             document.getElementById('receiptProcessingMessage').textContent = receiptResult.receipt;
             window.setTimeout(function(){ overlay.hidden = true; }, 900);
-            loadPurchaseTable();
+            updatePurchaseTableRow(receiptResult);
             QToast('Berhasil', receiptResult.msg, 'success');
         } catch(error) {
             console.error('Gagal membuat receipt pembelian:', error);
@@ -1620,7 +1636,7 @@ while($supplier = mysqli_fetch_assoc($qProductSuppliers)){
                 const formattedDate = result.date
                     ? new Date(result.date + 'T00:00:00').toLocaleDateString('id-ID', {day:'2-digit', month:'long', year:'numeric'})
                     : '-';
-                const documentTitle = result.receipt ? 'Receipt Penerimaan Barang' : 'Daftar Belanja';
+                const documentTitle = result.receipt ? 'Form Receipt' : 'Daftar Belanja';
                 printWindow.document.open();
                 printWindow.document.write(`<!doctype html>
                     <html lang="id"><head><meta charset="utf-8">
@@ -1629,17 +1645,17 @@ while($supplier = mysqli_fetch_assoc($qProductSuppliers)){
                         *{box-sizing:border-box}
                         body{margin:0;padding:32px;font-family:Arial,sans-serif;color:#172033;font-size:12px}
                         .sheet{max-width:1100px;margin:auto}
-                        header{display:flex;flex-direction:column;align-items:center;gap:14px;padding-bottom:18px;margin-bottom:22px;border-bottom:3px solid #312e81;text-align:center}
+                        header{display:flex;justify-content:space-between;align-items:flex-start;gap:24px;padding-bottom:18px;margin-bottom:22px;border-bottom:3px solid #312e81}
                         .brand{font-size:12px;font-weight:800;letter-spacing:2px;color:#4338ca}
                         h1{margin:7px 0 4px;font-size:24px;letter-spacing:.4px}
                         .subtitle{color:#64748b;font-size:12px}
-                        .meta{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:14px 28px;width:min(760px,100%);padding:12px 16px;border-top:3px solid #10b981;background:#f0fdf4;text-align:center}
-                        .meta-item{min-width:145px}
+                        .meta{min-width:245px;padding:13px 16px;border-left:4px solid #10b981;background:#f0fdf4}
+                        .meta-item{margin-bottom:10px}
                         .meta-label{margin:0 0 4px;color:#64748b;font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase}
                         .meta-value{margin:0 0 10px;font-size:13px;font-weight:700}
                         table{width:100%;border-collapse:collapse}
                         th,td{border:1px solid #cbd5e1;padding:8px;vertical-align:top}
-                        th{background:#eef2ff;color:#312e81;text-align:left;font-size:10px;text-transform:uppercase}
+                        th{background:#eef2ff;color:#312e81;text-align:center;font-size:10px;text-transform:uppercase}
                         .center{text-align:center}.right{text-align:right;white-space:nowrap}
                         .manual{min-width:95px}
                         .total td{background:#f8fafc;font-weight:700}

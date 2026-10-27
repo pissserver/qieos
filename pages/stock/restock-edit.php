@@ -33,7 +33,6 @@ $q = mysqli_query($conn,"
         COALESCE(products.name, '') AS name,
         pi.qty_buy,
         pi.unit_buy,
-        pi.price_unit,
         pi.price_buy,
         pi.supplier_id,
         pi.invoice_no
@@ -139,7 +138,7 @@ function buildUnitOptions($productUnits, $productId, $current){
             <span class="purchase-receipt-badge">
                 <i class="fas fa-circle-check"></i>
                 <span>
-                    <small>RECEIPT PENERIMAAN</small>
+                    <small>FORM RECEIPT</small>
                     <strong><?= htmlspecialchars($purchase['receipt'], ENT_QUOTES, 'UTF-8') ?></strong>
                 </span>
             </span>
@@ -238,7 +237,7 @@ function buildUnitOptions($productUnits, $productId, $current){
                 </div>
             </div>
 
-            <div class="col-md-2 item-price">
+            <div class="col-md-4 item-price">
                 <div class="input-group-modern">
                     <div class="input-icon input-icon-price">
                         <i class="fas fa-wallet"></i>
@@ -253,20 +252,6 @@ function buildUnitOptions($productUnits, $productId, $current){
                 </div>
             </div>
 
-            <div class="col-md-2 item-unit-price">
-                <div class="input-group-modern">
-                    <div class="input-icon input-icon-price">
-                        <i class="fas fa-coins"></i>
-                    </div>
-                    <input type="number"
-                           name="unit_price[]"
-                           class="form-control"
-                           placeholder="Harga Satuan"
-                           min="0"
-                           required
-                           value="<?= $d['price_unit'] !== null && $d['price_unit'] !== '' ? (int)$d['price_unit'] : '' ?>">
-                </div>
-            </div>
             </div>
 
             <div class="row g-3 align-items-end mt-1">
