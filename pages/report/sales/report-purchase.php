@@ -6,7 +6,7 @@ include 'report-helper.php';
 $purchaseId = isset($_GET['purchase_id']) ? (int) $_GET['purchase_id'] : 0;
 
 if ($purchaseId <= 0) {
-    report_empty(11, 'Pilih form belanja untuk menampilkan detail pembelian.');
+    report_empty(12, 'Pilih form belanja untuk menampilkan detail pembelian.');
     exit;
 }
 
@@ -19,7 +19,7 @@ $qPurchase = mysqli_query($conn, "
 ");
 
 if (!$qPurchase || mysqli_num_rows($qPurchase) === 0) {
-    report_empty(11, 'Form belanja tidak ditemukan.');
+    report_empty(12, 'Form belanja tidak ditemukan.');
     exit;
 }
 
@@ -32,11 +32,14 @@ $query = mysqli_query($conn, "
         pi.qty_buy,
         pi.price_unit,
         pi.price_buy,
+        pi.invoice_no,
+        s.name AS supplier_name,
         p.code AS product_code,
         p.name AS product_name,
         p.unit AS product_unit
     FROM purchase_items pi
     JOIN products p ON pi.product_id = p.id
+    LEFT JOIN suppliers s ON s.id = pi.supplier_id
     WHERE pi.purchase_id = $purchaseId
       AND pi.deleted_at IS NULL
       AND pi.qty_buy IS NOT NULL
@@ -56,7 +59,8 @@ if ($hasData) {
             <td class="text-center"><?= report_date_id($purchase['date']) ?></td>
             <td class="text-center"></td>
             <td class="text-center"><?= htmlspecialchars($purchase['form']) ?></td>
-            <td class="text-center">-</td>
+            <td class="text-center"><?= htmlspecialchars((string) $row['invoice_no']) ?></td>
+            <td class="text-center"><?= htmlspecialchars($row['supplier_name'] ? $row['supplier_name'] : '-') ?></td>
             <td class="text-center"><?= htmlspecialchars($row['product_code']) ?></td>
             <td class="text-center"><?= htmlspecialchars($row['product_name']) ?></td>
             <td class="text-center"><?= htmlspecialchars(strtoupper($row['product_unit'])) ?></td>
@@ -67,7 +71,7 @@ if ($hasData) {
         <?php
     }
 } else {
-    report_empty(11, 'Tidak ada item pada form belanja ini.');
+    report_empty(12, 'Tidak ada item pada form belanja ini.');
 }
 
 report_foot($total);

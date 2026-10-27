@@ -87,7 +87,7 @@ switch ($tab) {
             $qPurchase = mysqli_query($conn, "SELECT p.id, p.date, p.form FROM purchases p WHERE p.id = $purchase_id AND p.deleted_at IS NULL LIMIT 1");
             $purchase = $qPurchase ? mysqli_fetch_assoc($qPurchase) : null;
             if ($purchase) {
-                $q = mysqli_query($conn, "SELECT pi.id, pi.product_id, pi.qty_buy, pi.price_unit, pi.price_buy, p.code AS product_code, p.name AS product_name, p.unit AS product_unit FROM purchase_items pi JOIN products p ON pi.product_id = p.id WHERE pi.purchase_id = $purchase_id AND pi.deleted_at IS NULL AND pi.qty_buy IS NOT NULL ORDER BY pi.id ASC");
+                $q = mysqli_query($conn, "SELECT pi.id, pi.product_id, pi.qty_buy, pi.price_unit, pi.price_buy, pi.invoice_no, s.name AS supplier_name, p.code AS product_code, p.name AS product_name, p.unit AS product_unit FROM purchase_items pi JOIN products p ON pi.product_id = p.id LEFT JOIN suppliers s ON s.id = pi.supplier_id WHERE pi.purchase_id = $purchase_id AND pi.deleted_at IS NULL AND pi.qty_buy IS NOT NULL ORDER BY pi.id ASC");
                 if ($q) {
                     while ($r = mysqli_fetch_assoc($q)) {
                         $r['purchase_date'] = $purchase['date'];
@@ -881,7 +881,7 @@ $headers = [
     'summary'  => ['No', 'Komponen', 'Keterangan', 'Jumlah'],
     'omzet'    => ['No', 'Tanggal', 'Pesanan', 'Terbayar', 'Waiting', 'Cancel/Revisi', 'Omzet'],
     'expense'  => ['No', 'Tanggal', 'Form Belanja', 'Total Item', 'Total Belanja'],
-    'purchase' => ['No', 'Tgl Beli', 'No Penerimaan Barang', 'No Referensi', 'Nama Supplier', 'Kode Barang', 'Nama Barang', 'Satuan', 'Barang Masuk/Qty', 'Total Pembayaran', 'Harga/Satuan'],
+    'purchase' => ['No', 'Tgl Beli', 'No Penerimaan Barang', 'No Referensi', 'No Invoice', 'Nama Supplier', 'Kode Barang', 'Nama Barang', 'Satuan', 'Barang Masuk/Qty', 'Total Pembayaran', 'Harga/Satuan'],
     'profit'   => ['No', 'Tanggal', 'Omzet', 'Pengeluaran', 'Laba / Rugi', 'Status'],
     'margin'   => ['No', 'Produk', 'Qty Terjual', 'Harga Beli', 'Harga Jual', 'Margin', 'Keuntungan'],
     'all'      => ['No', 'Kode Pesanan', 'Tanggal', 'Kasir', 'Total', 'Status'],
@@ -989,13 +989,14 @@ for ($idx = 0; $idx < $count; $idx++) {
             $sheet->setCellValue("B$row", date('d M Y', strtotime($r['purchase_date'])));
             $sheet->setCellValue("C$row", '');
             $sheet->setCellValue("D$row", $r['purchase_form']);
-            $sheet->setCellValue("E$row", '-');
-            $sheet->setCellValue("F$row", $r['product_code']);
-            $sheet->setCellValue("G$row", $r['product_name']);
-            $sheet->setCellValue("H$row", strtoupper($r['product_unit']));
-            $sheet->setCellValue("I$row", (int) $r['qty_buy']);
-            $sheet->setCellValue("J$row", (float) $r['price_buy']);
-            $sheet->setCellValue("K$row", (float) $r['price_unit']);
+            $sheet->setCellValueExplicit("E$row", (string) $r['invoice_no'], PHPExcel_Cell_DataType::TYPE_STRING);
+            $sheet->setCellValue("F$row", $r['supplier_name'] ? $r['supplier_name'] : '-');
+            $sheet->setCellValue("G$row", $r['product_code']);
+            $sheet->setCellValue("H$row", $r['product_name']);
+            $sheet->setCellValue("I$row", strtoupper($r['product_unit']));
+            $sheet->setCellValue("J$row", (int) $r['qty_buy']);
+            $sheet->setCellValue("K$row", (float) $r['price_buy']);
+            $sheet->setCellValue("L$row", (float) $r['price_unit']);
             break;
 
         case 'profit':

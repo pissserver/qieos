@@ -91,6 +91,8 @@ if ($_GET['action'] == 'update') {
         $units_buy    = isset($_POST['unit_buy']) ? $_POST['unit_buy'] : [];
         $unit_prices  = isset($_POST['unit_price']) ? $_POST['unit_price'] : [];
         $prices_buy   = isset($_POST['price_buy']) ? $_POST['price_buy'] : [];
+        $supplier_ids = isset($_POST['supplier_id']) ? $_POST['supplier_id'] : [];
+        $invoice_nos  = isset($_POST['invoice_no']) ? $_POST['invoice_no'] : [];
 
         // id item yang valid & milik form ini
         $valid_ids = [];
@@ -107,11 +109,41 @@ if ($_GET['action'] == 'update') {
             $product_id = (int)$product_id;
             if ($product_id <= 0) continue;
 
+            $supplier_id = isset($supplier_ids[$key]) ? (int)$supplier_ids[$key] : 0;
+            $invoice_no = trim(isset($invoice_nos[$key]) ? $invoice_nos[$key] : '');
+            if($supplier_id <= 0 || $invoice_no === '' || strlen($invoice_no) > 100){
+                mysqli_rollback($conn);
+                echo json_encode([
+                    'status' => 'error',
+                    'msg' => 'Supplier wajib dipilih dan no invoice wajib diisi maksimal 100 karakter'
+                ]);
+                exit;
+            }
+
+            $supplierCheck = mysqli_query($conn, "
+                SELECT 1
+                FROM product_supplier ps
+                JOIN suppliers s ON s.id = ps.supplier_id
+                WHERE ps.product_id = '$product_id'
+                  AND ps.supplier_id = '$supplier_id'
+                  AND s.deleted_at IS NULL
+                LIMIT 1
+            ");
+            if(!$supplierCheck || mysqli_num_rows($supplierCheck) === 0){
+                mysqli_rollback($conn);
+                echo json_encode([
+                    'status' => 'error',
+                    'msg' => 'Supplier yang dipilih tidak terdaftar untuk produk tersebut'
+                ]);
+                exit;
+            }
+
             $item_id = isset($item_ids[$key]) ? (int)$item_ids[$key] : 0;
             if ($item_id > 0 && !isset($valid_ids[$item_id])) $item_id = 0;
 
             $qty_buy   = isset($qtys_buy[$key]) ? mysqli_real_escape_string($conn, $qtys_buy[$key]) : 0;
             $unit_buy  = isset($units_buy[$key]) ? mysqli_real_escape_string($conn, $units_buy[$key]) : '';
+            $invoice_no = mysqli_real_escape_string($conn, $invoice_no);
             $unit_price = isset($unit_prices[$key]) && $unit_prices[$key] !== ''
                 ? (float)$unit_prices[$key]
                 : null;
@@ -129,7 +161,9 @@ if ($_GET['action'] == 'update') {
                         qty_buy    = '$qty_buy',
                         unit_buy   = '$unit_buy',
                         price_unit = $unit_price_sql,
-                        price_buy  = '$price_buy'
+                        price_buy  = '$price_buy',
+                        supplier_id = '$supplier_id',
+                        invoice_no = '$invoice_no'
                     WHERE id = '$item_id'
                       AND purchase_id = '$id'
                 ");
@@ -143,14 +177,18 @@ if ($_GET['action'] == 'update') {
                         qty_buy,
                         unit_buy,
                         price_unit,
-                        price_buy
+                        price_buy,
+                        supplier_id,
+                        invoice_no
                     ) VALUES(
                         '$id',
                         '$product_id',
                         '$qty_buy',
                         '$unit_buy',
                         $unit_price_sql,
-                        $price_buy
+                        $price_buy,
+                        '$supplier_id',
+                        '$invoice_no'
                     )
                 ");
             }
@@ -383,6 +421,24 @@ if ($_GET['action'] == 'update') {
     if ($_GET['action'] == 'get_print') {
 
         $id = (int)$_GET['id'];
+        $purchaseQuery = mysqli_query($conn, "
+            SELECT form
+            FROM purchases
+            WHERE id = '$id'
+              AND deleted_at IS NULL
+            LIMIT 1
+        ");
+
+        if (!$purchaseQuery || mysqli_num_rows($purchaseQuery) === 0) {
+            http_response_code(404);
+            echo json_encode([
+                "status" => "error",
+                "msg" => "Form belanja tidak ditemukan"
+            ]);
+            exit;
+        }
+
+        $purchase = mysqli_fetch_assoc($purchaseQuery);
 
         $q = mysqli_query($conn,"
             SELECT
@@ -405,6 +461,7 @@ if ($_GET['action'] == 'update') {
 
         echo json_encode([
             "status" => "success",
+            "form" => $purchase['form'],
             "data" => $data
         ]);
 

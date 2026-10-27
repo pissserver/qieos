@@ -78,7 +78,7 @@ $tables = array(
             array('purchase_items', 'purchase_items.purchase_id'),
         )),
     'purchase_items' => array('name' => 'purchase_items', 'domain' => 'PURCHASING', 'icon' => 'fa-cart-plus',
-        'desc' => 'Baris detail pembelian: produk, jumlah rencana & realisasi, satuan, dan harga beli.',
+        'desc' => 'Baris detail pembelian: produk, jumlah rencana & realisasi, supplier, nomor invoice, satuan, dan harga beli.',
         'rels' => array(
             array('purchases', 'purchase_items.purchase_id'),
             array('products', 'purchase_items.product_id'),

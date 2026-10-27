@@ -13,6 +13,28 @@ while($p = mysqli_fetch_assoc($qProd)){
     $products[] = ['id' => (int)$p['id'], 'name' => $p['name'], 'unit' => $p['unit']];
 }
 
+$qProductSuppliers = mysqli_query($conn, "
+    SELECT ps.product_id, s.id AS supplier_id, s.name AS supplier_name
+    FROM product_supplier ps
+    JOIN suppliers s ON s.id = ps.supplier_id
+    WHERE s.deleted_at IS NULL
+    ORDER BY s.name ASC
+");
+if(!$qProductSuppliers){
+    die(mysqli_error($conn));
+}
+$productSuppliers = [];
+while($supplier = mysqli_fetch_assoc($qProductSuppliers)){
+    $productId = (int)$supplier['product_id'];
+    if(!isset($productSuppliers[$productId])){
+        $productSuppliers[$productId] = [];
+    }
+    $productSuppliers[$productId][] = [
+        'id' => (int)$supplier['supplier_id'],
+        'name' => $supplier['supplier_name']
+    ];
+}
+
 // Satuan untuk dropdown (Master Unit)
 $qUnit = mysqli_query($conn, "SELECT name FROM units WHERE deleted_at IS NULL ORDER BY name ASC");
 $units = [];
@@ -145,20 +167,6 @@ while($u = mysqli_fetch_assoc($qUnit)){
                                     </div>
                                 </div>
 
-                                <div class="col-md-2 item-unit-price">
-                                    <div class="input-group-modern">
-                                        <div class="input-icon input-icon-price">
-                                            <i class="fas fa-wallet"></i>
-                                        </div>
-                                        <input type="number"
-                                            name="unit_price[]"
-                                            class="form-control"
-                                            placeholder="Harga Satuan"
-                                            min="0"
-                                            required>
-                                    </div>
-                                </div>
-
                                 <div class="col-md-3 item-price">
                                     <div class="input-group-modern">
                                         <div class="input-icon input-icon-price">
@@ -168,6 +176,20 @@ while($u = mysqli_fetch_assoc($qUnit)){
                                             name="price_buy[]"
                                             class="form-control"
                                             placeholder="Total Harga Produk"
+                                            min="0"
+                                            required>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-2 item-unit-price">
+                                    <div class="input-group-modern">
+                                        <div class="input-icon input-icon-price">
+                                            <i class="fas fa-coins"></i>
+                                        </div>
+                                        <input type="number"
+                                            name="unit_price[]"
+                                            class="form-control"
+                                            placeholder="Harga Satuan"
                                             min="0"
                                             required>
                                     </div>
@@ -211,7 +233,7 @@ while($u = mysqli_fetch_assoc($qUnit)){
 </main>
 
 <!-- EDIT MODAL -->
-<div class="modal fade" id="editPurchaseModal" tabindex="-1">
+<div class="modal fade" id="editPurchaseModal" tabindex="-1" data-bs-backdrop="static">
     <div class="modal-dialog modal-xl modal-dialog-centered">
         <div class="modal-content stock-panel border-0">
 
@@ -393,16 +415,16 @@ while($u = mysqli_fetch_assoc($qUnit)){
                     </select>
                 </div>
             </div>
-            <div class="col-md-2 item-unit-price">
-                <div class="input-group-modern">
-                    <div class="input-icon input-icon-price"><i class="fas fa-wallet"></i></div>
-                    <input type="number" name="unit_price[]" class="form-control" placeholder="Harga Satuan" min="0">
-                </div>
-            </div>
             <div class="col-md-3 item-price">
                 <div class="input-group-modern">
                     <div class="input-icon input-icon-price"><i class="fas fa-wallet"></i></div>
                     <input type="number" name="price_buy[]" class="form-control" placeholder="Total Harga Produk" min="0">
+                </div>
+            </div>
+            <div class="col-md-2 item-unit-price">
+                <div class="input-group-modern">
+                    <div class="input-icon input-icon-price"><i class="fas fa-coins"></i></div>
+                    <input type="number" name="unit_price[]" class="form-control" placeholder="Harga Satuan" min="0">
                 </div>
             </div>
         `;
@@ -474,11 +496,49 @@ while($u = mysqli_fetch_assoc($qUnit)){
         }
         $sel.select2(opts);
         $sel.on('change', function(){
-            let unitSel = $(this).closest('.item-row').find('select[name="unit_buy[]"]');
+            let row = $(this).closest('.item-row');
+            let unitSel = row.find('select[name="unit_buy[]"]');
             let opt = this.options[this.selectedIndex];
             let u = opt ? opt.getAttribute('data-unit') : '';
             if(u) setUnitValue(unitSel, u);
+            if(row.closest('#itemsContainerEdit').length){
+                refreshProductSuppliers(row, '');
+            }
         });
+    }
+
+    const PRODUCT_SUPPLIERS = <?= json_encode($productSuppliers, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT) ?>;
+
+    function refreshProductSuppliers($row, selectedSupplierId){
+        let $supplier = $row.find('select[name="supplier_id[]"]');
+        if(!$supplier.length) return;
+
+        let productId = String($row.find('select[name="product_id[]"]').val() || '');
+        let suppliers = PRODUCT_SUPPLIERS[productId] || [];
+        let options = '<option value=""></option>';
+        let selectedExists = false;
+
+        suppliers.forEach(function(supplier){
+            let id = String(supplier.id);
+            let selected = selectedSupplierId !== '' && id === String(selectedSupplierId);
+            if(selected) selectedExists = true;
+            options += '<option value="' + id + '"' + (selected ? ' selected' : '') + '>' + escAttr(supplier.name) + '</option>';
+        });
+
+        $supplier.html(options);
+        $supplier.val(selectedExists ? String(selectedSupplierId) : '').trigger('change');
+    }
+
+    function applySupplierSelect2($sel){
+        if(!$sel || !$sel.length) return;
+        if($sel.hasClass('select2-hidden-accessible')) $sel.select2('destroy');
+        let opts = {
+            width: '100%',
+            placeholder: 'Pilih Supplier...',
+            allowClear: true,
+            dropdownParent: $('#editPurchaseModal')
+        };
+        $sel.select2(opts);
     }
 
     function applyUnitSelect2($sel){
@@ -511,6 +571,12 @@ while($u = mysqli_fetch_assoc($qUnit)){
         });
         document.querySelectorAll('#itemsContainerEdit .unit-select').forEach(function(sel){
             applyUnitSelect2($(sel));
+        });
+        document.querySelectorAll('#itemsContainerEdit .item-row').forEach(function(row){
+            let $row = $(row);
+            let selectedSupplierId = $row.find('select[name="supplier_id[]"]').data('selected') || '';
+            refreshProductSuppliers($row, selectedSupplierId);
+            applySupplierSelect2($row.find('select[name="supplier_id[]"]'));
         });
     }
 
@@ -846,19 +912,6 @@ while($u = mysqli_fetch_assoc($qUnit)){
                     </div>
                 </div>
 
-                <div class="col-md-2 item-unit-price">
-                    <div class="input-group-modern">
-                        <div class="input-icon input-icon-price">
-                            <i class="fas fa-wallet"></i>
-                        </div>
-                        <input type="number"
-                            name="unit_price[]"
-                            class="form-control"
-                            placeholder="Harga Satuan"
-                            min="0">
-                    </div>
-                </div>
-
                 <div class="col-md-2 item-price">
                     <div class="input-group-modern">
                         <div class="input-icon input-icon-price">
@@ -868,6 +921,19 @@ while($u = mysqli_fetch_assoc($qUnit)){
                             name="price_buy[]"
                             class="form-control"
                             placeholder="Total Harga Produk"
+                            min="0">
+                    </div>
+                </div>
+
+                <div class="col-md-2 item-unit-price">
+                    <div class="input-group-modern">
+                        <div class="input-icon input-icon-price">
+                            <i class="fas fa-coins"></i>
+                        </div>
+                        <input type="number"
+                            name="unit_price[]"
+                            class="form-control"
+                            placeholder="Harga Satuan"
                             min="0">
                     </div>
                 </div>
@@ -899,13 +965,14 @@ while($u = mysqli_fetch_assoc($qUnit)){
     function addItemEdit()
     {
         let html = `
-            <div class="item-row row mb-3">
+            <div class="item-row mb-3 border rounded-3 p-3">
 
                 <input type="hidden"
                     name="item_id[]"
                     value="">
 
-                <div class="col-md-3 item-product">
+                <div class="row g-3 align-items-end">
+                <div class="col-md-4 item-product">
                     <div class="input-group-modern">
                         <div class="input-icon input-icon-product">
                             <i class="fas fa-box"></i>
@@ -949,20 +1016,6 @@ while($u = mysqli_fetch_assoc($qUnit)){
                     </div>
                 </div>
 
-                <div class="col-md-2 item-unit-price">
-                    <div class="input-group-modern">
-                        <div class="input-icon input-icon-price">
-                            <i class="fas fa-wallet"></i>
-                        </div>
-                        <input type="number"
-                            name="unit_price[]"
-                            class="form-control"
-                            placeholder="Harga Satuan"
-                            min="0"
-                            value="">
-                    </div>
-                </div>
-
                 <div class="col-md-2 item-price">
                     <div class="input-group-modern">
                         <div class="input-icon input-icon-price">
@@ -977,7 +1030,34 @@ while($u = mysqli_fetch_assoc($qUnit)){
                     </div>
                 </div>
 
-                <div class="col-md-1 item-remove">
+                <div class="col-md-2 item-unit-price">
+                    <div class="input-group-modern">
+                        <div class="input-icon input-icon-price">
+                            <i class="fas fa-coins"></i>
+                        </div>
+                        <input type="number"
+                            name="unit_price[]"
+                            class="form-control"
+                            placeholder="Harga Satuan"
+                            min="0"
+                            value="">
+                    </div>
+                </div>
+
+                </div>
+
+                <div class="row g-3 align-items-end mt-1">
+                <div class="col-md-5">
+                    <label class="form-label">Supplier <span class="text-danger">*</span></label>
+                    <select name="supplier_id[]" class="form-control supplier-select" required>
+                        <option value=""></option>
+                    </select>
+                </div>
+                <div class="col-md-5">
+                    <label class="form-label">No Invoice <span class="text-danger">*</span></label>
+                    <input type="text" name="invoice_no[]" class="form-control" placeholder="Masukkan no invoice" maxlength="100" required>
+                </div>
+                <div class="col-md-2 item-remove">
                     <div class="input-group-modern">
                         <button type="button"
                                 class="input-icon input-icon-danger"
@@ -986,6 +1066,7 @@ while($u = mysqli_fetch_assoc($qUnit)){
                             <span>Hapus</span>
                         </button>
                     </div>
+                </div>
                 </div>
 
             </div>
@@ -999,6 +1080,9 @@ while($u = mysqli_fetch_assoc($qUnit)){
         applyItemSelect2($(last));
         let lastUnit = document.querySelector('#itemsContainerEdit .item-row:last-child select.unit-select');
         applyUnitSelect2($(lastUnit));
+        let lastRow = $('#itemsContainerEdit .item-row:last-child');
+        refreshProductSuppliers(lastRow, '');
+        applySupplierSelect2(lastRow.find('select[name="supplier_id[]"]'));
     }
 
     function removeItem(button)
@@ -1044,6 +1128,8 @@ while($u = mysqli_fetch_assoc($qUnit)){
             let unit = r.find('select[name="unit_buy[]"]');
             let unitPrice = r.find('input[name="unit_price[]"]');
             let priceBuy = r.find('input[name="price_buy[]"]');
+            let supplier = r.find('select[name="supplier_id[]"]');
+            let invoiceNo = r.find('input[name="invoice_no[]"]');
 
             if(!sel.val()){
                 QToast('Error', 'Nama produk wajib dipilih', 'error');
@@ -1067,6 +1153,16 @@ while($u = mysqli_fetch_assoc($qUnit)){
             }
             if(!priceBuy.val() || !String(priceBuy.val()).trim()){
                 QToast('Error', 'Total harga produk wajib diisi', 'error');
+                valid = false;
+                return false;
+            }
+            if(!supplier.val()){
+                QToast('Error', 'Supplier wajib dipilih', 'error');
+                valid = false;
+                return false;
+            }
+            if(!invoiceNo.val() || !String(invoiceNo.val()).trim()){
+                QToast('Error', 'No invoice wajib diisi', 'error');
                 valid = false;
                 return false;
             }
@@ -1382,7 +1478,13 @@ while($u = mysqli_fetch_assoc($qUnit)){
             .then(res => res.json())
             .then(res => {
 
+                if (res.status !== 'success') {
+                    QToast('Gagal', res.msg || 'Data form belanja tidak dapat dimuat', 'error');
+                    return;
+                }
+
                 let items = res.data;
+                let formNumber = res.form || '-';
 
                 let rows = '';
                 let grandTotal = 0;
@@ -1396,8 +1498,10 @@ while($u = mysqli_fetch_assoc($qUnit)){
                             <td style="text-align:center">${i + 1}</td>
                             <td>${item.name}</td>
                             <td style="text-align:center">${item.qty}</td>
+                            <td></td>
                             <td style="text-align:center">${item.unit}</td>
                             <td style="text-align:right">Rp ${price.toLocaleString('id-ID')}</td>
+                            <td></td>
                             <td style="text-align:center"><span class="chk"></span></td>
                         </tr>
                     `;
@@ -1405,8 +1509,9 @@ while($u = mysqli_fetch_assoc($qUnit)){
 
                 rows += `
                     <tr class="total-row">
-                        <td colspan="4" style="text-align:right;font-weight:700">Total Harga Keseluruhan</td>
+                        <td colspan="5" style="text-align:right;font-weight:700">Total Harga Keseluruhan</td>
                         <td style="text-align:right;font-weight:700">Rp ${grandTotal.toLocaleString('id-ID')}</td>
+                        <td></td>
                         <td></td>
                     </tr>
                 `;
@@ -1418,9 +1523,22 @@ while($u = mysqli_fetch_assoc($qUnit)){
                     <head>
                         <title>Print Daftar Belanja</title>
                         <style>
-                            body { font-family: Poppins; padding: 20px; }
-                            h2 { margin-bottom: 5px; text-align: center; text-transform: uppercase;}
-                            .sub { color: #666; margin-bottom: 50px; text-align: center;}
+                            body { font-family: Arial, sans-serif; color: #1f2937; padding: 28px; }
+                            .document-header {
+                                display: flex;
+                                justify-content: space-between;
+                                align-items: flex-start;
+                                gap: 24px;
+                                padding: 0 0 18px;
+                                margin-bottom: 24px;
+                                border-bottom: 3px solid #312e81;
+                            }
+                            .brand { color: #312e81; font-size: 13px; font-weight: 800; letter-spacing: 2px; }
+                            .document-title { margin: 8px 0 4px; color: #111827; font-size: 25px; font-weight: 800; letter-spacing: .5px; }
+                            .document-subtitle { color: #6b7280; font-size: 12px; }
+                            .document-meta { min-width: 190px; padding: 12px 16px; background: #f3f4f6; border-left: 4px solid #6366f1; }
+                            .meta-label { margin-bottom: 4px; color: #6b7280; font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; }
+                            .meta-value { color: #111827; font-size: 14px; font-weight: 700; }
 
                             table {
                                 width: 100%;
@@ -1436,9 +1554,13 @@ while($u = mysqli_fetch_assoc($qUnit)){
                             }
 
                             th {
-                                background: #f2f2f2;
+                                background: #eef2ff;
+                                color: #312e81;
+                                font-size: 11px;
+                                text-transform: uppercase;
                             }
 
+                            .total-row td { background: #f3f4f6; }
                             .chk {
                                 display: inline-block;
                                 width: 13px;
@@ -1448,23 +1570,37 @@ while($u = mysqli_fetch_assoc($qUnit)){
                                 vertical-align: middle;
                             }
 
-                            .total-row td {
-                                background: #f2f2f2;
+                            @media print {
+                                body { padding: 0; }
+                                .document-header { break-inside: avoid; }
                             }
                         </style>
                     </head>
                     <body>
 
-                        <h2>Daftar Belanja (${formattedDate})</h2>
-                        <div class="sub">by QIEOS</div>
+                        <header class="document-header">
+                            <div>
+                                <div class="brand">QIEOS</div>
+                                <h1 class="document-title">Daftar Belanja</h1>
+                                <div class="document-subtitle">Dokumen pembelian dan pengecekan barang</div>
+                            </div>
+                            <div class="document-meta">
+                                <div class="meta-label">Form Belanja</div>
+                                <div class="meta-value">${formNumber}</div>
+                                <div class="meta-label" style="margin-top:10px">Tanggal</div>
+                                <div class="meta-value">${formattedDate}</div>
+                            </div>
+                        </header>
 
                         <table>
                             <colgroup>
-                                <col style="width:6%">
-                                <col style="width:44%">
-                                <col style="width:10%">
-                                <col style="width:12%">
-                                <col style="width:18%">
+                                <col style="width:5%">
+                                <col style="width:34%">
+                                <col style="width:7%">
+                                <col style="width:9%">
+                                <col style="width:8%">
+                                <col style="width:14%">
+                                <col style="width:13%">
                                 <col style="width:10%">
                             </colgroup>
                             
@@ -1473,8 +1609,10 @@ while($u = mysqli_fetch_assoc($qUnit)){
                                     <th>No</th>
                                     <th>Nama Barang / Produk</th>
                                     <th>Qty</th>
+                                    <th>Qty Revisi</th>
                                     <th>Satuan</th>
                                     <th>Total Harga</th>
+                                    <th>Total Harga Revisi</th>
                                     <th>Check</th>
                                 </tr>
                             </thead>
@@ -1494,6 +1632,10 @@ while($u = mysqli_fetch_assoc($qUnit)){
                     win.print();
                 }, 300);
 
+            })
+            .catch(error => {
+                console.error('Gagal memuat data cetak daftar belanja:', error);
+                QToast('Gagal', 'Data cetak daftar belanja tidak dapat dimuat', 'error');
             });
 
     });

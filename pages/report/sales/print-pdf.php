@@ -154,7 +154,7 @@ switch ($tab) {
             $qPurchase = mysqli_query($conn, "SELECT p.id, p.date, p.form FROM purchases p WHERE p.id = $purchase_id AND p.deleted_at IS NULL LIMIT 1");
             $purchase = $qPurchase ? mysqli_fetch_assoc($qPurchase) : null;
             if ($purchase) {
-                $q = mysqli_query($conn, "SELECT pi.id, pi.product_id, pi.qty_buy, pi.price_unit, pi.price_buy, p.code AS product_code, p.name AS product_name, p.unit AS product_unit FROM purchase_items pi JOIN products p ON pi.product_id = p.id WHERE pi.purchase_id = $purchase_id AND pi.deleted_at IS NULL AND pi.qty_buy IS NOT NULL ORDER BY pi.id ASC");
+                $q = mysqli_query($conn, "SELECT pi.id, pi.product_id, pi.qty_buy, pi.price_unit, pi.price_buy, pi.invoice_no, s.name AS supplier_name, p.code AS product_code, p.name AS product_name, p.unit AS product_unit FROM purchase_items pi JOIN products p ON pi.product_id = p.id LEFT JOIN suppliers s ON s.id = pi.supplier_id WHERE pi.purchase_id = $purchase_id AND pi.deleted_at IS NULL AND pi.qty_buy IS NOT NULL ORDER BY pi.id ASC");
                 if ($q) {
                     while ($r = mysqli_fetch_assoc($q)) {
                         $r['purchase_date'] = $purchase['date'];
@@ -363,9 +363,13 @@ ob_start();
         .data-table th:last-child,
         .data-table td:last-child { padding-right: 14px; }
         .w5  { width: 5%; }
+        .w7  { width: 7%; }
         .w8  { width: 8%; }
+        .w9  { width: 9%; }
         .w10 { width: 10%; }
+        .w11 { width: 11%; }
         .w12 { width: 12%; }
+        .w13 { width: 13%; }
         .w15 { width: 15%; }
         .w18 { width: 18%; }
         .w20 { width: 20%; }
@@ -463,7 +467,7 @@ ob_start();
                     'summary'  => ['w5','w18','w40','w37'],
                     'omzet'    => ['w5','w18','w12','w12','w12','w12','w29'],
                     'expense'  => ['w5','w18','w25','w15','w37'],
-                    'purchase' => ['w5','w10','w10','w10','w12','w8','w15','w8','w8','w10','w10'],
+                    'purchase' => ['w5','w9','w8','w9','w8','w11','w7','w13','w7','w7','w9','w7'],
                     'profit'   => ['w5','w20','w18','w18','w20','w19'],
                     'margin'   => ['w5','w22','w12','w15','w15','w12','w19'],
                     'all'      => ['w5','w18','w17','w22','w20','w18'],
@@ -478,7 +482,7 @@ ob_start();
                     'summary'  => ['No', 'Komponen', 'Keterangan', 'Jumlah'],
                     'omzet'    => ['No', 'Tanggal', 'Pesanan', 'Terbayar', 'Waiting', 'Cancel/Revisi', 'Omzet'],
                     'expense'  => ['No', 'Tanggal', 'Form Belanja', 'Total Item', 'Total Belanja'],
-                    'purchase' => ['No', 'Tgl Beli', 'No Penerimaan', 'No Referensi', 'Supplier', 'Kode', 'Nama Barang', 'Satuan', 'Qty', 'Total', 'Harga/Sat'],
+                    'purchase' => ['No', 'Tgl Beli', 'No Penerimaan', 'No Referensi', 'No Invoice', 'Supplier', 'Kode', 'Nama Barang', 'Satuan', 'Qty', 'Total', 'Harga/Sat'],
                     'profit'   => ['No', 'Tanggal', 'Omzet', 'Pengeluaran', 'Laba / Rugi', 'Status'],
                     'margin'   => ['No', 'Produk', 'Qty Terjual', 'Harga Beli', 'Harga Jual', 'Margin', 'Keuntungan'],
                     'all'      => ['No', 'Kode Pesanan', 'Tanggal', 'Kasir', 'Total', 'Status'],
@@ -555,16 +559,17 @@ ob_start();
                     case 'purchase':
                 ?>
                         <td class="c w5"><?= $i + 1 ?></td>
-                        <td class="c w10"><?= sPdfDateId($r['purchase_date']) ?></td>
-                        <td class="c w10"></td>
-                        <td class="c w10"><?= sPdfEscape($r['purchase_form']) ?></td>
-                        <td class="c w12">-</td>
-                        <td class="c w8"><?= sPdfEscape($r['product_code']) ?></td>
-                        <td class="l w15"><?= sPdfEscape($r['product_name']) ?></td>
-                        <td class="c w8"><?= sPdfEscape(strtoupper($r['product_unit'])) ?></td>
-                        <td class="c w8"><?= (int) $r['qty_buy'] ?></td>
-                        <td class="r w10"><?= sPdfRp($r['price_buy']) ?></td>
-                        <td class="r w10"><?= sPdfRp($r['price_unit']) ?></td>
+                        <td class="c w9"><?= sPdfDateId($r['purchase_date']) ?></td>
+                        <td class="c w8"></td>
+                        <td class="c w9"><?= sPdfEscape($r['purchase_form']) ?></td>
+                        <td class="c w8"><?= sPdfEscape($r['invoice_no']) ?></td>
+                        <td class="c w11"><?= sPdfEscape($r['supplier_name'] ? $r['supplier_name'] : '-') ?></td>
+                        <td class="c w7"><?= sPdfEscape($r['product_code']) ?></td>
+                        <td class="l w13"><?= sPdfEscape($r['product_name']) ?></td>
+                        <td class="c w7"><?= sPdfEscape(strtoupper($r['product_unit'])) ?></td>
+                        <td class="c w7"><?= (int) $r['qty_buy'] ?></td>
+                        <td class="r w9"><?= sPdfRp($r['price_buy']) ?></td>
+                        <td class="r w7"><?= sPdfRp($r['price_unit']) ?></td>
                 <?php
                         break;
 

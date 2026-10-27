@@ -58,6 +58,7 @@
                     <th class="text-center">Tgl Beli</th>
                     <th class="text-center">No Penerimaan Barang</th>
                     <th class="text-center">No Referensi</th>
+                    <th class="text-center">No Invoice</th>
                     <th class="text-center">Nama Supplier</th>
                     <th class="text-center">Kode Barang</th>
                     <th class="text-center">Nama Barang</th>
@@ -70,7 +71,7 @@
 
             <tbody id="reportPurchaseBody">
                 <tr>
-                    <td colspan="11">
+                    <td colspan="12">
                         <div class="loading-box">
                             <i class="fas fa-file-invoice"></i>
                             <h5>Belum Ada Data</h5>

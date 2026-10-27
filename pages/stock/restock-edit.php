@@ -11,7 +11,9 @@ $q = mysqli_query($conn,"
         pi.qty_buy,
         pi.unit_buy,
         pi.price_unit,
-        pi.price_buy
+        pi.price_buy,
+        pi.supplier_id,
+        pi.invoice_no
     FROM purchases pr
     LEFT JOIN purchase_items pi
         ON pi.purchase_id = pr.id
@@ -85,13 +87,14 @@ function buildUnitOptions($units, $current){
 
         <?php while($d = mysqli_fetch_assoc($q)){ ?>
 
-        <div class="item-row row mb-3">
+        <div class="item-row mb-3 border rounded-3 p-3">
 
             <input type="hidden"
                    name="item_id[]"
                    value="<?= $d['item_id'] ?>">
 
-            <div class="col-md-3 item-product">
+            <div class="row g-3 align-items-end">
+            <div class="col-md-4 item-product">
                 <div class="input-group-modern">
                     <div class="input-icon input-icon-product">
                         <i class="fas fa-box"></i>
@@ -134,21 +137,6 @@ function buildUnitOptions($units, $current){
                 </div>
             </div>
 
-            <div class="col-md-2 item-unit-price">
-                <div class="input-group-modern">
-                    <div class="input-icon input-icon-price">
-                        <i class="fas fa-wallet"></i>
-                    </div>
-                    <input type="number"
-                           name="unit_price[]"
-                           class="form-control"
-                           placeholder="Harga Satuan"
-                           min="0"
-                           required
-                           value="<?= $d['price_unit'] !== null && $d['price_unit'] !== '' ? (int)$d['price_unit'] : '' ?>">
-                </div>
-            </div>
-
             <div class="col-md-2 item-price">
                 <div class="input-group-modern">
                     <div class="input-icon input-icon-price">
@@ -164,7 +152,46 @@ function buildUnitOptions($units, $current){
                 </div>
             </div>
 
-            <div class="col-md-1 item-remove">
+            <div class="col-md-2 item-unit-price">
+                <div class="input-group-modern">
+                    <div class="input-icon input-icon-price">
+                        <i class="fas fa-coins"></i>
+                    </div>
+                    <input type="number"
+                           name="unit_price[]"
+                           class="form-control"
+                           placeholder="Harga Satuan"
+                           min="0"
+                           required
+                           value="<?= $d['price_unit'] !== null && $d['price_unit'] !== '' ? (int)$d['price_unit'] : '' ?>">
+                </div>
+            </div>
+            </div>
+
+            <div class="row g-3 align-items-end mt-1">
+                <div class="col-md-5">
+                    <label class="form-label">Supplier <span class="text-danger">*</span></label>
+                    <select
+                           name="supplier_id[]"
+                           class="form-control supplier-select"
+                           data-selected="<?= (int)$d['supplier_id'] ?>"
+                           required>
+                        <option value=""></option>
+                    </select>
+                </div>
+
+                <div class="col-md-5">
+                    <label class="form-label">No Invoice <span class="text-danger">*</span></label>
+                    <input type="text"
+                           name="invoice_no[]"
+                           class="form-control"
+                           placeholder="Masukkan no invoice"
+                           maxlength="100"
+                           value="<?= htmlspecialchars((string)$d['invoice_no'], ENT_QUOTES, 'UTF-8') ?>"
+                           required>
+                </div>
+
+            <div class="col-md-2 item-remove">
                 <div class="input-group-modern">
                     <button type="button"
                             class="input-icon input-icon-danger"
@@ -173,6 +200,7 @@ function buildUnitOptions($units, $current){
                         <span>Hapus</span>
                     </button>
                 </div>
+            </div>
             </div>
 
         </div>
