@@ -54,8 +54,8 @@ if ($hasData) {
         <tr>
             <td class="text-center"><?= $no++ ?></td>
             <td class="text-center"><?= report_date_id($purchase['date']) ?></td>
-            <td class="text-center"><?= $purchase['id'] ?></td>
-            <td class="text-center">-</td>
+            <td class="text-center"></td>
+            <td class="text-center"><?= htmlspecialchars($purchase['form']) ?></td>
             <td class="text-center">-</td>
             <td class="text-center"><?= htmlspecialchars($row['product_code']) ?></td>
             <td class="text-center"><?= htmlspecialchars($row['product_name']) ?></td>

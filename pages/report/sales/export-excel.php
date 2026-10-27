@@ -881,7 +881,7 @@ $headers = [
     'summary'  => ['No', 'Komponen', 'Keterangan', 'Jumlah'],
     'omzet'    => ['No', 'Tanggal', 'Pesanan', 'Terbayar', 'Waiting', 'Cancel/Revisi', 'Omzet'],
     'expense'  => ['No', 'Tanggal', 'Form Belanja', 'Total Item', 'Total Belanja'],
-    'purchase' => ['No', 'Tgl Beli', 'No Penerimaan Barang', 'No SJ/INV', 'Nama Supplier', 'Kode Barang', 'Nama Barang', 'Satuan', 'Barang Masuk/Qty', 'Total Pembayaran', 'Harga/Satuan'],
+    'purchase' => ['No', 'Tgl Beli', 'No Penerimaan Barang', 'No Referensi', 'Nama Supplier', 'Kode Barang', 'Nama Barang', 'Satuan', 'Barang Masuk/Qty', 'Total Pembayaran', 'Harga/Satuan'],
     'profit'   => ['No', 'Tanggal', 'Omzet', 'Pengeluaran', 'Laba / Rugi', 'Status'],
     'margin'   => ['No', 'Produk', 'Qty Terjual', 'Harga Beli', 'Harga Jual', 'Margin', 'Keuntungan'],
     'all'      => ['No', 'Kode Pesanan', 'Tanggal', 'Kasir', 'Total', 'Status'],
@@ -987,8 +987,8 @@ for ($idx = 0; $idx < $count; $idx++) {
         case 'purchase':
             $sheet->setCellValue("A$row", $no);
             $sheet->setCellValue("B$row", date('d M Y', strtotime($r['purchase_date'])));
-            $sheet->setCellValue("C$row", (int) $r['purchase_id']);
-            $sheet->setCellValue("D$row", '-');
+            $sheet->setCellValue("C$row", '');
+            $sheet->setCellValue("D$row", $r['purchase_form']);
             $sheet->setCellValue("E$row", '-');
             $sheet->setCellValue("F$row", $r['product_code']);
             $sheet->setCellValue("G$row", $r['product_name']);

@@ -478,7 +478,7 @@ ob_start();
                     'summary'  => ['No', 'Komponen', 'Keterangan', 'Jumlah'],
                     'omzet'    => ['No', 'Tanggal', 'Pesanan', 'Terbayar', 'Waiting', 'Cancel/Revisi', 'Omzet'],
                     'expense'  => ['No', 'Tanggal', 'Form Belanja', 'Total Item', 'Total Belanja'],
-                    'purchase' => ['No', 'Tgl Beli', 'No Penerimaan', 'No SJ/INV', 'Supplier', 'Kode', 'Nama Barang', 'Satuan', 'Qty', 'Total', 'Harga/Sat'],
+                    'purchase' => ['No', 'Tgl Beli', 'No Penerimaan', 'No Referensi', 'Supplier', 'Kode', 'Nama Barang', 'Satuan', 'Qty', 'Total', 'Harga/Sat'],
                     'profit'   => ['No', 'Tanggal', 'Omzet', 'Pengeluaran', 'Laba / Rugi', 'Status'],
                     'margin'   => ['No', 'Produk', 'Qty Terjual', 'Harga Beli', 'Harga Jual', 'Margin', 'Keuntungan'],
                     'all'      => ['No', 'Kode Pesanan', 'Tanggal', 'Kasir', 'Total', 'Status'],
@@ -556,8 +556,8 @@ ob_start();
                 ?>
                         <td class="c w5"><?= $i + 1 ?></td>
                         <td class="c w10"><?= sPdfDateId($r['purchase_date']) ?></td>
-                        <td class="c w10"><?= (int) $r['purchase_id'] ?></td>
-                        <td class="c w10">-</td>
+                        <td class="c w10"></td>
+                        <td class="c w10"><?= sPdfEscape($r['purchase_form']) ?></td>
                         <td class="c w12">-</td>
                         <td class="c w8"><?= sPdfEscape($r['product_code']) ?></td>
                         <td class="l w15"><?= sPdfEscape($r['product_name']) ?></td>

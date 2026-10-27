@@ -57,7 +57,7 @@
                     <th class="text-center" width="40">No</th>
                     <th class="text-center">Tgl Beli</th>
                     <th class="text-center">No Penerimaan Barang</th>
-                    <th class="text-center">No SJ/INV</th>
+                    <th class="text-center">No Referensi</th>
                     <th class="text-center">Nama Supplier</th>
                     <th class="text-center">Kode Barang</th>
                     <th class="text-center">Nama Barang</th>

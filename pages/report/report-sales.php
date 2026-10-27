@@ -526,6 +526,7 @@
         url += "&first_date=" + ($("#first_date_" + tab).val() || "");
         url += "&last_date=" + ($("#last_date_" + tab).val() || "");
 
+        if (tab === "purchase") url += "&purchase_id=" + encodeURIComponent($("#purchase_form_id").val() || "");
         if (tab === "product") url += "&product_id=" + ($("#product_id").val() || "");
         if (tab === "category") url += "&category=" + ($("#category_id").val() || "");
         if (tab === "cashier") url += "&cashier_id=" + ($("#cashier_id").val() || "");
@@ -540,6 +541,7 @@
         url += "&first_date=" + ($("#first_date_" + tab).val() || "");
         url += "&last_date=" + ($("#last_date_" + tab).val() || "");
 
+        if (tab === "purchase") url += "&purchase_id=" + encodeURIComponent($("#purchase_form_id").val() || "");
         if (tab === "product") url += "&product_id=" + ($("#product_id").val() || "");
         if (tab === "category") url += "&category=" + ($("#category_id").val() || "");
         if (tab === "cashier") url += "&cashier_id=" + ($("#cashier_id").val() || "");
