@@ -68,6 +68,304 @@
         color:#fff;
     }
 
+    .purchase-receipt-toolbar{
+        display:flex;
+        align-items:center;
+        justify-content:space-between;
+        gap:18px;
+        margin:0 0 24px;
+        padding:16px 18px;
+        border:1px solid #e0e7ff;
+        border-radius:18px;
+        background:linear-gradient(120deg,#f8faff,#eef2ff);
+    }
+
+    .purchase-form-badges,
+    .purchase-receipt-actions{
+        display:flex;
+        align-items:center;
+        gap:12px;
+        flex-wrap:wrap;
+    }
+
+    .purchase-form-badge,
+    .purchase-receipt-badge{
+        display:inline-flex;
+        align-items:center;
+        gap:10px;
+        min-height:50px;
+        padding:8px 14px;
+        border:1px solid #c7d2fe;
+        border-radius:14px;
+        background:#fff;
+        color:#3730a3;
+        box-shadow:0 5px 16px rgba(49,46,129,.08);
+    }
+
+    .purchase-form-badge > i,
+    .purchase-receipt-badge > i{
+        font-size:19px;
+    }
+
+    .purchase-form-badge span,
+    .purchase-receipt-badge span{
+        display:flex;
+        flex-direction:column;
+        gap:2px;
+    }
+
+    .purchase-form-badge small,
+    .purchase-receipt-badge small{
+        color:#64748b;
+        font-size:9px;
+        font-weight:800;
+        letter-spacing:1px;
+    }
+
+    .purchase-form-badge strong,
+    .purchase-receipt-badge strong{
+        color:#1e1b4b;
+        font-size:13px;
+        letter-spacing:.3px;
+    }
+
+    .purchase-receipt-badge{
+        border-color:#a7f3d0;
+        background:linear-gradient(135deg,#ecfdf5,#f0fdfa);
+        color:#059669;
+        animation:receiptBadgeIn .45s cubic-bezier(.2,.8,.2,1) both;
+    }
+
+    .btn-receipt-submit,
+    .btn-receipt-print{
+        display:inline-flex;
+        align-items:center;
+        justify-content:center;
+        gap:9px;
+        min-height:46px;
+        padding:10px 17px;
+        border:0;
+        border-radius:13px;
+        color:#fff;
+        font-weight:700;
+        box-shadow:0 8px 18px rgba(49,46,129,.18);
+        transition:transform .18s ease, box-shadow .18s ease, opacity .18s ease;
+    }
+
+    .btn-receipt-submit{
+        background:linear-gradient(135deg,#4f46e5,#312e81);
+    }
+
+    .btn-receipt-print{
+        background:linear-gradient(135deg,#0f766e,#047857);
+    }
+
+    .btn-receipt-submit:hover:not(:disabled),
+    .btn-receipt-print:hover:not(:disabled){
+        color:#fff;
+        transform:translateY(-2px);
+        box-shadow:0 12px 22px rgba(49,46,129,.24);
+    }
+
+    .btn-receipt-submit:disabled,
+    .btn-receipt-print:disabled{
+        cursor:not-allowed;
+        opacity:.45;
+        box-shadow:none;
+    }
+
+    .btn-receipt-submit.is-complete{
+        background:linear-gradient(135deg,#059669,#047857);
+    }
+
+    .receipt-processing{
+        position:fixed;
+        z-index:2000;
+        inset:0;
+        display:grid;
+        place-items:center;
+        padding:24px;
+        background:rgba(15,23,42,.52);
+        backdrop-filter:blur(7px);
+    }
+
+    .receipt-processing[hidden]{
+        display:none;
+    }
+
+    .receipt-processing-card{
+        position:relative;
+        overflow:hidden;
+        width:min(420px,100%);
+        padding:34px;
+        border:1px solid rgba(255,255,255,.7);
+        border-radius:24px;
+        background:#fff;
+        text-align:center;
+        box-shadow:0 24px 80px rgba(15,23,42,.28);
+        animation:receiptCardIn .35s cubic-bezier(.2,.8,.2,1) both;
+    }
+
+    .receipt-processing-card::before{
+        position:absolute;
+        top:-95px;
+        left:50%;
+        width:260px;
+        height:190px;
+        border-radius:50%;
+        background:radial-gradient(ellipse,rgba(99,102,241,.14),transparent 70%);
+        content:"";
+        transform:translateX(-50%);
+        pointer-events:none;
+    }
+
+    .receipt-processing-icon{
+        position:relative;
+        display:grid;
+        width:72px;
+        height:72px;
+        place-items:center;
+        margin:0 auto 18px;
+        border-radius:22px;
+        background:linear-gradient(135deg,#e0e7ff,#c7d2fe);
+        color:#4338ca;
+        font-size:28px;
+        animation:receiptIconPulse 1.3s ease-in-out infinite;
+    }
+
+    .receipt-processing-steps{
+        display:flex;
+        justify-content:center;
+        gap:8px;
+        margin-top:22px;
+    }
+
+    .receipt-processing-steps span{
+        display:flex;
+        align-items:center;
+        gap:6px;
+        min-height:30px;
+        padding:5px 9px;
+        border:1px solid #e2e8f0;
+        border-radius:999px;
+        background:#f8fafc;
+        color:#94a3b8;
+        font-size:10px;
+        font-weight:700;
+        transition:color .25s ease,background .25s ease,border-color .25s ease,transform .25s ease;
+    }
+
+    .receipt-processing-steps span.is-active{
+        border-color:#c7d2fe;
+        background:#eef2ff;
+        color:#4338ca;
+        transform:translateY(-2px);
+    }
+
+    .receipt-processing-steps span.is-done{
+        border-color:#a7f3d0;
+        background:#ecfdf5;
+        color:#047857;
+    }
+
+    .receipt-processing-steps i{
+        font-size:11px;
+    }
+
+    .receipt-processing-title{
+        color:#1e1b4b;
+        font-size:20px;
+        font-weight:800;
+    }
+
+    .receipt-processing-message{
+        margin-top:7px;
+        color:#64748b;
+        font-size:13px;
+    }
+
+    .receipt-processing-track{
+        height:7px;
+        margin-top:24px;
+        overflow:hidden;
+        border-radius:20px;
+        background:#e2e8f0;
+    }
+
+    .receipt-processing-track span{
+        display:block;
+        width:0;
+        height:100%;
+        border-radius:inherit;
+        background:linear-gradient(90deg,#6366f1,#10b981);
+        transition:width .65s cubic-bezier(.2,.8,.2,1);
+    }
+
+    .receipt-processing.is-success .receipt-processing-icon{
+        background:linear-gradient(135deg,#d1fae5,#a7f3d0);
+        color:#047857;
+        animation:receiptSuccessPop .4s ease both;
+    }
+
+    .receipt-processing.is-success .receipt-processing-card{
+        animation:receiptSuccessCard .45s cubic-bezier(.2,.8,.2,1) both;
+    }
+
+    @keyframes receiptCardIn{
+        from{opacity:0;transform:translateY(12px) scale(.96)}
+        to{opacity:1;transform:translateY(0) scale(1)}
+    }
+
+    @keyframes receiptBadgeIn{
+        from{opacity:0;transform:translateY(6px) scale(.94)}
+        to{opacity:1;transform:translateY(0) scale(1)}
+    }
+
+    @keyframes receiptIconPulse{
+        50%{transform:translateY(-4px);box-shadow:0 10px 24px rgba(99,102,241,.18)}
+    }
+
+    @keyframes receiptSuccessPop{
+        50%{transform:scale(1.12)}
+    }
+
+    @keyframes receiptSuccessCard{
+        45%{transform:translateY(-5px) scale(1.015)}
+        100%{transform:translateY(0) scale(1)}
+    }
+
+    @media (max-width:767.98px){
+        .purchase-receipt-toolbar{
+            align-items:stretch;
+            flex-direction:column;
+            padding:14px;
+        }
+
+        .purchase-receipt-actions > button{
+            flex:1 1 0;
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce){
+        .purchase-receipt-badge,
+        .receipt-processing-card,
+        .receipt-processing-icon,
+        .receipt-processing.is-success .receipt-processing-icon{
+            animation:none;
+        }
+
+        .receipt-processing.is-success .receipt-processing-card{
+            animation:none;
+        }
+
+        .btn-receipt-submit,
+        .btn-receipt-print,
+        .receipt-processing-track span,
+        .receipt-processing-steps span{
+            transition:none;
+        }
+    }
+
 
     .panel-dark{
         background:linear-gradient(
