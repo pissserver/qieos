@@ -9,7 +9,8 @@ require '../../../vendor/phpoffice/phpexcel/Classes/PHPExcel/IOFactory.php';
 $tab        = isset($_GET['tab']) ? $_GET['tab'] : 'all';
 $first_date = isset($_GET['first_date']) ? $_GET['first_date'] : '';
 $last_date  = isset($_GET['last_date']) ? $_GET['last_date'] : '';
-$product_id = isset($_GET['product_id']) ? (int) $_GET['product_id'] : 0;
+$productSelection = report_product_selection(isset($_GET['product_id']) ? $_GET['product_id'] : 'all');
+$product_id = (int) $productSelection['id'];
 $category   = isset($_GET['category']) ? $_GET['category'] : '';
 $cashier_id = isset($_GET['cashier_id']) ? (int) $_GET['cashier_id'] : 0;
 $limit      = isset($_GET['limit']) ? (int) $_GET['limit'] : 10;
@@ -69,17 +70,17 @@ switch ($tab) {
         break;
 
     case 'omzet':
-        $q = mysqli_query($conn, "SELECT DATE(tanggal) AS dt, COUNT(*) AS total_order, SUM(CASE WHEN status_payment='paid' THEN 1 ELSE 0 END) AS paid_count, SUM(CASE WHEN status_payment='waiting' THEN 1 ELSE 0 END) AS waiting_count, SUM(CASE WHEN status_payment='paid' THEN total ELSE 0 END) AS omzet FROM orders WHERE $where GROUP BY DATE(tanggal) ORDER BY dt DESC");
+        $q = mysqli_query($conn, "SELECT DATE(tanggal) AS dt, COUNT(*) AS total_order, SUM(CASE WHEN status_payment='paid' THEN 1 ELSE 0 END) AS paid_count, SUM(CASE WHEN status_payment='waiting' THEN 1 ELSE 0 END) AS waiting_count, SUM(CASE WHEN status_payment='paid' THEN total ELSE 0 END) AS omzet FROM orders WHERE $where GROUP BY DATE(tanggal) ORDER BY dt ASC");
         if ($q) while ($r = mysqli_fetch_assoc($q)) { $rows[] = $r; $total += (float) $r['omzet']; }
         break;
 
     case 'expense':
-        $q = mysqli_query($conn, "SELECT p.id, p.form, p.date, COUNT(pi.id) AS total_items, COALESCE(SUM(pi.price_buy),0) AS total_price FROM purchases p LEFT JOIN purchase_items pi ON p.id=pi.purchase_id AND pi.deleted_at IS NULL WHERE p.deleted_at IS NULL AND DATE(p.date) BETWEEN '$escFirst' AND '$escLast' AND EXISTS (SELECT 1 FROM purchase_items pi2 WHERE pi2.purchase_id=p.id AND pi2.deleted_at IS NULL AND pi2.qty_buy IS NOT NULL) GROUP BY p.id, p.form, p.date ORDER BY p.date DESC, p.id DESC");
+        $q = mysqli_query($conn, "SELECT p.id, p.form, p.date, COUNT(pi.id) AS total_items, COALESCE(SUM(pi.price_buy),0) AS total_price FROM purchases p LEFT JOIN purchase_items pi ON p.id=pi.purchase_id AND pi.deleted_at IS NULL WHERE p.deleted_at IS NULL AND DATE(p.date) BETWEEN '$escFirst' AND '$escLast' AND EXISTS (SELECT 1 FROM purchase_items pi2 WHERE pi2.purchase_id=p.id AND pi2.deleted_at IS NULL AND pi2.qty_buy IS NOT NULL) GROUP BY p.id, p.form, p.date ORDER BY p.date ASC, p.id ASC");
         if ($q) while ($r = mysqli_fetch_assoc($q)) { $rows[] = $r; $total += (float) $r['total_price']; }
         break;
 
     case 'profit':
-        $q = mysqli_query($conn, "SELECT d.dt, COALESCE(o.omzet,0) AS omzet, COALESCE(e.expense,0) AS expense FROM (SELECT DATE(tanggal) AS dt FROM orders WHERE $where UNION SELECT DATE(date) AS dt FROM purchases WHERE deleted_at IS NULL AND DATE(date) BETWEEN '$escFirst' AND '$escLast') d LEFT JOIN (SELECT DATE(tanggal) AS dt, COALESCE(SUM(total),0) AS omzet FROM orders WHERE status_payment='paid' AND $where GROUP BY DATE(tanggal)) o ON o.dt=d.dt LEFT JOIN (SELECT DATE(p.date) AS dt, COALESCE(SUM(pi.price_buy),0) AS expense FROM purchases p JOIN purchase_items pi ON p.id=pi.purchase_id WHERE p.deleted_at IS NULL AND pi.deleted_at IS NULL AND DATE(p.date) BETWEEN '$escFirst' AND '$escLast' GROUP BY DATE(p.date)) e ON e.dt=d.dt ORDER BY d.dt DESC");
+        $q = mysqli_query($conn, "SELECT d.dt, COALESCE(o.omzet,0) AS omzet, COALESCE(e.expense,0) AS expense FROM (SELECT DATE(tanggal) AS dt FROM orders WHERE $where UNION SELECT DATE(date) AS dt FROM purchases WHERE deleted_at IS NULL AND DATE(date) BETWEEN '$escFirst' AND '$escLast') d LEFT JOIN (SELECT DATE(tanggal) AS dt, COALESCE(SUM(total),0) AS omzet FROM orders WHERE status_payment='paid' AND $where GROUP BY DATE(tanggal)) o ON o.dt=d.dt LEFT JOIN (SELECT DATE(p.date) AS dt, COALESCE(SUM(pi.price_buy),0) AS expense FROM purchases p JOIN purchase_items pi ON p.id=pi.purchase_id WHERE p.deleted_at IS NULL AND pi.deleted_at IS NULL AND DATE(p.date) BETWEEN '$escFirst' AND '$escLast' GROUP BY DATE(p.date)) e ON e.dt=d.dt ORDER BY d.dt ASC");
         if ($q) while ($r = mysqli_fetch_assoc($q)) { $r['profit'] = (float)$r['omzet'] - (float)$r['expense']; $rows[] = $r; $total += $r['profit']; }
         break;
 
@@ -89,24 +90,96 @@ switch ($tab) {
         break;
 
     case 'all':
-        $q = mysqli_query($conn, "SELECT o.code, o.tanggal, o.total, o.status_payment, COALESCE(NULLIF(u.fullname,''),u.username,'-') AS cashier_name FROM orders o LEFT JOIN users u ON o.staff_id=u.id WHERE $where ORDER BY o.tanggal DESC, o.id DESC");
+        $q = mysqli_query($conn, "SELECT o.code, o.tanggal, o.total, o.status_payment, COALESCE(NULLIF(u.fullname,''),u.username,'-') AS cashier_name FROM orders o LEFT JOIN users u ON o.staff_id=u.id WHERE $where ORDER BY o.tanggal ASC, o.id ASC");
         if ($q) while ($r = mysqli_fetch_assoc($q)) { if ($r['status_payment']==='paid') $total+=(float)$r['total']; $rows[]=$r; }
         break;
 
     case 'product':
-        $q = mysqli_query($conn, "SELECT o.code, o.tanggal, od.qty, od.price, od.subtotal FROM order_details od JOIN orders o ON od.order_id=o.id WHERE od.product_id=$product_id AND o.status_payment='paid' AND $where ORDER BY o.tanggal DESC, o.id DESC");
+        $range = "o.status_payment='paid' AND DATE(o.tanggal) BETWEEN '$escFirst' AND '$escLast'";
+
+        $normalSelect = "
+            SELECT o.code, o.tanggal, od.qty, od.price, od.subtotal,
+                   p.name AS item_name, COALESCE(p.code, '') AS item_code,
+                   0 AS is_combo, NULL AS combo_items
+            FROM order_details od
+            JOIN orders o ON od.order_id = o.id
+            JOIN products p ON od.product_id = p.id
+        ";
+
+        $comboSelect = "
+            SELECT o.code, o.tanggal,
+                   MIN(FLOOR(od.qty / COALESCE(NULLIF(pci.qty, 0), 1))) AS qty,
+                   ROUND(SUM(od.subtotal) / NULLIF(MIN(FLOOR(od.qty / COALESCE(NULLIF(pci.qty, 0), 1))), 0)) AS price,
+                   SUM(od.subtotal) AS subtotal,
+                   pc.name AS item_name,
+                   '-' AS item_code,
+                   1 AS is_combo,
+                   GROUP_CONCAT(
+                       CONCAT(ip.name, IF(pci.qty > 1, CONCAT(' x', pci.qty), ''))
+                       ORDER BY pci.id SEPARATOR '||'
+                   ) AS combo_items
+            FROM order_details od
+            JOIN orders o ON od.order_id = o.id
+            JOIN product_combos pc ON pc.id = od.product_combo_id
+            LEFT JOIN product_combo_items pci ON pci.combo_id = od.product_combo_id AND pci.product_id = od.product_id
+            LEFT JOIN products ip ON ip.id = pci.product_id
+        ";
+
+        if ($productSelection['type'] === 'combo') {
+            $q = mysqli_query($conn, "
+                $comboSelect
+                WHERE $range AND od.product_combo_id = $product_id
+                GROUP BY od.order_id, od.product_combo_id, o.code, o.tanggal, pc.name
+                ORDER BY o.tanggal ASC, o.code ASC
+            ");
+        } elseif ($productSelection['type'] === 'product') {
+            $q = mysqli_query($conn, "
+                $normalSelect
+                WHERE $range AND od.product_id = $product_id
+                ORDER BY o.tanggal ASC, o.id ASC
+            ");
+        } else {
+            $q = mysqli_query($conn, "
+                SELECT * FROM (
+                    $normalSelect
+                    WHERE $range AND od.product_combo_id IS NULL
+                    UNION ALL
+                    $comboSelect
+                    WHERE $range
+                    GROUP BY od.order_id, od.product_combo_id, o.code, o.tanggal, pc.name
+                ) t
+                ORDER BY t.tanggal ASC, t.code ASC
+            ");
+        }
+
         if ($q) while ($r = mysqli_fetch_assoc($q)) { $total+=(float)$r['subtotal']; $rows[]=$r; }
         break;
 
     case 'category':
-        $escCat = mysqli_real_escape_string($conn, $category);
-        $catFilter = ($category !== '' && strtolower($category) !== 'all') ? "AND p.category='$escCat'" : '';
-        $q = mysqli_query($conn, "SELECT p.name, p.code, COALESCE(SUM(od.qty),0) AS qty_sold, COALESCE(SUM(od.subtotal),0) AS omzet FROM order_details od JOIN orders o ON od.order_id=o.id JOIN products p ON od.product_id=p.id WHERE o.status_payment='paid' AND $where $catFilter GROUP BY p.id, p.name, p.code ORDER BY omzet DESC, p.name ASC");
-        if ($q) while ($r = mysqli_fetch_assoc($q)) { $total+=(float)$r['omzet']; $rows[]=$r; }
+        $range = "o.status_payment='paid' AND DATE(o.tanggal) BETWEEN '$escFirst' AND '$escLast'";
+        $isAllCategory = ($category === '' || strtolower($category) === 'all');
+        $isComboCategory = (strtolower($category) === 'racikan');
+
+        if (!$isComboCategory) {
+            $escCat = mysqli_real_escape_string($conn, $category);
+            $catFilter = $isAllCategory ? '' : "AND p.category='$escCat'";
+
+            $q = mysqli_query($conn, "SELECT p.name, p.code, COALESCE(SUM(od.qty),0) AS qty_sold, COALESCE(SUM(od.subtotal),0) AS omzet, MIN(o.tanggal) AS first_sold, 0 AS is_combo, '' AS combo_items FROM order_details od JOIN orders o ON od.order_id=o.id JOIN products p ON od.product_id=p.id WHERE $range $catFilter GROUP BY p.id, p.name, p.code");
+            if ($q) while ($r = mysqli_fetch_assoc($q)) { $total+=(float)$r['omzet']; $rows[]=$r; }
+        }
+
+        if ($isAllCategory || $isComboCategory) {
+            foreach (report_combo_sales($conn, $range) as $r) {
+                $total += (float) $r['omzet'];
+                $rows[] = $r;
+            }
+        }
+
+        report_sort_by_first_sold($rows);
         break;
 
     case 'cashier':
-        $q = mysqli_query($conn, "SELECT o.code, o.tanggal, o.total, o.status_payment FROM orders o WHERE o.staff_id=$cashier_id AND $where ORDER BY o.tanggal DESC, o.id DESC");
+        $q = mysqli_query($conn, "SELECT o.code, o.tanggal, o.total, o.status_payment FROM orders o WHERE o.staff_id=$cashier_id AND $where ORDER BY o.tanggal ASC, o.id ASC");
         if ($q) while ($r = mysqli_fetch_assoc($q)) { if ($r['status_payment']==='paid') $total+=(float)$r['total']; $rows[]=$r; }
         break;
 
@@ -117,7 +190,7 @@ switch ($tab) {
         break;
 
     case 'unpaid':
-        $q = mysqli_query($conn, "SELECT o.code, o.tanggal, o.total, COALESCE(NULLIF(u.fullname,''),u.username,'-') AS cashier_name FROM orders o LEFT JOIN users u ON o.staff_id=u.id WHERE o.status_payment='waiting' AND $where ORDER BY o.tanggal DESC, o.id DESC");
+        $q = mysqli_query($conn, "SELECT o.code, o.tanggal, o.total, COALESCE(NULLIF(u.fullname,''),u.username,'-') AS cashier_name FROM orders o LEFT JOIN users u ON o.staff_id=u.id WHERE o.status_payment='waiting' AND $where ORDER BY o.tanggal ASC, o.id ASC");
         if ($q) while ($r = mysqli_fetch_assoc($q)) { $total+=(float)$r['total']; $rows[]=$r; }
         break;
 
@@ -164,16 +237,19 @@ if ($tab === 'cashier' && $cashier_id > 0) {
 }
 
 $productName = '';
-if ($tab === 'product' && $product_id > 0) {
-    $qProductName = mysqli_query($conn, "SELECT COALESCE(name, '-') AS name FROM products WHERE id = $product_id LIMIT 1");
-    if ($qProductName && $productRow = mysqli_fetch_assoc($qProductName)) {
-        $productName = $productRow['name'];
-    }
+if ($tab === 'product') {
+    $productName = report_product_label($conn, $productSelection);
 }
 
 $categoryName = '';
 if ($tab === 'category' && $category !== '') {
-    $categoryName = (strtolower($category) === 'all') ? 'Semua Kategori' : ucfirst($category);
+    if (strtolower($category) === 'all') {
+        $categoryName = 'Semua Kategori';
+    } elseif (strtolower($category) === 'racikan') {
+        $categoryName = 'Racikan';
+    } else {
+        $categoryName = ucfirst($category);
+    }
 }
 
 // ============================================================
@@ -786,7 +862,7 @@ $headers = [
     'profit'   => ['No', 'Tanggal', 'Omzet', 'Pengeluaran', 'Laba / Rugi', 'Status'],
     'margin'   => ['No', 'Produk', 'Qty Terjual', 'Harga Beli', 'Harga Jual', 'Margin', 'Keuntungan'],
     'all'      => ['No', 'Kode Pesanan', 'Tanggal', 'Kasir', 'Total', 'Status'],
-    'product'  => ['No', 'Tanggal', 'Kode Pesanan', 'Qty', 'Harga', 'Subtotal'],
+    'product'  => ['No', 'Produk', 'Tanggal', 'Kode Pesanan', 'Qty', 'Harga', 'Subtotal'],
     'category' => ['No', 'Produk', 'Kode', 'Qty Terjual', 'Omzet'],
     'cashier'  => ['No', 'Kode Pesanan', 'Tanggal', 'Total', 'Status'],
     'best'     => ['Peringkat', 'Produk', 'Kategori', 'Qty Terjual', 'Omzet'],
@@ -916,21 +992,37 @@ for ($idx = 0; $idx < $count; $idx++) {
             break;
 
         case 'product':
+            $productText = $r['item_name'] . (!empty($r['is_combo']) ? ' (Racikan)' : '');
+            if (!empty($r['is_combo']) && !empty($r['combo_items'])) {
+                $productText .= "\n" . implode("\n", array_filter(explode('||', $r['combo_items'])));
+            }
             $sheet->setCellValue("A$row", $no);
-            $sheet->setCellValue("B$row", date('d M Y', strtotime($r['tanggal'])));
-            $sheet->setCellValue("C$row", $r['code']);
-            $sheet->setCellValue("D$row", (int) $r['qty']);
-            $sheet->setCellValue("E$row", (float) $r['price']);
-            $sheet->setCellValue("F$row", (float) $r['subtotal']);
+            $sheet->setCellValue("B$row", $productText);
+            $sheet->setCellValue("C$row", date('d M Y', strtotime($r['tanggal'])));
+            $sheet->setCellValue("D$row", $r['code']);
+            $sheet->setCellValue("E$row", (int) $r['qty']);
+            $sheet->setCellValue("F$row", (float) $r['price']);
+            $sheet->setCellValue("G$row", (float) $r['subtotal']);
+            if (!empty($r['is_combo'])) {
+                $sheet->getStyle("B$row")->getAlignment()->setWrapText(true);
+            }
             $totalQty += (int) $r['qty'];
             break;
 
         case 'category':
+            $categoryText = $r['name'] . (!empty($r['is_combo']) ? ' (Racikan)' : '');
+            if (!empty($r['is_combo']) && !empty($r['combo_items'])) {
+                $categoryText .= "\n" . implode("\n", array_filter(explode('||', $r['combo_items'])));
+            }
             $sheet->setCellValue("A$row", $no);
-            $sheet->setCellValue("B$row", $r['name']);
+            $sheet->setCellValue("B$row", $categoryText);
             $sheet->setCellValue("C$row", $r['code']);
             $sheet->setCellValue("D$row", (int) $r['qty_sold']);
             $sheet->setCellValue("E$row", (float) $r['omzet']);
+            if (!empty($r['is_combo'])) {
+                $sheet->getStyle("B$row")->getAlignment()->setWrapText(true);
+                $sheet->getStyle("D$row")->getNumberFormat()->setFormatCode('0" (sudah diinclude ke qty produk asli)"');
+            }
             $totalQty += (int) $r['qty_sold'];
             break;
 
@@ -1007,7 +1099,7 @@ $totalColMap = [
     'profit'   => 'E',
     'margin'   => 'G',
     'all'      => 'E',
-    'product'  => 'F',
+    'product'  => 'G',
     'category' => 'E',
     'cashier'  => 'D',
     'best'     => 'E',
@@ -1023,17 +1115,18 @@ $hasDataRows = $lastDataRow >= $firstDataRow;
 
 if ($tab !== 'stock') {
 
-if ($tab === 'best' || $tab === 'category' || $tab === 'product') {
+if ($tab === 'product') {
+    $sheet->mergeCells("A$row:D$row");
+    $sheet->setCellValue("A$row", $totalLabel);
+    $sheet->getStyle("A$row")->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_RIGHT);
+    $sheet->setCellValue("E$row", $hasDataRows ? "=SUM(E$firstDataRow:E$lastDataRow)" : '=0');
+    $sheet->setCellValue("G$row", $hasDataRows ? "=SUM(G$firstDataRow:G$lastDataRow)" : '=0');
+} elseif ($tab === 'best' || $tab === 'category') {
     $sheet->mergeCells("A$row:C$row");
     $sheet->setCellValue("A$row", $totalLabel);
     $sheet->getStyle("A$row")->getAlignment()->setHorizontal(PHPExcel_Style_Alignment::HORIZONTAL_RIGHT);
-    if ($tab === 'product') {
-        $sheet->setCellValue("D$row", $hasDataRows ? "=SUM(D$firstDataRow:D$lastDataRow)" : '=0');
-        $sheet->setCellValue("F$row", $hasDataRows ? "=SUM(F$firstDataRow:F$lastDataRow)" : '=0');
-    } else {
-        $sheet->setCellValue("D$row", $hasDataRows ? "=SUM(D$firstDataRow:D$lastDataRow)" : '=0');
-        $sheet->setCellValue("E$row", $hasDataRows ? "=SUM(E$firstDataRow:E$lastDataRow)" : '=0');
-    }
+    $sheet->setCellValue("D$row", $hasDataRows ? "=SUM(D$firstDataRow:D$lastDataRow)" : '=0');
+    $sheet->setCellValue("E$row", $hasDataRows ? "=SUM(E$firstDataRow:E$lastDataRow)" : '=0');
 } else {
     $sheet->mergeCells("A$row:{$mergeEndCol}{$row}");
     $sheet->setCellValue("A$row", $totalLabel);
@@ -1074,10 +1167,10 @@ if ($tab === 'best' || $tab === 'category') {
     $sheet->getStyle("E$row")->applyFromArray($goldTotal);
     $sheet->getStyle("E$row")->getNumberFormat()->setFormatCode('"Rp " #,##0');
 } elseif ($tab === 'product') {
-    $sheet->getStyle("D$row")->applyFromArray($goldTotal);
-    $sheet->getStyle("D$row")->getNumberFormat()->setFormatCode('#,##0');
-    $sheet->getStyle("F$row")->applyFromArray($goldTotal);
-    $sheet->getStyle("F$row")->getNumberFormat()->setFormatCode('"Rp " #,##0');
+    $sheet->getStyle("E$row")->applyFromArray($goldTotal);
+    $sheet->getStyle("E$row")->getNumberFormat()->setFormatCode('#,##0');
+    $sheet->getStyle("G$row")->applyFromArray($goldTotal);
+    $sheet->getStyle("G$row")->getNumberFormat()->setFormatCode('"Rp " #,##0');
 } else {
     $sheet->getStyle($totalCol . $row)->applyFromArray($goldTotal);
     $sheet->getStyle($totalCol . $row)->getNumberFormat()->setFormatCode('"Rp " #,##0');
@@ -1092,7 +1185,7 @@ $rpColMap = [
     'profit'   => ['C', 'D', 'E'],
     'margin'   => ['D', 'E', 'G'],
     'all'      => ['E'],
-    'product'  => ['E', 'F'],
+    'product'  => ['F', 'G'],
     'category' => ['E'],
     'cashier'  => ['D'],
     'best'     => ['E'],

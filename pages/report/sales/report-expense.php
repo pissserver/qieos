@@ -26,7 +26,7 @@ $query = mysqli_query($conn, "
             AND pi2.qty_buy IS NOT NULL
       )
     GROUP BY p.id, p.form, p.date
-    ORDER BY p.date DESC, p.id DESC
+    ORDER BY p.date ASC, p.id ASC
 ");
 
 $no = 1;

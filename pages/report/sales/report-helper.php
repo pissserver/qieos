@@ -26,6 +26,128 @@ function report_date_id($date)
     return date('d M Y', strtotime($date));
 }
 
+function report_product_selection($raw)
+{
+    $raw = trim((string) $raw);
+    $raw = preg_replace('/[^a-zA-Z0-9]/', '', $raw);
+
+    if ($raw === '' || strtolower($raw) === 'all') {
+        return array('type' => 'all', 'id' => 0, 'combo' => false);
+    }
+
+    if (preg_match('/^c(\d+)$/i', $raw, $m)) {
+        return array('type' => 'combo', 'id' => (int) $m[1], 'combo' => true);
+    }
+
+    $id = (int) $raw;
+
+    return array('type' => $id > 0 ? 'product' : 'all', 'id' => $id, 'combo' => false);
+}
+
+function report_product_label($conn, $selection)
+{
+    if ($selection['type'] === 'all') {
+        return 'Semua Produk';
+    }
+
+    $table = $selection['combo'] ? 'product_combos' : 'products';
+    $id = (int) $selection['id'];
+    $q = mysqli_query($conn, "SELECT name FROM $table WHERE id = $id LIMIT 1");
+
+    if ($q && $row = mysqli_fetch_assoc($q)) {
+        return $row['name'];
+    }
+
+    return $selection['combo'] ? 'Racikan' : '-';
+}
+
+function report_combo_sales($conn, $range)
+{
+    $rows = array();
+
+    $q = mysqli_query($conn, "
+        SELECT
+            pc.name,
+            '-' AS code,
+            agg.qty_sold,
+            agg.omzet,
+            agg.first_sold,
+            ing.combo_items
+        FROM (
+            SELECT
+                per_order.combo_id,
+                SUM(per_order.qty) AS qty_sold,
+                SUM(per_order.subtotal) AS omzet,
+                MIN(per_order.sold_at) AS first_sold
+            FROM (
+                SELECT
+                    od.order_id,
+                    od.product_combo_id AS combo_id,
+                    MIN(o.tanggal) AS sold_at,
+                    MIN(FLOOR(od.qty / COALESCE(NULLIF(pci.qty, 0), 1))) AS qty,
+                    SUM(od.subtotal) AS subtotal
+                FROM order_details od
+                JOIN orders o ON od.order_id = o.id
+                LEFT JOIN product_combo_items pci
+                    ON pci.combo_id = od.product_combo_id
+                   AND pci.product_id = od.product_id
+                WHERE $range
+                  AND od.product_combo_id IS NOT NULL
+                GROUP BY od.order_id, od.product_combo_id
+            ) per_order
+            GROUP BY per_order.combo_id
+        ) agg
+        JOIN product_combos pc ON pc.id = agg.combo_id
+        LEFT JOIN (
+            SELECT
+                ci.combo_id,
+                GROUP_CONCAT(
+                    CONCAT(ip.name, IF(ci.qty > 1, CONCAT(' x', ci.qty), ''))
+                    ORDER BY ci.id SEPARATOR '||'
+                ) AS combo_items
+            FROM product_combo_items ci
+            JOIN products ip ON ip.id = ci.product_id
+            GROUP BY ci.combo_id
+        ) ing ON ing.combo_id = pc.id
+    ");
+
+    while ($q && $row = mysqli_fetch_assoc($q)) {
+        $row['is_combo'] = 1;
+        $rows[] = $row;
+    }
+
+    return $rows;
+}
+
+function report_sort_by_omzet(&$rows)
+{
+    usort($rows, function ($a, $b) {
+        $omzetA = (float) $a['omzet'];
+        $omzetB = (float) $b['omzet'];
+
+        if ($omzetA === $omzetB) {
+            return strcmp($a['name'], $b['name']);
+        }
+
+        return $omzetB > $omzetA ? 1 : -1;
+    });
+}
+
+function report_sort_by_first_sold(&$rows)
+{
+    usort($rows, function ($a, $b) {
+        $soldA = isset($a['first_sold']) ? (string) $a['first_sold'] : '';
+        $soldB = isset($b['first_sold']) ? (string) $b['first_sold'] : '';
+        $cmp = strcmp($soldA, $soldB);
+
+        if ($cmp === 0) {
+            return strcmp($a['name'], $b['name']);
+        }
+
+        return $cmp;
+    });
+}
+
 function report_status_badge($status)
 {
     $status = strtolower((string) $status);

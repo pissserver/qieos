@@ -18,7 +18,7 @@ $q = mysqli_query($conn, "
     FROM orders o
     LEFT JOIN users u ON u.id = o.staff_id
     WHERE $where
-    ORDER BY o.tanggal DESC, o.id DESC
+    ORDER BY o.tanggal ASC, o.id ASC
 ");
 
 $data = [];

@@ -26,9 +26,7 @@
                     Produk
                 </label>
                 <select class="form-control" id="product_id">
-                    <option value="">
-                        -- Pilih Produk --
-                    </option>
+                    <option value="all" selected>Semua Produk</option>
                     <?php
                         $qProduct = mysqli_query($conn, "
                             SELECT id, name, code
@@ -45,6 +43,21 @@
                                 }
                                 echo '<option value="'.$product['id'].'">'.htmlspecialchars($label).'</option>';
                             }
+                        }
+
+                        $qCombo = mysqli_query($conn, "
+                            SELECT id, name
+                            FROM product_combos
+                            WHERE deleted_at IS NULL
+                            ORDER BY name ASC
+                        ");
+
+                        if ($qCombo && mysqli_num_rows($qCombo) > 0) {
+                            echo '<optgroup label="Racikan">';
+                            while ($combo = mysqli_fetch_assoc($qCombo)) {
+                                echo '<option value="c'.$combo['id'].'">'.htmlspecialchars($combo['name']).' (Racikan)</option>';
+                            }
+                            echo '</optgroup>';
                         }
                     ?>
                 </select>
@@ -90,6 +103,7 @@
             <thead>
                 <tr>
                     <th class="text-center" width="60">No</th>
+                    <th class="text-center">Produk</th>
                     <th class="text-center">Tanggal</th>
                     <th class="text-center">Kode Pesanan</th>
                     <th class="text-center">Qty</th>
@@ -100,12 +114,12 @@
 
             <tbody id="reportProductBody">
                 <tr>
-                    <td colspan="6">
+                    <td colspan="7">
                         <div class="loading-box">
                             <i class="fas fa-box"></i>
                             <h5>Belum Ada Data</h5>
                             <span>
-                                Pilih produk terlebih dahulu untuk melihat laporan penjualan.
+                                Pilih produk atau racikan untuk melihat laporan penjualan.
                             </span>
                         </div>
                     </td>

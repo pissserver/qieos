@@ -36,7 +36,7 @@ $query = mysqli_query($conn, "
           AND DATE(p.date) BETWEEN '$first' AND '$last'
         GROUP BY DATE(p.date)
     ) e ON e.dt = d.dt
-    ORDER BY d.dt DESC
+    ORDER BY d.dt ASC
 ");
 
 $no = 1;

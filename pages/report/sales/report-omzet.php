@@ -15,7 +15,7 @@ $query = mysqli_query($conn, "
     FROM orders
     WHERE DATE(tanggal) BETWEEN '$first' AND '$last'
     GROUP BY DATE(tanggal)
-    ORDER BY dt DESC
+    ORDER BY dt ASC
 ");
 
 $no = 1;

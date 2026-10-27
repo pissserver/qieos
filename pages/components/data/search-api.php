@@ -12,8 +12,6 @@ if ($q === '') {
 
 $like = '%' . $conn->real_escape_string($q) . '%';
 
-$cs = BASE_URL . '/pages/coming-soon.php?menu=';
-
 $badge = function($name, $url, $icon, $category) {
     return ['name' => $name, 'url' => $url, 'icon' => $icon, 'category' => $category];
 };
@@ -48,15 +46,15 @@ if ($role === 'developer') {
     ]);
 } elseif ($role === 'administrator') {
     $pages = array_merge($pages, [
-        $badge('Master Produk', $cs . 'master-product', 'fas fa-boxes-stacked', 'Master Data'),
+        $badge('Master Produk', BASE_URL . '/pages/master/master-product.php', 'fas fa-boxes-stacked', 'Master Data'),
         $badge('Master Unit', BASE_URL . '/pages/master/master-unit.php', 'fas fa-ruler-combined', 'Master Data'),
-        $badge('Master Supplier', $cs . 'master-supplier', 'fas fa-truck', 'Master Data'),
-        $badge('Master Customer', $cs . 'master-customer', 'fas fa-users', 'Master Data'),
-        $badge('Belanja & Restock', $cs . 'restock', 'fas fa-cart-shopping', 'Stok Action'),
-        $badge('Detail Stok', $cs . 'stock', 'fas fa-warehouse', 'Stok Action'),
-        $badge('Transfer Stok', $cs . 'transfer', 'fas fa-truck-loading', 'Stok Action'),
+        $badge('Master Supplier', BASE_URL . '/pages/master/master-supplier.php', 'fas fa-truck', 'Master Data'),
+        $badge('Master Customer', BASE_URL . '/pages/master/master-customer.php', 'fas fa-users', 'Master Data'),
+        $badge('Belanja & Restock', BASE_URL . '/pages/stock/restock.php', 'fas fa-cart-shopping', 'Stok Action'),
+        $badge('Detail Stok', BASE_URL . '/pages/stock/stock.php', 'fas fa-warehouse', 'Stok Action'),
+        $badge('Transfer Stok', BASE_URL . '/pages/stock/transfer.php', 'fas fa-truck-loading', 'Stok Action'),
         $badge('Tenant', BASE_URL . '/pages/tenant/tenant.php', 'fas fa-store', 'Tenant'),
-        $badge('Laporan Penjualan', $cs . 'report-sales', 'fas fa-chart-bar', 'Laporan'),
+        $badge('Laporan Penjualan', BASE_URL . '/pages/report/report-sales.php', 'fas fa-chart-bar', 'Laporan'),
         $badge('Laporan Tenant', BASE_URL . '/pages/report/report-tenant.php', 'fas fa-file-invoice-dollar', 'Laporan'),
         $badge('Master User', BASE_URL . '/pages/master/master-user.php', 'fas fa-users-cog', 'Management'),
         $badge('Update', BASE_URL . '/pages/other/update.php', 'fas fa-rocket', 'Sistem'),
@@ -65,12 +63,11 @@ if ($role === 'developer') {
     ]);
 } else {
     $pages = array_merge($pages, [
-        $badge('Master Customer', $cs . 'master-customer', 'fas fa-users', 'Master Data'),
-        $badge('Stok Kantin', $cs . 'sales-stock', 'fas fa-store', 'Penjualan'),
-        $badge('Katalog Produk', $cs . 'catalog', 'fas fa-book-open', 'Penjualan'),
-        $badge('Pesanan', $cs . 'order', 'fas fa-receipt', 'Penjualan'),
+        $badge('Master Customer', BASE_URL . '/pages/master/master-customer.php', 'fas fa-users', 'Master Data'),
+        $badge('Stok Kantin', BASE_URL . '/pages/sales/sales-stock.php', 'fas fa-store', 'Penjualan'),
+        $badge('Katalog Produk', BASE_URL . '/pages/sales/catalog.php', 'fas fa-book-open', 'Penjualan'),
+        $badge('Pesanan', BASE_URL . '/pages/sales/order.php', 'fas fa-receipt', 'Penjualan'),
         $badge('Checkout', BASE_URL . '/pages/checkout.php', 'fas fa-credit-card', 'Penjualan'),
-        $badge('Riwayat Pesanan', BASE_URL . '/pages/sales/order.php', 'fas fa-history', 'Penjualan'),
         $badge('Daftar Tenant', BASE_URL . '/pages/tenant/tenant.php', 'fas fa-store', 'Tenant'),
         $badge('Rekap Penjualan & Tenant', BASE_URL . '/pages/recap/recap.php', 'fas fa-clipboard-list', 'Rekap'),
         $badge('Update', BASE_URL . '/pages/other/update.php', 'fas fa-rocket', 'Sistem'),
@@ -99,9 +96,9 @@ if ($prod_q) {
             'code' => $row['code'],
             'category' => $row['category'],
             'price' => 'Rp ' . number_format($row['sell_price'], 0, ',', '.'),
-            'url' => $is_dev
+            'url' => ($is_dev || $is_admin)
                 ? BASE_URL . '/pages/master/master-product-detail.php?id=' . $row['id']
-                : ($is_admin ? $cs . 'master-product' : BASE_URL . '/pages/sales/catalog.php?highlight=' . $row['id']),
+                : BASE_URL . '/pages/sales/catalog.php?highlight=' . $row['id'],
             'icon' => 'fas fa-box',
             'category_label' => 'Produk'
         ];
@@ -119,9 +116,7 @@ if ($is_dev || $is_admin) {   // suppliers stay restricted; customers below incl
                 'name' => $row['name'],
                 'phone' => $row['phone'] ?: '-',
                 'address' => $row['address'] ?: '-',
-                'url' => $is_dev
-                    ? BASE_URL . '/pages/master/master-supplier.php'
-                    : $cs . 'master-supplier',
+                'url' => BASE_URL . '/pages/master/master-supplier.php',
                 'icon' => 'fas fa-truck',
                 'category_label' => 'Supplier'
             ];
@@ -137,9 +132,7 @@ if ($cus_q) {
             'id' => $row['id'],
             'name' => $row['name'],
             'phone' => $row['phone'] ?: '-',
-            'url' => $is_dev
-                ? BASE_URL . '/pages/master/master-customer.php'
-                : $cs . 'master-customer',
+            'url' => BASE_URL . '/pages/master/master-customer.php',
             'icon' => 'fas fa-user',
             'category_label' => 'Customer'
         ];

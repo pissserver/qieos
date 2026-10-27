@@ -235,7 +235,7 @@
         margin:   { body: "#reportMarginBody",   card: "#reportMarginSummaryCard",   label: "#totalMarginAmountLabel",   url: "sales/report-margin.php",   colspan: 7, icon: "fa-percent",         empty: "Silakan pilih tanggal awal dan tanggal akhir untuk menampilkan margin produk." },
         all:      { body: "#reportAllBody",      card: "#reportAllSummaryCard",      label: "#totalAllAmountLabel",      url: "sales/report-all.php",      colspan: 6, icon: "fa-receipt",         empty: "Silakan pilih tanggal awal dan tanggal akhir untuk menampilkan laporan transaksi." },
         stock:    { body: "#reportStockBody",    card: "#reportStockSummaryCard",    label: "#totalStockAmountLabel",    url: "sales/report-stock.php",    colspan: 8, icon: "fa-boxes-stacked",   empty: "Silakan pilih tanggal awal dan tanggal akhir untuk menampilkan laporan stok." },
-        product:  { body: "#reportProductBody",  card: "#reportProductSummaryCard",  label: "#totalProductAmountLabel",  url: "sales/report-product.php",  colspan: 6, icon: "fa-box",             empty: "Pilih produk terlebih dahulu untuk melihat laporan penjualan." },
+        product:  { body: "#reportProductBody",  card: "#reportProductSummaryCard",  label: "#totalProductAmountLabel",  url: "sales/report-product.php",  colspan: 7, icon: "fa-box",             empty: "Pilih produk atau racikan untuk melihat laporan penjualan." },
         category: { body: "#reportCategoryBody", card: "#reportCategorySummaryCard", label: "#totalCategoryAmountLabel", url: "sales/report-category.php", colspan: 5, icon: "fa-tags",            empty: "Pilih kategori terlebih dahulu untuk melihat laporan penjualan." },
         cashier:  { body: "#reportCashierBody",  card: "#reportCashierSummaryCard",  label: "#totalCashierAmountLabel",  url: "sales/report-cashier.php",  colspan: 5, icon: "fa-cash-register",   empty: "Pilih kasir terlebih dahulu untuk melihat laporan penjualan." },
         best:     { body: "#reportBestBody",     card: "#reportBestSummaryCard",     label: "#totalBestAmountLabel",     url: "sales/report-best.php",     colspan: 5, icon: "fa-trophy",          empty: "Silakan pilih tanggal awal dan tanggal akhir untuk menampilkan produk terlaris." },
@@ -326,7 +326,7 @@
             let id = $("#product_id").val();
             if (!id) {
                 $(cfg.card).hide();
-                $(cfg.body).html(emptyHtml(cfg, "Pilih produk terlebih dahulu untuk melihat laporan penjualan."));
+                $(cfg.body).html(emptyHtml(cfg, "Pilih produk atau racikan untuk melihat laporan penjualan."));
                 return;
             }
             if (!first || !last) {
@@ -463,9 +463,15 @@
 
         $('#product_id').select2({
             width: '100%',
-            placeholder: '-- Pilih Produk --',
-            allowClear: true,
+            placeholder: 'Pilih produk atau racikan',
+            allowClear: false,
             dropdownParent: $('#productContent')
+        });
+
+        $('#category_id').select2({
+            width: '100%',
+            minimumResultsForSearch: Infinity,
+            dropdownParent: $('#categoryContent')
         });
 
         let activeItem = $(".report-menu-item.active").first();
