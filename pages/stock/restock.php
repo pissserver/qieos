@@ -1,10 +1,11 @@
 <?php
 include '../../sessions/session.php';
+include __DIR__ . '/components/data/purchase-number.php';
 
-$qLast = mysqli_query($conn,"SELECT MAX(CAST(REPLACE(form, 'FORM-', '') AS UNSIGNED)) AS last_num FROM purchases");
-$dLast = mysqli_fetch_assoc($qLast);
-$nextNum = ($dLast && $dLast['last_num'] ? (int)$dLast['last_num'] : 0) + 1;
-$formNumber = 'FORM-' . str_pad($nextNum,7,'0',STR_PAD_LEFT);
+$formNumber = next_purchase_form_number($conn);
+if($formNumber === false){
+    die('Gagal membuat nomor form: ' . mysqli_error($conn));
+}
 
 // Produk untuk dropdown (semua kategori kecuali Additional)
 $qProd = mysqli_query($conn, "SELECT id, name, unit FROM products WHERE deleted_at IS NULL AND category <> 'Additional' ORDER BY name ASC");

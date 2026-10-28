@@ -1,6 +1,7 @@
 <?php
     include '../../sessions/session.php';
     include __DIR__ . '/../components/data/product-conversion.php';
+    include __DIR__ . '/components/data/purchase-number.php';
     header('Content-Type: application/json');
 
     if ($_GET['action'] == 'store') {
@@ -14,14 +15,11 @@
             exit;
         }
 
-        $qLast = mysqli_query($conn,"SELECT MAX(CAST(REPLACE(form, 'FORM-', '') AS UNSIGNED)) AS last_num FROM purchases");
-        if (!$qLast) {
+        $formNumber = next_purchase_form_number($conn);
+        if ($formNumber === false) {
             echo json_encode(['status' => 'error', 'msg' => 'Gagal membuat nomor form: ' . mysqli_error($conn)]);
             exit;
         }
-        $dLast = mysqli_fetch_assoc($qLast);
-        $nextNum = ($dLast && $dLast['last_num'] ? (int)$dLast['last_num'] : 0) + 1;
-        $formNumber = 'FORM-' . str_pad($nextNum, 7, '0', STR_PAD_LEFT);
         $dateNow = date('Y-m-d');
 
         mysqli_begin_transaction($conn);
