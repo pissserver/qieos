@@ -155,6 +155,45 @@ while($supplier = mysqli_fetch_assoc($qProductSuppliers)){
                                 <li><span class="purchase-flow-number">05</span><span>Restock ke gudang</span></li>
                             </ol>
                         </section>
+                        <script>
+                            (function(){
+                                const steps = Array.from(document.querySelectorAll('.purchase-flow-steps li'));
+                                if(!steps.length || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+                                const stepDuration = 2000;
+                                const completePause = 2200;
+                                let currentStep = 0;
+                                steps[currentStep].classList.add('is-active');
+                                steps[currentStep].setAttribute('aria-current', 'step');
+
+                                function advancePurchaseFlow(){
+                                    steps[currentStep].classList.remove('is-active');
+                                    steps[currentStep].classList.add('is-done');
+                                    steps[currentStep].removeAttribute('aria-current');
+                                    currentStep++;
+
+                                    if(currentStep >= steps.length){
+                                        window.setTimeout(function(){
+                                            steps.forEach(function(step){
+                                                step.classList.remove('is-done', 'is-active');
+                                                step.removeAttribute('aria-current');
+                                            });
+                                            currentStep = 0;
+                                            steps[currentStep].classList.add('is-active');
+                                            steps[currentStep].setAttribute('aria-current', 'step');
+                                            window.setTimeout(advancePurchaseFlow, stepDuration);
+                                        }, completePause);
+                                        return;
+                                    }
+
+                                    steps[currentStep].classList.add('is-active');
+                                    steps[currentStep].setAttribute('aria-current', 'step');
+                                    window.setTimeout(advancePurchaseFlow, stepDuration);
+                                }
+
+                                window.setTimeout(advancePurchaseFlow, stepDuration);
+                            })();
+                        </script>
 
                         <div id="itemsContainer">
 
