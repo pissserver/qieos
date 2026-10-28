@@ -374,6 +374,9 @@
                         .then(res=>res.json())
                         .then(res=>{
                             QToast(res.status,res.msg,res.status);
+                            if(res.status === 'success' && window.notifyTransferRequestChanged){
+                                window.notifyTransferRequestChanged();
+                            }
                             loadTable();
                             loadHistory();
                         });
@@ -394,9 +397,10 @@
                         })
                         .then(res=>res.json())
                         .then(res=>{
-                            console.log(res);
-                            console.log(id);
                             QToast(res.status,res.msg,res.status);
+                            if(res.status === 'success' && window.notifyTransferRequestChanged){
+                                window.notifyTransferRequestChanged();
+                            }
                             loadTable();
                             loadHistory();
                         });

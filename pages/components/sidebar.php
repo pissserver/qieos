@@ -198,6 +198,7 @@
                     <a href="<?php echo BASE_URL; ?>/pages/stock/restock.php" class="nav-link" data-tooltip="Belanja &amp; Restock">
                         <span class="sidebar-icon"><i class="fas fa-cart-shopping"></i></span>
                         <span class="sidebar-text">Belanja &amp; Restock</span>
+                        <span class="purchase-pending-badge" data-purchase-pending-badge hidden aria-label="0 belanja belum selesai">0</span>
                     </a>
                 </li>
 
@@ -205,6 +206,7 @@
                     <a href="<?php echo BASE_URL; ?>/pages/stock/transfer.php" class="nav-link" data-tooltip="Transfer Stok">
                         <span class="sidebar-icon"><i class="fas fa-exchange-alt"></i></span>
                         <span class="sidebar-text">Transfer Stok</span>
+                        <span class="transfer-pending-badge" data-transfer-pending-badge hidden aria-label="0 request transfer pending">0</span>
                     </a>
                 </li>
 
@@ -370,6 +372,132 @@
         const mobileToggle = document.getElementById('mobileSidebarToggle');
         const tooltip = document.getElementById('sidebarTooltip');
         const menuContainer = document.getElementById('sidebarMenuContainer');
+        const pendingBadges = document.querySelectorAll('[data-purchase-pending-badge]');
+        const transferPendingBadges = document.querySelectorAll('[data-transfer-pending-badge]');
+
+        if (pendingBadges.length) {
+            const countUrl = '<?php echo BASE_URL; ?>/pages/stock/restock-pending-count.php';
+            let pendingCountRequest = false;
+
+            function renderPendingPurchaseCount(count) {
+                const safeCount = Math.max(0, Number(count) || 0);
+                pendingBadges.forEach(function(badge) {
+                    badge.textContent = safeCount > 99 ? '99+' : String(safeCount);
+                    badge.hidden = safeCount === 0;
+                    badge.setAttribute('aria-label', safeCount + ' belanja belum selesai');
+                    const link = badge.closest('.nav-link');
+                    if (link) {
+                        link.setAttribute(
+                            'data-tooltip',
+                            'Belanja & Restock' + (safeCount > 0 ? ' - ' + safeCount + ' belum selesai' : '')
+                        );
+                    }
+                });
+            }
+
+            function refreshPendingPurchaseCount() {
+                if (pendingCountRequest || document.hidden) return;
+                pendingCountRequest = true;
+                fetch(countUrl, {cache: 'no-store'})
+                    .then(function(response) {
+                        if (!response.ok) throw new Error('Jumlah belanja tertunda tidak dapat dimuat');
+                        return response.json();
+                    })
+                    .then(function(result) {
+                        if (result.status !== 'success') {
+                            throw new Error(result.msg || 'Jumlah belanja tertunda tidak dapat dimuat');
+                        }
+                        renderPendingPurchaseCount(result.count);
+                    })
+                    .catch(function(error) {
+                        console.error('Gagal memperbarui badge Belanja & Restock:', error);
+                    })
+                    .finally(function() {
+                        pendingCountRequest = false;
+                    });
+            }
+
+            window.refreshPendingPurchaseCount = refreshPendingPurchaseCount;
+            window.notifyPurchaseWorkflowChanged = function() {
+                refreshPendingPurchaseCount();
+                try {
+                    localStorage.setItem('qieos_purchase_workflow_ping', String(Date.now()));
+                } catch (error) {
+                    console.warn('Sinkronisasi badge antar-tab tidak tersedia:', error);
+                }
+            };
+
+            window.addEventListener('storage', function(event) {
+                if (event.key === 'qieos_purchase_workflow_ping') {
+                    refreshPendingPurchaseCount();
+                }
+            });
+            document.addEventListener('visibilitychange', refreshPendingPurchaseCount);
+            refreshPendingPurchaseCount();
+            window.setInterval(refreshPendingPurchaseCount, 5000);
+        }
+
+        if (transferPendingBadges.length) {
+            const countUrl = '<?php echo BASE_URL; ?>/pages/stock/transfer-pending-count.php';
+            let transferCountRequest = false;
+
+            function renderPendingTransferCount(count) {
+                const safeCount = Math.max(0, Number(count) || 0);
+                transferPendingBadges.forEach(function(badge) {
+                    badge.textContent = safeCount > 99 ? '99+' : String(safeCount);
+                    badge.hidden = safeCount === 0;
+                    badge.setAttribute('aria-label', safeCount + ' request transfer pending');
+                    const link = badge.closest('.nav-link');
+                    if (link) {
+                        link.setAttribute(
+                            'data-tooltip',
+                            'Transfer Stok' + (safeCount > 0 ? ' - ' + safeCount + ' pending' : '')
+                        );
+                    }
+                });
+            }
+
+            function refreshPendingTransferCount() {
+                if (transferCountRequest || document.hidden) return;
+                transferCountRequest = true;
+                fetch(countUrl, {cache: 'no-store'})
+                    .then(function(response) {
+                        if (!response.ok) throw new Error('Jumlah request transfer pending tidak dapat dimuat');
+                        return response.json();
+                    })
+                    .then(function(result) {
+                        if (result.status !== 'success') {
+                            throw new Error(result.msg || 'Jumlah request transfer pending tidak dapat dimuat');
+                        }
+                        renderPendingTransferCount(result.count);
+                    })
+                    .catch(function(error) {
+                        console.error('Gagal memperbarui badge Transfer Stok:', error);
+                    })
+                    .finally(function() {
+                        transferCountRequest = false;
+                    });
+            }
+
+            window.refreshPendingTransferCount = refreshPendingTransferCount;
+            window.notifyTransferRequestChanged = function() {
+                refreshPendingTransferCount();
+                try {
+                    localStorage.setItem('qieos_transfer_pending_ping', String(Date.now()));
+                } catch (error) {
+                    console.warn('Sinkronisasi badge transfer antar-tab tidak tersedia:', error);
+                }
+            };
+
+            window.addEventListener('storage', function(event) {
+                if (event.key === 'qieos_transfer_pending_ping') {
+                    refreshPendingTransferCount();
+                }
+            });
+            document.addEventListener('visibilitychange', refreshPendingTransferCount);
+            refreshPendingTransferCount();
+            window.setInterval(refreshPendingTransferCount, 5000);
+        }
 
         // Restore collapsed state on desktop from localStorage
         if (window.innerWidth >= 992) {

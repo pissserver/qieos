@@ -157,21 +157,24 @@
     }
 
     .purchase-workflow-status.status-incomplete{
-        color:#9a3412;
-        border-color:#fed7aa;
-        background:linear-gradient(135deg,#fff7ed,#ffedd5);
+        color:#7c2d12;
+        border-color:#fb923c;
+        background:linear-gradient(135deg,#ffedd5,#fed7aa);
+        box-shadow:0 4px 12px rgba(234,88,12,.2);
     }
 
     .purchase-workflow-status.status-receipt{
-        color:#854d0e;
-        border-color:#fde68a;
-        background:linear-gradient(135deg,#fefce8,#fef3c7);
+        color:#713f12;
+        border-color:#eab308;
+        background:linear-gradient(135deg,#fef9c3,#fde68a);
+        box-shadow:0 4px 12px rgba(202,138,4,.2);
     }
 
     .purchase-workflow-status.status-restock{
-        color:#1d4ed8;
-        border-color:#bfdbfe;
-        background:linear-gradient(135deg,#eff6ff,#dbeafe);
+        color:#1e3a8a;
+        border-color:#60a5fa;
+        background:linear-gradient(135deg,#dbeafe,#bfdbfe);
+        box-shadow:0 4px 12px rgba(37,99,235,.2);
     }
 
     .purchase-workflow-status.status-complete{
@@ -183,19 +186,34 @@
     .purchase-workflow-status.status-incomplete,
     .purchase-workflow-status.status-receipt,
     .purchase-workflow-status.status-restock{
-        animation:purchaseStatusPulse 2.2s ease-in-out infinite;
+        animation:purchaseStatusAttention 1.5s ease-in-out infinite;
     }
 
-    @keyframes purchaseStatusPulse{
-        0%,100%{box-shadow:0 3px 8px rgba(15,23,42,.06)}
-        50%{box-shadow:0 0 0 4px rgba(245,158,11,.12),0 5px 14px rgba(180,83,9,.14)}
+    .purchase-workflow-status.status-incomplete > i,
+    .purchase-workflow-status.status-receipt > i,
+    .purchase-workflow-status.status-restock > i{
+        animation:purchaseStatusIcon 1.5s ease-in-out infinite;
+    }
+
+    @keyframes purchaseStatusAttention{
+        0%,100%{transform:scale(1);filter:saturate(1)}
+        50%{transform:scale(1.07);filter:saturate(1.35)}
+    }
+
+    @keyframes purchaseStatusIcon{
+        0%,100%{transform:scale(1)}
+        50%{transform:scale(1.25)}
     }
 
     @media (prefers-reduced-motion:reduce){
         .purchase-workflow-status.status-incomplete,
         .purchase-workflow-status.status-receipt,
-        .purchase-workflow-status.status-restock{
+        .purchase-workflow-status.status-restock,
+        .purchase-workflow-status.status-incomplete > i,
+        .purchase-workflow-status.status-receipt > i,
+        .purchase-workflow-status.status-restock > i{
             animation:none;
+            transform:none;
         }
     }
 

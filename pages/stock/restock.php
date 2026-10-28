@@ -359,6 +359,7 @@ while($supplier = mysqli_fetch_assoc($qProductSuppliers)){
         .then(res=>{
             if(res.status==="success"){
                 QToast("Berhasil", res.msg, "success");
+                if(window.notifyPurchaseWorkflowChanged) window.notifyPurchaseWorkflowChanged();
                 resetItemRows();
 
                 // Auto-switch ke tab Edit dan muat data terbaru
@@ -901,6 +902,7 @@ while($supplier = mysqli_fetch_assoc($qProductSuppliers)){
         }
 
         dt.row($purchaseRow.get(0)).invalidate('dom').draw(false);
+        if(window.notifyPurchaseWorkflowChanged) window.notifyPurchaseWorkflowChanged();
     }
 
     // Update baris purchase menjadi state "restocked" tanpa reload tabel.
@@ -1536,6 +1538,7 @@ while($supplier = mysqli_fetch_assoc($qProductSuppliers)){
                 cancelTimers();
 
                 if(res.status === 'success'){
+                    if(window.notifyPurchaseWorkflowChanged) window.notifyPurchaseWorkflowChanged();
 
                     // Animasi sukses spektakuler: ring jadi checkmark besar,
                     // confetti burst, semua step hijau, glow effect
@@ -1635,6 +1638,7 @@ while($supplier = mysqli_fetch_assoc($qProductSuppliers)){
                     if(res.status==='success'){
 
                         QToast('Terhapus', 'Data berhasil dihapus', 'success');
+                        if(window.notifyPurchaseWorkflowChanged) window.notifyPurchaseWorkflowChanged();
 
                         loadPurchaseTable();
 
