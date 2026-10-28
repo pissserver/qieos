@@ -129,12 +129,14 @@ $q = mysqli_query($conn,"
             </button>
             <?php endif; ?>
 
+            <?php if(empty($d['receipt'])): ?>
             <button class="action-btn btn-print printPurchaseBtn"
                 data-id="<?= $d['id'] ?>"
                 title="Print daftar belanja"
                 data-date="<?= $d['date'] ?>">
                 <i class="fas fa-print"></i>
             </button>
+            <?php endif; ?>
 
             <button class="action-btn btn-edit editPurchaseBtn" data-id="<?= $d['id'] ?>" title="Edit daftar belanja">
                 <i class="fas fa-edit"></i>
