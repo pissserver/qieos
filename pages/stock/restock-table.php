@@ -171,9 +171,10 @@ $q = mysqli_query($conn,"
             <?php if(empty($d['receipt'])): ?>
             <button class="action-btn btn-print printPurchaseBtn"
                 data-id="<?= $d['id'] ?>"
-                title="Print daftar belanja"
+                title="Buka PDF daftar belanja untuk dicetak atau diunduh"
+                aria-label="Buka PDF daftar belanja untuk dicetak atau diunduh"
                 data-date="<?= $d['date'] ?>">
-                <i class="fas fa-print"></i>
+                <i class="fas fa-download"></i>
             </button>
             <?php endif; ?>
 

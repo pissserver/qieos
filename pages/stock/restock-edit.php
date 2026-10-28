@@ -151,9 +151,9 @@ function buildUnitOptions($productUnits, $productId, $current){
                 <span>Buat Receipt</span>
             </button>
             <?php elseif(!empty($purchase['receipt'])): ?>
-            <button type="button" class="btn btn-receipt-print" data-print-purchase="<?= $id ?>">
-                <i class="fas fa-print"></i>
-                <span>Print Receipt</span>
+            <button type="button" class="btn btn-receipt-print" data-print-purchase="<?= $id ?>" title="Buka PDF receipt untuk dicetak atau diunduh">
+                <i class="fas fa-download"></i>
+                <span>Buka PDF Receipt</span>
             </button>
             <?php endif; ?>
         </div>

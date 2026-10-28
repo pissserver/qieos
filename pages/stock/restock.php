@@ -1340,8 +1340,8 @@ while($supplier = mysqli_fetch_assoc($qProductSuppliers)){
             $('#editPurchaseContent .purchase-receipt-badge strong').text(receiptResult.receipt);
             $('#editPurchaseContent .purchase-receipt-badge').addClass('receipt-badge-success');
             $('#createReceiptBtn').replaceWith(`
-                <button type="button" class="btn btn-receipt-print" data-print-purchase="${receiptResult.purchase_id}">
-                    <i class="fas fa-print"></i><span>Print Receipt</span>
+                <button type="button" class="btn btn-receipt-print" data-print-purchase="${receiptResult.purchase_id}" title="Buka PDF receipt untuk dicetak atau diunduh">
+                    <i class="fas fa-download"></i><span>Buka PDF Receipt</span>
                 </button>
             `);
             $('#editPurchaseForm')
@@ -1373,15 +1373,6 @@ while($supplier = mysqli_fetch_assoc($qProductSuppliers)){
             formControls.prop('disabled', false);
             QToast('Gagal', error.message || 'Receipt tidak dapat dibuat', 'error');
         }
-    });
-
-    $(document).on('click', '[data-print-purchase]', function(){
-        const printWindow = window.open('', '_blank', 'width=1000,height=800');
-        if(!printWindow){
-            QToast('Gagal', 'Izinkan pop-up browser untuk mencetak receipt', 'error');
-            return;
-        }
-        printPurchaseReceipt($(this).attr('data-print-purchase'), printWindow);
     });
 
     // RESTOCK (validasi) MODAL
@@ -1650,119 +1641,36 @@ while($supplier = mysqli_fetch_assoc($qProductSuppliers)){
 
     });
 
-    function printPurchaseReceipt(id, printWindow){
-        const escapeHtml = function(value){
-            return String(value == null ? '' : value).replace(/[&<>"']/g, function(character){
-                return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[character];
-            });
-        };
-        fetch('restock-action.php?action=get_print&id=' + encodeURIComponent(id))
-            .then(function(response){
-                if(!response.ok) throw new Error('Data receipt tidak dapat dimuat');
-                return response.json();
-            })
-            .then(function(result){
-                if(result.status !== 'success') throw new Error(result.msg || 'Data receipt tidak dapat dimuat');
-                const data = result.data || [];
-                const hasReceipt = Boolean(result.receipt);
-                const formatCurrency = function(value){
-                    return 'Rp ' + (Number(value) || 0).toLocaleString('id-ID');
-                };
-                const total = data.reduce(function(sum, item){ return sum + (Number(item.price) || 0); }, 0);
-                const rows = data.map(function(item, index){
-                    return `<tr>
-                        <td class="center">${index + 1}</td>
-                        <td>${escapeHtml(item.name)}</td>
-                        <td>${escapeHtml(item.supplier || '-')}</td>
-                        <td>${escapeHtml(item.invoice_no || '-')}</td>
-                        <td class="center">${escapeHtml(item.qty)}</td>
-                        ${hasReceipt ? '' : '<td class="manual"></td>'}
-                        <td class="center">${escapeHtml(item.unit)}</td>
-                        <td class="right">${formatCurrency(item.price)}</td>
-                        ${hasReceipt ? '' : '<td class="manual"></td>'}
-                        ${hasReceipt ? '' : '<td class="check-cell"><span class="check-box"></span></td>'}
-                    </tr>`;
-                }).join('');
-                const formattedDate = result.date
-                    ? new Date(result.date + 'T00:00:00').toLocaleDateString('id-ID', {day:'2-digit', month:'long', year:'numeric'})
-                    : '-';
-                const printedAt = new Date().toLocaleString('id-ID', {
-                    day: '2-digit',
-                    month: 'long',
-                    year: 'numeric',
-                    hour: '2-digit',
-                    minute: '2-digit'
-                });
-                const documentTitle = result.receipt ? 'Form Receipt' : 'Daftar Belanja';
-                printWindow.document.open();
-                printWindow.document.write(`<!doctype html>
-                    <html lang="id"><head><meta charset="utf-8">
-                    <title>${escapeHtml(documentTitle)} ${escapeHtml(result.receipt || result.form)}</title>
-                    <style>
-                        *{box-sizing:border-box}
-                        body{margin:0;padding:32px;font-family:Arial,sans-serif;color:#172033;font-size:12px}
-                        .sheet{max-width:1100px;margin:auto}
-                        header{display:flex;justify-content:space-between;align-items:flex-start;gap:24px;padding-bottom:18px;margin-bottom:22px;border-bottom:3px solid #312e81}
-                        .brand{font-size:15px;font-weight:800;letter-spacing:.7px;color:#312e81}
-                        h1{margin:12px 0 4px;font-size:24px;letter-spacing:.4px}
-                        .subtitle{color:#64748b;font-size:12px}
-                        .meta{min-width:270px;padding:13px 16px;border:1px solid #dbe3f0;border-left:4px solid #10b981;background:#f8fafc}
-                        .meta-item{margin-bottom:9px}
-                        .meta-item:last-child{margin-bottom:0}
-                        .meta-label{margin:0 0 4px;color:#64748b;font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase}
-                        .meta-value{margin:0;font-size:13px;font-weight:700}
-                        table{width:100%;border-collapse:collapse}
-                        th,td{border:1px solid #cbd5e1;padding:8px;vertical-align:top}
-                        th{background:#eef2ff;color:#312e81;text-align:center;font-size:10px;text-transform:uppercase}
-                        .center{text-align:center}.right{text-align:right;white-space:nowrap}
-                        .manual{min-width:95px}
-                        .check-cell{text-align:center;width:42px}
-                        .check-box{display:inline-block;width:14px;height:14px;border:1px solid #64748b}
-                        .total td{background:#f8fafc;font-weight:700}
-                        .signatures{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:36px;text-align:center}
-                        .signature{min-height:132px;padding:13px 18px 12px;border:1px solid #cbd5e1;border-radius:6px;display:flex;flex-direction:column;justify-content:space-between}
-                        .signature-role{color:#334155;font-size:10px;font-weight:700;letter-spacing:.8px;text-transform:uppercase}
-                        .signature-space{height:64px}
-                        .signature-line{padding-top:7px;border-top:1px solid #64748b;color:#475569;font-size:11px}
-                        @page{size:A4 landscape;margin:12mm}
-                        @media print{body{padding:0}.sheet{max-width:none}thead{display:table-header-group}tr,.signature{break-inside:avoid}}
-                    </style></head>
-                    <body><main class="sheet">
-                        <header><div><div class="brand">PT. SELARASGRIYA SARANA UTAMA</div><h1>${escapeHtml(documentTitle)}</h1>
-                        <div class="subtitle">Dokumen pembelian dan verifikasi barang</div></div>
-                        <div class="meta"><div class="meta-item"><div class="meta-label">No. Form</div><div class="meta-value">${escapeHtml(result.form || '-')}</div></div>
-                        <div class="meta-item"><div class="meta-label">No. Receipt</div><div class="meta-value">${escapeHtml(result.receipt || '-')}</div></div>
-                        <div class="meta-item"><div class="meta-label">Tanggal Form</div><div class="meta-value">${escapeHtml(formattedDate)}</div></div>
-                        <div class="meta-item"><div class="meta-label">Dicetak pada</div><div class="meta-value">${escapeHtml(printedAt)}</div></div></div></header>
-                        <table><thead><tr><th>No</th><th>Nama Barang / Produk</th><th>Supplier</th><th>No Invoice</th>
-                        <th>Qty</th>${hasReceipt ? '' : '<th>Qty Revisi</th>'}<th>Satuan</th><th>Total Harga</th>${hasReceipt ? '' : '<th>Total Harga Revisi</th><th>Check</th>'}</tr></thead>
-                        <tbody>${rows}<tr class="total"><td colspan="${hasReceipt ? 6 : 7}" class="right">Total Harga Keseluruhan</td><td class="right">${formatCurrency(total)}</td>${hasReceipt ? '' : '<td></td><td></td>'}</tr></tbody></table>
-                        <section class="signatures">
-                            <div class="signature"><div class="signature-role">Dibuat oleh</div><div class="signature-space"></div><div class="signature-line">Nama &amp; tanda tangan</div></div>
-                            <div class="signature"><div class="signature-role">Diperiksa oleh</div><div class="signature-space"></div><div class="signature-line">Nama &amp; tanda tangan</div></div>
-                            <div class="signature"><div class="signature-role">Diterima oleh</div><div class="signature-space"></div><div class="signature-line">Nama &amp; tanda tangan</div></div>
-                        </section>
-                    </main></body></html>`);
-                printWindow.document.close();
-                printWindow.focus();
-                window.setTimeout(function(){ printWindow.print(); }, 350);
-            })
-            .catch(function(error){
-                console.error('Gagal memuat data cetak receipt:', error);
-                printWindow.close();
-                QToast('Gagal', error.message || 'Data receipt tidak dapat dimuat', 'error');
-            });
+    function getLocalPrintTimestamp(){
+        const now = new Date();
+        const offsetMinutes = -now.getTimezoneOffset();
+        const offsetSign = offsetMinutes >= 0 ? '+' : '-';
+        const offsetHours = String(Math.floor(Math.abs(offsetMinutes) / 60)).padStart(2, '0');
+        const offsetRemainder = String(Math.abs(offsetMinutes) % 60).padStart(2, '0');
+        const localDateTime = [
+            now.getFullYear(),
+            String(now.getMonth() + 1).padStart(2, '0'),
+            String(now.getDate()).padStart(2, '0')
+        ].join('-') + 'T' + [
+            String(now.getHours()).padStart(2, '0'),
+            String(now.getMinutes()).padStart(2, '0'),
+            String(now.getSeconds()).padStart(2, '0')
+        ].join(':');
+
+        return localDateTime + offsetSign + offsetHours + ':' + offsetRemainder;
     }
 
-    $(document).on('click', '.printPurchaseBtn', function(){
-        const id = $(this).data('id');
-        const printWindow = window.open('', '_blank', 'width=1000,height=800');
+    $(document).on('click', '.printPurchaseBtn, [data-print-purchase]', function(){
+        const id = $(this).attr('data-print-purchase') || $(this).data('id');
+        const printedAt = getLocalPrintTimestamp();
+        const pdfUrl = 'restock-pdf.php?id=' + encodeURIComponent(id) +
+            '&printed_at=' + encodeURIComponent(printedAt);
+        const printWindow = window.open(pdfUrl, '_blank');
         if(!printWindow){
-            QToast('Gagal', 'Izinkan pop-up browser untuk mencetak receipt', 'error');
-            return;
+            QToast('Gagal', 'Izinkan pop-up browser untuk membuka dokumen PDF', 'error');
         }
-        printPurchaseReceipt(id, printWindow);
     });
+
 </script>
 
 </body>
