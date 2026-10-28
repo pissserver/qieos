@@ -108,6 +108,13 @@ $tables = array(
         'rels' => array(
             array('products', 'sales_stock.product_id'),
         )),
+    'stock_adjustments' => array('name' => 'stock_adjustments', 'domain' => 'STOK', 'icon' => 'fa-sliders',
+        'desc' => 'Riwayat penyesuaian stok produk per lokasi, termasuk jenis dan jumlah penyesuaian, catatan, waktu, pengguna, serta item pembelian terkait bila ada.',
+        'rels' => array(
+            array('products', 'stock_adjustments.product_id'),
+            array('purchase_items', 'stock_adjustments.purchase_item_id'),
+            array('users', 'stock_adjustments.user_id'),
+        )),
     'stock_requests' => array('name' => 'stock_requests', 'domain' => 'STOK', 'icon' => 'fa-clipboard-check',
         'desc' => 'Permintaan stok kantin ke gudang beserta status persetujuan (pending / disetujui / ditolak).',
         'rels' => array(
@@ -180,6 +187,7 @@ $pos = array(
     'purchases'             => array(960, 400),
     'purchase_items'        => array(1280, 400),
     'sales_stock'           => array(60, 600),
+    'stock_adjustments'     => array(60, 820),
     'stock_requests'        => array(380, 600),
     'stock_request_items'   => array(700, 600),
     'orders'                => array(380, 820),
@@ -200,6 +208,9 @@ $edges = array(
     array('products', 'purchase_items', 'purchase_items.product_id'),
     array('purchases', 'purchase_items', 'purchase_items.purchase_id'),
     array('products', 'sales_stock', 'sales_stock.product_id'),
+    array('products', 'stock_adjustments', 'stock_adjustments.product_id'),
+    array('purchase_items', 'stock_adjustments', 'stock_adjustments.purchase_item_id'),
+    array('users', 'stock_adjustments', 'stock_adjustments.user_id'),
     array('products', 'stock_request_items', 'stock_request_items.product_id'),
     array('stock_requests', 'stock_request_items', 'stock_request_items.request_id'),
     array('users', 'stock_requests', 'stock_requests.created_by / approved_by'),
