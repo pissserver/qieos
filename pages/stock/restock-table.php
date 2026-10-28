@@ -9,6 +9,12 @@ $q = mysqli_query($conn,"
         p.date,
         COUNT(pi.id) AS total_items,
         COALESCE(SUM(pi.price_buy), 0) AS total_price,
+        SUM(CASE
+            WHEN pi.supplier_id IS NULL
+              OR pi.supplier_id = 0
+              OR TRIM(COALESCE(pi.invoice_no, '')) = ''
+            THEN 1 ELSE 0
+        END) AS incomplete_items,
         MAX(CASE WHEN pi.qty_stock IS NOT NULL THEN 1 ELSE 0 END) AS used_flag
     FROM purchases p
     LEFT JOIN purchase_items pi
@@ -34,6 +40,7 @@ $q = mysqli_query($conn,"
     <th class="text-center">TANGGAL PEMBUATAN</th>
     <th class="text-center">TOTAL ITEM</th>
     <th class="text-center">TOTAL BELANJA</th>
+    <th class="text-center workflow-status-heading">STATUS</th>
     <th class="text-center">AKSI</th>
 </tr>
 </thead>
@@ -53,6 +60,30 @@ $q = mysqli_query($conn,"
 
             <div class="purchase-box-text">
                 <div class="fw-bold"><?= htmlspecialchars($d['form']) ?></div>
+                <?php
+                    $incompleteItems = (int)$d['incomplete_items'];
+                    if((int)$d['used_flag'] === 1){
+                        $workflowClass = 'status-complete';
+                        $workflowIcon = 'fa-circle-check';
+                        $workflowLabel = 'Selesai';
+                        $workflowTitle = 'Sudah divalidasi dan direstock';
+                    }elseif(!empty($d['receipt'])){
+                        $workflowClass = 'status-restock';
+                        $workflowIcon = 'fa-truck-ramp-box';
+                        $workflowLabel = 'Perlu restock';
+                        $workflowTitle = 'Receipt sudah dibuat. Tekan tombol restock untuk melanjutkan';
+                    }elseif($incompleteItems > 0){
+                        $workflowClass = 'status-incomplete';
+                        $workflowIcon = 'fa-triangle-exclamation';
+                        $workflowLabel = 'Data belum lengkap';
+                        $workflowTitle = $incompleteItems . ' item belum memiliki supplier dan/atau nomor invoice. Tekan Edit untuk melengkapi';
+                    }else{
+                        $workflowClass = 'status-receipt';
+                        $workflowIcon = 'fa-receipt';
+                        $workflowLabel = 'Buat receipt';
+                        $workflowTitle = 'Data lengkap. Buka Edit untuk membuat receipt';
+                    }
+                ?>
                 <?php if(!empty($d['receipt'])): ?>
                 <span class="purchase-receipt-badge table-receipt-badge mt-1">
                     <i class="fas fa-circle-check"></i>
@@ -114,6 +145,14 @@ $q = mysqli_query($conn,"
             <i class="fas fa-money-bill"></i>
             Rp <?= number_format($d['total_price'], 0, ',', '.') ?>
         </span>
+    </td>
+
+    <!-- STATUS -->
+    <td class="text-center workflow-status-cell">
+        <div class="purchase-workflow-status <?= $workflowClass ?>" role="status" aria-live="polite" title="<?= htmlspecialchars($workflowTitle, ENT_QUOTES, 'UTF-8') ?>" aria-label="<?= htmlspecialchars($workflowTitle, ENT_QUOTES, 'UTF-8') ?>">
+            <i class="fas <?= $workflowIcon ?>" aria-hidden="true"></i>
+            <span class="workflow-label"><?= htmlspecialchars($workflowLabel, ENT_QUOTES, 'UTF-8') ?></span>
+        </div>
     </td>
 
     <!-- ACTION -->

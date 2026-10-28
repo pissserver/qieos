@@ -33,6 +33,15 @@
         border-radius:0 14px 14px 0;
     }
 
+    #purchaseTable thead th.workflow-status-heading{
+        min-width:155px;
+    }
+
+    #purchaseTable tbody td.workflow-status-cell{
+        min-width:155px;
+        text-align:center;
+    }
+
     #purchaseTable tbody td{
         padding:20px 18px;
         border:none !important;
@@ -117,6 +126,77 @@
         font-size:11px;
         line-height:1.2;
         overflow-wrap:anywhere;
+    }
+
+    .purchase-workflow-status{
+        display:inline-flex;
+        align-items:center;
+        gap:6px;
+        max-width:100%;
+        margin:0 auto;
+        padding:7px 11px;
+        border:1px solid transparent;
+        border-radius:999px;
+        font-size:10px;
+        font-weight:700;
+        line-height:1.2;
+        vertical-align:middle;
+        box-shadow:0 3px 8px rgba(15,23,42,.06);
+    }
+
+    .purchase-workflow-status > i{
+        flex:0 0 auto;
+        font-size:10px;
+    }
+
+    .purchase-workflow-status .workflow-label{
+        overflow:hidden;
+        min-width:0;
+        text-overflow:ellipsis;
+        white-space:nowrap;
+    }
+
+    .purchase-workflow-status.status-incomplete{
+        color:#9a3412;
+        border-color:#fed7aa;
+        background:linear-gradient(135deg,#fff7ed,#ffedd5);
+    }
+
+    .purchase-workflow-status.status-receipt{
+        color:#854d0e;
+        border-color:#fde68a;
+        background:linear-gradient(135deg,#fefce8,#fef3c7);
+    }
+
+    .purchase-workflow-status.status-restock{
+        color:#1d4ed8;
+        border-color:#bfdbfe;
+        background:linear-gradient(135deg,#eff6ff,#dbeafe);
+    }
+
+    .purchase-workflow-status.status-complete{
+        color:#047857;
+        border-color:#a7f3d0;
+        background:#ecfdf5;
+    }
+
+    .purchase-workflow-status.status-incomplete,
+    .purchase-workflow-status.status-receipt,
+    .purchase-workflow-status.status-restock{
+        animation:purchaseStatusPulse 2.2s ease-in-out infinite;
+    }
+
+    @keyframes purchaseStatusPulse{
+        0%,100%{box-shadow:0 3px 8px rgba(15,23,42,.06)}
+        50%{box-shadow:0 0 0 4px rgba(245,158,11,.12),0 5px 14px rgba(180,83,9,.14)}
+    }
+
+    @media (prefers-reduced-motion:reduce){
+        .purchase-workflow-status.status-incomplete,
+        .purchase-workflow-status.status-receipt,
+        .purchase-workflow-status.status-restock{
+            animation:none;
+        }
     }
 
     /* ACTION */
@@ -309,6 +389,20 @@
         .purchase-box-text{
             min-width:0;
             overflow:hidden;
+        }
+
+        #purchaseTable tbody td.workflow-status-cell{
+            flex:1 1 100%;
+            width:100% !important;
+            padding-left:50px !important;
+            text-align:left !important;
+        }
+
+        .purchase-workflow-status{
+            max-width:100%;
+            margin:0;
+            padding:5px 8px;
+            font-size:9px;
         }
 
         .purchase-box .purchase-box-text > .fw-bold{

@@ -801,6 +801,46 @@ while($supplier = mysqli_fetch_assoc($qProductSuppliers)){
         });
     }
 
+    function updatePurchaseWorkflowStatus($row, incompleteItems, receipt, used){
+        const status = used
+            ? {
+                className: 'status-complete',
+                icon: 'fa-circle-check',
+                label: 'Selesai',
+                title: 'Sudah divalidasi dan direstock'
+            }
+            : receipt
+                ? {
+                    className: 'status-restock',
+                    icon: 'fa-truck-ramp-box',
+                    label: 'Perlu restock',
+                    title: 'Receipt sudah dibuat. Tekan tombol restock untuk melanjutkan'
+                }
+                : incompleteItems > 0
+                    ? {
+                        className: 'status-incomplete',
+                        icon: 'fa-triangle-exclamation',
+                        label: 'Data belum lengkap',
+                        title: incompleteItems + ' item belum memiliki supplier dan/atau nomor invoice. Tekan Edit untuk melengkapi'
+                    }
+                    : {
+                        className: 'status-receipt',
+                        icon: 'fa-receipt',
+                        label: 'Buat receipt',
+                        title: 'Data lengkap. Buka Edit untuk membuat receipt'
+                    };
+        const $status = $row.find('.purchase-workflow-status');
+        $status
+            .removeClass('status-complete status-restock status-incomplete status-receipt')
+            .addClass(status.className)
+            .attr('title', status.title)
+            .attr('aria-label', status.title)
+            .html(
+                '<i class="fas ' + status.icon + '" aria-hidden="true"></i>' +
+                '<span class="workflow-label">' + status.label + '</span>'
+            );
+    }
+
     function updatePurchaseTableRow(summary){
         if(!$.fn.DataTable.isDataTable('#purchaseTable')) return;
 
@@ -815,8 +855,10 @@ while($supplier = mysqli_fetch_assoc($qProductSuppliers)){
         const totalItems = Number(summary.total_items) || 0;
         const totalPrice = Number(summary.total_price) || 0;
         const receipt = summary.receipt ? String(summary.receipt) : '';
+        const incompleteItems = Number(summary.incomplete_items) || 0;
         const used = Number(summary.used_flag) === 1;
         const formattedPrice = 'Rp ' + totalPrice.toLocaleString('id-ID');
+        updatePurchaseWorkflowStatus($purchaseRow, incompleteItems, receipt, used);
 
         if(receipt){
             $purchaseRow.find('.purchase-box-text > .text-muted').remove();
@@ -877,6 +919,7 @@ while($supplier = mysqli_fetch_assoc($qProductSuppliers)){
 
         // Tambah class restocked dengan animasi pulse
         $row.addClass('is-restocked').css('animation', 'restockPulse 0.6s ease');
+        updatePurchaseWorkflowStatus($row, 0, true, true);
         
         // Keep Edit available; only remove Delete and mark the receipt restocked.
         const $actions = $row.find('.mp-actions');

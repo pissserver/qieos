@@ -135,6 +135,12 @@
             SELECT
                 COUNT(*) AS total_items,
                 COALESCE(SUM(price_buy), 0) AS total_price,
+                SUM(CASE
+                    WHEN supplier_id IS NULL
+                      OR supplier_id = 0
+                      OR TRIM(COALESCE(invoice_no, '')) = ''
+                    THEN 1 ELSE 0
+                END) AS incomplete_items,
                 MAX(CASE WHEN qty_stock IS NOT NULL THEN 1 ELSE 0 END) AS used_flag
             FROM purchase_items
             WHERE purchase_id = '$id'
@@ -156,6 +162,7 @@
             'receipt' => $receiptNumber,
             'total_items' => (int)$summary['total_items'],
             'total_price' => (float)$summary['total_price'],
+            'incomplete_items' => (int)$summary['incomplete_items'],
             'used_flag' => (int)$summary['used_flag']
         ]);
         exit;
@@ -171,7 +178,7 @@ if ($_GET['action'] == 'update') {
         }
 
         $purchaseCheck = mysqli_query($conn, "
-            SELECT receipt
+            SELECT form, receipt
             FROM purchases
             WHERE id = '$id'
               AND deleted_at IS NULL
@@ -349,6 +356,12 @@ if ($_GET['action'] == 'update') {
             SELECT
                 COUNT(*) AS total_items,
                 COALESCE(SUM(price_buy), 0) AS total_price,
+                SUM(CASE
+                    WHEN supplier_id IS NULL
+                      OR supplier_id = 0
+                      OR TRIM(COALESCE(invoice_no, '')) = ''
+                    THEN 1 ELSE 0
+                END) AS incomplete_items,
                 MAX(CASE WHEN qty_stock IS NOT NULL THEN 1 ELSE 0 END) AS used_flag
             FROM purchase_items
             WHERE purchase_id = '$id'
@@ -367,8 +380,11 @@ if ($_GET['action'] == 'update') {
             "status" => "success",
             "msg" => "Daftar belanja berhasil diupdate",
             "purchase_id" => $id,
+            "form" => $purchase['form'],
+            "receipt" => $purchase['receipt'],
             "total_items" => (int)$summary['total_items'],
             "total_price" => (float)$summary['total_price'],
+            "incomplete_items" => (int)$summary['incomplete_items'],
             "used_flag" => (int)$summary['used_flag']
         ]);
         exit;
