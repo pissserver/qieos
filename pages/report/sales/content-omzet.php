@@ -62,12 +62,9 @@
         <table class="table align-middle" id="reportTableOmzet">
             <thead>
                 <tr>
-                    <th class="text-center" width="60">No</th>
+                    <th class="text-center" width="40">No</th>
                     <th class="text-center">Tanggal</th>
                     <th class="text-center">Jumlah Pesanan</th>
-                    <th class="text-center">Terbayar</th>
-                    <th class="text-center">Waiting</th>
-                    <th class="text-center">Cancel/Revisi</th>
                     <th class="text-center">Omzet</th>
                 </tr>
             </thead>

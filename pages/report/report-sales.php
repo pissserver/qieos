@@ -241,7 +241,7 @@
 
     const reportTabs = {
         summary:  { body: "#reportSummaryBody",  card: "#reportSummarySummaryCard",  label: "#totalSummaryAmountLabel",  url: "sales/report-summary.php",  colspan: 4, icon: "fa-wallet",          empty: "Silakan pilih tanggal awal dan tanggal akhir untuk menampilkan ringkasan keuangan." },
-        omzet:    { body: "#reportOmzetBody",    card: "#reportOmzetSummaryCard",    label: "#totalOmzetAmountLabel",    url: "sales/report-omzet.php",    colspan: 7, icon: "fa-coins",           empty: "Silakan pilih tanggal awal dan tanggal akhir untuk menampilkan omzet harian." },
+        omzet:    { body: "#reportOmzetBody",    card: "#reportOmzetSummaryCard",    label: "#totalOmzetAmountLabel",    url: "sales/report-omzet.php",    colspan: 4, icon: "fa-coins",           empty: "Silakan pilih tanggal awal dan tanggal akhir untuk menampilkan omzet harian." },
         expense:  { body: "#reportExpenseBody",  card: "#reportExpenseSummaryCard",  label: "#totalExpenseAmountLabel",  url: "sales/report-expense.php",  colspan: 5, icon: "fa-cart-shopping",   empty: "Silakan pilih tanggal awal dan tanggal akhir untuk menampilkan pengeluaran belanja." },
         purchase: { body: "#reportPurchaseBody", card: "#reportPurchaseSummaryCard", label: "#totalPurchaseAmountLabel", url: "sales/report-purchase.php", colspan: 12, icon: "fa-file-invoice",   empty: "Pilih form belanja untuk menampilkan detail pembelian." },
         profit:   { body: "#reportProfitBody",   card: "#reportProfitSummaryCard",   label: "#totalProfitAmountLabel",   url: "sales/report-profit.php",   colspan: 6, icon: "fa-chart-pie",       empty: "Silakan pilih tanggal awal dan tanggal akhir untuk menampilkan laba dan rugi." },

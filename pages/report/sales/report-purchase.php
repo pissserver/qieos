@@ -33,11 +33,14 @@ $query = mysqli_query($conn, "
         pi.price_unit,
         pi.price_buy,
         pi.invoice_no,
+        pi.unit_buy,
         s.name AS supplier_name,
         p.code AS product_code,
         p.name AS product_name,
-        p.unit AS product_unit
+        p.unit AS product_unit,
+        pur.receipt
     FROM purchase_items pi
+    JOIN purchases pur ON pur.id = pi.purchase_id
     JOIN products p ON pi.product_id = p.id
     LEFT JOIN suppliers s ON s.id = pi.supplier_id
     WHERE pi.purchase_id = $purchaseId
@@ -54,16 +57,20 @@ if ($hasData) {
     while ($row = mysqli_fetch_assoc($query)) {
         $total += (float) $row['price_buy'];
         ?>
+        <?php
+            $receiptNo = isset($row['receipt']) && $row['receipt'] !== '' ? $row['receipt'] : (isset($purchase['receipt']) && $purchase['receipt'] !== '' ? $purchase['receipt'] : '');
+            $unitShow = !empty($row['unit_buy']) ? $row['unit_buy'] : $row['product_unit'];
+        ?>
         <tr>
             <td class="text-center"><?= $no++ ?></td>
             <td class="text-center"><?= report_date_id($purchase['date']) ?></td>
-            <td class="text-center"></td>
+            <td class="text-center"><?= htmlspecialchars($receiptNo) ?></td>
             <td class="text-center"><?= htmlspecialchars($purchase['form']) ?></td>
             <td class="text-center"><?= htmlspecialchars((string) $row['invoice_no']) ?></td>
             <td class="text-center"><?= htmlspecialchars($row['supplier_name'] ? $row['supplier_name'] : '-') ?></td>
             <td class="text-center"><?= htmlspecialchars($row['product_code']) ?></td>
             <td class="text-center"><?= htmlspecialchars($row['product_name']) ?></td>
-            <td class="text-center"><?= htmlspecialchars(strtoupper($row['product_unit'])) ?></td>
+            <td class="text-center"><?= htmlspecialchars(strtoupper($unitShow)) ?></td>
             <td class="text-center"><?= (int) $row['qty_buy'] ?></td>
             <td class="text-center fw-semibold"><?= report_rp($row['price_buy']) ?></td>
             <td class="text-center"><?= report_rp($row['price_unit']) ?></td>

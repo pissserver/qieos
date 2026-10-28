@@ -72,7 +72,7 @@ switch ($tab) {
         break;
 
     case 'omzet':
-        $q = mysqli_query($conn, "SELECT DATE(tanggal) AS dt, COUNT(*) AS total_order, SUM(CASE WHEN status_payment='paid' THEN 1 ELSE 0 END) AS paid_count, SUM(CASE WHEN status_payment='waiting' THEN 1 ELSE 0 END) AS waiting_count, SUM(CASE WHEN status_payment='cancelled' THEN 1 ELSE 0 END) AS cancelled_count, SUM(CASE WHEN status_payment='paid' THEN total ELSE 0 END) AS omzet FROM orders WHERE $where GROUP BY DATE(tanggal) ORDER BY dt ASC");
+        $q = mysqli_query($conn, "SELECT DATE(tanggal) AS dt, COUNT(*) AS total_order, SUM(total) AS omzet FROM orders WHERE status_payment='paid' AND $where GROUP BY DATE(tanggal) ORDER BY dt ASC");
         if ($q) while ($r = mysqli_fetch_assoc($q)) { $rows[] = $r; $total += (float) $r['omzet']; }
         break;
 
@@ -84,15 +84,17 @@ switch ($tab) {
     case 'purchase':
         $purchase_id = isset($_GET['purchase_id']) ? (int) $_GET['purchase_id'] : 0;
         if ($purchase_id > 0) {
-            $qPurchase = mysqli_query($conn, "SELECT p.id, p.date, p.form FROM purchases p WHERE p.id = $purchase_id AND p.deleted_at IS NULL LIMIT 1");
+            $qPurchase = mysqli_query($conn, "SELECT p.id, p.date, p.form, p.receipt FROM purchases p WHERE p.id = $purchase_id AND p.deleted_at IS NULL LIMIT 1");
             $purchase = $qPurchase ? mysqli_fetch_assoc($qPurchase) : null;
             if ($purchase) {
-                $q = mysqli_query($conn, "SELECT pi.id, pi.product_id, pi.qty_buy, pi.price_unit, pi.price_buy, pi.invoice_no, s.name AS supplier_name, p.code AS product_code, p.name AS product_name, p.unit AS product_unit FROM purchase_items pi JOIN products p ON pi.product_id = p.id LEFT JOIN suppliers s ON s.id = pi.supplier_id WHERE pi.purchase_id = $purchase_id AND pi.deleted_at IS NULL AND pi.qty_buy IS NOT NULL ORDER BY pi.id ASC");
+                $q = mysqli_query($conn, "SELECT pi.id, pi.product_id, pi.qty_buy, pi.price_unit, pi.price_buy, pi.invoice_no, pi.unit_buy, s.name AS supplier_name, p.code AS product_code, p.name AS product_name, p.unit AS product_unit FROM purchase_items pi JOIN products p ON pi.product_id = p.id LEFT JOIN suppliers s ON s.id = pi.supplier_id WHERE pi.purchase_id = $purchase_id AND pi.deleted_at IS NULL AND pi.qty_buy IS NOT NULL ORDER BY pi.id ASC");
                 if ($q) {
                     while ($r = mysqli_fetch_assoc($q)) {
                         $r['purchase_date'] = $purchase['date'];
                         $r['purchase_form'] = $purchase['form'];
                         $r['purchase_id'] = $purchase['id'];
+                        $r['receipt'] = isset($purchase['receipt']) ? $purchase['receipt'] : '';
+                        $r['unit_buy'] = isset($r['unit_buy']) ? $r['unit_buy'] : '';
                         $rows[] = $r;
                         $total += (float) $r['price_buy'];
                     }
@@ -868,6 +870,20 @@ if ($tab === 'best' && $detail === 1) {
     exit;
 }
 
+// Ambil info pembelian untuk nama file
+$purchaseFormName = '';
+$purchaseDateFile = '';
+if ($tab === 'purchase') {
+    $purchase_id = isset($_GET['purchase_id']) ? (int) $_GET['purchase_id'] : 0;
+    if ($purchase_id > 0) {
+        $qp = mysqli_query($conn, "SELECT p.form, p.date FROM purchases p WHERE p.id = $purchase_id AND p.deleted_at IS NULL LIMIT 1");
+        if ($qp && ($pr = mysqli_fetch_assoc($qp))) {
+            $purchaseFormName = $pr['form'];
+            $purchaseDateFile = $pr['date'];
+        }
+    }
+}
+
 // ============================
 // CREATE EXCEL
 // ============================
@@ -879,7 +895,7 @@ $sheet->setTitle("Laporan");
 
 $headers = [
     'summary'  => ['No', 'Komponen', 'Keterangan', 'Jumlah'],
-    'omzet'    => ['No', 'Tanggal', 'Pesanan', 'Terbayar', 'Waiting', 'Cancel/Revisi', 'Omzet'],
+    'omzet'    => ['No', 'Tanggal', 'Jumlah Pesanan', 'Omzet'],
     'expense'  => ['No', 'Tanggal', 'Form Belanja', 'Total Item', 'Total Belanja'],
     'purchase' => ['No', 'Tgl Beli', 'No Penerimaan Barang', 'No Referensi', 'No Invoice', 'Nama Supplier', 'Kode Barang', 'Nama Barang', 'Satuan', 'Barang Masuk/Qty', 'Total Pembayaran', 'Harga/Satuan'],
     'profit'   => ['No', 'Tanggal', 'Omzet', 'Pengeluaran', 'Laba / Rugi', 'Status'],
@@ -970,10 +986,7 @@ for ($idx = 0; $idx < $count; $idx++) {
             $sheet->setCellValue("A$row", $no);
             $sheet->setCellValue("B$row", date('d M Y', strtotime($r['dt'])));
             $sheet->setCellValue("C$row", (int) $r['total_order']);
-            $sheet->setCellValue("D$row", (int) $r['paid_count']);
-            $sheet->setCellValue("E$row", (int) $r['waiting_count']);
-            $sheet->setCellValue("F$row", (int) $r['cancelled_count']);
-            $sheet->setCellValue("G$row", (float) $r['omzet']);
+            $sheet->setCellValue("D$row", (float) $r['omzet']);
             break;
 
         case 'expense':
@@ -985,15 +998,17 @@ for ($idx = 0; $idx < $count; $idx++) {
             break;
 
         case 'purchase':
+            $receiptExcel = isset($r['receipt']) && $r['receipt'] !== '' ? $r['receipt'] : '';
+            $unitExcel = !empty($r['unit_buy']) ? $r['unit_buy'] : $r['product_unit'];
             $sheet->setCellValue("A$row", $no);
             $sheet->setCellValue("B$row", date('d M Y', strtotime($r['purchase_date'])));
-            $sheet->setCellValue("C$row", '');
+            $sheet->setCellValue("C$row", $receiptExcel);
             $sheet->setCellValue("D$row", $r['purchase_form']);
             $sheet->setCellValueExplicit("E$row", (string) $r['invoice_no'], PHPExcel_Cell_DataType::TYPE_STRING);
             $sheet->setCellValue("F$row", $r['supplier_name'] ? $r['supplier_name'] : '-');
             $sheet->setCellValue("G$row", $r['product_code']);
             $sheet->setCellValue("H$row", $r['product_name']);
-            $sheet->setCellValue("I$row", strtoupper($r['product_unit']));
+            $sheet->setCellValue("I$row", strtoupper($unitExcel));
             $sheet->setCellValue("J$row", (int) $r['qty_buy']);
             $sheet->setCellValue("K$row", (float) $r['price_buy']);
             $sheet->setCellValue("L$row", (float) $r['price_unit']);
@@ -1134,9 +1149,9 @@ $totalLabel = isset($totalLabels[$tab]) ? $totalLabels[$tab] : 'TOTAL';
 // Kolom angka yang dijumlah, sesuai urutan header di layar
 $totalColMap = [
     'summary'  => 'D',
-    'omzet'    => 'G',
+    'omzet'    => 'D',
     'expense'  => 'E',
-    'purchase' => 'J',
+    'purchase' => 'K',
     'profit'   => 'E',
     'margin'   => 'G',
     'all'      => 'E',
@@ -1259,7 +1274,13 @@ if (ob_get_length()) {
     ob_end_clean();
 }
 
-$filename = $title2 . ' - ' . date('d M Y', strtotime($first_date)) . ' s.d. ' . date('d M Y', strtotime($last_date)) . '.xlsx';
+if ($tab === 'purchase' && $purchaseFormName !== '') {
+    $safeForm = preg_replace('/[\\\\\/:*?"<>|]/', '_', $purchaseFormName);
+    $safeDate = $purchaseDateFile !== '' && $purchaseDateFile !== '0000-00-00' ? date('Ymd', strtotime($purchaseDateFile)) : date('Ymd');
+    $filename = 'Laporan Pembelian - ' . $safeForm . ' - ' . $safeDate . '.xlsx';
+} else {
+    $filename = $title2 . ' - ' . date('d M Y', strtotime($first_date)) . ' s.d. ' . date('d M Y', strtotime($last_date)) . '.xlsx';
+}
 
 header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
 header('Content-Disposition: attachment; filename="' . $filename . '"');
