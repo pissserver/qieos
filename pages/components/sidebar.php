@@ -141,9 +141,9 @@
     <div class="sidebar-menu" id="sidebarMenuContainer">
         <ul class="nav flex-column">
             <li class="nav-item <?php echo ($current_page == 'dashboard.php') ? 'active' : ''; ?>">
-                <a href="<?php echo BASE_URL; ?>/pages/dashboard.php" class="nav-link" data-tooltip="Dashboard">
-                    <span class="sidebar-icon"><i class="fas fa-th-large"></i></span>
-                    <span class="sidebar-text">Dashboard</span>
+                <a href="<?php echo BASE_URL; ?>/pages/dashboard.php" class="nav-link" data-tooltip="Overview">
+                    <span class="sidebar-icon"><i class="fas fa-gauge-high"></i></span>
+                    <span class="sidebar-text">Overview</span>
                 </a>
             </li>
 

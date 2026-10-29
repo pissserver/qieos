@@ -17,7 +17,7 @@ $badge = function($name, $url, $icon, $category) {
 };
 
 $pages = [
-    $badge('Dashboard', BASE_URL . '/pages/dashboard.php', 'fas fa-chart-pie', 'Halaman'),
+    $badge('Overview', BASE_URL . '/pages/dashboard.php', 'fas fa-gauge-high', 'Halaman'),
     $badge('Chat', BASE_URL . '/pages/chat/chat.php', 'fas fa-comments', 'Halaman'),
     $badge('Profil', BASE_URL . '/pages/profile/profile.php', 'fas fa-user-circle', 'Akun'),
 ];

@@ -362,6 +362,7 @@
 }
 
 /* Warna berdasarkan icon class */
+.sidebar-icon i.fa-gauge-high { color: #6366f1; }
 .sidebar-icon i.fa-th-large { color: #6366f1; }
 .sidebar-icon i.fa-boxes-stacked { color: #8b5cf6; }
 .sidebar-icon i.fa-truck { color: #ec4899; }

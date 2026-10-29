@@ -165,6 +165,7 @@ include '../../sessions/session.php';
 
         <div class="adjust-modal-body">
             <div class="adjust-product-card">
+                <span class="adjust-product-kicker">PRODUCT IN REVIEW</span>
                 <div class="adjust-product-avatar" id="adjustProductAvatar">
                     <i class="fas fa-box-open"></i>
                 </div>
@@ -178,20 +179,25 @@ include '../../sessions/session.php';
                 </div>
             </div>
 
-            <div class="adjust-tabs" role="tablist">
-                <button type="button" class="adjust-tab is-active" data-adjust-tab="form" role="tab">
+            <div class="adjust-tabs" role="tablist" aria-label="Adjustment stok">
+                <button type="button" class="adjust-tab is-active" id="adjustFormTab" data-adjust-tab="form" role="tab" aria-selected="true" aria-controls="adjustFormPane" tabindex="0">
                     <i class="fas fa-pen-to-square"></i>
                     <span>Form Adjustment</span>
                 </button>
-                <button type="button" class="adjust-tab" data-adjust-tab="history" role="tab">
+                <button type="button" class="adjust-tab" id="adjustHistoryTab" data-adjust-tab="history" role="tab" aria-selected="false" aria-controls="adjustHistoryPane" tabindex="-1">
                     <i class="fas fa-clock-rotate-left"></i>
                     <span>Riwayat Adjustment</span>
                 </button>
             </div>
 
             <div class="adjust-panes">
-                <div class="adjust-pane is-active" data-adjust-pane="form">
+                <div class="adjust-pane is-active" id="adjustFormPane" data-adjust-pane="form" role="tabpanel" aria-labelledby="adjustFormTab">
                     <form id="adjustForm" novalidate>
+                        <div class="adjust-form-intro">
+                            <span class="adjust-form-eyebrow">STOCK CONTROL</span>
+                            <h3>Rincian perubahan</h3>
+                            <p>Lengkapi detail penyesuaian sebelum menyimpan.</p>
+                        </div>
                         <div class="adjust-fields">
                             <div class="adjust-field">
                                 <label class="adjust-label" for="adjustType">Jenis Adjustment</label>
@@ -221,7 +227,7 @@ include '../../sessions/session.php';
                                 <small class="adjust-field-hint">Pilih layer pembelian yang di-adjust</small>
                             </div>
 
-                            <div class="adjust-field">
+                            <div class="adjust-field" id="adjustQtyField">
                                 <label class="adjust-label" for="adjustQty">Jumlah</label>
                                 <div class="adjust-qty-wrap">
                                     <input type="number" class="adjust-input" id="adjustQty" min="1" step="1" placeholder="0" required disabled>
@@ -230,24 +236,24 @@ include '../../sessions/session.php';
                                 <small class="adjust-field-hint" id="adjustQtyHint"></small>
                             </div>
 
-                            <div class="adjust-field">
-                                <label class="adjust-label" for="adjustNote">Catatan <span class="adjust-label-req" id="adjustNoteReq" hidden>(wajib)</span></label>
-                                <textarea class="adjust-textarea" id="adjustNote" rows="3" maxlength="500" placeholder="Contoh: stok rusak, opname gudang, dll."></textarea>
-                                <small class="adjust-field-hint">Catatan wajib untuk adjustment stok kantin</small>
+                            <div class="adjust-field" id="adjustNoteField">
+                                <label class="adjust-label" for="adjustNote">Catatan <span class="adjust-label-req" id="adjustNoteReq">(wajib)</span></label>
+                                <textarea class="adjust-textarea" id="adjustNote" rows="3" maxlength="500" placeholder="Contoh: hasil opname, barang rusak, atau kedaluwarsa..." required></textarea>
+                                <small class="adjust-field-hint">Jelaskan alasan penyesuaian agar perubahan stok mudah ditelusuri.</small>
                             </div>
                         </div>
 
                         <div class="adjust-modal-foot">
                             <button type="button" class="adjust-btn adjust-btn-ghost" data-adjust-close>Batal</button>
-                            <button type="submit" class="adjust-btn adjust-btn-primary" id="adjustSubmitBtn" disabled>
+                            <button type="submit" class="adjust-btn adjust-btn-primary" id="adjustSubmitBtn" disabled hidden>
                                 <span class="adjust-btn-spinner" hidden><i class="fas fa-circle-notch fa-spin"></i></span>
-                                <span class="adjust-btn-text">Simpan Adjustment</span>
+                                <span class="adjust-btn-text">Save Adjustment</span>
                             </button>
                         </div>
                     </form>
                 </div>
 
-                <div class="adjust-pane" data-adjust-pane="history">
+                <div class="adjust-pane" id="adjustHistoryPane" data-adjust-pane="history" role="tabpanel" aria-labelledby="adjustHistoryTab">
                     <div id="adjustHistoryContent" class="adjust-history-wrap">
                         <div class="adjust-loading">
                             <i class="fas fa-circle-notch fa-spin"></i>
@@ -818,8 +824,8 @@ include '../../sessions/session.php';
         currentEditId = 0;
         currentEditAdj = null;
 
-        document.getElementById('adjustModalName').textContent = name;
-        document.getElementById('adjustModalCode').textContent = 'Sesuaikan stok produk dengan kondisi fisik';
+        document.getElementById('adjustModalName').textContent = 'Penyesuaian Stok';
+        document.getElementById('adjustModalCode').textContent = 'Perbarui stok berdasarkan kondisi fisik';
 
         document.getElementById('adjustProductName').textContent = name;
         document.getElementById('adjustProductCode').textContent = code;
@@ -840,17 +846,8 @@ include '../../sessions/session.php';
             avatar.innerHTML = '<i class="fas fa-box-open"></i>';
         }
 
-        const img = document.getElementById('adjustModalImg');
-        const icon = document.getElementById('adjustModalIcon');
-        if(photo){
-            img.src = BASE_URL + '/assets/img/products/' + photo;
-            img.alt = name;
-            img.hidden = false;
-            icon.hidden = true;
-        } else {
-            img.hidden = true;
-            icon.hidden = false;
-        }
+        document.getElementById('adjustModalImg').hidden = true;
+        document.getElementById('adjustModalIcon').hidden = false;
 
         document.getElementById('adjustModal').classList.add('is-open');
         document.getElementById('adjustModal').setAttribute('aria-hidden', 'false');
@@ -878,7 +875,10 @@ include '../../sessions/session.php';
 
     function switchAdjustTab(tab){
         document.querySelectorAll('.adjust-tab').forEach(function(b){
-            b.classList.toggle('is-active', b.getAttribute('data-adjust-tab') === tab);
+            const isActive = b.getAttribute('data-adjust-tab') === tab;
+            b.classList.toggle('is-active', isActive);
+            b.setAttribute('aria-selected', isActive ? 'true' : 'false');
+            b.setAttribute('tabindex', isActive ? '0' : '-1');
         });
         document.querySelectorAll('.adjust-pane').forEach(function(p){
             p.classList.toggle('is-active', p.getAttribute('data-adjust-pane') === tab);
@@ -932,13 +932,13 @@ include '../../sessions/session.php';
 
         document.getElementById('adjustType').value = '';
         document.getElementById('adjustLayerField').style.display = 'none';
-        document.getElementById('adjustNoteReq').hidden = true;
         document.getElementById('adjustQty').disabled = true;
         document.getElementById('adjustQty').value = '';
         document.getElementById('adjustQty').removeAttribute('max');
         document.getElementById('adjustQtyHint').textContent = '';
         document.getElementById('adjustQtyHint').classList.remove('is-warn');
         document.getElementById('adjustSubmitBtn').disabled = true;
+        document.getElementById('adjustSubmitBtn').hidden = true;
 
         const loc = document.getElementById('adjustLocation');
         loc.disabled = true;
@@ -1006,6 +1006,7 @@ include '../../sessions/session.php';
         layerField.style.display = 'none';
         document.getElementById('adjustQtyHint').textContent = '';
         document.getElementById('adjustSubmitBtn').disabled = true;
+        document.getElementById('adjustSubmitBtn').hidden = true;
 
         if(!type){
             locSelect.disabled = true;
@@ -1023,17 +1024,16 @@ include '../../sessions/session.php';
         const location = $(this).val();
         const layerField = document.getElementById('adjustLayerField');
         const qtyInput = document.getElementById('adjustQty');
-        const noteReq = document.getElementById('adjustNoteReq');
         const $layer = $('#adjustLayer');
 
         qtyInput.value = '';
         qtyInput.disabled = true;
         document.getElementById('adjustQtyHint').textContent = '';
         document.getElementById('adjustSubmitBtn').disabled = true;
+        document.getElementById('adjustSubmitBtn').hidden = true;
 
         if(location === 'gudang'){
             layerField.style.display = '';
-            noteReq.hidden = true;
 
             initLayerSelect2();
 
@@ -1055,13 +1055,11 @@ include '../../sessions/session.php';
 
         } else if(location === 'kantin'){
             layerField.style.display = 'none';
-            noteReq.hidden = false;
             qtyInput.disabled = false;
             qtyInput.focus();
             document.getElementById('adjustQtyHint').textContent = 'Masukkan jumlah adjustment';
         } else {
             layerField.style.display = 'none';
-            noteReq.hidden = true;
         }
 
         validateAdjustForm();
@@ -1077,6 +1075,7 @@ include '../../sessions/session.php';
             qtyInput.value = '';
             hint.textContent = '';
             document.getElementById('adjustSubmitBtn').disabled = true;
+            document.getElementById('adjustSubmitBtn').hidden = true;
             return;
         }
 
@@ -1109,20 +1108,16 @@ include '../../sessions/session.php';
         const note = document.getElementById('adjustNote').value.trim();
         const submitBtn = document.getElementById('adjustSubmitBtn');
 
-        if(!type || !location || qty <= 0){
-            submitBtn.disabled = true;
-            return;
-        }
+        submitBtn.hidden = true;
+        submitBtn.disabled = true;
 
-        if(location === 'kantin' && note === ''){
-            submitBtn.disabled = true;
+        if(!type || !location || qty <= 0 || note === ''){
             return;
         }
 
         if(location === 'gudang'){
             const layerId = $('#adjustLayer').val();
             if(!layerId || layerId === ''){
-                submitBtn.disabled = true;
                 return;
             }
 
@@ -1139,7 +1134,6 @@ include '../../sessions/session.php';
                 }
 
                 if(qty > maxQty){
-                    submitBtn.disabled = true;
                     document.getElementById('adjustQty').classList.add('is-invalid');
                     return;
                 }
@@ -1147,6 +1141,7 @@ include '../../sessions/session.php';
         }
 
         document.getElementById('adjustQty').classList.remove('is-invalid');
+        submitBtn.hidden = false;
         submitBtn.disabled = false;
     }
 
@@ -1154,12 +1149,14 @@ include '../../sessions/session.php';
         e.preventDefault();
 
         const submitBtn = document.getElementById('adjustSubmitBtn');
+        if(submitBtn.hidden || submitBtn.disabled) return;
+
         const spinner = submitBtn.querySelector('.adjust-btn-spinner');
         const btnText = submitBtn.querySelector('.adjust-btn-text');
 
         submitBtn.disabled = true;
         spinner.hidden = false;
-        btnText.textContent = 'Menyimpan...';
+        btnText.textContent = 'Saving...';
 
         const formData = {
             edit_id: currentEditId,
@@ -1208,7 +1205,8 @@ include '../../sessions/session.php';
         .finally(() => {
             submitBtn.disabled = false;
             spinner.hidden = true;
-            btnText.textContent = 'Simpan Adjustment';
+            btnText.textContent = 'Save Adjustment';
+            validateAdjustForm();
         });
     });
 
@@ -1222,13 +1220,14 @@ include '../../sessions/session.php';
         loc.innerHTML = '<option value="" selected disabled>Pilih jenis adjustment dahulu</option>';
 
         document.getElementById('adjustLayerField').style.display = 'none';
-        document.getElementById('adjustNoteReq').hidden = true;
         document.getElementById('adjustQty').disabled = true;
         document.getElementById('adjustQty').value = '';
         document.getElementById('adjustQty').removeAttribute('max');
         document.getElementById('adjustQtyHint').textContent = '';
         document.getElementById('adjustQtyHint').classList.remove('is-warn');
         document.getElementById('adjustSubmitBtn').disabled = true;
+        document.getElementById('adjustSubmitBtn').hidden = true;
+        document.getElementById('adjustNote').value = '';
 
         if($.fn.select2 && $('#adjustLayer').data('select2')){
             $('#adjustLayer').val('').trigger('change.select2');
@@ -1276,7 +1275,6 @@ include '../../sessions/session.php';
         const locSel    = document.getElementById('adjustLocation');
         const layerField= document.getElementById('adjustLayerField');
         const qtyInput  = document.getElementById('adjustQty');
-        const noteReq   = document.getElementById('adjustNoteReq');
         const hint      = document.getElementById('adjustQtyHint');
 
         document.querySelectorAll('.adjust-select, .adjust-input, .adjust-textarea').forEach(el => el.classList.remove('is-invalid'));
@@ -1296,7 +1294,6 @@ include '../../sessions/session.php';
 
         if(adj.location === 'gudang'){
             layerField.style.display = '';
-            noteReq.hidden = true;
             initLayerSelect2();
 
             let opts = '<option value="">Pilih layer FIFO...</option>';
@@ -1333,7 +1330,6 @@ include '../../sessions/session.php';
             }
         } else {
             layerField.style.display = 'none';
-            noteReq.hidden = false;
             hint.textContent = 'Masukkan jumlah adjustment';
             hint.classList.remove('is-warn');
         }
