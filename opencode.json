@@ -6,7 +6,7 @@
             "name": "9Router-server",
             "options": {
                 "baseURL": "http://192.168.2.216:20128/v1",
-                "apiKey": "sk-c52d2f4b945e51ad-ogjivm-538359a6"
+                "apiKey": "sk-c52d2f4b945e51ad-o89mhu-92740109"
             },
             "models": {
                 "Hermes-Agent": {
