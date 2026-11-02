@@ -441,11 +441,31 @@ $current_page = 'chat.php';
         if (!msgEl) return;
         if (!list.length) return;
 
+        var seenIds = {};
+        var rendered = msgEl.querySelectorAll('.chat-msg[data-id]');
+        for (var i = 0; i < rendered.length; i++) {
+            seenIds[rendered[i].getAttribute('data-id')] = true;
+        }
+
+        var newMessages = [];
+        list.forEach(function (m) {
+            if (m.id > lastId) lastId = m.id;
+            var id = String(m.id);
+            if (seenIds[id]) return;
+            seenIds[id] = true;
+            newMessages.push(m);
+        });
+
+        if (!newMessages.length) {
+            if (activeId && convCache[activeId]) convCache[activeId].lastId = lastId;
+            return;
+        }
+
         var needBeep = false;
         var lastDay = lastRenderedDay;
 
         var html = '';
-        list.forEach(function (m) {
+        newMessages.forEach(function (m) {
             if (m.id > lastId) lastId = m.id;
             if (!m.mine) needBeep = true;
 
@@ -463,12 +483,12 @@ $current_page = 'chat.php';
 
         // Simpan ke cache
         if (activeId && convCache[activeId]) {
-            convCache[activeId].list = convCache[activeId].list.concat(list);
+            convCache[activeId].list = convCache[activeId].list.concat(newMessages);
             convCache[activeId].lastId = lastId;
         }
 
         // Urutan kontak naik instan (kirim/terima)
-        var lastNew = list[list.length - 1];
+        var lastNew = newMessages[newMessages.length - 1];
         if (lastNew) touchMessage(lastNew, !!lastNew.mine);
 
         if (needBeep && document.visibilityState !== 'hidden') beep(2);
