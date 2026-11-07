@@ -12,7 +12,7 @@ if (!isset($_SESSION['welcome_shown'])) {
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-    <title>Dashboard - Qieos</title>
+    <title>Overview - Qieos</title>
     <?php include '../script/headscript.php'; ?>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -26,7 +26,7 @@ if (!isset($_SESSION['welcome_shown'])) {
         <div class="dash-hdr fi">
             <div class="hdr-row">
                 <div>
-                    <h1>Dashboard</h1>
+                    <h1>Overview</h1>
                     <p class="hdr-sub">Ringkasan data bisnis Anda secara real-time</p>
                     <div class="hdr-dots"><span></span><span></span><span></span></div>
                 </div>

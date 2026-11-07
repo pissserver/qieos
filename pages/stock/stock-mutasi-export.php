@@ -27,11 +27,13 @@ if(!$prod){
 $isKantin = ($tab === 'kantin');
 $tabLabel = $isKantin ? 'KANTIN' : 'GUDANG';
 
-$rows   = $isKantin ? $rowsK : $rowsG;
-$qAwal  = $isKantin ? $kAwal  : $gAwal;
-$qMasuk = $isKantin ? $kMasuk : $gMasuk;
-$qKeluar= $isKantin ? $kKeluar: $gKeluar;
-$qAkhir = $isKantin ? $kAkhir : $gAkhir;
+$rows    = $isKantin ? $rowsK   : $rowsG;
+$qAwal   = $isKantin ? $kAwal   : $gAwal;
+$qMasuk  = $isKantin ? $kMasuk  : $gMasuk;
+$qKeluar = $isKantin ? $kKeluar : $gKeluar;
+$qAdjIn  = $isKantin ? $kAdjIn  : $gAdjIn;
+$qAdjOut = $isKantin ? $kAdjOut : $gAdjOut;
+$qAkhir  = $isKantin ? $kAkhir  : $gAkhir;
 
 $periode = mutasi_tgl($from, $bulan) . ' - ' . mutasi_tgl($to, $bulan);
 
@@ -121,51 +123,29 @@ foreach($info as $row => $v){
 }
 $sheet->getRowDimension(8)->setRowHeight(8);
 
-/* ---------------- Kartu ringkasan (2x2) ---------------- */
-$cards = [
-    [9,  'A', 'C', 'QTY AWAL',   $qAwal],
-    [9,  'D', 'F', 'QTY MASUK',  $qMasuk],
-    [11, 'A', 'C', 'QTY KELUAR', $qKeluar],
-    [11, 'D', 'F', 'QTY AKHIR',  $qAkhir],
-];
-foreach($cards as $c){
-    list($lr, $lc, $ec, $label, $value) = $c;
-    $vr = $lr + 1;
+/* ---------------- Ringkasan: 1 baris mini ---------------- */
+$adjNet = (int)$qAdjIn - (int)$qAdjOut;
+$u = $unit !== '' ? ' ' . $unit : '';
+$summaryText = 'Qty Awal ' . number_format((int)$qAwal) . $u
+    . '   •   Qty Masuk ' . number_format((int)$qMasuk) . $u
+    . '   •   Qty Keluar ' . number_format((int)$qKeluar) . $u
+    . '   •   Adjustment +' . number_format((int)$qAdjIn) . '/−' . number_format((int)$qAdjOut) . ' (Net ' . ($adjNet >= 0 ? '+' : '−') . number_format(abs($adjNet)) . ')'
+    . '   •   Qty Akhir ' . number_format((int)$qAkhir) . $u;
 
-    $sheet->mergeCells("{$lc}{$lr}:{$ec}{$lr}");
-    $sheet->setCellValue("{$lc}{$lr}", $label);
-    $sheet->getStyle("{$lc}{$lr}:{$ec}{$lr}")->applyFromArray([
-        'font'      => ['bold' => true, 'size' => 10, 'color' => ['rgb' => $cAccent]],
-        'fill'      => ['type' => PHPExcel_Style_Fill::FILL_SOLID, 'color' => ['rgb' => $cAccentTl]],
-        'alignment' => ['horizontal' => PHPExcel_Style_Alignment::HORIZONTAL_CENTER, 'vertical' => PHPExcel_Style_Alignment::VERTICAL_CENTER],
-        'borders'   => ['allborders' => ['style' => PHPExcel_Style_Border::BORDER_THIN, 'color' => ['rgb' => $cLine]]],
-    ]);
-
-    $sheet->mergeCells("{$lc}{$vr}:{$ec}{$vr}");
-    $sheet->setCellValue("{$lc}{$vr}", (int)$value);
-    $sheet->getStyle("{$lc}{$vr}:{$ec}{$vr}")->applyFromArray([
-        'font'      => ['bold' => true, 'size' => 14, 'color' => ['rgb' => $cText]],
-        'fill'      => ['type' => PHPExcel_Style_Fill::FILL_SOLID, 'color' => ['rgb' => 'FFFFFF']],
-        'alignment' => ['horizontal' => PHPExcel_Style_Alignment::HORIZONTAL_CENTER, 'vertical' => PHPExcel_Style_Alignment::VERTICAL_CENTER],
-        'borders'   => ['allborders' => ['style' => PHPExcel_Style_Border::BORDER_THIN, 'color' => ['rgb' => $cLine]]],
-    ]);
-    $sheet->getStyle("{$lc}{$vr}:{$ec}{$vr}")->getNumberFormat()->setFormatCode('#,##0');
-    $sheet->getRowDimension($lr)->setRowHeight(18);
-    $sheet->getRowDimension($vr)->setRowHeight(26);
-}
-$sheet->getRowDimension(13)->setRowHeight(8);
-
-/* Unit diselipkan ke label kartu kalau ada (mis. "QTY MASUK (PCS)") */
-if($unit !== ''){
-    $sheet->setCellValue('A9',  'QTY AWAL ('   . $unit . ')');
-    $sheet->setCellValue('D9',  'QTY MASUK ('  . $unit . ')');
-    $sheet->setCellValue('A11', 'QTY KELUAR (' . $unit . ')');
-    $sheet->setCellValue('D11', 'QTY AKHIR ('  . $unit . ')');
-}
+$sheet->mergeCells('A9:F9');
+$sheet->setCellValue('A9', $summaryText);
+$sheet->getStyle('A9:F9')->applyFromArray([
+    'font'      => ['bold' => true, 'size' => 10, 'color' => ['rgb' => $cAccent]],
+    'fill'      => ['type' => PHPExcel_Style_Fill::FILL_SOLID, 'color' => ['rgb' => $cAccentTl]],
+    'alignment' => ['horizontal' => PHPExcel_Style_Alignment::HORIZONTAL_CENTER, 'vertical' => PHPExcel_Style_Alignment::VERTICAL_CENTER],
+    'borders'   => ['allborders' => ['style' => PHPExcel_Style_Border::BORDER_THIN, 'color' => ['rgb' => $cLine]]],
+]);
+$sheet->getRowDimension(9)->setRowHeight(20);
+$sheet->getRowDimension(10)->setRowHeight(6);
 
 /* ---------------- Tabel riwayat ---------------- */
-$headRow  = 14;
-$dataRow  = 15;
+$headRow  = 11;
+$dataRow  = 12;
 $headers  = ['No', 'Tanggal', 'Keterangan', 'Masuk', 'Keluar', 'Saldo'];
 $col      = 'A';
 foreach($headers as $h){
@@ -207,8 +187,13 @@ if(!$rows){
         $sheet->setCellValue("E{$r}", $row['keluar'] > 0 ? (int)$row['keluar'] : '');
         $sheet->setCellValue("F{$r}", (int)$row['saldo']);
 
-        $sumMasuk  += (int)$row['masuk'];
-        $sumKeluar += (int)$row['keluar'];
+        /* Total pergerakan mengecualikan adjustment (sudah dihitung
+           terpisah di baris info adjustment). */
+        $isAdj = strpos($row['title'], 'Adjustment') === 0;
+        if(!$isAdj){
+            $sumMasuk  += (int)$row['masuk'];
+            $sumKeluar += (int)$row['keluar'];
+        }
 
         $zebra = ($i % 2 === 1);
 
@@ -247,8 +232,7 @@ $sheet->mergeCells("A{$totalRow}:C{$totalRow}");
 $sheet->setCellValue("A{$totalRow}", 'TOTAL PERGERAKAN');
 $sheet->setCellValue("D{$totalRow}", $sumMasuk);
 $sheet->setCellValue("E{$totalRow}", $sumKeluar);
-$sheet->setCellValue("F{$totalRow}", $qAkhir);
-$sheet->getStyle("A{$totalRow}:F{$totalRow}")->applyFromArray([
+$sheet->setCellValue("F{$totalRow}", $qAkhir);$sheet->getStyle("A{$totalRow}:F{$totalRow}")->applyFromArray([
     'font'      => ['bold' => true, 'size' => 11, 'color' => ['rgb' => $cBrand]],
     'fill'      => ['type' => PHPExcel_Style_Fill::FILL_SOLID, 'color' => ['rgb' => $cAccentTl]],
     'borders'   => ['allborders' => ['style' => PHPExcel_Style_Border::BORDER_THIN, 'color' => ['rgb' => 'C7D2FE']]],

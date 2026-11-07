@@ -11,7 +11,6 @@ $q = mysqli_query($conn,"
         COALESCE(products.name, '') AS name,
         pi.qty_buy,
         pi.unit_buy,
-        pi.price_unit,
         pi.price_buy,
         pi.qty_stock,
         pi.remaining_qty,
@@ -100,7 +99,7 @@ $hasBlock = false;
                     $qtyStockVal  = (int)round(((float)$d['qty_buy']) * $convFactor);
                     $unitStockVal = $baseUnit;
                 } else {
-                    $qtyStockVal  = (int)$d['qty_buy'];
+                    $qtyStockVal  = (int)round((float)$d['qty_buy']);
                     $unitStockVal = $productUnit;
                 }
                 $remainVal = $qtyStockVal;
@@ -109,6 +108,9 @@ $hasBlock = false;
                 $remainVal    = $d['remaining_qty'] !== null ? (int)$d['remaining_qty'] : $qtyStockVal;
                 $unitStockVal = $d['unit_stock'] ?: ($d['product_unit'] ?: $d['unit_buy']);
             }
+            $unitPriceStock = $qtyStockVal > 0
+                ? (float)$d['price_buy'] / $qtyStockVal
+                : null;
         ?>
 
         <div class="restock-view-item">
@@ -126,17 +128,13 @@ $hasBlock = false;
                     <span class="rv-value"><?= (int)$d['qty_buy'] ?> <?= htmlspecialchars($d['unit_buy']) ?></span>
                 </div>
 
-                <div class="rv-stat">
-                    <span class="rv-label">Harga Satuan</span>
-                    <span class="rv-value">Rp <?= number_format((float)$d['price_unit'], 0, ',', '.') ?></span>
-                </div>
-
                 <div class="rv-stat rv-stat-total">
                     <span class="rv-label">Total</span>
                     <span class="rv-value">Rp <?= number_format((float)$d['price_buy'], 0, ',', '.') ?></span>
                 </div>
             </div>
 
+            <div class="rv-conversion-row">
             <?php if($isPending): ?>
                 <?php if($hasConvert): ?>
                 <div class="rv-convert rv-convert-on">
@@ -205,6 +203,15 @@ $hasBlock = false;
                 <?php endif; ?>
             <?php endif; ?>
 
+            <?php if($unitPriceStock !== null && !$blocked): ?>
+                <div class="rv-unit-price-detail">
+                    <span class="rv-unit-price-label"><i class="fas fa-calculator"></i> Harga per unit stock</span>
+                    <strong>Rp <?= number_format($unitPriceStock, 2, ',', '.') ?></strong>
+                    <small>Rp <?= number_format((float)$d['price_buy'], 0, ',', '.') ?> ÷ <?= product_qty_label($qtyStockVal) ?> <?= htmlspecialchars($unitStockVal) ?></small>
+                </div>
+            <?php endif; ?>
+            </div>
+
             <div class="rv-fields">
                 <div class="rv-field-item">
                     <span class="rv-target-label"><i class="fas fa-cubes-stacked"></i> Qty Stock</span>
@@ -219,6 +226,10 @@ $hasBlock = false;
                 <div class="rv-field-item">
                     <span class="rv-target-label"><i class="fas fa-ruler"></i> Unit Stock</span>
                     <span class="rv-field rv-field-text<?= $isRestocked ? ' is-filled' : '' ?>" data-value="<?= htmlspecialchars($unitStockVal) ?>"><?= $isRestocked && $unitStockVal !== '' ? htmlspecialchars($unitStockVal) : '&mdash;' ?></span>
+                </div>
+                <div class="rv-field-item rv-field-price">
+                    <span class="rv-target-label"><i class="fas fa-coins"></i> Harga Satuan</span>
+                    <span class="rv-field<?= $unitPriceStock !== null ? ' is-filled' : '' ?>" data-value="<?= $unitPriceStock !== null ? 'Rp ' . number_format($unitPriceStock, 2, ',', '.') : '' ?>"><?= $unitPriceStock !== null ? 'Rp ' . number_format($unitPriceStock, 2, ',', '.') : '&mdash;' ?></span>
                 </div>
             </div>
 

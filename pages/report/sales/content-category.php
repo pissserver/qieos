@@ -12,7 +12,7 @@
                 </div>
 
                 <div class="panel-subtitle">
-                    Menampilkan omzet produk berdasarkan kategori.
+                    Menampilkan omzet produk dan racikan berdasarkan kategori.
                 </div>
             </div>
         </div>
@@ -32,6 +32,7 @@
                     <option value="jajanan">Jajanan</option>
                     <option value="pelengkap">Pelengkap</option>
                     <option value="additional">Additional</option>
+                    <option value="racikan">Racikan</option>
                 </select>
             </div>
 

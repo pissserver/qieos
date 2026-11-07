@@ -1,22 +1,37 @@
 <?php
     include '../../sessions/session.php';
     include __DIR__ . '/../components/data/product-conversion.php';
+    include __DIR__ . '/components/data/purchase-number.php';
     header('Content-Type: application/json');
 
     if ($_GET['action'] == 'store') {
         $product_ids = isset($_POST['product_id']) ? $_POST['product_id'] : [];
         $qtys_buy    = isset($_POST['qty_buy']) ? $_POST['qty_buy'] : [];
         $units_buy   = isset($_POST['unit_buy']) ? $_POST['unit_buy'] : [];
-        $unit_prices = isset($_POST['unit_price']) ? $_POST['unit_price'] : [];
         $prices_buy  = isset($_POST['price_buy']) ? $_POST['price_buy'] : [];
 
-        $qLast = mysqli_query($conn,"SELECT MAX(CAST(REPLACE(form, 'FORM-', '') AS UNSIGNED)) AS last_num FROM purchases");
-        $dLast = mysqli_fetch_assoc($qLast);
-        $nextNum = ($dLast && $dLast['last_num'] ? (int)$dLast['last_num'] : 0) + 1;
-        $formNumber = 'FORM-' . str_pad($nextNum, 7, '0', STR_PAD_LEFT);
+        if (count($product_ids) === 0) {
+            echo json_encode(['status' => 'error', 'msg' => 'Tambahkan minimal satu produk']);
+            exit;
+        }
+
+        $formNumber = next_purchase_form_number($conn);
+        if ($formNumber === false) {
+            echo json_encode(['status' => 'error', 'msg' => 'Gagal membuat nomor form: ' . mysqli_error($conn)]);
+            exit;
+        }
         $dateNow = date('Y-m-d');
 
-        mysqli_query($conn, "INSERT INTO purchases (form, date) VALUES ('$formNumber', '$dateNow')");
+        mysqli_begin_transaction($conn);
+        $purchaseCreated = mysqli_query($conn, "
+            INSERT INTO purchases (form, receipt, date)
+            VALUES ('$formNumber', NULL, '$dateNow')
+        ");
+        if (!$purchaseCreated) {
+            mysqli_rollback($conn);
+            echo json_encode(['status' => 'error', 'msg' => 'Gagal menyimpan form: ' . mysqli_error($conn)]);
+            exit;
+        }
         $purchase_id = mysqli_insert_id($conn);
 
         for ($i = 0; $i < count($product_ids); $i++) {
@@ -25,25 +40,130 @@
 
             $qty_buy   = mysqli_real_escape_string($conn, isset($qtys_buy[$i]) ? $qtys_buy[$i] : 0);
             $unit_buy  = mysqli_real_escape_string($conn, isset($units_buy[$i]) ? $units_buy[$i] : '');
-            $unit_price = isset($unit_prices[$i]) && $unit_prices[$i] !== ''
-                ? (float)$unit_prices[$i]
-                : null;
             $price_buy = isset($prices_buy[$i]) && $prices_buy[$i] !== ''
                 ? (float)$prices_buy[$i]
                 : 0;
 
-            $unit_price_sql = $unit_price === null ? 'NULL' : $unit_price;
-
-            mysqli_query($conn, "INSERT INTO purchase_items
+            $itemSaved = mysqli_query($conn, "INSERT INTO purchase_items
                 (purchase_id, product_id, qty_buy, unit_buy, price_unit, price_buy)
                 VALUES
-                ($purchase_id, $product_id, $qty_buy, '$unit_buy', $unit_price_sql, $price_buy)");
+                ($purchase_id, $product_id, $qty_buy, '$unit_buy', NULL, $price_buy)");
+            if (!$itemSaved) {
+                mysqli_rollback($conn);
+                echo json_encode(['status' => 'error', 'msg' => 'Gagal menyimpan produk: ' . mysqli_error($conn)]);
+                exit;
+            }
         }
 
+        mysqli_commit($conn);
         echo json_encode([
             "status" => "success",
-            "msg" => "Daftar belanja berhasil dibuat"
+            "msg" => "Daftar belanja berhasil dibuat",
+            "purchase_id" => $purchase_id,
+            "form" => $formNumber
         ]);
+        exit;
+    }
+
+    if ($_GET['action'] == 'create_receipt') {
+        $id = isset($_POST['id']) ? (int)$_POST['id'] : 0;
+        if ($id <= 0) {
+            echo json_encode(['status' => 'error', 'msg' => 'Data pembelian tidak valid']);
+            exit;
+        }
+
+        mysqli_begin_transaction($conn);
+        $purchaseQuery = mysqli_query($conn, "
+            SELECT form, receipt
+            FROM purchases
+            WHERE id = '$id'
+              AND deleted_at IS NULL
+            LIMIT 1
+            FOR UPDATE
+        ");
+        $purchase = $purchaseQuery ? mysqli_fetch_assoc($purchaseQuery) : null;
+        if (!$purchase) {
+            mysqli_rollback($conn);
+            echo json_encode(['status' => 'error', 'msg' => 'Form pembelian tidak ditemukan']);
+            exit;
+        }
+        if (!empty($purchase['receipt'])) {
+            mysqli_rollback($conn);
+            echo json_encode([
+                'status' => 'error',
+                'msg' => 'Receipt untuk pembelian ini sudah dibuat',
+                'receipt' => $purchase['receipt']
+            ]);
+            exit;
+        }
+        if (!preg_match('/^FORM-[0-9]+$/', $purchase['form'])) {
+            mysqli_rollback($conn);
+            echo json_encode(['status' => 'error', 'msg' => 'Nomor form tidak sesuai format receipt']);
+            exit;
+        }
+
+        $itemsQuery = mysqli_query($conn, "
+            SELECT COUNT(*) AS total
+            FROM purchase_items
+            WHERE purchase_id = '$id'
+              AND deleted_at IS NULL
+        ");
+        $items = $itemsQuery ? mysqli_fetch_assoc($itemsQuery) : null;
+        if (!$itemsQuery || (int)$items['total'] === 0) {
+            mysqli_rollback($conn);
+            echo json_encode(['status' => 'error', 'msg' => 'Pembelian belum memiliki produk']);
+            exit;
+        }
+
+        $receiptNumber = 'RECEIPT-' . substr($purchase['form'], 5);
+        $receiptEscaped = mysqli_real_escape_string($conn, $receiptNumber);
+        $updated = mysqli_query($conn, "
+            UPDATE purchases
+            SET receipt = '$receiptEscaped'
+            WHERE id = '$id'
+              AND receipt IS NULL
+        ");
+        if (!$updated || mysqli_affected_rows($conn) !== 1) {
+            mysqli_rollback($conn);
+            echo json_encode(['status' => 'error', 'msg' => 'Gagal membuat nomor receipt']);
+            exit;
+        }
+
+        $summaryQuery = mysqli_query($conn, "
+            SELECT
+                COUNT(*) AS total_items,
+                COALESCE(SUM(price_buy), 0) AS total_price,
+                SUM(CASE
+                    WHEN supplier_id IS NULL
+                      OR supplier_id = 0
+                      OR TRIM(COALESCE(invoice_no, '')) = ''
+                    THEN 1 ELSE 0
+                END) AS incomplete_items,
+                MAX(CASE WHEN qty_stock IS NOT NULL THEN 1 ELSE 0 END) AS used_flag
+            FROM purchase_items
+            WHERE purchase_id = '$id'
+              AND deleted_at IS NULL
+        ");
+        if(!$summaryQuery){
+            mysqli_rollback($conn);
+            echo json_encode(['status' => 'error', 'msg' => 'Gagal membaca ringkasan receipt: ' . mysqli_error($conn)]);
+            exit;
+        }
+        $summary = mysqli_fetch_assoc($summaryQuery);
+
+        mysqli_commit($conn);
+        echo json_encode([
+            'status' => 'success',
+            'msg' => 'Receipt pembelian berhasil dibuat',
+            'purchase_id' => $id,
+            'form' => $purchase['form'],
+            'receipt' => $receiptNumber,
+            'total_items' => (int)$summary['total_items'],
+            'total_price' => (float)$summary['total_price'],
+            'incomplete_items' => (int)$summary['incomplete_items'],
+            'used_flag' => (int)$summary['used_flag']
+        ]);
+        exit;
     }
 
 if ($_GET['action'] == 'update') {
@@ -52,6 +172,26 @@ if ($_GET['action'] == 'update') {
 
         if ($id <= 0) {
             echo json_encode(['status' => 'error', 'msg' => 'Data tidak valid']);
+            exit;
+        }
+
+        $purchaseCheck = mysqli_query($conn, "
+            SELECT form, receipt
+            FROM purchases
+            WHERE id = '$id'
+              AND deleted_at IS NULL
+            LIMIT 1
+        ");
+        $purchase = $purchaseCheck ? mysqli_fetch_assoc($purchaseCheck) : null;
+        if (!$purchase) {
+            echo json_encode(['status' => 'error', 'msg' => 'Form pembelian tidak ditemukan']);
+            exit;
+        }
+        if (!empty($purchase['receipt'])) {
+            echo json_encode([
+                'status' => 'error',
+                'msg' => 'Pembelian sudah menjadi receipt dan tidak dapat diubah'
+            ]);
             exit;
         }
 
@@ -89,8 +229,9 @@ if ($_GET['action'] == 'update') {
         $product_ids  = isset($_POST['product_id']) ? $_POST['product_id'] : [];
         $qtys_buy     = isset($_POST['qty_buy']) ? $_POST['qty_buy'] : [];
         $units_buy    = isset($_POST['unit_buy']) ? $_POST['unit_buy'] : [];
-        $unit_prices  = isset($_POST['unit_price']) ? $_POST['unit_price'] : [];
         $prices_buy   = isset($_POST['price_buy']) ? $_POST['price_buy'] : [];
+        $supplier_ids = isset($_POST['supplier_id']) ? $_POST['supplier_id'] : [];
+        $invoice_nos  = isset($_POST['invoice_no']) ? $_POST['invoice_no'] : [];
 
         // id item yang valid & milik form ini
         $valid_ids = [];
@@ -107,19 +248,44 @@ if ($_GET['action'] == 'update') {
             $product_id = (int)$product_id;
             if ($product_id <= 0) continue;
 
+            $supplier_id = isset($supplier_ids[$key]) ? (int)$supplier_ids[$key] : 0;
+            $invoice_no = trim(isset($invoice_nos[$key]) ? $invoice_nos[$key] : '');
+            if($supplier_id <= 0 || $invoice_no === '' || strlen($invoice_no) > 100){
+                mysqli_rollback($conn);
+                echo json_encode([
+                    'status' => 'error',
+                    'msg' => 'Supplier wajib dipilih dan no invoice wajib diisi maksimal 100 karakter'
+                ]);
+                exit;
+            }
+
+            $supplierCheck = mysqli_query($conn, "
+                SELECT 1
+                FROM product_supplier ps
+                JOIN suppliers s ON s.id = ps.supplier_id
+                WHERE ps.product_id = '$product_id'
+                  AND ps.supplier_id = '$supplier_id'
+                  AND s.deleted_at IS NULL
+                LIMIT 1
+            ");
+            if(!$supplierCheck || mysqli_num_rows($supplierCheck) === 0){
+                mysqli_rollback($conn);
+                echo json_encode([
+                    'status' => 'error',
+                    'msg' => 'Supplier yang dipilih tidak terdaftar untuk produk tersebut'
+                ]);
+                exit;
+            }
+
             $item_id = isset($item_ids[$key]) ? (int)$item_ids[$key] : 0;
             if ($item_id > 0 && !isset($valid_ids[$item_id])) $item_id = 0;
 
             $qty_buy   = isset($qtys_buy[$key]) ? mysqli_real_escape_string($conn, $qtys_buy[$key]) : 0;
             $unit_buy  = isset($units_buy[$key]) ? mysqli_real_escape_string($conn, $units_buy[$key]) : '';
-            $unit_price = isset($unit_prices[$key]) && $unit_prices[$key] !== ''
-                ? (float)$unit_prices[$key]
-                : null;
+            $invoice_no = mysqli_real_escape_string($conn, $invoice_no);
             $price_buy = isset($prices_buy[$key]) && $prices_buy[$key] !== ''
                 ? (float)$prices_buy[$key]
                 : 0;
-
-            $unit_price_sql = $unit_price === null ? 'NULL' : $unit_price;
 
             if ($item_id > 0) {
                 // update baris yang sama, qty/remaining_qty tidak disentuh
@@ -128,8 +294,10 @@ if ($_GET['action'] == 'update') {
                     SET product_id = '$product_id',
                         qty_buy    = '$qty_buy',
                         unit_buy   = '$unit_buy',
-                        price_unit = $unit_price_sql,
-                        price_buy  = '$price_buy'
+                        price_unit = NULL,
+                        price_buy  = '$price_buy',
+                        supplier_id = '$supplier_id',
+                        invoice_no = '$invoice_no'
                     WHERE id = '$item_id'
                       AND purchase_id = '$id'
                 ");
@@ -143,14 +311,18 @@ if ($_GET['action'] == 'update') {
                         qty_buy,
                         unit_buy,
                         price_unit,
-                        price_buy
+                        price_buy,
+                        supplier_id,
+                        invoice_no
                     ) VALUES(
                         '$id',
                         '$product_id',
                         '$qty_buy',
                         '$unit_buy',
-                        $unit_price_sql,
-                        $price_buy
+                        NULL,
+                        $price_buy,
+                        '$supplier_id',
+                        '$invoice_no'
                     )
                 ");
             }
@@ -178,17 +350,70 @@ if ($_GET['action'] == 'update') {
             ");
         }
 
+        $summaryQuery = mysqli_query($conn, "
+            SELECT
+                COUNT(*) AS total_items,
+                COALESCE(SUM(price_buy), 0) AS total_price,
+                SUM(CASE
+                    WHEN supplier_id IS NULL
+                      OR supplier_id = 0
+                      OR TRIM(COALESCE(invoice_no, '')) = ''
+                    THEN 1 ELSE 0
+                END) AS incomplete_items,
+                MAX(CASE WHEN qty_stock IS NOT NULL THEN 1 ELSE 0 END) AS used_flag
+            FROM purchase_items
+            WHERE purchase_id = '$id'
+              AND deleted_at IS NULL
+        ");
+        if(!$summaryQuery){
+            mysqli_rollback($conn);
+            echo json_encode(['status' => 'error', 'msg' => 'Gagal memperbarui ringkasan pembelian: ' . mysqli_error($conn)]);
+            exit;
+        }
+        $summary = mysqli_fetch_assoc($summaryQuery);
+
         mysqli_commit($conn);
 
         echo json_encode([
             "status" => "success",
-            "msg" => "Daftar belanja berhasil diupdate"
+            "msg" => "Daftar belanja berhasil diupdate",
+            "purchase_id" => $id,
+            "form" => $purchase['form'],
+            "receipt" => $purchase['receipt'],
+            "total_items" => (int)$summary['total_items'],
+            "total_price" => (float)$summary['total_price'],
+            "incomplete_items" => (int)$summary['incomplete_items'],
+            "used_flag" => (int)$summary['used_flag']
         ]);
         exit;
     }
 
     if ($_GET['action'] == 'destroy') {
         $id = (int)$_POST['id'];
+        if ($id <= 0) {
+            echo json_encode(['status' => 'error', 'msg' => 'Data tidak valid']);
+            exit;
+        }
+
+        $qPurchase = mysqli_query($conn, "
+            SELECT receipt
+            FROM purchases
+            WHERE id = '$id'
+              AND deleted_at IS NULL
+            LIMIT 1
+        ");
+        $purchase = $qPurchase ? mysqli_fetch_assoc($qPurchase) : null;
+        if (!$purchase) {
+            echo json_encode(['status' => 'error', 'msg' => 'Form pembelian tidak ditemukan']);
+            exit;
+        }
+        if (!empty($purchase['receipt'])) {
+            echo json_encode([
+                'status' => 'error',
+                'msg' => 'Pembelian yang sudah memiliki receipt tidak dapat dihapus'
+            ]);
+            exit;
+        }
 
         // stok sudah dipakai -> daftar belanja tidak boleh dihapus
         $qUsed = mysqli_query($conn,"
@@ -317,7 +542,7 @@ if ($_GET['action'] == 'update') {
         foreach ($pending as $item_id) {
 
             $qi = mysqli_query($conn,"
-                SELECT product_id, qty_buy, unit_buy
+                SELECT product_id, qty_buy, unit_buy, price_buy
                 FROM purchase_items
                 WHERE id = '$item_id'
                   AND purchase_id = '$id'
@@ -335,6 +560,7 @@ if ($_GET['action'] == 'update') {
 
             $product_id = (int)$it['product_id'];
             $qty_buy    = (float)$it['qty_buy'];
+            $price_buy  = (float)$it['price_buy'];
             $unit_buy   = isset($it['unit_buy']) ? $it['unit_buy'] : '';
 
             // Bila produk punya konversi yang cocok dengan satuan beli,
@@ -351,11 +577,15 @@ if ($_GET['action'] == 'update') {
             }
 
             $unitStockEsc = mysqli_real_escape_string($conn, $unitStock);
+            $unitPriceStock = $qtyStock > 0
+                ? sprintf('%.4f', $price_buy / $qtyStock)
+                : '0';
 
             $run = mysqli_query($conn,"
                 UPDATE purchase_items
                 SET qty_stock     = $qtyStock,
                     unit_stock    = '$unitStockEsc',
+                    price_unit    = $unitPriceStock,
                     remaining_qty = $qtyStock
                 WHERE id = $item_id
                   AND purchase_id = '$id'
@@ -383,16 +613,38 @@ if ($_GET['action'] == 'update') {
     if ($_GET['action'] == 'get_print') {
 
         $id = (int)$_GET['id'];
+        $purchaseQuery = mysqli_query($conn, "
+            SELECT form, receipt, date
+            FROM purchases
+            WHERE id = '$id'
+              AND deleted_at IS NULL
+            LIMIT 1
+        ");
+
+        if (!$purchaseQuery || mysqli_num_rows($purchaseQuery) === 0) {
+            http_response_code(404);
+            echo json_encode([
+                "status" => "error",
+                "msg" => "Form belanja tidak ditemukan"
+            ]);
+            exit;
+        }
+
+        $purchase = mysqli_fetch_assoc($purchaseQuery);
 
         $q = mysqli_query($conn,"
             SELECT
                 COALESCE(products.name, '') AS name,
+                s.name AS supplier,
+                pi.invoice_no,
                 pi.qty_buy AS qty,
                 pi.unit_buy AS unit,
                 pi.price_buy AS price
             FROM purchase_items pi
             LEFT JOIN products
                 ON products.id = pi.product_id
+            LEFT JOIN suppliers s
+                ON s.id = pi.supplier_id
             WHERE pi.purchase_id = '$id'
               AND pi.deleted_at IS NULL
         ");
@@ -405,6 +657,9 @@ if ($_GET['action'] == 'update') {
 
         echo json_encode([
             "status" => "success",
+            "date" => $purchase['date'],
+            "form" => $purchase['form'],
+            "receipt" => $purchase['receipt'],
             "data" => $data
         ]);
 

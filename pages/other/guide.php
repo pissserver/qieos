@@ -5,7 +5,6 @@ $base = BASE_URL;
 
 // status
 $A = 'aktif';
-$S = 'segera';
 
 // helper pembungkus item
 function g($icon, $name, $url, $status, $desc, $points, $tag = '') {
@@ -112,7 +111,7 @@ $D['update'] = g('fa-rocket', 'Update', $base . '/pages/other/update.php', $A,
 
 $D['guide'] = g('fa-book', 'Guide', $base . '/pages/other/guide.php', $A,
     'Halaman ini. Petunjuk penggunaan setiap halaman Qieos sesuai role Anda.',
-    array('Cara pakai tiap menu', 'Status fitur: aktif / segera hadir', 'Buka halaman langsung dari kartu'));
+    array('Cara pakai tiap menu', 'Buka halaman langsung dari kartu'));
 
 $D['database-schema'] = g('fa-database', 'Database Schema', $base . '/pages/other/database-schema.php', $A,
     'Peta struktur tabel database Qieos beserta relasinya: 24 tabel dengan domain MASTER, KONVERSI UNIT, PURCHASING, STOK, PENJUALAN, TENANT, AKUN & CHAT, dan SISTEM.',
@@ -121,10 +120,6 @@ $D['database-schema'] = g('fa-database', 'Database Schema', $base . '/pages/othe
 // ============================================================
 // KOMPOSISI PER ROLE
 // ============================================================
-$cs = function ($menu) use ($base) {
-    return $base . '/pages/coming-soon.php?menu=' . $menu;
-};
-
 $sections = array();
 
 switch ($role) {
@@ -156,19 +151,6 @@ switch ($role) {
         $sections['REKAP'] = array('rekap');
         $sections['LAINNYA'] = array('update', 'guide', 'database-schema');
         break;
-}
-
-// ubah item yang belum tersedia sesuai role -> "segera hadir"
-$segera = array(
-    'administrator' => array('master-produk', 'master-unit', 'master-supplier', 'master-customer', 'restock',
-        'stok-gudang', 'transfer-gudang', 'laporan-penjualan'),
-    'staff kasir'   => array('master-customer', 'stok-kantin', 'katalog', 'pesanan'),
-);
-
-if (isset($segera[$role])) {
-    foreach ($segera[$role] as $k) {
-        if (isset($D[$k])) { $D[$k]['url'] = $cs($k); $D[$k]['status'] = $S; }
-    }
 }
 
 // ============================================================
@@ -209,12 +191,9 @@ function slugify($s) {
 
     <!-- HITUNG RINGKASAN -->
     <?php
-    $totalMenus = 0; $soonCount = 0;
+    $totalMenus = 0;
     foreach ($sections as $keys) {
         $totalMenus += count($keys);
-        foreach ($keys as $k) {
-            if (isset($D[$k]) && $D[$k]['status'] === $S) { $soonCount++; }
-        }
     }
     $seksiCount = count($sections);
     $roleLabel = ($role === 'staff kasir') ? 'Staff Kasir' : ucfirst($role);
@@ -244,10 +223,6 @@ function slugify($s) {
                 <div class="gh-stat">
                     <span class="gh-stat-num"><?= $seksiCount ?></span>
                     <span class="gh-stat-label">Seksi</span>
-                </div>
-                <div class="gh-stat">
-                    <span class="gh-stat-num"><?= $soonCount ?></span>
-                    <span class="gh-stat-label">Segera Hadir</span>
                 </div>
             </div>
         </div>
@@ -282,10 +257,9 @@ function slugify($s) {
         <div class="guide-grid">
             <?php $i = 0; foreach ($keys as $k) :
                 $item = $D[$k];
-                $isSoon = ($item['status'] === $S);
                 $extra = ($k === 'tenant' && $role === 'staff kasir') ? 'Daftar Tenant' : $item['name'];
             ?>
-            <article class="guide-card<?= $isSoon ? ' g-coming' : '' ?>" style="--gs:linear-gradient(135deg,<?= $grad ?>);--i:<?= $i ?>;">
+            <article class="guide-card" style="--gs:linear-gradient(135deg,<?= $grad ?>);--i:<?= $i ?>;">
                 <div class="gc-top">
                     <div class="gc-ico"><i class="fas <?= $item['icon'] ?>"></i></div>
                     <div class="gc-id">
@@ -295,9 +269,7 @@ function slugify($s) {
                                 <span class="gc-tag"><?= htmlspecialchars($item['tag']) ?></span>
                             <?php endif; ?>
                         </div>
-                        <span class="g-badge <?= $isSoon ? 'g-b-segera' : 'g-b-aktif' ?>">
-                            <?= $isSoon ? 'Segera Hadir' : 'Aktif' ?>
-                        </span>
+                        <span class="g-badge g-b-aktif">Aktif</span>
                     </div>
                 </div>
 
@@ -310,9 +282,7 @@ function slugify($s) {
                 </ul>
 
                 <div class="gc-foot">
-                    <?php if ($isSoon) : ?>
-                        <span class="gc-soon"><i class="fas fa-hourglass-half"></i> Segera Hadir</span>
-                    <?php elseif ($item['url'] !== '') : ?>
+                    <?php if ($item['url'] !== '') : ?>
                         <a href="<?= htmlspecialchars($item['url']) ?>" class="gc-btn">
                             Buka Halaman <i class="fas fa-arrow-right"></i>
                         </a>

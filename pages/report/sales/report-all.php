@@ -16,7 +16,7 @@ $query = mysqli_query($conn, "
     FROM orders o
     LEFT JOIN users u ON o.staff_id = u.id
     WHERE DATE(o.tanggal) BETWEEN '$first' AND '$last'
-    ORDER BY o.tanggal DESC, o.id DESC
+    ORDER BY o.tanggal ASC, o.id ASC
 ");
 
 $no = 1;

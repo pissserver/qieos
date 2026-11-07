@@ -15,7 +15,7 @@ $query = mysqli_query($conn, "
     FROM orders o
     WHERE o.staff_id = $cashierId
       AND DATE(o.tanggal) BETWEEN '$first' AND '$last'
-    ORDER BY o.tanggal DESC, o.id DESC
+    ORDER BY o.tanggal ASC, o.id ASC
 ");
 
 $no = 1;

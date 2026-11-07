@@ -62,18 +62,16 @@
         <table class="table align-middle" id="reportTableOmzet">
             <thead>
                 <tr>
-                    <th class="text-center" width="60">No</th>
+                    <th class="text-center" width="40">No</th>
                     <th class="text-center">Tanggal</th>
                     <th class="text-center">Jumlah Pesanan</th>
-                    <th class="text-center">Terbayar</th>
-                    <th class="text-center">Waiting</th>
                     <th class="text-center">Omzet</th>
                 </tr>
             </thead>
 
             <tbody id="reportOmzetBody">
                 <tr>
-                    <td colspan="6">
+                    <td colspan="7">
                         <div class="loading-box">
                             <i class="fas fa-coins"></i>
                             <h5>Belum Ada Data</h5>

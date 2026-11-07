@@ -43,6 +43,7 @@
     <a href="<?php echo BASE_URL; ?>/pages/stock/restock.php" class="nav-link" data-tooltip="Belanja & Restock">
         <span class="sidebar-icon"><i class="fas fa-cart-shopping"></i></span>
         <span class="sidebar-text">Belanja & Restock</span>
+        <span class="purchase-pending-badge" data-purchase-pending-badge hidden aria-label="0 belanja belum selesai">0</span>
     </a>
 </li>
 
@@ -50,6 +51,7 @@
     <a href="<?php echo BASE_URL; ?>/pages/stock/transfer.php" class="nav-link" data-tooltip="Transfer Stok">
         <span class="sidebar-icon"><i class="fas fa-exchange-alt"></i></span>
         <span class="sidebar-text">Transfer Stok</span>
+        <span class="transfer-pending-badge" data-transfer-pending-badge hidden aria-label="0 request transfer pending">0</span>
     </a>
 </li>
 

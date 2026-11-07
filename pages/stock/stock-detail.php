@@ -5,6 +5,7 @@ $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 
 $q = mysqli_query($conn, "
     SELECT 
+        pi.id,
         pi.qty_stock,
         pi.remaining_qty,
         p.date,
@@ -78,7 +79,7 @@ $bulan = [
                     $form = $d['form'] ? $d['form'] : '-';
                 ?>
 
-                <tr<?= $rowNum === 1 ? ' class="fifo-first"' : '' ?>>
+                <tr<?= $rowNum === 1 ? ' class="fifo-first"' : '' ?> data-item-id="<?= (int)$d['id'] ?>">
 
                     <!-- TANGGAL + FORM -->
                     <td>

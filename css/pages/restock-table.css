@@ -33,6 +33,15 @@
         border-radius:0 14px 14px 0;
     }
 
+    #purchaseTable thead th.workflow-status-heading{
+        min-width:155px;
+    }
+
+    #purchaseTable tbody td.workflow-status-cell{
+        min-width:155px;
+        text-align:center;
+    }
+
     #purchaseTable tbody td{
         padding:20px 18px;
         border:none !important;
@@ -91,6 +100,121 @@
         padding:8px 14px;
         border-radius:10px;
         font-weight:600;
+    }
+
+    #purchaseTable .table-receipt-badge{
+        min-height:0;
+        width:max-content;
+        max-width:100%;
+        gap:7px;
+        padding:5px 9px;
+        border-radius:10px;
+        box-shadow:none;
+        animation:none;
+    }
+
+    #purchaseTable .table-receipt-badge > i{
+        font-size:13px;
+    }
+
+    #purchaseTable .table-receipt-badge small{
+        font-size:8px;
+        letter-spacing:.7px;
+    }
+
+    #purchaseTable .table-receipt-badge strong{
+        font-size:11px;
+        line-height:1.2;
+        overflow-wrap:anywhere;
+    }
+
+    .purchase-workflow-status{
+        display:inline-flex;
+        align-items:center;
+        gap:6px;
+        max-width:100%;
+        margin:0 auto;
+        padding:7px 11px;
+        border:1px solid transparent;
+        border-radius:999px;
+        font-size:10px;
+        font-weight:700;
+        line-height:1.2;
+        vertical-align:middle;
+        box-shadow:0 3px 8px rgba(15,23,42,.06);
+    }
+
+    .purchase-workflow-status > i{
+        flex:0 0 auto;
+        font-size:10px;
+    }
+
+    .purchase-workflow-status .workflow-label{
+        overflow:hidden;
+        min-width:0;
+        text-overflow:ellipsis;
+        white-space:nowrap;
+    }
+
+    .purchase-workflow-status.status-incomplete{
+        color:#7c2d12;
+        border-color:#fb923c;
+        background:linear-gradient(135deg,#ffedd5,#fed7aa);
+        box-shadow:0 4px 12px rgba(234,88,12,.2);
+    }
+
+    .purchase-workflow-status.status-receipt{
+        color:#713f12;
+        border-color:#eab308;
+        background:linear-gradient(135deg,#fef9c3,#fde68a);
+        box-shadow:0 4px 12px rgba(202,138,4,.2);
+    }
+
+    .purchase-workflow-status.status-restock{
+        color:#1e3a8a;
+        border-color:#60a5fa;
+        background:linear-gradient(135deg,#dbeafe,#bfdbfe);
+        box-shadow:0 4px 12px rgba(37,99,235,.2);
+    }
+
+    .purchase-workflow-status.status-complete{
+        color:#047857;
+        border-color:#a7f3d0;
+        background:#ecfdf5;
+    }
+
+    .purchase-workflow-status.status-incomplete,
+    .purchase-workflow-status.status-receipt,
+    .purchase-workflow-status.status-restock{
+        animation:purchaseStatusAttention 1.5s ease-in-out infinite;
+    }
+
+    .purchase-workflow-status.status-incomplete > i,
+    .purchase-workflow-status.status-receipt > i,
+    .purchase-workflow-status.status-restock > i{
+        animation:purchaseStatusIcon 1.5s ease-in-out infinite;
+    }
+
+    @keyframes purchaseStatusAttention{
+        0%,100%{transform:scale(1);filter:saturate(1)}
+        50%{transform:scale(1.07);filter:saturate(1.35)}
+    }
+
+    @keyframes purchaseStatusIcon{
+        0%,100%{transform:scale(1)}
+        50%{transform:scale(1.25)}
+    }
+
+    @media (prefers-reduced-motion:reduce){
+        .purchase-workflow-status.status-incomplete,
+        .purchase-workflow-status.status-receipt,
+        .purchase-workflow-status.status-restock,
+        .purchase-workflow-status.status-incomplete > i,
+        .purchase-workflow-status.status-receipt > i,
+        .purchase-workflow-status.status-restock > i{
+            animation:none;
+            transform:none;
+        }
     }
 
     /* ACTION */
@@ -283,6 +407,20 @@
         .purchase-box-text{
             min-width:0;
             overflow:hidden;
+        }
+
+        #purchaseTable tbody td.workflow-status-cell{
+            flex:1 1 100%;
+            width:100% !important;
+            padding-left:50px !important;
+            text-align:left !important;
+        }
+
+        .purchase-workflow-status{
+            max-width:100%;
+            margin:0;
+            padding:5px 8px;
+            font-size:9px;
         }
 
         .purchase-box .purchase-box-text > .fw-bold{
@@ -610,6 +748,61 @@
     flex:0 0 auto;
 }
 
+.rv-conversion-row{
+    flex:1 1 100%;
+    display:flex;
+    align-items:stretch;
+    gap:10px;
+    min-width:0;
+}
+
+.rv-conversion-row .rv-convert{
+    flex:1 1 360px;
+    min-width:0;
+}
+
+.rv-unit-price-detail{
+    flex:0 1 250px;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    gap:6px;
+    min-width:200px;
+    padding:12px 15px;
+    border:1px solid #a7f3d0;
+    border-radius:14px;
+    background:linear-gradient(145deg,#ecfdf5,#fff);
+    box-shadow:0 4px 12px rgba(5,150,105,.06);
+}
+
+.rv-unit-price-label{
+    display:flex;
+    align-items:center;
+    gap:7px;
+    color:#047857;
+    font-size:9px;
+    font-weight:800;
+    letter-spacing:.6px;
+    text-transform:uppercase;
+}
+
+.rv-unit-price-label i{
+    font-size:12px;
+}
+
+.rv-unit-price-detail strong{
+    color:#065f46;
+    font-size:18px;
+    font-weight:900;
+    line-height:1.15;
+}
+
+.rv-unit-price-detail small{
+    color:#64748b;
+    font-size:10px;
+    line-height:1.4;
+}
+
 .rv-stat{
     display:flex;
     flex-direction:column;
@@ -796,7 +989,7 @@
     .rv-stats{
         flex:1 1 100%;
         display:grid;
-        grid-template-columns:repeat(3, 1fr);
+        grid-template-columns:repeat(2, 1fr);
         gap:6px;
     }
 
@@ -1150,7 +1343,7 @@
 .rv-fields{
     flex:1 1 100%;
     display:grid;
-    grid-template-columns:repeat(3, minmax(0, 1fr));
+    grid-template-columns:repeat(4, minmax(0, 1fr));
     gap:7px;
     margin-top:2px;
 }
@@ -1639,6 +1832,17 @@ body.restock-busy .modal-backdrop{
     .rv-convert{
         padding:12px 13px;
         gap:8px;
+    }
+
+    .rv-conversion-row{
+        flex-direction:column;
+    }
+
+    .rv-conversion-row .rv-convert,
+    .rv-unit-price-detail{
+        flex:1 1 auto;
+        width:100%;
+        min-width:0;
     }
 
     .rvc-qty-big,

@@ -1,10 +1,11 @@
 <?php
 include '../../sessions/session.php';
+include __DIR__ . '/components/data/purchase-number.php';
 
-$qLast = mysqli_query($conn,"SELECT MAX(CAST(REPLACE(form, 'FORM-', '') AS UNSIGNED)) AS last_num FROM purchases");
-$dLast = mysqli_fetch_assoc($qLast);
-$nextNum = ($dLast && $dLast['last_num'] ? (int)$dLast['last_num'] : 0) + 1;
-$formNumber = 'FORM-' . str_pad($nextNum,7,'0',STR_PAD_LEFT);
+$formNumber = next_purchase_form_number($conn);
+if($formNumber === false){
+    die('Gagal membuat nomor form: ' . mysqli_error($conn));
+}
 
 // Produk untuk dropdown (semua kategori kecuali Additional)
 $qProd = mysqli_query($conn, "SELECT id, name, unit FROM products WHERE deleted_at IS NULL AND category <> 'Additional' ORDER BY name ASC");
@@ -13,12 +14,57 @@ while($p = mysqli_fetch_assoc($qProd)){
     $products[] = ['id' => (int)$p['id'], 'name' => $p['name'], 'unit' => $p['unit']];
 }
 
-// Satuan untuk dropdown (Master Unit)
-$qUnit = mysqli_query($conn, "SELECT name FROM units WHERE deleted_at IS NULL ORDER BY name ASC");
-$units = [];
-while($u = mysqli_fetch_assoc($qUnit)){
-    $units[] = $u['name'];
+$productUnits = [];
+foreach($products as $product){
+    $productId = (int)$product['id'];
+    $productUnits[$productId] = [];
+    if(trim((string)$product['unit']) !== ''){
+        $productUnits[$productId][] = $product['unit'];
+    }
 }
+$qConversionUnits = mysqli_query($conn, "
+    SELECT uc.product_id, uci.unit_name
+    FROM unit_conversions uc
+    JOIN unit_conversion_items uci
+        ON uci.conversion_id = uc.id
+    WHERE uc.deleted_at IS NULL
+    ORDER BY uc.product_id ASC, uci.id ASC
+");
+if(!$qConversionUnits){
+    die(mysqli_error($conn));
+}
+while($conversionUnit = mysqli_fetch_assoc($qConversionUnits)){
+    $productId = (int)$conversionUnit['product_id'];
+    $unitName = trim((string)$conversionUnit['unit_name']);
+    if(!isset($productUnits[$productId]) || $unitName === '') continue;
+    $existingUnits = array_map('strtolower', $productUnits[$productId]);
+    if(!in_array(strtolower($unitName), $existingUnits, true)){
+        $productUnits[$productId][] = $unitName;
+    }
+}
+
+$qProductSuppliers = mysqli_query($conn, "
+    SELECT ps.product_id, s.id AS supplier_id, s.name AS supplier_name
+    FROM product_supplier ps
+    JOIN suppliers s ON s.id = ps.supplier_id
+    WHERE s.deleted_at IS NULL
+    ORDER BY s.name ASC
+");
+if(!$qProductSuppliers){
+    die(mysqli_error($conn));
+}
+$productSuppliers = [];
+while($supplier = mysqli_fetch_assoc($qProductSuppliers)){
+    $productId = (int)$supplier['product_id'];
+    if(!isset($productSuppliers[$productId])){
+        $productSuppliers[$productId] = [];
+    }
+    $productSuppliers[$productId][] = [
+        'id' => (int)$supplier['supplier_id'],
+        'name' => $supplier['supplier_name']
+    ];
+}
+
 ?>
 
 <!doctype html>
@@ -92,6 +138,63 @@ while($u = mysqli_fetch_assoc($qUnit)){
 
                         <input type="hidden" name="form_number" value="<?= $formNumber ?>">
 
+                        <section class="purchase-flow-guide purchase-flow-create" aria-labelledby="purchaseFlowTitle">
+                            <div class="purchase-flow-heading">
+                                <span class="purchase-flow-icon" aria-hidden="true"><i class="fas fa-route"></i></span>
+                                <div class="purchase-flow-copy">
+                                    <span class="purchase-flow-kicker">PANDUAN PROSES</span>
+                                    <strong id="purchaseFlowTitle">Dari daftar belanja sampai stok siap</strong>
+                                    <span>Ikuti tahapan ini agar barang datang dan stok tercatat dengan rapi.</span>
+                                </div>
+                            </div>
+                            <ol class="purchase-flow-steps">
+                                <li><span class="purchase-flow-number">01</span><span class="purchase-flow-label">Buat form belanja</span></li>
+                                <li><span class="purchase-flow-number">02</span><span class="purchase-flow-label">Print form belanja</span></li>
+                                <li><span class="purchase-flow-number">03</span><span>Edit sesuai barang datang</span></li>
+                                <li><span class="purchase-flow-number">04</span><span>Buat form receipt</span></li>
+                                <li><span class="purchase-flow-number">05</span><span>Restock ke gudang</span></li>
+                            </ol>
+                        </section>
+                        <script>
+                            (function(){
+                                const steps = Array.from(document.querySelectorAll('.purchase-flow-steps li'));
+                                if(!steps.length || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+                                const stepDuration = 2000;
+                                const completePause = 2200;
+                                let currentStep = 0;
+                                steps[currentStep].classList.add('is-active');
+                                steps[currentStep].setAttribute('aria-current', 'step');
+
+                                function advancePurchaseFlow(){
+                                    steps[currentStep].classList.remove('is-active');
+                                    steps[currentStep].classList.add('is-done');
+                                    steps[currentStep].removeAttribute('aria-current');
+                                    currentStep++;
+
+                                    if(currentStep >= steps.length){
+                                        window.setTimeout(function(){
+                                            steps.forEach(function(step){
+                                                step.classList.remove('is-done', 'is-active');
+                                                step.removeAttribute('aria-current');
+                                            });
+                                            currentStep = 0;
+                                            steps[currentStep].classList.add('is-active');
+                                            steps[currentStep].setAttribute('aria-current', 'step');
+                                            window.setTimeout(advancePurchaseFlow, stepDuration);
+                                        }, completePause);
+                                        return;
+                                    }
+
+                                    steps[currentStep].classList.add('is-active');
+                                    steps[currentStep].setAttribute('aria-current', 'step');
+                                    window.setTimeout(advancePurchaseFlow, stepDuration);
+                                }
+
+                                window.setTimeout(advancePurchaseFlow, stepDuration);
+                            })();
+                        </script>
+
                         <div id="itemsContainer">
 
                             <div class="item-row row mb-3">
@@ -138,28 +241,11 @@ while($u = mysqli_fetch_assoc($qUnit)){
                                             placeholder="Satuan"
                                             required>
                                             <option value=""></option>
-                                            <?php foreach($units as $u): ?>
-                                            <option value="<?= htmlspecialchars($u) ?>"><?= htmlspecialchars($u) ?></option>
-                                            <?php endforeach; ?>
                                         </select>
                                     </div>
                                 </div>
 
-                                <div class="col-md-2 item-unit-price">
-                                    <div class="input-group-modern">
-                                        <div class="input-icon input-icon-price">
-                                            <i class="fas fa-wallet"></i>
-                                        </div>
-                                        <input type="number"
-                                            name="unit_price[]"
-                                            class="form-control"
-                                            placeholder="Harga Satuan"
-                                            min="0"
-                                            required>
-                                    </div>
-                                </div>
-
-                                <div class="col-md-3 item-price">
+                                <div class="col-md-5 item-price">
                                     <div class="input-group-modern">
                                         <div class="input-icon input-icon-price">
                                             <i class="fas fa-wallet"></i>
@@ -211,7 +297,7 @@ while($u = mysqli_fetch_assoc($qUnit)){
 </main>
 
 <!-- EDIT MODAL -->
-<div class="modal fade" id="editPurchaseModal" tabindex="-1">
+<div class="modal fade" id="editPurchaseModal" tabindex="-1" data-bs-backdrop="static">
     <div class="modal-dialog modal-xl modal-dialog-centered">
         <div class="modal-content stock-panel border-0">
 
@@ -300,14 +386,37 @@ while($u = mysqli_fetch_assoc($qUnit)){
     document.getElementById("form-stock").addEventListener("submit", function(e){
         e.preventDefault();
 
-        // Validasi manual (required Select2 tidak tervalidasi otomatis)
+        if(!validatePurchaseItems()) return;
+
+        let formData = new FormData(this);
+
+        fetch(this.action,{
+            method:"POST",
+            body:formData
+        })
+        .then(res=>res.json())
+        .then(res=>{
+            if(res.status==="success"){
+                QToast("Berhasil", res.msg, "success");
+                if(window.notifyPurchaseWorkflowChanged) window.notifyPurchaseWorkflowChanged();
+                resetItemRows();
+
+                // Auto-switch ke tab Edit dan muat data terbaru
+                panelToggle.checked = true;
+                panelToggle.dispatchEvent(new Event('change'));
+            }else{
+                QToast("Error", res.msg, "error");
+            }
+        });
+    });
+
+    function validatePurchaseItems(){
         let rows = document.querySelectorAll('#itemsContainer .item-row');
         let valid = true;
         rows.forEach(function(r){
             let sel = r.querySelector('select[name="product_id[]"]');
             let qty = r.querySelector('input[name="qty_buy[]"]');
             let unit = r.querySelector('select[name="unit_buy[]"]');
-            let unitPrice = r.querySelector('input[name="unit_price[]"]');
             let priceBuy = r.querySelector('input[name="price_buy[]"]');
             
             if(!sel || !sel.value){
@@ -325,39 +434,14 @@ while($u = mysqli_fetch_assoc($qUnit)){
                 valid = false;
                 return;
             }
-            if(!unitPrice || !unitPrice.value.trim()){
-                QToast('Error', 'Harga satuan wajib diisi', 'error');
-                valid = false;
-                return;
-            }
             if(!priceBuy || !priceBuy.value.trim()){
                 QToast('Error', 'Total harga produk wajib diisi', 'error');
                 valid = false;
                 return;
             }
         });
-        if(!valid) return;
-
-        let formData = new FormData(this);
-
-        fetch(this.action,{
-            method:"POST",
-            body:formData
-        })
-        .then(res=>res.json())
-        .then(res=>{
-            if(res.status==="success"){
-                QToast("Berhasil", res.msg, "success");
-                resetItemRows();
-                
-                // Auto-switch ke tab Edit dan muat data terbaru
-                panelToggle.checked = true;
-                panelToggle.dispatchEvent(new Event('change'));
-            }else{
-                QToast("Error", res.msg, "error");
-            }
-        });
-    });
+        return valid;
+    }
 
     // Reset form item ke kondisi awal (satu baris kosong seperti halaman baru)
     function resetItemRows(){
@@ -393,13 +477,7 @@ while($u = mysqli_fetch_assoc($qUnit)){
                     </select>
                 </div>
             </div>
-            <div class="col-md-2 item-unit-price">
-                <div class="input-group-modern">
-                    <div class="input-icon input-icon-price"><i class="fas fa-wallet"></i></div>
-                    <input type="number" name="unit_price[]" class="form-control" placeholder="Harga Satuan" min="0">
-                </div>
-            </div>
-            <div class="col-md-3 item-price">
+            <div class="col-md-5 item-price">
                 <div class="input-group-modern">
                     <div class="input-icon input-icon-price"><i class="fas fa-wallet"></i></div>
                     <input type="number" name="price_buy[]" class="form-control" placeholder="Total Harga Produk" min="0">
@@ -414,8 +492,8 @@ while($u = mysqli_fetch_assoc($qUnit)){
     // Daftar produk untuk dropdown dinamis (semua kecuali Additional)
     var PRODUCT_LIST = <?= json_encode(array_values($products), JSON_UNESCAPED_UNICODE) ?>;
 
-    // Daftar satuan untuk dropdown dinamis (Master Unit)
-    var UNIT_LIST = <?= json_encode(array_values($units), JSON_UNESCAPED_UNICODE) ?>;
+    // Satuan dasar dan konversi yang hanya berlaku untuk tiap produk.
+    var PRODUCT_UNITS = <?= json_encode($productUnits, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT) ?>;
 
     function escAttr(s){
         return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
@@ -430,35 +508,27 @@ while($u = mysqli_fetch_assoc($qUnit)){
         return html;
     }
 
-    // Opsi satuan; nilai tersimpan tetap ditampilkan walau tidak ada di Master Unit
-    function buildUnitOptions(selected){
+    function buildUnitOptions(selected, productId){
         selected = selected ? String(selected) : '';
         let html = '<option value=""></option>';
-        let found = false;
-        UNIT_LIST.forEach(function(u){
+        const units = PRODUCT_UNITS[String(productId)] || [];
+        units.forEach(function(u){
             let sel = (selected !== '' && String(u) === selected) ? ' selected' : '';
-            if(sel) found = true;
             html += '<option value="' + escAttr(u) + '"' + sel + '>' + escAttr(u) + '</option>';
         });
-        if(selected !== '' && !found){
-            html += '<option value="' + escAttr(selected) + '" selected>' + escAttr(selected) + '</option>';
-        }
         return html;
     }
 
-    // Set nilai satuan pada <select>; tambahkan opsi bila belum ada,
-    // lalu picu 'change' supaya tampilan select2 ikut terbarui
-    function setUnitValue($unitSel, unit){
-        if(!$unitSel || !$unitSel.length || !unit) return;
-        let val = String(unit);
-        let exists = false;
-        $unitSel.find('option').each(function(){
-            if(String(this.value) === val){ exists = true; return false; }
+    function updateUnitOptions($unitSel, productId, preferredUnit){
+        if(!$unitSel || !$unitSel.length) return;
+        const units = PRODUCT_UNITS[String(productId)] || [];
+        const currentUnit = preferredUnit || $unitSel.val() || '';
+        const matchedUnit = units.find(function(unit){
+            return String(unit).toLowerCase() === String(currentUnit).toLowerCase();
         });
-        if(!exists){
-            $unitSel.append('<option value="' + escAttr(val) + '">' + escAttr(val) + '</option>');
-        }
-        $unitSel.val(val).trigger('change');
+        const baseUnit = units[0] || '';
+        $unitSel.html(buildUnitOptions(matchedUnit || baseUnit, productId));
+        $unitSel.val(matchedUnit || baseUnit || '').trigger('change');
     }
 
     function applyItemSelect2($sel){
@@ -474,11 +544,48 @@ while($u = mysqli_fetch_assoc($qUnit)){
         }
         $sel.select2(opts);
         $sel.on('change', function(){
-            let unitSel = $(this).closest('.item-row').find('select[name="unit_buy[]"]');
+            let row = $(this).closest('.item-row');
+            let unitSel = row.find('select[name="unit_buy[]"]');
             let opt = this.options[this.selectedIndex];
-            let u = opt ? opt.getAttribute('data-unit') : '';
-            if(u) setUnitValue(unitSel, u);
+            updateUnitOptions(unitSel, this.value, opt ? opt.getAttribute('data-unit') : '');
+            if(row.closest('#itemsContainerEdit').length){
+                refreshProductSuppliers(row, '');
+            }
         });
+    }
+
+    const PRODUCT_SUPPLIERS = <?= json_encode($productSuppliers, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT) ?>;
+
+    function refreshProductSuppliers($row, selectedSupplierId){
+        let $supplier = $row.find('select[name="supplier_id[]"]');
+        if(!$supplier.length) return;
+
+        let productId = String($row.find('select[name="product_id[]"]').val() || '');
+        let suppliers = PRODUCT_SUPPLIERS[productId] || [];
+        let options = '<option value=""></option>';
+        let selectedExists = false;
+
+        suppliers.forEach(function(supplier){
+            let id = String(supplier.id);
+            let selected = selectedSupplierId !== '' && id === String(selectedSupplierId);
+            if(selected) selectedExists = true;
+            options += '<option value="' + id + '"' + (selected ? ' selected' : '') + '>' + escAttr(supplier.name) + '</option>';
+        });
+
+        $supplier.html(options);
+        $supplier.val(selectedExists ? String(selectedSupplierId) : '').trigger('change');
+    }
+
+    function applySupplierSelect2($sel){
+        if(!$sel || !$sel.length) return;
+        if($sel.hasClass('select2-hidden-accessible')) $sel.select2('destroy');
+        let opts = {
+            width: '100%',
+            placeholder: 'Pilih Supplier...',
+            allowClear: true,
+            dropdownParent: $('#editPurchaseModal')
+        };
+        $sel.select2(opts);
     }
 
     function applyUnitSelect2($sel){
@@ -511,6 +618,12 @@ while($u = mysqli_fetch_assoc($qUnit)){
         });
         document.querySelectorAll('#itemsContainerEdit .unit-select').forEach(function(sel){
             applyUnitSelect2($(sel));
+        });
+        document.querySelectorAll('#itemsContainerEdit .item-row').forEach(function(row){
+            let $row = $(row);
+            let selectedSupplierId = $row.find('select[name="supplier_id[]"]').data('selected') || '';
+            refreshProductSuppliers($row, selectedSupplierId);
+            applySupplierSelect2($row.find('select[name="supplier_id[]"]'));
         });
     }
 
@@ -729,6 +842,108 @@ while($u = mysqli_fetch_assoc($qUnit)){
         });
     }
 
+    function updatePurchaseWorkflowStatus($row, incompleteItems, receipt, used){
+        const status = used
+            ? {
+                className: 'status-complete',
+                icon: 'fa-circle-check',
+                label: 'Selesai',
+                title: 'Sudah divalidasi dan direstock'
+            }
+            : receipt
+                ? {
+                    className: 'status-restock',
+                    icon: 'fa-truck-ramp-box',
+                    label: 'Perlu restock',
+                    title: 'Receipt sudah dibuat. Tekan tombol restock untuk melanjutkan'
+                }
+                : incompleteItems > 0
+                    ? {
+                        className: 'status-incomplete',
+                        icon: 'fa-triangle-exclamation',
+                        label: 'Data belum lengkap',
+                        title: incompleteItems + ' item belum memiliki supplier dan/atau nomor invoice. Tekan Edit untuk melengkapi'
+                    }
+                    : {
+                        className: 'status-receipt',
+                        icon: 'fa-receipt',
+                        label: 'Buat receipt',
+                        title: 'Data lengkap. Buka Edit untuk membuat receipt'
+                    };
+        const $status = $row.find('.purchase-workflow-status');
+        $status
+            .removeClass('status-complete status-restock status-incomplete status-receipt')
+            .addClass(status.className)
+            .attr('title', status.title)
+            .attr('aria-label', status.title)
+            .html(
+                '<i class="fas ' + status.icon + '" aria-hidden="true"></i>' +
+                '<span class="workflow-label">' + status.label + '</span>'
+            );
+    }
+
+    function updatePurchaseTableRow(summary){
+        if(!$.fn.DataTable.isDataTable('#purchaseTable')) return;
+
+        const purchaseId = String(summary.purchase_id || '');
+        const dt = $('#purchaseTable').DataTable();
+        const $row = dt.rows().nodes().to$().filter(function(){
+            return String(this.getAttribute('data-id')) === purchaseId;
+        });
+        if(!$row.length) return;
+
+        const $purchaseRow = $row.first();
+        const totalItems = Number(summary.total_items) || 0;
+        const totalPrice = Number(summary.total_price) || 0;
+        const receipt = summary.receipt ? String(summary.receipt) : '';
+        const incompleteItems = Number(summary.incomplete_items) || 0;
+        const used = Number(summary.used_flag) === 1;
+        const formattedPrice = 'Rp ' + totalPrice.toLocaleString('id-ID');
+        updatePurchaseWorkflowStatus($purchaseRow, incompleteItems, receipt, used);
+
+        if(receipt){
+            $purchaseRow.find('.purchase-box-text > .text-muted').remove();
+            $purchaseRow.addClass('has-receipt');
+            $purchaseRow.find('.printPurchaseBtn').remove();
+            let $badge = $purchaseRow.find('.table-receipt-badge');
+            if(!$badge.length){
+                $badge = $(`
+                    <span class="purchase-receipt-badge table-receipt-badge mt-1">
+                        <i class="fas fa-circle-check"></i>
+                        <span><small>RECEIPT</small><strong></strong></span>
+                    </span>
+                `);
+                $purchaseRow.find('.purchase-box-text > .fw-bold').after($badge);
+            }
+            $badge.find('strong').text(receipt);
+        }
+
+        $purchaseRow.find('.note-badge').html('<i class="fas fa-box"></i> ' + totalItems);
+        $purchaseRow.find('.created-badge').html('<i class="fas fa-money-bill"></i> ' + formattedPrice);
+        $purchaseRow.find('.mp-meta-item').has('i.fa-box').html('<i class="fas fa-box"></i> ' + totalItems + ' item');
+        $purchaseRow.find('.mp-meta-total-value').text(formattedPrice);
+
+        if(used){
+            $purchaseRow.addClass('is-restocked');
+            $purchaseRow.find('.btn-delete').remove();
+            $purchaseRow.find('.restockPurchaseBtn')
+                .removeClass('btn-restock')
+                .addClass('btn-restocked')
+                .attr('title', 'Sudah direstock ke stok gudang')
+                .html('<i class="fas fa-circle-check"></i>');
+        }else if(receipt){
+            $purchaseRow.find('.btn-delete').remove();
+            if(!$purchaseRow.find('.restockPurchaseBtn').length){
+                const $restock = $('<button type="button" class="action-btn btn-restock restockPurchaseBtn" title="Validasi &amp; Restock ke stok gudang"><i class="fas fa-truck-ramp-box"></i></button>');
+                $restock.attr('data-id', purchaseId).attr('data-date', $purchaseRow.attr('data-date') || '');
+                $purchaseRow.find('.mp-actions').append($restock);
+            }
+        }
+
+        dt.row($purchaseRow.get(0)).invalidate('dom').draw(false);
+        if(window.notifyPurchaseWorkflowChanged) window.notifyPurchaseWorkflowChanged();
+    }
+
     // Update baris purchase menjadi state "restocked" tanpa reload tabel.
     // Animasi smooth: tombol berubah, class ditambahkan, pulse effect.
     function markPurchaseRestocked(purchaseId){
@@ -746,10 +961,11 @@ while($u = mysqli_fetch_assoc($qUnit)){
 
         // Tambah class restocked dengan animasi pulse
         $row.addClass('is-restocked').css('animation', 'restockPulse 0.6s ease');
+        updatePurchaseWorkflowStatus($row, 0, true, true);
         
-        // Hapus tombol Edit & Delete, ubah tombol Restock jadi badge sukses
+        // Keep Edit available; only remove Delete and mark the receipt restocked.
         const $actions = $row.find('.mp-actions');
-        $actions.find('.btn-edit, .btn-delete').fadeOut(300, function(){ $(this).remove(); });
+        $actions.find('.btn-delete').fadeOut(300, function(){ $(this).remove(); });
         
         const $restockBtn = $actions.find('.restockPurchaseBtn');
         $restockBtn.removeClass('btn-restock')
@@ -846,20 +1062,7 @@ while($u = mysqli_fetch_assoc($qUnit)){
                     </div>
                 </div>
 
-                <div class="col-md-2 item-unit-price">
-                    <div class="input-group-modern">
-                        <div class="input-icon input-icon-price">
-                            <i class="fas fa-wallet"></i>
-                        </div>
-                        <input type="number"
-                            name="unit_price[]"
-                            class="form-control"
-                            placeholder="Harga Satuan"
-                            min="0">
-                    </div>
-                </div>
-
-                <div class="col-md-2 item-price">
+                <div class="col-md-4 item-price">
                     <div class="input-group-modern">
                         <div class="input-icon input-icon-price">
                             <i class="fas fa-wallet"></i>
@@ -899,13 +1102,14 @@ while($u = mysqli_fetch_assoc($qUnit)){
     function addItemEdit()
     {
         let html = `
-            <div class="item-row row mb-3">
+            <div class="item-row mb-3 border rounded-3 p-3">
 
                 <input type="hidden"
                     name="item_id[]"
                     value="">
 
-                <div class="col-md-3 item-product">
+                <div class="row g-3 align-items-end">
+                <div class="col-md-4 item-product">
                     <div class="input-group-modern">
                         <div class="input-icon input-icon-product">
                             <i class="fas fa-box"></i>
@@ -949,21 +1153,7 @@ while($u = mysqli_fetch_assoc($qUnit)){
                     </div>
                 </div>
 
-                <div class="col-md-2 item-unit-price">
-                    <div class="input-group-modern">
-                        <div class="input-icon input-icon-price">
-                            <i class="fas fa-wallet"></i>
-                        </div>
-                        <input type="number"
-                            name="unit_price[]"
-                            class="form-control"
-                            placeholder="Harga Satuan"
-                            min="0"
-                            value="">
-                    </div>
-                </div>
-
-                <div class="col-md-2 item-price">
+                <div class="col-md-4 item-price">
                     <div class="input-group-modern">
                         <div class="input-icon input-icon-price">
                             <i class="fas fa-wallet"></i>
@@ -977,7 +1167,20 @@ while($u = mysqli_fetch_assoc($qUnit)){
                     </div>
                 </div>
 
-                <div class="col-md-1 item-remove">
+                </div>
+
+                <div class="row g-3 align-items-end mt-1">
+                <div class="col-md-5">
+                    <label class="form-label">Supplier <span class="text-danger">*</span></label>
+                    <select name="supplier_id[]" class="form-control supplier-select" required>
+                        <option value=""></option>
+                    </select>
+                </div>
+                <div class="col-md-5">
+                    <label class="form-label">No Invoice <span class="text-danger">*</span></label>
+                    <input type="text" name="invoice_no[]" class="form-control" placeholder="Masukkan no invoice" maxlength="100" required>
+                </div>
+                <div class="col-md-2 item-remove">
                     <div class="input-group-modern">
                         <button type="button"
                                 class="input-icon input-icon-danger"
@@ -986,6 +1189,7 @@ while($u = mysqli_fetch_assoc($qUnit)){
                             <span>Hapus</span>
                         </button>
                     </div>
+                </div>
                 </div>
 
             </div>
@@ -999,6 +1203,9 @@ while($u = mysqli_fetch_assoc($qUnit)){
         applyItemSelect2($(last));
         let lastUnit = document.querySelector('#itemsContainerEdit .item-row:last-child select.unit-select');
         applyUnitSelect2($(lastUnit));
+        let lastRow = $('#itemsContainerEdit .item-row:last-child');
+        refreshProductSuppliers(lastRow, '');
+        applySupplierSelect2(lastRow.find('select[name="supplier_id[]"]'));
     }
 
     function removeItem(button)
@@ -1027,23 +1234,24 @@ while($u = mysqli_fetch_assoc($qUnit)){
         .then(html => {
             document.getElementById('editPurchaseContent').innerHTML = html;
             initEditSelects();
+            if($('#editPurchaseForm').attr('data-is-locked') === '1'){
+                $('#itemsContainerEdit :input').prop('disabled', true);
+                $('#editPurchaseForm .mp-add-footer').remove();
+            }
         });
 
     });
 
-    // Edit Action
-    $(document).on('submit','#editPurchaseForm',function(e){
-        e.preventDefault();
-
-        // Validasi manual (required Select2 tidak tervalidasi otomatis)
+    function validateEditPurchaseForm(){
         let valid = true;
         $('#editPurchaseContent .item-row').each(function(){
             let r = $(this);
             let sel = r.find('select[name="product_id[]"]');
             let qty = r.find('input[name="qty_buy[]"]');
             let unit = r.find('select[name="unit_buy[]"]');
-            let unitPrice = r.find('input[name="unit_price[]"]');
             let priceBuy = r.find('input[name="price_buy[]"]');
+            let supplier = r.find('select[name="supplier_id[]"]');
+            let invoiceNo = r.find('input[name="invoice_no[]"]');
 
             if(!sel.val()){
                 QToast('Error', 'Nama produk wajib dipilih', 'error');
@@ -1060,47 +1268,150 @@ while($u = mysqli_fetch_assoc($qUnit)){
                 valid = false;
                 return false;
             }
-            if(!unitPrice.val() || !String(unitPrice.val()).trim()){
-                QToast('Error', 'Harga satuan wajib diisi', 'error');
-                valid = false;
-                return false;
-            }
             if(!priceBuy.val() || !String(priceBuy.val()).trim()){
                 QToast('Error', 'Total harga produk wajib diisi', 'error');
                 valid = false;
                 return false;
             }
-        });
-        if(!valid) return;
-
-        let formData = new FormData(this);
-        let id = formData.get('id');
-
-        fetch('restock-action.php?action=update&id='+id,{
-            method:'POST',
-            body:formData
-        })
-        .then(res => res.json())
-        .then(res => {
-
-            if(res.status === 'success'){
-
-                QToast('Berhasil', 'Data berhasil diperbarui', 'success');
-
-                $('#editPurchaseModal').modal('hide');
-
-                loadPurchaseTable();
-
-            }else{
-
-                QToast('Gagal', res.msg || 'Terjadi kesalahan', 'error');
-
+            if(!supplier.val()){
+                QToast('Error', 'Supplier wajib dipilih', 'error');
+                valid = false;
+                return false;
             }
+            if(!invoiceNo.val() || !String(invoiceNo.val()).trim()){
+                QToast('Error', 'No invoice wajib diisi', 'error');
+                valid = false;
+                return false;
+            }
+        });
+        return valid;
+    }
 
+    function saveEditPurchaseForm(form){
+        const formData = form instanceof FormData ? form : new FormData(form);
+        const id = formData.get('id');
+        return fetch('restock-action.php?action=update&id=' + encodeURIComponent(id), {
+            method: 'POST',
+            body: formData
+        }).then(function(response){ return response.json(); });
+    }
+
+    // Edit Action
+    $(document).on('submit','#editPurchaseForm',function(e){
+        e.preventDefault();
+        if(!validateEditPurchaseForm()) return;
+
+        saveEditPurchaseForm(this)
+        .then(function(result){
+            if(result.status === 'success'){
+                updatePurchaseTableRow(result);
+                QToast('Berhasil', 'Data berhasil diperbarui', 'success');
+            }else{
+                QToast('Gagal', result.msg || 'Terjadi kesalahan', 'error');
+            }
         })
-        .catch(() => {
+        .catch(function(error){
+            console.error('Gagal memperbarui daftar belanja:', error);
             QToast('Error', 'Gagal memproses update', 'error');
         });
+    });
+
+    $(document).on('click', '#createReceiptBtn', async function(){
+        const form = document.getElementById('editPurchaseForm');
+        if(!form || !validateEditPurchaseForm()) return;
+
+        const formNumber = $('#editPurchaseContent .purchase-form-badge strong').text().trim();
+        const receiptNumber = formNumber.replace(/^FORM-/, 'RECEIPT-');
+        const confirmation = await QConfirm(
+            'Konfirmasi Pembuatan Receipt',
+            `Form ${formNumber} akan dibuat menjadi receipt penerimaan ${receiptNumber}. Periksa detail sebelum melanjutkan.`,
+            {
+                confirmText: 'Ya, buat receipt',
+                cancelText: 'Periksa kembali',
+                icon: 'fa-file-circle-check',
+                confirmClass: 'q-confirm-btn-success',
+                iconClass: 'q-confirm-icon-info'
+            }
+        );
+        if(!confirmation) return;
+
+        const button = this;
+        const formData = new FormData(form);
+        const purchaseId = formData.get('id');
+        const formControls = $('#editPurchaseForm :input, #editPurchaseForm .mp-add-footer button');
+        const overlay = document.getElementById('receiptProcessing');
+        const progress = document.getElementById('receiptProcessingProgress');
+        const steps = $('#receiptProcessing [data-receipt-step]');
+        button.disabled = true;
+        formControls.prop('disabled', true);
+        overlay.hidden = false;
+        overlay.classList.remove('is-success');
+        document.getElementById('receiptProcessingIcon').innerHTML = '<i class="fas fa-receipt"></i>';
+        document.getElementById('receiptProcessingTitle').textContent = 'Menyiapkan receipt';
+        document.getElementById('receiptProcessingMessage').textContent = 'Menyimpan perubahan pembelian...';
+        progress.style.width = '22%';
+        steps.removeClass('is-active is-done').filter('[data-receipt-step="save"]').addClass('is-active');
+
+        try {
+            const saveResult = await saveEditPurchaseForm(formData);
+            if(saveResult.status !== 'success') throw new Error(saveResult.msg || 'Gagal menyimpan pembelian');
+
+            steps.filter('[data-receipt-step="save"]').removeClass('is-active').addClass('is-done');
+            steps.filter('[data-receipt-step="create"]').addClass('is-active');
+            progress.style.width = '58%';
+            document.getElementById('receiptProcessingTitle').textContent = 'Membuat receipt';
+            document.getElementById('receiptProcessingMessage').textContent = 'Menautkan nomor receipt ke form pembelian...';
+            const receiptResponse = await fetch('restock-action.php?action=create_receipt', {
+                method: 'POST',
+                body: new URLSearchParams({id: purchaseId})
+            });
+            const receiptResult = await receiptResponse.json();
+            if(!receiptResponse.ok || receiptResult.status !== 'success'){
+                throw new Error(receiptResult.msg || 'Gagal membuat receipt');
+            }
+
+            $('#editPurchaseContent .purchase-form-badges').append(`
+                <span class="purchase-receipt-badge">
+                    <i class="fas fa-circle-check"></i>
+                    <span><small>FORM RECEIPT</small><strong></strong></span>
+                </span>
+            `);
+            $('#editPurchaseContent .purchase-receipt-badge strong').text(receiptResult.receipt);
+            $('#editPurchaseContent .purchase-receipt-badge').addClass('receipt-badge-success');
+            $('#createReceiptBtn').replaceWith(`
+                <button type="button" class="btn btn-receipt-print" data-print-purchase="${receiptResult.purchase_id}" title="Buka PDF receipt untuk dicetak atau diunduh">
+                    <i class="fas fa-download"></i><span>Buka PDF Receipt</span>
+                </button>
+            `);
+            $('#editPurchaseForm')
+                .attr('data-has-receipt', '1')
+                .attr('data-is-locked', '1');
+            $('#editPurchaseForm .purchase-receipt-toolbar').after(`
+                <div class="alert alert-success py-2 mb-3">
+                    <i class="fas fa-lock me-1"></i>
+                    Receipt sudah dibuat. Detail pembelian dikunci dan tidak dapat diubah.
+                </div>
+            `);
+            $('#itemsContainerEdit :input').prop('disabled', true);
+            $('#itemsContainerEdit .item-remove').remove();
+            $('#editPurchaseForm .mp-add-footer').remove();
+            steps.filter('[data-receipt-step="create"]').removeClass('is-active').addClass('is-done');
+            steps.filter('[data-receipt-step="done"]').addClass('is-active is-done');
+            progress.style.width = '100%';
+            overlay.classList.add('is-success');
+            document.getElementById('receiptProcessingIcon').innerHTML = '<i class="fas fa-check"></i>';
+            document.getElementById('receiptProcessingTitle').textContent = 'Receipt berhasil dibuat';
+            document.getElementById('receiptProcessingMessage').textContent = receiptResult.receipt;
+            window.setTimeout(function(){ overlay.hidden = true; }, 900);
+            updatePurchaseTableRow(receiptResult);
+            QToast('Berhasil', receiptResult.msg, 'success');
+        } catch(error) {
+            console.error('Gagal membuat receipt pembelian:', error);
+            overlay.hidden = true;
+            button.disabled = false;
+            formControls.prop('disabled', false);
+            QToast('Gagal', error.message || 'Receipt tidak dapat dibuat', 'error');
+        }
     });
 
     // RESTOCK (validasi) MODAL
@@ -1257,6 +1568,7 @@ while($u = mysqli_fetch_assoc($qUnit)){
                 cancelTimers();
 
                 if(res.status === 'success'){
+                    if(window.notifyPurchaseWorkflowChanged) window.notifyPurchaseWorkflowChanged();
 
                     // Animasi sukses spektakuler: ring jadi checkmark besar,
                     // confetti burst, semua step hijau, glow effect
@@ -1356,6 +1668,7 @@ while($u = mysqli_fetch_assoc($qUnit)){
                     if(res.status==='success'){
 
                         QToast('Terhapus', 'Data berhasil dihapus', 'success');
+                        if(window.notifyPurchaseWorkflowChanged) window.notifyPurchaseWorkflowChanged();
 
                         loadPurchaseTable();
 
@@ -1367,136 +1680,36 @@ while($u = mysqli_fetch_assoc($qUnit)){
 
     });
 
-    // Print Action
-    $(document).on('click', '.printPurchaseBtn', function () {
+    function getLocalPrintTimestamp(){
+        const now = new Date();
+        const offsetMinutes = -now.getTimezoneOffset();
+        const offsetSign = offsetMinutes >= 0 ? '+' : '-';
+        const offsetHours = String(Math.floor(Math.abs(offsetMinutes) / 60)).padStart(2, '0');
+        const offsetRemainder = String(Math.abs(offsetMinutes) % 60).padStart(2, '0');
+        const localDateTime = [
+            now.getFullYear(),
+            String(now.getMonth() + 1).padStart(2, '0'),
+            String(now.getDate()).padStart(2, '0')
+        ].join('-') + 'T' + [
+            String(now.getHours()).padStart(2, '0'),
+            String(now.getMinutes()).padStart(2, '0'),
+            String(now.getSeconds()).padStart(2, '0')
+        ].join(':');
 
-        let id = $(this).data('id');
-        let date = $(this).data('date');
-        let formattedDate = new Date(date).toLocaleDateString('en-GB', {
-            day: '2-digit',
-            month: 'long',
-            year: 'numeric'
-        });
+        return localDateTime + offsetSign + offsetHours + ':' + offsetRemainder;
+    }
 
-        fetch('restock-action.php?action=get_print&id=' + id)
-            .then(res => res.json())
-            .then(res => {
-
-                let items = res.data;
-
-                let rows = '';
-                let grandTotal = 0;
-
-                items.forEach((item, i) => {
-                    let price = parseFloat(item.price) || 0;
-                    grandTotal += price;
-
-                    rows += `
-                        <tr>
-                            <td style="text-align:center">${i + 1}</td>
-                            <td>${item.name}</td>
-                            <td style="text-align:center">${item.qty}</td>
-                            <td style="text-align:center">${item.unit}</td>
-                            <td style="text-align:right">Rp ${price.toLocaleString('id-ID')}</td>
-                            <td style="text-align:center"><span class="chk"></span></td>
-                        </tr>
-                    `;
-                });
-
-                rows += `
-                    <tr class="total-row">
-                        <td colspan="4" style="text-align:right;font-weight:700">Total Harga Keseluruhan</td>
-                        <td style="text-align:right;font-weight:700">Rp ${grandTotal.toLocaleString('id-ID')}</td>
-                        <td></td>
-                    </tr>
-                `;
-
-                let win = window.open('', '', 'width=900,height=700');
-
-                win.document.write(`
-                    <html>
-                    <head>
-                        <title>Print Daftar Belanja</title>
-                        <style>
-                            body { font-family: Poppins; padding: 20px; }
-                            h2 { margin-bottom: 5px; text-align: center; text-transform: uppercase;}
-                            .sub { color: #666; margin-bottom: 50px; text-align: center;}
-
-                            table {
-                                width: 100%;
-                                border-collapse: collapse;
-                            }
-
-                            table, th, td {
-                                border: 1px solid #000;
-                            }
-
-                            th, td {
-                                padding: 8px;
-                            }
-
-                            th {
-                                background: #f2f2f2;
-                            }
-
-                            .chk {
-                                display: inline-block;
-                                width: 13px;
-                                height: 13px;
-                                border: 1.5px solid #000;
-                                background: #fff;
-                                vertical-align: middle;
-                            }
-
-                            .total-row td {
-                                background: #f2f2f2;
-                            }
-                        </style>
-                    </head>
-                    <body>
-
-                        <h2>Daftar Belanja (${formattedDate})</h2>
-                        <div class="sub">by QIEOS</div>
-
-                        <table>
-                            <colgroup>
-                                <col style="width:6%">
-                                <col style="width:44%">
-                                <col style="width:10%">
-                                <col style="width:12%">
-                                <col style="width:18%">
-                                <col style="width:10%">
-                            </colgroup>
-                            
-                            <thead>
-                                <tr>
-                                    <th>No</th>
-                                    <th>Nama Barang / Produk</th>
-                                    <th>Qty</th>
-                                    <th>Satuan</th>
-                                    <th>Total Harga</th>
-                                    <th>Check</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                ${rows}
-                            </tbody>
-                        </table>
-
-                    </body>
-                    </html>
-                `);
-
-                win.document.close();
-
-                // FIX IMPORTANT
-                setTimeout(() => {
-                    win.print();
-                }, 300);
-
-            });
-
+    $(document).on('click', '.printPurchaseBtn, [data-print-purchase]', function(){
+        const id = $(this).attr('data-print-purchase') || $(this).data('id');
+        const printedAt = getLocalPrintTimestamp();
+        const pdfUrl = 'restock-pdf.php?id=' + encodeURIComponent(id) +
+            '&printed_at=' + encodeURIComponent(printedAt);
+        const printWindow = window.open(pdfUrl, '_blank');
+        if(!printWindow){
+            QToast('Gagal', 'Izinkan pop-up browser untuk membuka dokumen PDF', 'error');
+        }
     });
+
 </script>
 
 </body>
