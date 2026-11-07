@@ -22,7 +22,7 @@ services:
             MYSQL_DATABASE: ${DB_NAME:-db_kantin}
             MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
         ports:
-            - "3306:3306"
+            - "3310:3306"
         volumes:
             - mysql_data:/var/lib/mysql
         healthcheck:
