@@ -160,7 +160,7 @@ Lihat halaman **Database Schema** di aplikasi untuk diagram relasi interaktif le
 
 - Web Server: **Apache** (XAMPP / WampServer / Laragon)
 - Bahasa Pemrograman: **PHP 8.0+**
-- Database: **MySQL / MariaDB**
+- Database: **MySQL**
 - Ekstensi PHP: `mysqli`, `gd`, `mbstring`, `json`
 - Composer (untuk library Dompdf & PHPExcel)
 
@@ -206,6 +206,37 @@ Lihat halaman **Database Schema** di aplikasi untuk diagram relasi interaktif le
     ```
     http://localhost/qieos
     ```
+
+### Menjalankan dengan Docker
+
+1. Pastikan Docker Compose tersedia, lalu jalankan dari direktori proyek:
+
+    ```bash
+    docker compose up --build -d
+    ```
+
+2. Buka aplikasi di `http://localhost:8080`. Untuk mengganti port, atur `APP_PORT`.
+   phpMyAdmin tersedia di `http://localhost:8081` (port dapat diubah lewat
+   `PHPMYADMIN_PORT`); login dengan username `root` dan password kosong.
+   Konfigurasi ini ditujukan untuk penggunaan lokal saja, bukan server publik.
+3. Database baru masih kosong. Impor skema dan data aplikasi ke database `db_kantin`
+   sebelum digunakan; file skema awal tidak disertakan dalam repository.
+4. Data MySQL disimpan pada volume Docker `mysql_data`. Untuk menghentikan aplikasi
+   tanpa menghapus data, jalankan `docker compose down`.
+   Jika sebelumnya memakai MariaDB Compose, volume `db_data` lama tidak dapat
+   dipakai langsung oleh MySQL; ekspor database dari MariaDB dan impor ke MySQL
+   sebelum melanjutkan jika volume lama berisi data.
+
+Image aplikasi menggunakan PHP 7.4 agar kompatibel dengan PHPExcel 1.8 yang
+digunakan proyek. PHP 7.4 sudah tidak didukung upstream; gunakan konfigurasi ini
+untuk pengembangan lokal, dan perbarui dependensi Excel sebelum deployment
+produksi.
+
+Untuk database MySQL lokal, Compose mengizinkan akun `root` tanpa password agar
+phpMyAdmin dan aplikasi dapat terhubung. Jika volume `mysql_data` sudah pernah
+dibuat dengan password root, ubah password root di database atau ikuti instruksi
+pada chat sebelum menjalankan ulang Compose; perubahan environment tidak
+mengganti password pada volume yang sudah ada.
 
 ---
 
