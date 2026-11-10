@@ -4,16 +4,16 @@ if (!defined('BASE_URL')) {
 }
 ?>
 <!-- Core -->
-<script src="<?php echo BASE_URL; ?>/vendor/@popperjs/core/dist/umd/popper.min.js"></script>
-<script src="<?php echo BASE_URL; ?>/vendor/bootstrap/dist/js/bootstrap.min.js"></script>
+<script src="<?php echo BASE_URL; ?>/assets/vendor/@popperjs/popper.min.js?v=<?php echo filemtime(__DIR__ . '/../assets/vendor/@popperjs/popper.min.js'); ?>"></script>
+<script src="<?php echo BASE_URL; ?>/assets/vendor/bootstrap/bootstrap.min.js?v=<?php echo filemtime(__DIR__ . '/../assets/vendor/bootstrap/bootstrap.min.js'); ?>"></script>
 
 <!-- Smooth scroll -->
-<script src="<?php echo BASE_URL; ?>/vendor/smooth-scroll/dist/smooth-scroll.polyfills.min.js"></script>
+<script src="<?php echo BASE_URL; ?>/assets/vendor/smooth-scroll/smooth-scroll.polyfills.min.js?v=<?php echo filemtime(__DIR__ . '/../assets/vendor/smooth-scroll/smooth-scroll.polyfills.min.js'); ?>"></script>
 
 <?php if (basename($_SERVER['PHP_SELF']) === 'dashboard.php') { ?>
 <!-- Charts -->
-<script src="<?php echo BASE_URL; ?>/vendor/chartist/dist/chartist.min.js"></script>
-<script src="<?php echo BASE_URL; ?>/vendor/chartist-plugin-tooltips/dist/chartist-plugin-tooltip.min.js"></script>
+<script src="<?php echo BASE_URL; ?>/assets/vendor/chartist/chartist.min.js?v=<?php echo filemtime(__DIR__ . '/../assets/vendor/chartist/chartist.min.js'); ?>"></script>
+<script src="<?php echo BASE_URL; ?>/assets/vendor/chartist-plugin-tooltips/chartist-plugin-tooltip.min.js?v=<?php echo filemtime(__DIR__ . '/../assets/vendor/chartist-plugin-tooltips/chartist-plugin-tooltip.min.js'); ?>"></script>
 <?php } ?>
 
 <!-- Volt JS -->

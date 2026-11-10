@@ -19,13 +19,15 @@ yarn-error.log*
 
 # Dependencies
 node_modules/
-vendor/
+/vendor/
 
 # Build outputs
 dist/
 build/
 *.min.css
 *.min.js
+!assets/vendor/**/*.min.css
+!assets/vendor/**/*.min.js
 
 # Environment
 .env

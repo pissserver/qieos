@@ -43,11 +43,11 @@ if (!defined('BASE_URL')) {
 <!-- Sweet Alert -->
 <link
     type="text/css"
-    href="<?php echo BASE_URL; ?>/vendor/sweetalert2/dist/sweetalert2.min.css"
+    href="<?php echo BASE_URL; ?>/assets/vendor/sweetalert2/sweetalert2.min.css"
     rel="stylesheet" />
 
 <!-- Notyf -->
-<link type="text/css" href="<?php echo BASE_URL; ?>/vendor/notyf/notyf.min.css" rel="stylesheet" />
+<link type="text/css" href="<?php echo BASE_URL; ?>/assets/vendor/notyf/notyf.min.css" rel="stylesheet" />
 
 <!-- Volt CSS -->
 <link type="text/css" href="<?php echo BASE_URL; ?>/css/volt.css?v=<?php echo filemtime(__DIR__ . '/../css/volt.css'); ?>" rel="stylesheet" />
@@ -59,24 +59,21 @@ if (!defined('BASE_URL')) {
 <link type="text/css" href="<?php echo BASE_URL; ?>/css/components/buttons.css?v=<?php echo filemtime(__DIR__ . '/../css/components/buttons.css'); ?>" rel="stylesheet" />
 
 <!-- Font Awesome -->
-<link
-    rel="stylesheet"
-    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+<link rel="stylesheet" href="<?php echo BASE_URL; ?>/assets/vendor/fontawesome/css/all.min.css?v=<?php echo filemtime(__DIR__ . '/../assets/vendor/fontawesome/css/all.min.css'); ?>" />
+<link rel="stylesheet" href="<?php echo BASE_URL; ?>/assets/vendor/inter/inter.css?v=<?php echo filemtime(__DIR__ . '/../assets/vendor/inter/inter.css'); ?>" />
 
 <!-- SweetAlert2 -->
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="<?php echo BASE_URL; ?>/assets/vendor/sweetalert2/sweetalert2.all.min.js?v=<?php echo filemtime(__DIR__ . '/../assets/vendor/sweetalert2/sweetalert2.all.min.js'); ?>"></script>
 
 <!-- Datatables -->
-<link
-    rel="stylesheet"
-    href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" />
-<script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
-<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
-<script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+<link rel="stylesheet" href="<?php echo BASE_URL; ?>/assets/vendor/datatables/dataTables.bootstrap5.min.css?v=<?php echo filemtime(__DIR__ . '/../assets/vendor/datatables/dataTables.bootstrap5.min.css'); ?>" />
+<script src="<?php echo BASE_URL; ?>/assets/vendor/jquery/jquery.min.js?v=<?php echo filemtime(__DIR__ . '/../assets/vendor/jquery/jquery.min.js'); ?>"></script>
+<script src="<?php echo BASE_URL; ?>/assets/vendor/datatables/jquery.dataTables.min.js?v=<?php echo filemtime(__DIR__ . '/../assets/vendor/datatables/jquery.dataTables.min.js'); ?>"></script>
+<script src="<?php echo BASE_URL; ?>/assets/vendor/datatables/dataTables.bootstrap5.min.js?v=<?php echo filemtime(__DIR__ . '/../assets/vendor/datatables/dataTables.bootstrap5.min.js'); ?>"></script>
 
 <!-- Select2 (dropdown searchable) -->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" />
-<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<link rel="stylesheet" href="<?php echo BASE_URL; ?>/assets/vendor/select2/select2.min.css?v=<?php echo filemtime(__DIR__ . '/../assets/vendor/select2/select2.min.css'); ?>" />
+<script src="<?php echo BASE_URL; ?>/assets/vendor/select2/select2.min.js?v=<?php echo filemtime(__DIR__ . '/../assets/vendor/select2/select2.min.js'); ?>"></script>
 
 <!-- Select2: halaman ini di-scroll lewat .content (overflow-y: auto), bukan <body>.
      Bawaan select2 MEMBEKUKAN scroll semua ancestor yang bisa di-scroll selama
@@ -308,4 +305,3 @@ if (!defined('BASE_URL')) {
         });
     }
 </script>
-
