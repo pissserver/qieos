@@ -189,7 +189,9 @@ Lihat halaman **Database Schema** di aplikasi untuk diagram relasi interaktif le
 
     - Buka `http://localhost/phpmyadmin`
     - Buat database baru dengan nama `db_kantin`
-    - Import file SQL schema (file akan disediakan setelah versi final)
+    - Pilih database `db_kantin`, buka tab **Import**, lalu pilih
+      `migrations/20261110_initial_schema.sql` dan klik **Import/Go**.
+      Satu file ini membuat seluruh 24 tabel aplikasi.
 
 5. **Cek Konfigurasi Koneksi**
    Buka file `script/connection.php` dan pastikan pengaturan sesuai dengan MySQL lokal Anda:
@@ -215,14 +217,19 @@ Lihat halaman **Database Schema** di aplikasi untuk diagram relasi interaktif le
     docker compose up --build -d
     ```
 
-2. Buka aplikasi di `http://localhost:8080`. Untuk mengganti port, atur `APP_PORT`.
-   phpMyAdmin tersedia di `http://localhost:8081` (port dapat diubah lewat
+2. Buka aplikasi di `http://localhost:9002`. Untuk mengganti port, atur `APP_PORT`.
+   phpMyAdmin tersedia di `http://localhost:9003` (port dapat diubah lewat
    `PHPMYADMIN_PORT`); login dengan username `root` dan password kosong.
    Konfigurasi ini ditujukan untuk penggunaan lokal saja, bukan server publik.
-3. Database baru masih kosong. Impor skema dan data aplikasi ke database `db_kantin`
-   sebelum digunakan; file skema awal tidak disertakan dalam repository.
-4. Data MySQL disimpan pada volume Docker `mysql_data`. Untuk menghentikan aplikasi
-   tanpa menghapus data, jalankan `docker compose down`.
+3. Pada volume MySQL yang baru, Docker otomatis menjalankan
+   `migrations/20261110_initial_schema.sql` untuk membuat seluruh tabel database
+   `db_kantin`. Migrasi ini berisi struktur tabel saja, bukan data pengguna,
+   produk, transaksi, atau data aplikasi lainnya; pindahkan data tersebut
+   menggunakan ekspor/impor database secara terpisah bila diperlukan.
+4. Data MySQL disimpan pada volume Docker `mysql_data`. Skrip inisialisasi hanya
+   dijalankan saat volume database pertama kali dibuat; volume yang sudah ada
+   tidak diubah. Untuk menghentikan aplikasi tanpa menghapus data, jalankan
+   `docker compose down`.
    Jika sebelumnya memakai MariaDB Compose, volume `db_data` lama tidak dapat
    dipakai langsung oleh MySQL; ekspor database dari MariaDB dan impor ke MySQL
    sebelum melanjutkan jika volume lama berisi data.
