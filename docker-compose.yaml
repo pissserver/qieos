@@ -21,6 +21,8 @@ services:
         environment:
             MYSQL_DATABASE: ${DB_NAME:-db_kantin}
             MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
+        ports:
+            - "3310:3306"
         volumes:
             - mysql_data:/var/lib/mysql
         healthcheck:
@@ -36,6 +38,7 @@ services:
         environment:
             PMA_HOST: db
             PMA_PORT: 3306
+            PMA_ARBITRARY: 1
         ports:
             - "${PHPMYADMIN_PORT:-9003}:80"
         depends_on:
