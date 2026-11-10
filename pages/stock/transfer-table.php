@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 include '../../sessions/session.php';
 
 $q = mysqli_query($conn,"
