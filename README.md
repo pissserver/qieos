@@ -158,56 +158,53 @@ Lihat halaman **Database Schema** di aplikasi untuk diagram relasi interaktif le
 
 ### Persyaratan Sistem
 
-- Web Server: **Apache** (XAMPP / WampServer / Laragon)
-- Bahasa Pemrograman: **PHP 8.0+**
-- Database: **MySQL**
-- Ekstensi PHP: `mysqli`, `gd`, `mbstring`, `json`
-- Composer (untuk library Dompdf & PHPExcel)
+- Web server Apache dari **Laragon** atau **XAMPP**, atau Docker Compose
+- **PHP 7.4** untuk kompatibilitas dengan PHPExcel 1.8
+- MySQL atau MariaDB
+- Ekstensi PHP: `mysqli`, `gd`, `mbstring`, `xml`, `xmlwriter`, dan `zip`
+- Composer untuk menginstal library PHP Dompdf dan PHPExcel
 
-### Langkah-Langkah Instalasi (XAMPP)
+Library browser (Bootstrap, jQuery, DataTables, Select2, SweetAlert2, ikon, font Inter,
+dan lainnya) sudah dibundel di `assets/vendor`, sehingga aplikasi tidak perlu
+mengambil library tersebut dari CDN saat dijalankan. Versi sumbernya dikunci di
+`package-lock.json`; Node.js dan npm hanya diperlukan jika ingin memperbarui
+bundle frontend. Setelah memperbarui dependency, jalankan `npm ci` lalu
+`npm run assets:sync`. Perintah ini tidak diperlukan untuk instalasi/pemakaian
+aplikasi.
 
-1. **Unduh / Clone Project**
-   Letakkan folder proyek di dalam direktori `htdocs` XAMPP:
+### Instalasi Lokal (Laragon atau XAMPP)
 
-    ```bash
-    cd C:\xampp\htdocs
-    git clone https://github.com/pissserver/qieos.git
-    ```
+1. Clone project ke direktori web server:
 
-2. **Install Dependencies**
-   Jalankan Composer untuk install library PDF & Excel:
+   - Laragon: `C:\laragon\www\qieos`
+   - XAMPP: `C:\xampp\htdocs\qieos`
 
-    ```bash
-    cd qieos
-    composer install
-    ```
+   ```bash
+   git clone https://github.com/pissserver/qieos.git qieos
+   ```
 
-3. **Jalankan Apache & MySQL**
-   Buka **XAMPP Control Panel**, lalu klik **Start** pada modul **Apache** dan **MySQL**.
+2. Dari folder project, instal library PHP:
 
-4. **Setup Database** (via phpMyAdmin)
+   ```bash
+   composer install
+   ```
 
-    - Buka `http://localhost/phpmyadmin`
-    - Buat database baru dengan nama `db_kantin`
-    - Pilih database `db_kantin`, buka tab **Import**, lalu pilih
-      `migrations/20261110_initial_schema.sql` dan klik **Import/Go**.
-      Satu file ini membuat seluruh 24 tabel aplikasi.
+   Folder `vendor/` dibuat oleh Composer dan memang tidak disimpan di Git.
 
-5. **Cek Konfigurasi Koneksi**
-   Buka file `script/connection.php` dan pastikan pengaturan sesuai dengan MySQL lokal Anda:
+3. Jalankan Apache dan MySQL/MariaDB dari Laragon atau XAMPP.
 
-    ```php
-    $servername = "localhost";
-    $username   = "root";
-    $password   = "";        // kosongkan jika default XAMPP
-    $dbname     = "db_kantin";
-    ```
+4. Buat database `db_kantin` melalui phpMyAdmin, lalu import
+   `migrations/20261110_initial_schema.sql`.
 
-6. **Akses Aplikasi di Browser**
-   Buka browser dan akses:
-    ```
-    http://localhost/qieos
-    ```
+5. Koneksi default di `script/connection.php` adalah MySQL `localhost`, user
+   `root`, password kosong, dan database `db_kantin`. Jika konfigurasi lokal
+   berbeda, atur variabel `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER`, dan
+   `DB_PASSWORD`, atau sesuaikan nilai fallback pada file tersebut.
+
+6. Buka aplikasi:
+
+   - Laragon: `http://localhost/qieos` (atau virtual host Laragon jika aktif)
+   - XAMPP: `http://localhost/qieos`
 
 ### Menjalankan dengan Docker
 
@@ -251,7 +248,8 @@ mengganti password pada volume yang sudah ada.
 
 ```
 qieos/
-├── assets/                  # Upload foto profil user & produk, brand assets
+├── assets/                  # Brand, upload, dan library browser yang dibundel
+│   └── vendor/              # File JS/CSS browser dan lisensinya
 ├── css/                     # Stylesheet CSS per halaman (40+ file modular)
 │   └── pages/
 ├── pages/                   # Modul & halaman utama sistem
@@ -272,7 +270,10 @@ qieos/
 │   └── tenant/              # Pendaftaran, detail, pembayaran sewa & utilitas
 ├── script/                  # Connection.php (koneksi DB), headscript, footscript
 ├── sessions/                # Autentikasi: login, register, session guard, logout
-├── vendor/                  # Library Composer (Dompdf, PHPExcel)
+├── vendor/                  # Library PHP Composer (dibuat saat composer install)
+├── package.json             # Versi sumber library browser untuk bundle
+├── package-lock.json        # Versi dependency browser yang dikunci
+├── tools/                   # Script sinkronisasi bundle frontend
 ├── .htaccess                # Rewrite rules & security
 ├── index.php                # Landing/login page
 ├── manifest.php             # PWA manifest (Progressive Web App ready)
@@ -285,7 +286,7 @@ qieos/
 ## 🎨 Teknologi & Library
 
 - **Frontend**: HTML5, CSS3 (custom modular), JavaScript (vanilla), Bootstrap Icons, Font Awesome
-- **Backend**: PHP 8.0+ (procedural & OOP hybrid), MySQLi
+- **Backend**: PHP 7.4 (procedural & OOP hybrid), MySQLi
 - **Database**: MySQL / MariaDB dengan 24 tabel relasional
 - **PDF**: Dompdf (laporan & struk)
 - **Excel**: PHPExcel (export data master & laporan)

@@ -14,8 +14,6 @@ if (!isset($_SESSION['welcome_shown'])) {
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <title>Overview - Qieos</title>
     <?php include '../script/headscript.php'; ?>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="<?php echo BASE_URL; ?>/css/pages/dashboard.css?v=<?php echo filemtime(__DIR__ . '/../css/pages/dashboard.css'); ?>">
 </head>
 <body>

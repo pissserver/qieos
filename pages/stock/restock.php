@@ -74,7 +74,6 @@ while($supplier = mysqli_fetch_assoc($qProductSuppliers)){
 <title>Pembelian Stok - Qieos</title>
 <?php include '../../script/headscript.php'; ?>
 
-<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet">
 <link rel="stylesheet" href="<?php echo BASE_URL; ?>/css/pages/restock.css?v=<?= filemtime(__DIR__ . '/../../css/pages/restock.css') ?>">
 
 <!-- Search + Show entries + baris info + pagination premium.
@@ -86,8 +85,6 @@ while($supplier = mysqli_fetch_assoc($qProductSuppliers)){
      restock-table.php) supaya toggle Form <-> Edit tidak kedap-kedip:
      style sudah terpasang sebelum markup tabel di-inject via innerHTML. -->
 <link rel="stylesheet" href="<?php echo BASE_URL; ?>/css/pages/restock-table.css?v=<?= filemtime(__DIR__ . '/../../css/pages/restock-table.css') ?>">
-<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-
 </head>
 
 <body>
