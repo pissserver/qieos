@@ -5,6 +5,9 @@ services:
             dockerfile: Dockerfile
         ports:
             - "${APP_PORT:-3004}:80"
+        volumes:
+            - .:/var/www/html
+            - composer_vendor:/var/www/html/vendor
         environment:
             DB_HOST: db
             DB_PORT: 3306
@@ -49,3 +52,4 @@ services:
 
 volumes:
     mysql_data:
+    composer_vendor:

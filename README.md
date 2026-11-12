@@ -208,11 +208,18 @@ aplikasi.
 
 ### Menjalankan dengan Docker
 
-1. Pastikan Docker Compose tersedia, lalu jalankan dari direktori proyek:
+1. Pastikan Docker Compose tersedia, lalu jalankan dari direktori proyek untuk
+   build image pertama kali:
 
     ```bash
     docker compose up --build -d
     ```
+
+   Source code di-mount langsung ke container, sehingga perubahan file PHP, CSS,
+   dan JavaScript langsung terbaca tanpa build ulang. Untuk menjalankan lagi
+   setelah perubahan kode, cukup gunakan `docker compose up -d`. Build ulang
+   hanya diperlukan jika `Dockerfile` berubah. Jika dependency Composer berubah,
+   jalankan `docker compose exec app composer install`.
 
 2. Buka aplikasi di `http://localhost:9002`. Untuk mengganti port, atur `APP_PORT`.
    phpMyAdmin tersedia di `http://localhost:9003` (port dapat diubah lewat

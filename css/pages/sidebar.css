@@ -134,7 +134,7 @@
     white-space: nowrap;
 }
 
-/* Show Version Icon on Collapse */
+/* Version icon adapts when the sidebar is collapsed */
 .version-icon {
     display: none;
     font-size: 0.95rem;
@@ -627,50 +627,88 @@
 
 /* ===== SIDEBAR FOOTER ===== */
 .sidebar-footer {
-    padding: 14px;
-    border-top: 1px solid var(--sidebar-border);
+    padding: 12px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
     display: flex;
     justify-content: center;
     align-items: center;
+    background: linear-gradient(180deg, rgba(2, 6, 23, 0.02), rgba(2, 6, 23, 0.2));
 }
 
 .version-badge {
-    display: inline-flex;
+    width: 100%;
+    min-height: 60px;
+    display: flex;
     align-items: center;
-    justify-content: center;
-    gap: 6px;
-    padding: 8px 14px;
-    border-radius: 99px;
-    background: linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(139, 92, 246, 0.1));
-    border: 1px solid rgba(99, 102, 241, 0.3);
-    transition: all 0.3s ease;
+    justify-content: flex-start;
+    gap: 11px;
+    padding: 9px 11px;
+    border-radius: 16px;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.075), rgba(255, 255, 255, 0.025));
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 8px 18px rgba(2, 6, 23, 0.12);
+    transition: background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
     position: relative;
     overflow: hidden;
 }
 
 .version-badge:hover {
-    background: linear-gradient(135deg, rgba(99, 102, 241, 0.25), rgba(139, 92, 246, 0.2));
-    border-color: rgba(99, 102, 241, 0.5);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(99, 102, 241, 0.08));
+    border-color: rgba(165, 180, 252, 0.28);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 10px 22px rgba(2, 6, 23, 0.2);
+}
+
+.version-badge::before {
+    content: '';
+    position: absolute;
+    top: -34px;
+    left: -20px;
+    width: 92px;
+    height: 72px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(129, 140, 248, 0.2), transparent 70%);
+    pointer-events: none;
 }
 
 .version-text {
     display: flex;
-    align-items: center;
-    gap: 6px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 3px;
+    min-width: 0;
+    position: relative;
     transition: opacity 0.2s ease, visibility 0.2s ease;
 }
 
 .version-badge span {
-    font-weight: 600;
-    color: var(--text-primary);
-    font-size: 0.8rem;
+    color: #f8fafc;
+    font-size: 0.84rem;
+    font-weight: 700;
+    letter-spacing: 0.015em;
+    line-height: 1.15;
 }
 
 .version-badge small {
-    color: var(--text-secondary);
-    font-size: 0.725rem;
+    color: #a5b4fc;
+    font-size: 0.67rem;
+    font-weight: 600;
+    letter-spacing: 0.055em;
+    line-height: 1;
+}
+
+.version-icon {
+    width: 36px;
+    height: 36px;
+    flex: 0 0 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid rgba(199, 210, 254, 0.2);
+    border-radius: 12px;
+    background: linear-gradient(145deg, rgba(99, 102, 241, 0.32), rgba(56, 189, 248, 0.12));
+    color: #c7d2fe;
+    font-size: 0.86rem;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12), 0 4px 10px rgba(79, 70, 229, 0.16);
 }
 
 .sidebar.collapsed .version-badge {
@@ -678,6 +716,7 @@
     border-radius: 50%;
     width: 36px;
     height: 36px;
+    min-height: 36px;
     display: flex;
     align-items: center;
     justify-content: center;
