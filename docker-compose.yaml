@@ -4,7 +4,7 @@ services:
             context: .
             dockerfile: Dockerfile
         ports:
-            - "${APP_PORT:-9002}:80"
+            - "${APP_PORT:-3004}:80"
         environment:
             DB_HOST: db
             DB_PORT: 3306
@@ -22,7 +22,7 @@ services:
             MYSQL_DATABASE: ${DB_NAME:-db_kantin}
             MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
         ports:
-            - "3310:3306"
+            - "3006:3306"
         volumes:
             - mysql_data:/var/lib/mysql
             - ./migrations/20261110_initial_schema.sql:/docker-entrypoint-initdb.d/001-initial-schema.sql:ro
@@ -41,7 +41,7 @@ services:
             PMA_PORT: 3306
             PMA_ARBITRARY: 1
         ports:
-            - "${PHPMYADMIN_PORT:-9003}:80"
+            - "${PHPMYADMIN_PORT:-3005}:80"
         depends_on:
             db:
                 condition: service_healthy
