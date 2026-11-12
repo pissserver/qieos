@@ -1,0 +1,30 @@
+name: Deploy QIEOS
+
+on:
+  push:
+    branches:
+      - master
+
+concurrency:
+  group: qieos-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: [self-hosted, Linux, X64]
+    timeout-minutes: 10
+
+    steps:
+      - name: Update application
+        run: |
+          set -e
+          cd /opt/lampp/htdocs/qieos
+          git fetch origin master
+          git reset --hard origin/master
+
+      - name: Verify deployment
+        run: |
+          set -e
+          test -f /opt/lampp/htdocs/qieos/index.php
+          test -d /opt/lampp/htdocs/qieos/vendor
+          echo "QIEOS deployment successful"
