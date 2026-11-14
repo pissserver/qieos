@@ -3,55 +3,285 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-    <title>Offline - Qieos</title>
-    <link rel="manifest" href="./manifest.php">
-    <meta name="theme-color" content="#4f46e5">
+    <meta name="theme-color" content="#0f172a">
+    <title>Qieos - Koneksi Terputus</title>
     <style>
-        *{box-sizing:border-box;margin:0;padding:0}
-        body{
-            font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
-            min-height:100vh;
-            min-height:100dvh;
-            display:flex;
-            align-items:center;
-            justify-content:center;
-            text-align:center;
-            padding:24px;
-            color:#f8fafc;
-            background:linear-gradient(135deg,#0f172a,#1e1b4b 55%,#311042);
+        :root {
+            color-scheme: dark;
+            font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            color: #f8fafc;
+            background: #0b1120;
         }
-        .box{max-width:420px}
-        .icon{
-            width:96px;height:96px;margin:0 auto 24px;
-            border-radius:28px;
-            display:flex;align-items:center;justify-content:center;
-            font-size:44px;
-            background:rgba(255,255,255,.1);
-            box-shadow:0 20px 50px rgba(0,0,0,.35);
+
+        * {
+            box-sizing: border-box;
         }
-        h1{font-size:24px;font-weight:800;margin-bottom:10px}
-        p{color:#94a3b8;line-height:1.7;font-size:15px;margin-bottom:26px}
-        button{
-            border:none;
-            padding:13px 26px;
-            border-radius:14px;
-            font-weight:700;
-            font-size:15px;
-            color:#fff;
-            cursor:pointer;
-            background:linear-gradient(90deg,#4f46e5,#7c3aed);
-            box-shadow:0 10px 25px rgba(79,70,229,.4);
-            transition:.25s;
+
+        body {
+            min-width: 320px;
+            min-height: 100vh;
+            min-height: 100dvh;
+            margin: 0;
+            padding: max(24px, env(safe-area-inset-top, 0px))
+                max(24px, env(safe-area-inset-right, 0px))
+                max(24px, env(safe-area-inset-bottom, 0px))
+                max(24px, env(safe-area-inset-left, 0px));
+            display: grid;
+            place-items: center;
+            background:
+                radial-gradient(ellipse at 18% 18%, rgba(99, 102, 241, .2), transparent 38%),
+                radial-gradient(ellipse at 88% 82%, rgba(14, 165, 233, .12), transparent 35%),
+                #0b1120;
         }
-        button:hover{transform:translateY(-2px)}
+
+        .offline-card {
+            width: min(900px, 100%);
+            min-height: 460px;
+            display: grid;
+            grid-template-columns: .9fr 1.1fr;
+            overflow: hidden;
+            border: 1px solid rgba(148, 163, 184, .18);
+            border-radius: 30px;
+            background: linear-gradient(140deg, rgba(30, 41, 59, .96), rgba(15, 23, 42, .98));
+            box-shadow: 0 32px 90px rgba(0, 0, 0, .42), inset 0 1px 0 rgba(255, 255, 255, .06);
+        }
+
+        .offline-art {
+            position: relative;
+            min-height: 320px;
+            display: grid;
+            place-items: center;
+            overflow: hidden;
+            background: radial-gradient(circle at center, rgba(99, 102, 241, .22), transparent 62%);
+        }
+
+        .offline-art::before,
+        .offline-art::after {
+            position: absolute;
+            content: "";
+            border: 1px solid rgba(165, 180, 252, .16);
+            border-radius: 50%;
+        }
+
+        .offline-art::before {
+            width: 280px;
+            height: 280px;
+        }
+
+        .offline-art::after {
+            width: 350px;
+            height: 350px;
+        }
+
+        .offline-mascot {
+            z-index: 1;
+            width: min(230px, 66%);
+            height: auto;
+            filter: drop-shadow(0 22px 30px rgba(0, 0, 0, .35));
+            animation: float 3.8s ease-in-out infinite;
+        }
+
+        .offline-copy {
+            align-self: center;
+            padding: 52px 56px 44px 24px;
+        }
+
+        .status-pill {
+            width: fit-content;
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            margin-bottom: 22px;
+            padding: 8px 12px;
+            border: 1px solid rgba(251, 191, 36, .24);
+            border-radius: 999px;
+            background: rgba(245, 158, 11, .1);
+            color: #fde68a;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: .04em;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #fbbf24;
+            box-shadow: 0 0 12px rgba(251, 191, 36, .7);
+        }
+
+        h1 {
+            max-width: 440px;
+            margin: 0;
+            font-size: clamp(30px, 4vw, 44px);
+            line-height: 1.08;
+            letter-spacing: -.04em;
+        }
+
+        .message {
+            max-width: 420px;
+            margin: 18px 0 26px;
+            color: #aab8cc;
+            font-size: 16px;
+            line-height: 1.7;
+        }
+
+        .retry-button {
+            min-height: 50px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 0 20px;
+            border: 1px solid rgba(255, 255, 255, .16);
+            border-radius: 14px;
+            background: linear-gradient(135deg, #6366f1, #7c3aed);
+            box-shadow: 0 10px 24px rgba(79, 70, 229, .3);
+            color: #fff;
+            font: inherit;
+            font-size: 15px;
+            font-weight: 750;
+            cursor: pointer;
+            transition: transform .18s ease, box-shadow .18s ease;
+        }
+
+        .retry-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 14px 28px rgba(79, 70, 229, .4);
+        }
+
+        .retry-button:focus-visible,
+        a:focus-visible {
+            outline: 3px solid #c4b5fd;
+            outline-offset: 4px;
+        }
+
+        .hint {
+            margin: 18px 0 0;
+            color: #7f8da3;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotate(-2deg); }
+            50% { transform: translateY(-9px) rotate(2deg); }
+        }
+
+        @media (max-width: 680px) {
+            body {
+                padding: max(16px, env(safe-area-inset-top, 0px))
+                    max(16px, env(safe-area-inset-right, 0px))
+                    max(16px, env(safe-area-inset-bottom, 0px))
+                    max(16px, env(safe-area-inset-left, 0px));
+            }
+
+            .offline-card {
+                min-height: 0;
+                grid-template-columns: 1fr;
+                border-radius: 24px;
+            }
+
+            .offline-art {
+                min-height: 220px;
+            }
+
+            .offline-art::before {
+                width: 190px;
+                height: 190px;
+            }
+
+            .offline-art::after {
+                width: 240px;
+                height: 240px;
+            }
+
+            .offline-mascot {
+                width: 150px;
+            }
+
+            .offline-copy {
+                padding: 8px 24px 28px;
+                text-align: center;
+            }
+
+            .status-pill {
+                margin: 0 auto 16px;
+            }
+
+            .message {
+                margin: 14px auto 22px;
+                font-size: 15px;
+            }
+
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *,
+            *::before,
+            *::after {
+                animation-duration: .01ms !important;
+                animation-iteration-count: 1 !important;
+                scroll-behavior: auto !important;
+                transition-duration: .01ms !important;
+            }
+        }
     </style>
 </head>
 <body>
-    <div class="box">
-        <div class="icon">&#128246;</div>
-        <h1>Tidak Ada Koneksi</h1>
-        <p>Anda sedang offline. Periksa koneksi internet Anda lalu coba muat ulang halaman.</p>
-        <button onclick="location.reload()">Coba Lagi</button>
-    </div>
+    <main class="offline-card">
+        <div class="offline-art">
+            <svg class="offline-mascot" viewBox="0 0 320 280" role="img" aria-labelledby="cat-title cat-description" xmlns="http://www.w3.org/2000/svg">
+                <title id="cat-title">Kucing kecil sedang offline</title>
+                <desc id="cat-description">Kucing jingga duduk di bawah tanda sinyal terputus.</desc>
+                <defs>
+                    <linearGradient id="cat-fur" x1="0" y1="0" x2="1" y2="1">
+                        <stop offset="0" stop-color="#fbbf67"/>
+                        <stop offset="1" stop-color="#e87932"/>
+                    </linearGradient>
+                    <linearGradient id="cat-belly" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0" stop-color="#fff0d7"/>
+                        <stop offset="1" stop-color="#ffdca8"/>
+                    </linearGradient>
+                </defs>
+                <ellipse cx="153" cy="252" rx="96" ry="13" fill="#020617" opacity=".38"/>
+                <path d="M91 207c-34 3-49 27-35 42 10 11 31 8 34-5 2-8-4-14-12-12" fill="none" stroke="#e87932" stroke-width="17" stroke-linecap="round"/>
+                <path d="M87 238c0-46 22-79 67-79s74 33 74 79v10H87z" fill="url(#cat-fur)"/>
+                <ellipse cx="156" cy="216" rx="38" ry="47" fill="url(#cat-belly)"/>
+                <ellipse cx="112" cy="243" rx="25" ry="12" fill="#f7b65f"/>
+                <ellipse cx="191" cy="243" rx="25" ry="12" fill="#f7b65f"/>
+                <path d="M94 111 88 61c-1-10 10-15 17-8l32 30m50 0 30-30c7-7 18-2 17 8l-6 50" fill="url(#cat-fur)" stroke="#d96c2d" stroke-width="4" stroke-linejoin="round"/>
+                <path d="m105 83-3-17 20 18m76 0 19-18-2 18" fill="#ef9a65"/>
+                <ellipse cx="156" cy="116" rx="69" ry="59" fill="url(#cat-fur)"/>
+                <path d="M126 120q10 11 20 0m20 0q10 11 20 0" fill="none" stroke="#713f2c" stroke-width="5" stroke-linecap="round"/>
+                <path d="m150 135 6 5 6-5c0-5-12-5-12 0Z" fill="#a94d52"/>
+                <path d="M156 141q-9 10-18 2m18-2q9 10 18 2" fill="none" stroke="#713f2c" stroke-width="3" stroke-linecap="round"/>
+                <path d="m119 137-23-4m23 10-22 4m93-10 23-4m-23 10 22 4" stroke="#fff1d9" stroke-width="2.5" stroke-linecap="round" opacity=".9"/>
+                <circle cx="111" cy="137" r="7" fill="#f28a76" opacity=".72"/>
+                <circle cx="201" cy="137" r="7" fill="#f28a76" opacity=".72"/>
+                <path d="M104 92q9-8 18 0m69 0q9-8 18 0" fill="none" stroke="#d96c2d" stroke-width="4" stroke-linecap="round"/>
+                <rect x="225" y="34" width="70" height="66" rx="22" fill="#312e81" stroke="#818cf8" stroke-width="2"/>
+                <path d="M241 56q19-16 38 0m-30 9q11-9 22 0" fill="none" stroke="#c4b5fd" stroke-width="5" stroke-linecap="round"/>
+                <circle cx="260" cy="75" r="3.5" fill="#c4b5fd"/>
+                <path d="m240 84 39-35" stroke="#fb7185" stroke-width="5" stroke-linecap="round"/>
+                <path d="m65 94 4-9 4 9 9 4-9 4-4 9-4-9-9-4zm188 89 3-7 3 7 7 3-7 3-3 7-3-7-7-3z" fill="#a5b4fc" opacity=".85"/>
+            </svg>
+        </div>
+        <section class="offline-copy" aria-labelledby="offline-title">
+            <div class="status-pill" role="status">
+                <span class="status-dot" aria-hidden="true"></span>
+                Koneksi terputus
+            </div>
+            <h1 id="offline-title">Sepertinya internet sedang bersembunyi</h1>
+            <p class="message">Qieos belum bisa terhubung. Periksa Wi-Fi atau data seluler, lalu coba lagi.</p>
+            <button class="retry-button" type="button" onclick="window.location.reload()">
+                <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none">
+                    <path d="M20 7v5h-5M4 17v-5h5m-3.1-3A7 7 0 0 1 18 7l2 5M4 12l2 5a7 7 0 0 0 12.1-2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                Coba lagi
+            </button>
+            <p class="hint">Setelah koneksi pulih, tekan “Coba lagi” untuk membuka halaman.</p>
+        </section>
+    </main>
 </body>
 </html>

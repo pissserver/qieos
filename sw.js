@@ -1,8 +1,9 @@
-const CACHE_VERSION = "qieos-v6";
+const CACHE_VERSION = "qieos-v9";
 const APP_SHELL_CACHE = `${CACHE_VERSION}-shell`;
 const RUNTIME_CACHE = `${CACHE_VERSION}-runtime`;
 
 const BASE = "/qieos";
+const OFFLINE_URL = `${BASE}/offline.html`;
 
 const APP_SHELL = [
     `${BASE}/manifest.json`,
@@ -12,15 +13,19 @@ const APP_SHELL = [
     `${BASE}/assets/img/brand/qieos2.png`,
     `${BASE}/assets/img/brand/icon-192.png`,
     `${BASE}/assets/img/brand/icon-512.png`,
-    `${BASE}/offline.html`
+    OFFLINE_URL
 ];
 
 self.addEventListener("install", event => {
     event.waitUntil(
         caches.open(APP_SHELL_CACHE).then(cache =>
-            Promise.allSettled(
-                APP_SHELL.map(url =>
-                    cache.add(new Request(url, { cache: "reload" })).catch(()=>{})
+            cache.add(OFFLINE_URL).then(() =>
+                Promise.allSettled(
+                    APP_SHELL
+                        .filter(url => url !== OFFLINE_URL)
+                        .map(url =>
+                            cache.add(new Request(url, { cache: "reload" })).catch(() => {})
+                        )
                 )
             )
         )
@@ -51,7 +56,16 @@ self.addEventListener("fetch", event => {
     const url = new URL(request.url);
     if (url.origin !== self.location.origin) return;
 
-    // Skip semua PHP pages & API — biarkan browser handle langsung
+    if (request.mode === "navigate") {
+        event.respondWith(
+            fetch(request).catch(() =>
+                caches.match(OFFLINE_URL).then(response => response || Response.error())
+            )
+        );
+        return;
+    }
+
+    // Skip PHP resources yang bukan navigasi dokumen.
     if (url.pathname.endsWith('.php') || url.pathname.indexOf('-search.php') !== -1 || url.pathname.indexOf('-action.php') !== -1) return;
 
     // Hanya cache static assets
