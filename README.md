@@ -266,7 +266,7 @@ qieos/
 │   │   ├── modals/          # Modal components
 │   │   └── tables/          # Table components
 │   ├── master/              # Master produk, unit, supplier, customer, user, paket racikan
-│   ├── other/               # Update log, guide, database schema, coming soon
+│   ├── other/               # Update log, guide, database schema
 │   ├── profile/             # Profil user, upload foto, ganti password
 │   ├── recap/               # Rekap harian penjualan & tenant
 │   ├── report/              # Laporan penjualan & tenant (PDF/Excel)

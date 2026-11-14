@@ -1,5 +1,5 @@
 <?php
-session_start();
+require_once __DIR__ . '/../../script/session-bootstrap.php';
 require_once __DIR__ . '/../../script/connection.php';
 date_default_timezone_set('Asia/Jakarta');
 
