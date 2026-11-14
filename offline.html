@@ -126,36 +126,6 @@
             line-height: 1.7;
         }
 
-        .retry-button {
-            min-height: 50px;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            padding: 0 20px;
-            border: 1px solid rgba(255, 255, 255, .16);
-            border-radius: 14px;
-            background: linear-gradient(135deg, #6366f1, #7c3aed);
-            box-shadow: 0 10px 24px rgba(79, 70, 229, .3);
-            color: #fff;
-            font: inherit;
-            font-size: 15px;
-            font-weight: 750;
-            cursor: pointer;
-            transition: transform .18s ease, box-shadow .18s ease;
-        }
-
-        .retry-button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 14px 28px rgba(79, 70, 229, .4);
-        }
-
-        .retry-button:focus-visible,
-        a:focus-visible {
-            outline: 3px solid #c4b5fd;
-            outline-offset: 4px;
-        }
-
         .hint {
             margin: 18px 0 0;
             color: #7f8da3;
@@ -273,14 +243,8 @@
                 Koneksi terputus
             </div>
             <h1 id="offline-title">Sepertinya internet sedang bersembunyi</h1>
-            <p class="message">Qieos belum bisa terhubung. Periksa Wi-Fi atau data seluler, lalu coba lagi.</p>
-            <button class="retry-button" type="button" onclick="retryConnection()">
-                <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none">
-                    <path d="M20 7v5h-5M4 17v-5h5m-3.1-3A7 7 0 0 1 18 7l2 5M4 12l2 5a7 7 0 0 0 12.1-2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-                Coba lagi
-            </button>
-            <p class="hint">Setelah koneksi pulih, tekan “Coba lagi” untuk membuka halaman.</p>
+            <p class="message">Qieos belum bisa terhubung. Periksa Wi-Fi atau data seluler.</p>
+            <p class="hint">Halaman akan kembali terbuka secara otomatis setelah koneksi pulih.</p>
         </section>
     </main>
     <script>
@@ -304,22 +268,16 @@
                 }
             }
 
-            function retryConnection() {
+            function restorePage() {
                 var target = getReturnUrl();
                 if (target) {
                     window.location.replace(target.href);
                     return;
                 }
-                window.location.reload();
+                if (window.location.pathname !== offlinePath) window.location.reload();
             }
 
-            window.retryConnection = retryConnection;
-            window.addEventListener("online", function () {
-                var buttonLabel = document.querySelector(".retry-button");
-                var hint = document.querySelector(".hint");
-                if (buttonLabel) buttonLabel.lastChild.textContent = "Kembali ke aplikasi";
-                if (hint) hint.textContent = "Koneksi kembali. Tekan tombol untuk membuka halaman sebelumnya.";
-            });
+            window.addEventListener("online", restorePage);
         })();
     </script>
 </body>

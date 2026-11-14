@@ -286,6 +286,7 @@ if (!defined('BASE_URL')) {
     const BASE_URL = '<?php echo BASE_URL; ?>';
     (function () {
         var overlayId = "qieos-offline-overlay";
+        var previousFocus = null;
 
         function showOfflineOverlay() {
             if (document.getElementById(overlayId)) return;
@@ -296,6 +297,11 @@ if (!defined('BASE_URL')) {
 
             var overlay = document.createElement("div");
             overlay.id = overlayId;
+            overlay.tabIndex = -1;
+            overlay.setAttribute("role", "alertdialog");
+            overlay.setAttribute("aria-modal", "true");
+            overlay.setAttribute("aria-labelledby", "qieos-offline-title");
+            overlay.setAttribute("aria-describedby", "qieos-offline-message");
             overlay.innerHTML = `
                 <style>
                     #qieos-offline-overlay {
@@ -372,32 +378,6 @@ if (!defined('BASE_URL')) {
                         font-size: 16px;
                         line-height: 1.7;
                     }
-                    #qieos-offline-overlay .qieos-offline-button {
-                        min-height: 50px;
-                        display: inline-flex;
-                        align-items: center;
-                        justify-content: center;
-                        padding: 0 20px;
-                        border: 1px solid rgba(255, 255, 255, .16);
-                        border-radius: 14px;
-                        background: linear-gradient(135deg, #6366f1, #7c3aed);
-                        box-shadow: 0 10px 24px rgba(79, 70, 229, .3);
-                        color: #fff;
-                        font: inherit;
-                        font-size: 15px;
-                        font-weight: 750;
-                        cursor: pointer;
-                    }
-                    #qieos-offline-overlay .qieos-offline-button:focus-visible {
-                        outline: 3px solid #c4b5fd;
-                        outline-offset: 4px;
-                    }
-                    #qieos-offline-overlay .qieos-offline-hint {
-                        margin: 16px 0 0;
-                        color: #7f8da3;
-                        font-size: 13px;
-                        line-height: 1.6;
-                    }
                     @media (max-width: 680px) {
                         #qieos-offline-overlay .qieos-offline-card {
                             grid-template-columns: 1fr;
@@ -413,7 +393,7 @@ if (!defined('BASE_URL')) {
                         #qieos-offline-overlay .qieos-offline-message { font-size: 15px; }
                     }
                 </style>
-                <main class="qieos-offline-card" role="alertdialog" aria-modal="true" aria-labelledby="qieos-offline-title" aria-describedby="qieos-offline-message">
+                <main class="qieos-offline-card">
                     <div class="qieos-offline-art" aria-hidden="true">
                         <svg viewBox="0 0 320 280" xmlns="http://www.w3.org/2000/svg">
                             <ellipse cx="153" cy="252" rx="96" ry="13" fill="#020617" opacity=".38"/>
@@ -435,55 +415,37 @@ if (!defined('BASE_URL')) {
                     <section class="qieos-offline-copy">
                         <div class="qieos-offline-status" role="status">
                             <span class="qieos-offline-dot" aria-hidden="true"></span>
-                            <span class="qieos-offline-status-text">Koneksi terputus</span>
+                            <span>Koneksi terputus</span>
                         </div>
                         <h1 id="qieos-offline-title">Sepertinya internet sedang bersembunyi</h1>
-                        <p id="qieos-offline-message" class="qieos-offline-message">Qieos belum bisa terhubung. Periksa Wi-Fi atau data seluler, lalu coba lagi.</p>
-                        <button class="qieos-offline-button" type="button"><span class="qieos-offline-button-label">Coba lagi</span></button>
-                        <p class="qieos-offline-hint">Halaman Anda tetap terbuka. Setelah koneksi pulih, tekan tombol untuk melanjutkan.</p>
+                        <p id="qieos-offline-message" class="qieos-offline-message">Qieos belum bisa terhubung. Periksa Wi-Fi atau data seluler.</p>
                     </section>
                 </main>`;
 
+            previousFocus = document.activeElement;
             document.body.appendChild(overlay);
-            var previousFocus = document.activeElement;
-            var statusText = overlay.querySelector(".qieos-offline-status-text");
-            var message = overlay.querySelector(".qieos-offline-message");
-            var button = overlay.querySelector(".qieos-offline-button");
-            var buttonLabel = overlay.querySelector(".qieos-offline-button-label");
-
-            button.addEventListener("click", function () {
-                if (!navigator.onLine) {
-                    statusText.textContent = "Koneksi terputus";
-                    message.textContent = "Koneksi masih belum tersedia. Periksa Wi-Fi atau data seluler, lalu coba lagi.";
-                    return;
-                }
-
-                overlay.remove();
-                if (previousFocus && typeof previousFocus.focus === "function") {
-                    previousFocus.focus({ preventScroll: true });
-                }
-            });
-
-            button.focus();
+            overlay.focus();
         }
 
-        function showOnlineStatus() {
+        function hideOfflineOverlay() {
             var overlay = document.getElementById(overlayId);
             if (!overlay) return;
 
-            overlay.querySelector(".qieos-offline-status-text").textContent = "Koneksi kembali";
-            overlay.querySelector(".qieos-offline-message").textContent = "Internet sudah tersambung. Halaman Anda tetap terbuka.";
-            overlay.querySelector(".qieos-offline-button-label").textContent = "Kembali ke aplikasi";
+            overlay.remove();
+            if (previousFocus && typeof previousFocus.focus === "function") {
+                previousFocus.focus({ preventScroll: true });
+            }
+            previousFocus = null;
         }
 
         window.addEventListener("offline", showOfflineOverlay);
-        window.addEventListener("online", showOnlineStatus);
+        window.addEventListener("online", hideOfflineOverlay);
         if (!navigator.onLine) showOfflineOverlay();
     })();
 
     if ("serviceWorker" in navigator) {
         window.addEventListener("load", function () {
-            navigator.serviceWorker.register(BASE_URL + "/sw.js?v=11").catch(function (err) {
+            navigator.serviceWorker.register(BASE_URL + "/sw.js?v=12").catch(function (err) {
                 console.warn("SW registration failed:", err);
             });
             // Unregister old service workers
