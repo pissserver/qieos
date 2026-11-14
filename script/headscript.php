@@ -263,11 +263,6 @@ if (!defined('BASE_URL')) {
             user-select:none;
         }
 
-        /* Area status bar ditutup navbar mobile (hindari strip putih di atas) */
-        .navbar-theme-primary{
-            padding-top:calc(.75rem + max(var(--safe-top, 0px), 24px));
-        }
-
         /* Izinkan seleksi teks di area input/konten */
         input, textarea, select, [contenteditable="true"], .allow-select{
             -webkit-user-select:text;
