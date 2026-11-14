@@ -977,11 +977,17 @@
 @media (max-width: 991px){
 
     #chatPage{
-        --chat-mob-nav: 55px;
         height: 100vh;
         height: 100dvh;
+        height: var(--chat-visual-height, 100dvh);
+        display: flex;
+        flex-direction: column;
         overflow: hidden;
         overscroll-behavior: none;
+    }
+
+    #chatPage .navbar-theme-primary{
+        flex: 0 0 auto;
     }
 
     /* Di halaman chat, navbar desktop disembunyikan agar chat
@@ -1000,8 +1006,10 @@
     #chatPage main.content{
         display: flex;
         flex-direction: column;
+        flex: 1 1 0;
+        min-height: 0;
         padding: 0 !important;
-        height: calc(100dvh - var(--chat-mob-nav));
+        height: auto;
         overflow: hidden;
     }
 
@@ -1015,12 +1023,6 @@
     #chatPage .chat-shell{
         height: 100%;
         min-height: 0;
-    }
-}
-
-@media (display-mode: standalone), (display-mode: fullscreen), (display-mode: window-controls-overlay), (display-mode: minimal-ui) {
-    #chatPage {
-        --chat-mob-nav: calc(47px + max(env(safe-area-inset-top, 0px), 20px));
     }
 }
 
@@ -1080,7 +1082,7 @@
     }
 
     .chat-panel-header{
-        padding: 14px 14px 12px;
+        padding: 8px 14px 12px;
     }
 
     .chat-msg .bubble{
@@ -1102,12 +1104,6 @@
 
     .chat-conv-header{
         padding: 8px 10px;
-        padding-top: calc(8px + env(safe-area-inset-top, 0px));
-    }
-
-    #chatPage .chat-conv-header{
-        padding: 8px 10px;
-        padding-top: calc(8px + env(safe-area-inset-top, 0px));
     }
 
     .chat-send-btn{

@@ -1103,5 +1103,27 @@ $current_page = 'chat.php';
 })();
 </script>
 
+<script>
+(function () {
+    var viewport = window.visualViewport;
+    var isStandalone = window.navigator.standalone === true ||
+        (window.matchMedia && window.matchMedia(
+            '(display-mode: standalone), (display-mode: fullscreen), (display-mode: window-controls-overlay), (display-mode: minimal-ui)'
+        ).matches);
+
+    if (!viewport || !isStandalone) return;
+
+    function updateChatViewport() {
+        var height = viewport.height + viewport.offsetTop;
+        document.documentElement.style.setProperty('--chat-visual-height', height + 'px');
+    }
+
+    viewport.addEventListener('resize', updateChatViewport);
+    viewport.addEventListener('scroll', updateChatViewport);
+    window.addEventListener('resize', updateChatViewport);
+    updateChatViewport();
+})();
+</script>
+
 </body>
 </html>
