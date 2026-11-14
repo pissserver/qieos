@@ -265,7 +265,7 @@ if (!defined('BASE_URL')) {
 
         /* Area status bar ditutup navbar mobile (hindari strip putih di atas) */
         .navbar-theme-primary{
-            padding-top:calc(.75rem + var(--safe-top, 0px));
+            padding-top:calc(.75rem + max(var(--safe-top, 0px), 24px));
         }
 
         /* Izinkan seleksi teks di area input/konten */

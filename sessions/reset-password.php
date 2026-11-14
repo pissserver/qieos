@@ -1,5 +1,5 @@
 ﻿<?php
-    session_start();
+    require_once __DIR__ . '/../script/session-bootstrap.php';
     include '../script/connection.php';
 ?>
 

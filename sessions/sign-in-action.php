@@ -27,7 +27,8 @@
             $row = $result->fetch_assoc();
             if (password_verify($password, $row['password'])) {
                 // Login berhasil
-                session_start();
+                require_once __DIR__ . '/../script/session-bootstrap.php';
+                session_regenerate_id(true);
                 $_SESSION['user_id'] = $row['id'];
                 $_SESSION['username'] = $row['username'];
 
