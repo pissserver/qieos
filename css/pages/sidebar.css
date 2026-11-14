@@ -753,7 +753,7 @@
 
 @media (display-mode: standalone), (display-mode: fullscreen), (display-mode: window-controls-overlay), (display-mode: minimal-ui) {
     .navbar-theme-primary {
-        padding-top: calc(0.75rem + max(env(safe-area-inset-top, 0px), 24px));
+        padding-top: max(env(safe-area-inset-top, 0px), 20px);
     }
 }
 
