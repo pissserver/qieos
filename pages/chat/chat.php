@@ -1106,12 +1106,7 @@ $current_page = 'chat.php';
 <script>
 (function () {
     var viewport = window.visualViewport;
-    var isStandalone = window.navigator.standalone === true ||
-        (window.matchMedia && window.matchMedia(
-            '(display-mode: standalone), (display-mode: fullscreen), (display-mode: window-controls-overlay), (display-mode: minimal-ui)'
-        ).matches);
-
-    if (!viewport || !isStandalone) return;
+    if (!viewport) return;
 
     function updateChatViewport() {
         var height = viewport.height + viewport.offsetTop;

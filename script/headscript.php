@@ -6,7 +6,7 @@ if (!defined('BASE_URL')) {
 <!-- Meta -->
 <meta
     name="viewport"
-    content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover, shrink-to-fit=no" />
+    content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover, shrink-to-fit=no, interactive-widget=resizes-content" />
 <meta name="title" content="Volt Free Bootstrap Dashboard - Transactions" />
 <meta name="author" content="Themesberg" />
 <meta

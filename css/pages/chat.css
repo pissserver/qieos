@@ -1099,7 +1099,7 @@
     }
 
     .chat-composer{
-        padding: 10px 10px calc(10px + env(safe-area-inset-bottom, 0px));
+        padding: 10px 10px max(16px, env(safe-area-inset-bottom, 0px));
     }
 
     .chat-conv-header{
