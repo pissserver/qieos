@@ -284,9 +284,24 @@ if (!defined('BASE_URL')) {
 
 <script>
     const BASE_URL = '<?php echo BASE_URL; ?>';
+    (function () {
+        var offlinePath = BASE_URL + "/offline.html";
+
+        function showOfflinePage() {
+            var offlineUrl = new URL(offlinePath, window.location.origin);
+            if (window.location.pathname === offlineUrl.pathname) return;
+
+            offlineUrl.searchParams.set("return", window.location.href);
+            window.location.replace(offlineUrl.href);
+        }
+
+        window.addEventListener("offline", showOfflinePage);
+        if (!navigator.onLine) showOfflinePage();
+    })();
+
     if ("serviceWorker" in navigator) {
         window.addEventListener("load", function () {
-            navigator.serviceWorker.register(BASE_URL + "/sw.js?v=9").catch(function (err) {
+            navigator.serviceWorker.register(BASE_URL + "/sw.js?v=10").catch(function (err) {
                 console.warn("SW registration failed:", err);
             });
             // Unregister old service workers
