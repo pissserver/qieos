@@ -285,23 +285,205 @@ if (!defined('BASE_URL')) {
 <script>
     const BASE_URL = '<?php echo BASE_URL; ?>';
     (function () {
-        var offlinePath = BASE_URL + "/offline.html";
+        var overlayId = "qieos-offline-overlay";
 
-        function showOfflinePage() {
-            var offlineUrl = new URL(offlinePath, window.location.origin);
-            if (window.location.pathname === offlineUrl.pathname) return;
+        function showOfflineOverlay() {
+            if (document.getElementById(overlayId)) return;
+            if (!document.body) {
+                document.addEventListener("DOMContentLoaded", showOfflineOverlay, { once: true });
+                return;
+            }
 
-            offlineUrl.searchParams.set("return", window.location.href);
-            window.location.replace(offlineUrl.href);
+            var overlay = document.createElement("div");
+            overlay.id = overlayId;
+            overlay.innerHTML = `
+                <style>
+                    #qieos-offline-overlay {
+                        position: fixed;
+                        z-index: 2147483647;
+                        inset: 0;
+                        display: grid;
+                        place-items: center;
+                        overflow-y: auto;
+                        padding: max(16px, env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-right, 0px)) max(16px, env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px));
+                        background: radial-gradient(ellipse at 18% 18%, rgba(99, 102, 241, .2), transparent 38%), radial-gradient(ellipse at 88% 82%, rgba(14, 165, 233, .12), transparent 35%), #0b1120;
+                        color: #f8fafc;
+                        font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+                    }
+                    #qieos-offline-overlay *,
+                    #qieos-offline-overlay *::before,
+                    #qieos-offline-overlay *::after { box-sizing: border-box; }
+                    #qieos-offline-overlay .qieos-offline-card {
+                        width: min(900px, 100%);
+                        display: grid;
+                        grid-template-columns: .9fr 1.1fr;
+                        overflow: hidden;
+                        border: 1px solid rgba(148, 163, 184, .18);
+                        border-radius: 30px;
+                        background: linear-gradient(140deg, rgba(30, 41, 59, .96), rgba(15, 23, 42, .98));
+                        box-shadow: 0 32px 90px rgba(0, 0, 0, .42), inset 0 1px 0 rgba(255, 255, 255, .06);
+                    }
+                    #qieos-offline-overlay .qieos-offline-art {
+                        min-height: 300px;
+                        display: grid;
+                        place-items: center;
+                        background: radial-gradient(circle at center, rgba(99, 102, 241, .22), transparent 62%);
+                    }
+                    #qieos-offline-overlay .qieos-offline-art svg {
+                        width: min(230px, 66%);
+                        height: auto;
+                        filter: drop-shadow(0 22px 30px rgba(0, 0, 0, .35));
+                    }
+                    #qieos-offline-overlay .qieos-offline-copy {
+                        align-self: center;
+                        padding: 44px 48px 40px 20px;
+                    }
+                    #qieos-offline-overlay .qieos-offline-status {
+                        width: fit-content;
+                        display: flex;
+                        align-items: center;
+                        gap: 9px;
+                        margin-bottom: 20px;
+                        padding: 8px 12px;
+                        border: 1px solid rgba(251, 191, 36, .24);
+                        border-radius: 999px;
+                        background: rgba(245, 158, 11, .1);
+                        color: #fde68a;
+                        font-size: 12px;
+                        font-weight: 700;
+                    }
+                    #qieos-offline-overlay .qieos-offline-dot {
+                        width: 8px;
+                        height: 8px;
+                        border-radius: 50%;
+                        background: #fbbf24;
+                        box-shadow: 0 0 12px rgba(251, 191, 36, .7);
+                    }
+                    #qieos-offline-overlay h1 {
+                        margin: 0;
+                        color: #f8fafc;
+                        font-size: clamp(30px, 4vw, 44px);
+                        line-height: 1.08;
+                        letter-spacing: -.04em;
+                    }
+                    #qieos-offline-overlay .qieos-offline-message {
+                        margin: 18px 0 24px;
+                        color: #aab8cc;
+                        font-size: 16px;
+                        line-height: 1.7;
+                    }
+                    #qieos-offline-overlay .qieos-offline-button {
+                        min-height: 50px;
+                        display: inline-flex;
+                        align-items: center;
+                        justify-content: center;
+                        padding: 0 20px;
+                        border: 1px solid rgba(255, 255, 255, .16);
+                        border-radius: 14px;
+                        background: linear-gradient(135deg, #6366f1, #7c3aed);
+                        box-shadow: 0 10px 24px rgba(79, 70, 229, .3);
+                        color: #fff;
+                        font: inherit;
+                        font-size: 15px;
+                        font-weight: 750;
+                        cursor: pointer;
+                    }
+                    #qieos-offline-overlay .qieos-offline-button:focus-visible {
+                        outline: 3px solid #c4b5fd;
+                        outline-offset: 4px;
+                    }
+                    #qieos-offline-overlay .qieos-offline-hint {
+                        margin: 16px 0 0;
+                        color: #7f8da3;
+                        font-size: 13px;
+                        line-height: 1.6;
+                    }
+                    @media (max-width: 680px) {
+                        #qieos-offline-overlay .qieos-offline-card {
+                            grid-template-columns: 1fr;
+                            border-radius: 24px;
+                        }
+                        #qieos-offline-overlay .qieos-offline-art { min-height: 180px; }
+                        #qieos-offline-overlay .qieos-offline-art svg { width: 145px; }
+                        #qieos-offline-overlay .qieos-offline-copy {
+                            padding: 4px 24px 28px;
+                            text-align: center;
+                        }
+                        #qieos-offline-overlay .qieos-offline-status { margin: 0 auto 16px; }
+                        #qieos-offline-overlay .qieos-offline-message { font-size: 15px; }
+                    }
+                </style>
+                <main class="qieos-offline-card" role="alertdialog" aria-modal="true" aria-labelledby="qieos-offline-title" aria-describedby="qieos-offline-message">
+                    <div class="qieos-offline-art" aria-hidden="true">
+                        <svg viewBox="0 0 320 280" xmlns="http://www.w3.org/2000/svg">
+                            <ellipse cx="153" cy="252" rx="96" ry="13" fill="#020617" opacity=".38"/>
+                            <path d="M91 207c-34 3-49 27-35 42 10 11 31 8 34-5 2-8-4-14-12-12" fill="none" stroke="#e87932" stroke-width="17" stroke-linecap="round"/>
+                            <path d="M87 238c0-46 22-79 67-79s74 33 74 79v10H87z" fill="#e99142"/>
+                            <ellipse cx="156" cy="216" rx="38" ry="47" fill="#ffe5bc"/>
+                            <ellipse cx="112" cy="243" rx="25" ry="12" fill="#f7b65f"/>
+                            <ellipse cx="191" cy="243" rx="25" ry="12" fill="#f7b65f"/>
+                            <path d="M94 111 88 61c-1-10 10-15 17-8l32 30m50 0 30-30c7-7 18-2 17 8l-6 50" fill="#f4aa53" stroke="#d96c2d" stroke-width="4" stroke-linejoin="round"/>
+                            <path d="m105 83-3-17 20 18m76 0 19-18-2 18" fill="#ef9a65"/>
+                            <ellipse cx="156" cy="116" rx="69" ry="59" fill="#f4aa53"/>
+                            <path d="M126 120q10 11 20 0m20 0q10 11 20 0" fill="none" stroke="#713f2c" stroke-width="5" stroke-linecap="round"/>
+                            <path d="m150 135 6 5 6-5c0-5-12-5-12 0Zm6 6q-9 10-18 2m18-2q9 10 18 2" fill="#a94d52" stroke="#713f2c" stroke-width="3" stroke-linecap="round"/>
+                            <rect x="225" y="34" width="70" height="66" rx="22" fill="#312e81" stroke="#818cf8" stroke-width="2"/>
+                            <path d="M241 56q19-16 38 0m-30 9q11-9 22 0m-31 19 39-35" fill="none" stroke="#c4b5fd" stroke-width="5" stroke-linecap="round"/>
+                            <circle cx="260" cy="75" r="3.5" fill="#c4b5fd"/>
+                        </svg>
+                    </div>
+                    <section class="qieos-offline-copy">
+                        <div class="qieos-offline-status" role="status">
+                            <span class="qieos-offline-dot" aria-hidden="true"></span>
+                            <span class="qieos-offline-status-text">Koneksi terputus</span>
+                        </div>
+                        <h1 id="qieos-offline-title">Sepertinya internet sedang bersembunyi</h1>
+                        <p id="qieos-offline-message" class="qieos-offline-message">Qieos belum bisa terhubung. Periksa Wi-Fi atau data seluler, lalu coba lagi.</p>
+                        <button class="qieos-offline-button" type="button"><span class="qieos-offline-button-label">Coba lagi</span></button>
+                        <p class="qieos-offline-hint">Halaman Anda tetap terbuka. Setelah koneksi pulih, tekan tombol untuk melanjutkan.</p>
+                    </section>
+                </main>`;
+
+            document.body.appendChild(overlay);
+            var previousFocus = document.activeElement;
+            var statusText = overlay.querySelector(".qieos-offline-status-text");
+            var message = overlay.querySelector(".qieos-offline-message");
+            var button = overlay.querySelector(".qieos-offline-button");
+            var buttonLabel = overlay.querySelector(".qieos-offline-button-label");
+
+            button.addEventListener("click", function () {
+                if (!navigator.onLine) {
+                    statusText.textContent = "Koneksi terputus";
+                    message.textContent = "Koneksi masih belum tersedia. Periksa Wi-Fi atau data seluler, lalu coba lagi.";
+                    return;
+                }
+
+                overlay.remove();
+                if (previousFocus && typeof previousFocus.focus === "function") {
+                    previousFocus.focus({ preventScroll: true });
+                }
+            });
+
+            button.focus();
         }
 
-        window.addEventListener("offline", showOfflinePage);
-        if (!navigator.onLine) showOfflinePage();
+        function showOnlineStatus() {
+            var overlay = document.getElementById(overlayId);
+            if (!overlay) return;
+
+            overlay.querySelector(".qieos-offline-status-text").textContent = "Koneksi kembali";
+            overlay.querySelector(".qieos-offline-message").textContent = "Internet sudah tersambung. Halaman Anda tetap terbuka.";
+            overlay.querySelector(".qieos-offline-button-label").textContent = "Kembali ke aplikasi";
+        }
+
+        window.addEventListener("offline", showOfflineOverlay);
+        window.addEventListener("online", showOnlineStatus);
+        if (!navigator.onLine) showOfflineOverlay();
     })();
 
     if ("serviceWorker" in navigator) {
         window.addEventListener("load", function () {
-            navigator.serviceWorker.register(BASE_URL + "/sw.js?v=10").catch(function (err) {
+            navigator.serviceWorker.register(BASE_URL + "/sw.js?v=11").catch(function (err) {
                 console.warn("SW registration failed:", err);
             });
             // Unregister old service workers

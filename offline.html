@@ -314,11 +314,12 @@
             }
 
             window.retryConnection = retryConnection;
-            window.addEventListener("online", retryConnection);
-
-            if (navigator.onLine && (returnUrl || window.location.pathname !== offlinePath)) {
-                retryConnection();
-            }
+            window.addEventListener("online", function () {
+                var buttonLabel = document.querySelector(".retry-button");
+                var hint = document.querySelector(".hint");
+                if (buttonLabel) buttonLabel.lastChild.textContent = "Kembali ke aplikasi";
+                if (hint) hint.textContent = "Koneksi kembali. Tekan tombol untuk membuka halaman sebelumnya.";
+            });
         })();
     </script>
 </body>
