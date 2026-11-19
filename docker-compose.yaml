@@ -20,7 +20,7 @@ services:
         restart: unless-stopped
 
     db:
-        image: mysql:8.0
+        image: mysql:5.6
         environment:
             MYSQL_DATABASE: ${DB_NAME:-db_kantin}
             MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
@@ -38,7 +38,7 @@ services:
         restart: unless-stopped
 
     phpmyadmin:
-        image: phpmyadmin:5-apache
+        image: phpmyadmin/phpmyadmin:4.9
         environment:
             PMA_HOST: db
             PMA_PORT: 3306
