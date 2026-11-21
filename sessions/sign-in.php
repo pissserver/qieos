@@ -26,7 +26,7 @@
                 
                 <!-- Title -->
                 <div class="auth-title-wrap">
-                    <h1 class="auth-title">Selamat Datang</h1>
+                    <h1 class="auth-title">Selamat Datang!</h1>
                     <p class="auth-subtitle">Login ke akun Qieos Anda</p>
                     <div class="auth-title-underline"></div>
                 </div>
