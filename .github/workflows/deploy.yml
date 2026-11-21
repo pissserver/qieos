@@ -12,19 +12,49 @@ concurrency:
 jobs:
   deploy:
     runs-on: [self-hosted, Linux, X64]
-    timeout-minutes: 10
+    timeout-minutes: 30
 
     steps:
-      - name: Update application
+      - name: Update XAMPP source code
         run: |
           set -e
           cd /opt/lampp/htdocs/qieos
           git fetch origin master
           git reset --hard origin/master
 
+      - name: Update Docker source code
+        run: |
+          set -e
+          cd /srv/docker/projects/qieos
+          git fetch origin master
+          git reset --hard origin/master
+
+      - name: Build and restart Docker
+        run: |
+          set -e
+          cd /srv/docker/projects/qieos
+          docker compose -f docker-compose.yaml up -d --build
+
+      - name: Synchronize Composer dependencies
+        run: |
+          set -e
+          cd /srv/docker/projects/qieos
+          docker compose -f docker-compose.yaml exec -T app \
+            composer install --no-dev --no-interaction --no-progress --prefer-dist --optimize-autoloader
+
       - name: Verify deployment
         run: |
           set -e
+
           test -f /opt/lampp/htdocs/qieos/index.php
           test -d /opt/lampp/htdocs/qieos/vendor
-          echo "QIEOS deployment successful"
+
+          test -f /srv/docker/projects/qieos/index.php
+
+          docker compose -f /srv/docker/projects/qieos/docker-compose.yaml ps
+
+          curl --fail --silent --show-error \
+            --retry 10 --retry-delay 3 --retry-connrefused \
+            http://127.0.0.1:3004/ > /dev/null
+
+          echo "QIEOS XAMPP and Docker deployment successful"
